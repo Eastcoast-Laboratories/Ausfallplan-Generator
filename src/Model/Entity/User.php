@@ -14,8 +14,6 @@ use Cake\ORM\Entity;
  * @property string $email
  * @property string $password
  * @property string $role
- * @property \Cake\I18n\DateTime|null $email_verified_at
- * @property \Cake\I18n\DateTime|null $last_login_at
  * @property \Cake\I18n\DateTime $created
  * @property \Cake\I18n\DateTime $modified
  *
@@ -33,8 +31,6 @@ class User extends Entity
         'email' => true,
         'password' => true,
         'role' => true,
-        'email_verified_at' => true,
-        'last_login_at' => true,
         'created' => true,
         'modified' => true,
         'organization' => true,
