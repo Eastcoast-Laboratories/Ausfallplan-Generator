@@ -1,0 +1,31 @@
+{
+  "name": "ausfallplan-generator",
+  "version": "1.0.0",
+  "description": "> A multi-tenant web application for Kitas (childcare organizations) to create and manage **Schedules** (absence/day plans) for children with automatic distribution, waitlist management, and PDF/PNG export capabilities.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:screenshots": "playwright test tests/e2e/navigation.spec.js",
+    "test:debug": "playwright test --debug",
+    "test:chromium": "playwright test --browser=chromium",
+    "test:firefox": "playwright test --browser=firefox",
+    "test:webkit": "playwright test --browser=webkit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Eastcoast-Laboratories/Ausfallplan-Generator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Eastcoast-Laboratories/Ausfallplan-Generator/issues"
+  },
+  "homepage": "https://github.com/Eastcoast-Laboratories/Ausfallplan-Generator#readme"
+}

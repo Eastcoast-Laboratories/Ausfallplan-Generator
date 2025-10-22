@@ -29,6 +29,11 @@ use Migrations\TestSuite\Migrator;
  */
 require dirname(__DIR__) . '/vendor/autoload.php';
 
+// Skip old include files if they exist
+if (file_exists('/var/www/html/include/config.inc.php')) {
+    define('SKIP_OLD_INCLUDES', true);
+}
+
 require dirname(__DIR__) . '/config/bootstrap.php';
 
 if (empty($_SERVER['HTTP_HOST']) && !Configure::read('App.fullBaseUrl')) {
