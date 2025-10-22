@@ -186,12 +186,12 @@ See `dev/IMPLEMENTATION_CHECKLIST.md` for complete breakdown.
 sudo bash -c 'echo "127.0.0.1 ausfallplan-local" >> /etc/hosts'
 
 # 2. Start containers
-docker-compose up -d
+docker compose up -d
 
 # 3. Install & migrate
-docker-compose exec app composer install
-docker-compose exec app bin/cake migrations migrate
-docker-compose exec app bin/cake migrations seed
+docker compose exec app composer install
+docker compose exec app bin/cake migrations migrate
+docker compose exec app bin/cake migrations seed
 
 # 4. Access
 open http://ausfallplan-local
@@ -331,8 +331,8 @@ git push origin v1.0.0
 
 5. **Start development**
    ```bash
-   docker-compose up -d
-   docker-compose exec app bin/cake migrations migrate
+   docker compose up -d
+   docker compose exec app bin/cake migrations migrate
    ```
 
 ### Follow Implementation Checklist

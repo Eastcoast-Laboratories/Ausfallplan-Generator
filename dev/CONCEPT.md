@@ -105,14 +105,14 @@ volumes:
 sudo bash -c 'echo "127.0.0.1 ausfallplan-local" >> /etc/hosts'
 
 # 2. Start containers
-docker-compose up -d
+docker compose up -d
 
 # 3. Install dependencies
-docker-compose exec app composer install
+docker compose exec app composer install
 
 # 4. Run migrations & seeds
-docker-compose exec app bin/cake migrations migrate
-docker-compose exec app bin/cake migrations seed
+docker compose exec app bin/cake migrations migrate
+docker compose exec app bin/cake migrations seed
 
 # 5. Access
 open http://ausfallplan-local
@@ -194,13 +194,13 @@ open http://ausfallplan-local
 
 ```bash
 # Run all tests
-docker-compose exec app composer test
+docker compose exec app composer test
 
 # Static analysis
-docker-compose exec app composer phpstan
+docker compose exec app composer phpstan
 
 # Code style
-docker-compose exec app composer cs-check
+docker compose exec app composer cs-check
 ```
 
 ---
@@ -490,9 +490,9 @@ STRIPE_SECRET_KEY="sk_live_..."
 
 ```bash
 # Docker
-docker-compose up -d              # Start all services
-docker-compose exec app bash      # Shell into app container
-docker-compose logs -f app        # Follow app logs
+docker compose up -d              # Start all services
+docker compose exec app bash      # Shell into app container
+docker compose logs -f app        # Follow app logs
 
 # Database
 bin/cake migrations migrate       # Run migrations
