@@ -15,15 +15,18 @@
             echo $this->Form->control('organization_id', [
                 'options' => $organizations,
                 'empty' => __('Select your organization'),
+                'label' => __('Organization'),
                 'required' => true
             ]);
             echo $this->Form->control('email', [
                 'type' => 'email',
+                'label' => __('Email'),
                 'required' => true,
                 'placeholder' => 'email@example.com'
             ]);
             echo $this->Form->control('password', [
                 'type' => 'password',
+                'label' => __('Password'),
                 'required' => true,
                 'minlength' => 8,
                 'placeholder' => __('Minimum 8 characters')
@@ -34,6 +37,7 @@
                     'editor' => __('Editor (Create & Edit)'),
                     'admin' => __('Administrator (Full Access)')
                 ],
+                'label' => __('Role'),
                 'default' => 'viewer',
                 'help' => __('Your role can be changed later by an administrator')
             ]);

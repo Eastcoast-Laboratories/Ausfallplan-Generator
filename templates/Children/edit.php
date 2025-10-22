@@ -11,7 +11,7 @@ $this->assign('title', __('Edit Child'));
     <fieldset>
         <legend><?= __('Edit Child') ?></legend>
         <?php
-            echo $this->Form->control('name', ['required' => true]);
+            echo $this->Form->control('name', ['label' => __('Name'), 'required' => true]);
             echo $this->Form->control('is_active', ['type' => 'checkbox', 'label' => __('Active')]);
             echo $this->Form->control('is_integrative', ['type' => 'checkbox', 'label' => __('Integrative Child')]);
             echo $this->Form->control('sibling_group_id', [

@@ -67,6 +67,8 @@ return [
     '(No Sibling Group)' => '(Keine Geschwistergruppe)',
     'Sibling Group' => 'Geschwistergruppe',
     'Name' => 'Name',
+    'Organization' => 'Organisation',
+    'New Child' => 'Neues Kind',
     
     // Sibling Groups
     'Add Sibling Group' => 'Geschwistergruppe hinzufügen',
