@@ -22,6 +22,7 @@
  */
 
 use Cake\Routing\Route\DashedRoute;
+use Cake\Routing\Route\Route;
 use Cake\Routing\RouteBuilder;
 
 /*
@@ -51,40 +52,35 @@ return function (RouteBuilder $routes): void {
 
     $routes->scope('/', function (RouteBuilder $builder): void {
         /*
-         * Here, we are connecting '/' (base path) to a controller called 'Pages',
-         * its action called 'display', and we pass a param to select the view file
-         * to use (in this case, templates/Pages/home.php)...
+         * Home page
          */
         $builder->connect('/', ['controller' => 'Pages', 'action' => 'display', 'home']);
 
         /*
-         * ...and connect the rest of 'Pages' controller's URLs.
+         * Authentication routes - Using standard Route class to prevent DashedRoute transformation
+         * THESE MUST COME BEFORE WILDCARD ROUTES!
          */
-        $builder->connect('/pages/*', 'Pages::display');
-
-        /*
-         * Authentication routes - Aliases for cleaner URLs
-         */
+        $builder->setRouteClass(Route::class);
         $builder->connect('/login', ['controller' => 'Users', 'action' => 'login']);
         $builder->connect('/logout', ['controller' => 'Users', 'action' => 'logout']);
         $builder->connect('/register', ['controller' => 'Users', 'action' => 'register']);
         $builder->connect('/profile', ['controller' => 'Users', 'action' => 'profile']);
         $builder->connect('/dashboard', ['controller' => 'Dashboard', 'action' => 'index']);
+        
+        /*
+         * Switch back to DashedRoute for the rest
+         */
+        $builder->setRouteClass(DashedRoute::class);
 
         /*
-         * Connect catchall routes for all controllers.
-         *
-         * The `fallbacks` method is a shortcut for
-         *
-         * ```
-         * $builder->connect('/{controller}', ['action' => 'index']);
-         * $builder->connect('/{controller}/{action}/*', []);
-         * ```
-         *
-         * It is NOT recommended to use fallback routes after your initial prototyping phase!
-         * See https://book.cakephp.org/5/en/development/routing.html#fallbacks-method for more information
+         * Pages controller URLs
          */
-        $builder->fallbacks();
+        $builder->connect('/pages/*', 'Pages::display');
+
+        /*
+         * Wildcard controller routes (LAST!)
+         */
+        $builder->connect('/{controller}/{action}/*', []);
     });
 
     /*
