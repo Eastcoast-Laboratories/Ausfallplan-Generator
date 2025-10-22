@@ -47,16 +47,25 @@ class UsersController extends AppController
     public function login()
     {
         $this->request->allowMethod(['get', 'post']);
-        $result = $this->Authentication->getResult();
         
-        // If user is already logged in, redirect
-        if ($result && $result->isValid()) {
-            $target = $this->Authentication->getLoginRedirect() ?? '/';
-            return $this->redirect($target);
-        }
-        
-        if ($this->request->is('post') && !$result->isValid()) {
-            $this->Flash->error(__('Invalid email or password'));
+        // Check if Authentication component is loaded
+        if (isset($this->Authentication)) {
+            $result = $this->Authentication->getResult();
+            
+            // If user is already logged in, redirect
+            if ($result && $result->isValid()) {
+                $target = $this->Authentication->getLoginRedirect() ?? '/';
+                return $this->redirect($target);
+            }
+            
+            if ($this->request->is('post') && !$result->isValid()) {
+                $this->Flash->error(__('Invalid email or password'));
+            }
+        } else {
+            // Temporary: Show info that authentication is not yet configured
+            if ($this->request->is('post')) {
+                $this->Flash->warning(__('Authentication system is not yet configured. Please use the registration form for now.'));
+            }
         }
     }
 
