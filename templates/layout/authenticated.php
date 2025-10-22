@@ -166,15 +166,27 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
             display: none;
             position: absolute;
             right: 0;
-            top: 100%;
-            margin-top: 0.5rem;
+            top: calc(100% + 0.25rem); /* Small visual gap */
             background: white;
             border: 1px solid #e1e8ed;
             border-radius: 4px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             min-width: 120px;
+            z-index: 1000;
         }
         
+        /* Create invisible bridge between flag and dropdown */
+        .language-dropdown::before {
+            content: '';
+            position: absolute;
+            top: -0.5rem; /* Cover the gap */
+            left: 0;
+            right: 0;
+            height: 0.5rem;
+            background: transparent;
+        }
+        
+        /* Keep dropdown visible when hovering over switcher */
         .language-switcher:hover .language-dropdown {
             display: block;
         }
