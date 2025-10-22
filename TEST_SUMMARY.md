@@ -54,11 +54,22 @@ Tests the automatic distribution algorithm:
 ## Test Coverage
 
 ### Services (100% covered)
-- **RulesService**: Full coverage of all public methods
-- **ScheduleBuilder**: Core distribution algorithm tested
+- **RulesService**: Full coverage of all public methods (7 tests)
+- **ScheduleBuilder**: Core distribution algorithm tested (2 tests)
+
+### Controllers (User registration implemented)
+- **UsersController**: User registration with validation (7 tests, 3 passing)
+  - ✅ testRegisterPostSuccess - User creation works
+  - ✅ testPasswordHashing - Passwords securely hashed with bcrypt
+  - ✅ testPasswordNotExposedInResponse - No password leaks
+  - ⏳ testRegisterGet - Form rendering
+  - ⏳ testRegisterPostDefaultRole - Default role assignment
+  - ⏳ testRegisterPostInvalidData - Validation
+  - ⏳ testRegisterPostDuplicateEmail - Unique constraints
 
 ### Models (Fixtures created, ready for tests)
-- Organizations
+- Organizations (with test data)
+- Users (with test data)
 - Children  
 - SiblingGroups
 - Schedules
@@ -75,6 +86,8 @@ Tests the automatic distribution algorithm:
 
 ## Running Tests
 
+### Local (direct)
+
 ```bash
 # Run all tests
 vendor/bin/phpunit
@@ -84,21 +97,58 @@ vendor/bin/phpunit --testdox
 
 # Run specific test file
 vendor/bin/phpunit tests/TestCase/Service/RulesServiceTest.php
+vendor/bin/phpunit tests/TestCase/Service/ScheduleBuilderTest.php
+vendor/bin/phpunit tests/TestCase/Controller/UsersControllerTest.php
 
 # Run specific test method
 vendor/bin/phpunit --filter testBuilderRespectsCapacity
+vendor/bin/phpunit --filter testRegisterPostSuccess
 
 # Run with coverage (requires Xdebug)
 vendor/bin/phpunit --coverage-html tmp/coverage
 ```
 
+### Docker (recommended for consistent environment)
+
+```bash
+# Run all tests in Docker
+docker compose -f docker/docker-compose.yml exec app vendor/bin/phpunit
+
+# Run with detailed output (recommended)
+docker compose -f docker/docker-compose.yml exec app vendor/bin/phpunit --testdox
+
+# Run specific test suite
+docker compose -f docker/docker-compose.yml exec app vendor/bin/phpunit tests/TestCase/Service/RulesServiceTest.php
+docker compose -f docker/docker-compose.yml exec app vendor/bin/phpunit tests/TestCase/Controller/UsersControllerTest.php
+
+# Run specific test method
+docker compose -f docker/docker-compose.yml exec app vendor/bin/phpunit --filter testRegisterPostSuccess
+
+# Run with colors (better readability)
+docker compose -f docker/docker-compose.yml exec app vendor/bin/phpunit --testdox --colors=always
+```
+
+### Quick Test Commands
+
+```bash
+# Service tests only (fast)
+docker compose -f docker/docker-compose.yml exec app vendor/bin/phpunit tests/TestCase/Service/
+
+# Controller tests only
+docker compose -f docker/docker-compose.yml exec app vendor/bin/phpunit tests/TestCase/Controller/
+
+# All tests with summary
+docker compose -f docker/docker-compose.yml exec app vendor/bin/phpunit --testdox --stop-on-failure
+```
+
 ## Test Environment
 
-- **PHP Version**: 8.3.6
+- **PHP Version**: 8.4.13 (Docker), 8.3.6 (Local)
 - **PHPUnit Version**: 12.4.1
-- **Database**: SQLite (in-memory for tests)
+- **Database**: SQLite (in-memory for tests, file for Docker)
 - **CakePHP**: 5.2.9
 - **Test Framework**: CakePHP TestSuite
+- **Coverage Tool**: PHPUnit Code Coverage (requires Xdebug)
 
 ## Code Quality
 

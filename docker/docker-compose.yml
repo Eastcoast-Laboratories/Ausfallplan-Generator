@@ -9,6 +9,9 @@ services:
     volumes:
       - ../tmp:/var/www/html/tmp
       - ../logs:/var/www/html/logs
+      - ../src:/var/www/html/src
+      - ../tests:/var/www/html/tests
+      - ../templates:/var/www/html/templates
     environment:
       - DEBUG=true
       - SECURITY_SALT=your-secret-salt-change-this-in-production

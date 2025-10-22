@@ -17,7 +17,14 @@ class OrganizationsFixture extends TestFixture
      */
     public function init(): void
     {
-        $this->records = [];
+        $this->records = [
+            [
+                'id' => 1,
+                'name' => 'Test Kita',
+                'created' => '2024-01-01 10:00:00',
+                'modified' => '2024-01-01 10:00:00',
+            ],
+        ];
         parent::init();
     }
 }

@@ -89,6 +89,12 @@ vendor/bin/phpunit
 # Run specific test suite
 vendor/bin/phpunit tests/TestCase/Service/RulesServiceTest.php
 vendor/bin/phpunit tests/TestCase/Service/ScheduleBuilderTest.php
+vendor/bin/phpunit tests/TestCase/Controller/UsersControllerTest.php
+
+# Run tests in Docker container
+docker compose -f docker/docker-compose.yml exec app vendor/bin/phpunit
+docker compose -f docker/docker-compose.yml exec app vendor/bin/phpunit --testdox
+docker compose -f docker/docker-compose.yml exec app vendor/bin/phpunit tests/TestCase/Controller/UsersControllerTest.php
 
 # Run with coverage (requires Xdebug)
 vendor/bin/phpunit --coverage-html tmp/coverage
