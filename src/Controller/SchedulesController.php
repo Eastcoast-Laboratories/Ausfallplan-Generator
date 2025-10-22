@@ -245,4 +245,31 @@ class SchedulesController extends AppController
         
         return $this->redirect(['action' => 'manageChildren', $scheduleId]);
     }
+
+    /**
+     * Generate Report - Create Ausfallplan PDF
+     *
+     * @param string|null $id Schedule id.
+     * @return \Cake\Http\Response|null
+     */
+    public function generateReport($id = null)
+    {
+        $schedule = $this->Schedules->get($id, contain: ['Organizations']);
+        
+        // Get assigned children count for default days_count suggestion
+        $assignedChildrenCount = $this->fetchTable('Assignments')->find()
+            ->select(['child_id' => 'DISTINCT Assignments.child_id'])
+            ->innerJoinWith('ScheduleDays')
+            ->where(['ScheduleDays.schedule_id' => $schedule->id])
+            ->count();
+        
+        // Use days_count from schedule or default to assigned children count
+        $daysCount = $schedule->days_count ?? $assignedChildrenCount;
+        
+        // TODO: Implement actual PDF generation logic
+        // For now, show a placeholder message
+        $this->Flash->info(__('Report generation for {0} days is not yet implemented.', $daysCount));
+        
+        return $this->redirect(['action' => 'index']);
+    }
 }
