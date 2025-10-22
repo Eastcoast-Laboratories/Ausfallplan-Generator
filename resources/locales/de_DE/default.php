@@ -115,6 +115,7 @@ return [
     'Move Down' => 'Nach unten',
     'Drag to reorder' => 'Ziehen zum Sortieren',
     'No children on waitlist.' => 'Keine Kinder auf der Warteliste.',
+    'All children are on the waitlist.' => 'Alle Kinder sind auf der Warteliste.',
     'Available Children' => 'Verfügbare Kinder',
     'Children on Waitlist' => 'Kinder auf der Warteliste',
     
