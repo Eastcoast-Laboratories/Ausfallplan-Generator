@@ -78,6 +78,14 @@ return [
     'Manage Children' => 'Kinder verwalten',
     'Change Language' => 'Sprache wechseln',
     
+    // Waitlist
+    'Children on Waitlist' => 'Kinder auf der Warteliste',
+    'Drag to reorder' => 'Ziehen zum Sortieren',
+    'Child removed from waitlist.' => 'Kind von der Warteliste entfernt.',
+    'Select Schedule' => 'Ausfallplan wählen',
+    '-- Select Schedule --' => '-- Ausfallplan wählen --',
+    'Could not remove child from waitlist.' => 'Kind konnte nicht von der Warteliste entfernt werden.',
+    
     // Common
     'Submit' => 'Absenden',
     'Save' => 'Speichern',
