@@ -13,6 +13,12 @@ $this->assign('title', __('Create Schedule'));
             echo $this->Form->control('title', ['required' => true]);
             echo $this->Form->control('starts_on', ['type' => 'date', 'required' => true]);
             echo $this->Form->control('ends_on', ['type' => 'date', 'required' => true]);
+            echo $this->Form->control('capacity_per_day', [
+                'label' => __('Max Children per Day'),
+                'type' => 'number',
+                'min' => 1,
+                'help' => __('Maximum number of children that can be assigned per day')
+            ]);
             echo $this->Form->control('state', [
                 'options' => ['draft' => __('Draft'), 'final' => __('Final')],
                 'default' => 'draft',
