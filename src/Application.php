@@ -135,16 +135,17 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
                 'password' => 'password',
             ],
             'loginUrl' => '/users/login',
-            'identifier' => [
-                'className' => 'Authentication.Password',
-                'fields' => [
-                    'username' => 'email',
-                    'password' => 'password',
-                ],
-                'resolver' => [
-                    'className' => 'Authentication.Orm',
-                    'userModel' => 'Users',
-                ],
+        ]);
+        
+        // Load identifiers
+        $service->loadIdentifier('Authentication.Password', [
+            'fields' => [
+                'username' => 'email',
+                'password' => 'password',
+            ],
+            'resolver' => [
+                'className' => 'Authentication.Orm',
+                'userModel' => 'Users',
             ],
         ]);
 
