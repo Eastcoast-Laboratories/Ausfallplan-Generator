@@ -43,8 +43,8 @@ class ScheduleBuilder
         $children = $this->childrenTable
             ->find()
             ->where([
-                'organization_id' => $schedule->organization_id,
-                'is_active' => true,
+                'Children.organization_id' => $schedule->organization_id,
+                'Children.is_active' => true,
             ])
             ->contain(['SiblingGroups' => ['Children']])
             ->all()
@@ -100,11 +100,17 @@ class ScheduleBuilder
     ): int {
         $assignmentsCreated = 0;
         $assignmentCounts = [];
+        $dayLoads = []; // Track current load per day
         $dayIndex = 0;
         $dayCount = count($days);
 
         if ($dayCount === 0) {
             return 0;
+        }
+
+        // Initialize day loads
+        foreach ($days as $day) {
+            $dayLoads[$day->id] = $this->calculateDayLoad($day);
         }
 
         foreach ($children as $child) {
@@ -126,7 +132,7 @@ class ScheduleBuilder
                 // Try to place group
                 for ($i = 0; $i < $dayCount; $i++) {
                     $day = $days[$dayIndex];
-                    $currentLoad = $this->calculateDayLoad($day);
+                    $currentLoad = $dayLoads[$day->id];
 
                     if ($currentLoad + $groupWeight <= $day->capacity) {
                         // Place all siblings
@@ -136,6 +142,7 @@ class ScheduleBuilder
                             $assignmentsCreated++;
                             $assignmentCounts[$sibling->id] = ($assignmentCounts[$sibling->id] ?? 0) + 1;
                         }
+                        $dayLoads[$day->id] += $groupWeight;
                         break;
                     }
 
@@ -147,12 +154,13 @@ class ScheduleBuilder
 
                 for ($i = 0; $i < $dayCount; $i++) {
                     $day = $days[$dayIndex];
-                    $currentLoad = $this->calculateDayLoad($day);
+                    $currentLoad = $dayLoads[$day->id];
 
                     if ($currentLoad + $weight <= $day->capacity) {
                         $this->createAssignment($day, $child, $weight, 'auto');
                         $assignmentsCreated++;
                         $assignmentCounts[$child->id]++;
+                        $dayLoads[$day->id] += $weight;
                         $dayIndex = ($dayIndex + 1) % $dayCount;
                         break;
                     }
@@ -207,12 +215,14 @@ class ScheduleBuilder
      */
     private function calculateDayLoad(ScheduleDay $day): int
     {
-        if (!isset($day->assignments)) {
-            return 0;
-        }
+        // Query database for current assignments
+        $assignments = $this->assignmentsTable
+            ->find()
+            ->where(['schedule_day_id' => $day->id])
+            ->all();
 
         $load = 0;
-        foreach ($day->assignments as $assignment) {
+        foreach ($assignments as $assignment) {
             $load += $assignment->weight;
         }
         return $load;
