@@ -1,0 +1,242 @@
+<?php
+declare(strict_types=1);
+
+namespace App\Test\TestCase\Controller;
+
+use Cake\TestSuite\IntegrationTestTrait;
+use Cake\TestSuite\TestCase;
+
+/**
+ * App\Controller\SiblingGroupsController Test Case
+ *
+ * @uses \App\Controller\SiblingGroupsController
+ */
+class SiblingGroupsControllerTest extends TestCase
+{
+    use IntegrationTestTrait;
+
+    /**
+     * Fixtures
+     *
+     * @var list<string>
+     */
+    protected array $fixtures = [
+        'app.Organizations',
+        'app.Users',
+        'app.SiblingGroups',
+        'app.Children',
+    ];
+
+    /**
+     * setUp method
+     *
+     * @return void
+     */
+    public function setUp(): void
+    {
+        parent::setUp();
+        
+        $this->enableCsrfToken();
+        $this->enableSecurityToken();
+    }
+
+    /**
+     * Test index method
+     *
+     * @return void
+     * @uses \App\Controller\SiblingGroupsController::index()
+     */
+    public function testIndex(): void
+    {
+        // Create and log in user
+        $users = $this->getTableLocator()->get('Users');
+        $user = $users->newEntity([
+            'organization_id' => 1,
+            'email' => 'siblinggroups@test.com',
+            'password' => 'password123',
+            'role' => 'admin',
+        ]);
+        $users->save($user);
+        $this->session(['Auth' => $user]);
+
+        // Access sibling groups index
+        $this->get('/sibling-groups');
+        
+        $this->assertResponseOk();
+        $this->assertResponseContains('Sibling Groups');
+    }
+
+    /**
+     * Test add method (GET)
+     *
+     * @return void
+     * @uses \App\Controller\SiblingGroupsController::add()
+     */
+    public function testAddGet(): void
+    {
+        // Create and log in user
+        $users = $this->getTableLocator()->get('Users');
+        $user = $users->newEntity([
+            'organization_id' => 1,
+            'email' => 'groupadd@test.com',
+            'password' => 'password123',
+            'role' => 'admin',
+        ]);
+        $users->save($user);
+        $this->session(['Auth' => $user]);
+
+        // Access add form
+        $this->get('/sibling-groups/add');
+        
+        $this->assertResponseOk();
+        $this->assertResponseContains('label');
+    }
+
+    /**
+     * Test add method (POST) - Successful creation
+     *
+     * @return void
+     * @uses \App\Controller\SiblingGroupsController::add()
+     */
+    public function testAddPostSuccess(): void
+    {
+        // Create and log in user
+        $users = $this->getTableLocator()->get('Users');
+        $user = $users->newEntity([
+            'organization_id' => 1,
+            'email' => 'grouppost@test.com',
+            'password' => 'password123',
+            'role' => 'admin',
+        ]);
+        $users->save($user);
+        $this->session(['Auth' => $user]);
+
+        // Submit sibling group creation
+        $this->post('/sibling-groups/add', [
+            'label' => 'Schmidt Family',
+        ]);
+
+        // Should redirect after success
+        $this->assertRedirect(['controller' => 'SiblingGroups', 'action' => 'index']);
+
+        // Verify sibling group was created
+        $siblingGroups = $this->getTableLocator()->get('SiblingGroups');
+        $group = $siblingGroups->find()
+            ->where(['label' => 'Schmidt Family'])
+            ->first();
+
+        $this->assertNotNull($group);
+        $this->assertEquals('Schmidt Family', $group->label);
+        $this->assertEquals(1, $group->organization_id);
+    }
+
+    /**
+     * Test view method
+     *
+     * @return void
+     * @uses \App\Controller\SiblingGroupsController::view()
+     */
+    public function testView(): void
+    {
+        // Create and log in user
+        $users = $this->getTableLocator()->get('Users');
+        $user = $users->newEntity([
+            'organization_id' => 1,
+            'email' => 'groupview@test.com',
+            'password' => 'password123',
+            'role' => 'admin',
+        ]);
+        $users->save($user);
+        $this->session(['Auth' => $user]);
+
+        // Create a sibling group
+        $siblingGroups = $this->getTableLocator()->get('SiblingGroups');
+        $group = $siblingGroups->newEntity([
+            'organization_id' => 1,
+            'label' => 'View Test Group',
+        ]);
+        $siblingGroups->save($group);
+
+        // View the sibling group
+        $this->get("/sibling-groups/view/{$group->id}");
+        
+        $this->assertResponseOk();
+        $this->assertResponseContains('View Test Group');
+    }
+
+    /**
+     * Test edit method
+     *
+     * @return void
+     * @uses \App\Controller\SiblingGroupsController::edit()
+     */
+    public function testEdit(): void
+    {
+        // Create and log in user
+        $users = $this->getTableLocator()->get('Users');
+        $user = $users->newEntity([
+            'organization_id' => 1,
+            'email' => 'groupedit@test.com',
+            'password' => 'password123',
+            'role' => 'admin',
+        ]);
+        $users->save($user);
+        $this->session(['Auth' => $user]);
+
+        // Create a sibling group
+        $siblingGroups = $this->getTableLocator()->get('SiblingGroups');
+        $group = $siblingGroups->newEntity([
+            'organization_id' => 1,
+            'label' => 'Original Label',
+        ]);
+        $siblingGroups->save($group);
+
+        // Edit the sibling group
+        $this->post("/sibling-groups/edit/{$group->id}", [
+            'label' => 'Updated Label',
+        ]);
+
+        $this->assertRedirect(['controller' => 'SiblingGroups', 'action' => 'index']);
+
+        // Verify update
+        $updated = $siblingGroups->get($group->id);
+        $this->assertEquals('Updated Label', $updated->label);
+    }
+
+    /**
+     * Test delete method
+     *
+     * @return void
+     * @uses \App\Controller\SiblingGroupsController::delete()
+     */
+    public function testDelete(): void
+    {
+        // Create and log in user
+        $users = $this->getTableLocator()->get('Users');
+        $user = $users->newEntity([
+            'organization_id' => 1,
+            'email' => 'groupdelete@test.com',
+            'password' => 'password123',
+            'role' => 'admin',
+        ]);
+        $users->save($user);
+        $this->session(['Auth' => $user]);
+
+        // Create a sibling group
+        $siblingGroups = $this->getTableLocator()->get('SiblingGroups');
+        $group = $siblingGroups->newEntity([
+            'organization_id' => 1,
+            'label' => 'To Delete',
+        ]);
+        $siblingGroups->save($group);
+
+        // Delete the sibling group
+        $this->post("/sibling-groups/delete/{$group->id}");
+
+        $this->assertRedirect(['controller' => 'SiblingGroups', 'action' => 'index']);
+
+        // Verify deletion
+        $exists = $siblingGroups->exists(['id' => $group->id]);
+        $this->assertFalse($exists);
+    }
+}
