@@ -93,6 +93,19 @@ return [
     'None' => 'Keine',
     'Are you sure?' => 'Sind Sie sicher?',
     
+    // Waitlist
+    'Waitlist' => 'Warteliste',
+    'Add to Waitlist' => 'Zur Warteliste hinzufügen',
+    'Priority' => 'Priorität',
+    'Position' => 'Position',
+    'Remove from Waitlist' => 'Von Warteliste entfernen',
+    'Move Up' => 'Nach oben',
+    'Move Down' => 'Nach unten',
+    'Drag to reorder' => 'Ziehen zum Sortieren',
+    'No children on waitlist.' => 'Keine Kinder auf der Warteliste.',
+    'Available Children' => 'Verfügbare Kinder',
+    'Children on Waitlist' => 'Kinder auf der Warteliste',
+    
     // Errors & Validation
     'This field is required' => 'Dieses Feld ist erforderlich',
     'Invalid email address' => 'Ungültige E-Mail-Adresse',
