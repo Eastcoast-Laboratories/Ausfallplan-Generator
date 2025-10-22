@@ -100,6 +100,11 @@ class SchedulesTable extends Table
             ->notEmptyString('state')
             ->inList('state', ['draft', 'final']);
 
+        $validator
+            ->integer('capacity_per_day')
+            ->allowEmptyString('capacity_per_day')
+            ->greaterThan('capacity_per_day', 0);
+
         return $validator;
     }
 }
