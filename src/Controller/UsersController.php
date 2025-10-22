@@ -51,13 +51,6 @@ class UsersController extends AppController
         
         // If user is already logged in, redirect
         if ($result && $result->isValid()) {
-            // Update last login timestamp
-            $user = $this->Authentication->getIdentity();
-            $usersTable = $this->fetchTable('Users');
-            $userEntity = $usersTable->get($user->id);
-            $userEntity->last_login_at = date('Y-m-d H:i:s');
-            $usersTable->save($userEntity);
-            
             // Redirect to dashboard after successful login
             $target = $this->Authentication->getLoginRedirect() ?? ['controller' => 'Dashboard', 'action' => 'index'];
             return $this->redirect($target);
