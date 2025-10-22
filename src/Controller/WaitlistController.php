@@ -56,19 +56,20 @@ class WaitlistController extends AppController
             $childrenOnWaitlist[] = $entry->child_id;
         }
         
-        $availableChildren = $this->fetchTable('Children')->find()
+        $availableChildrenQuery = $this->fetchTable('Children')->find()
             ->where([
                 'Children.organization_id' => $user->organization_id,
                 'Children.is_active' => true,
             ])
-            ->orderBy(['Children.name' => 'ASC'])
-            ->all();
+            ->orderBy(['Children.name' => 'ASC']);
         
         if (!empty($childrenOnWaitlist)) {
-            $availableChildren = $availableChildren->where([
+            $availableChildrenQuery->where([
                 'Children.id NOT IN' => $childrenOnWaitlist
             ]);
         }
+        
+        $availableChildren = $availableChildrenQuery->all();
         
         $this->set(compact('schedules', 'selectedSchedule', 'waitlistEntries', 'availableChildren'));
     }
