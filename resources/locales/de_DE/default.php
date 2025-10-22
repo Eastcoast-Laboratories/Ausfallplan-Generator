@@ -19,6 +19,57 @@ return [
     'If places become available due to illness, appointments, etc., the parents can fill these spots by consulting the substitute list in order. The integrative children count double here.' => 'Sollten Plätze durch Krankheit, Termine o.ä. der Kinder nicht besetzt sein, können die Eltern diese anhand der Nachrückliste durch Absprechen in der WhatsApp-Gruppe füllen. Hierbei ist zu beachten, dass die Anzahl von 9 Zählkindern nicht überschritten wird. Die integrativ Kinder zählen hierbei doppelt.',
     'Print' => 'Drucken',
     'No entries' => 'Keine Einträge',
+    'None' => 'Keine',
+    
+    // Login & Registration
+    'Login' => 'Anmelden',
+    'Create new account' => 'Neues Konto erstellen',
+    'Register New Account' => 'Neues Konto registrieren',
+    'Create your account to start managing your Kita schedules.' => 'Erstellen Sie Ihr Konto, um mit der Verwaltung Ihrer Kita-Ausfallpläne zu beginnen.',
+    'Select your organization' => 'Wählen Sie Ihre Organisation',
+    'Minimum 8 characters' => 'Mindestens 8 Zeichen',
+    'Viewer (Read-only)' => 'Betrachter (Nur Lesen)',
+    'Editor (Create & Edit)' => 'Bearbeiter (Erstellen & Bearbeiten)',
+    'Administrator (Full Access)' => 'Administrator (Voller Zugriff)',
+    'Your role can be changed later by an administrator' => 'Ihre Rolle kann später von einem Administrator geändert werden',
+    'Create Account' => 'Konto erstellen',
+    'Already have an account? Login' => 'Bereits ein Konto? Anmelden',
+    'Email Address' => 'E-Mail-Adresse',
+    'Password' => 'Passwort',
+    'Email' => 'E-Mail',
+    
+    // Profile & Account
+    'Profile Settings' => 'Profil-Einstellungen',
+    'Manage your account information and preferences.' => 'Verwalten Sie Ihre Kontoinformationen und Einstellungen.',
+    'Account Information' => 'Konto-Informationen',
+    'Role' => 'Rolle',
+    'Your role is managed by administrators.' => 'Ihre Rolle wird von Administratoren verwaltet.',
+    'Member Since' => 'Mitglied seit',
+    'N/A' => 'N/V',
+    'Change Password' => 'Passwort ändern',
+    'Leave blank if you don\'t want to change your password.' => 'Lassen Sie das Feld leer, wenn Sie Ihr Passwort nicht ändern möchten.',
+    'New Password' => 'Neues Passwort',
+    'Confirm Password' => 'Passwort bestätigen',
+    'Save Changes' => 'Änderungen speichern',
+    'Settings' => 'Einstellungen',
+    'My Account' => 'Mein Konto',
+    'Logout' => 'Abmelden',
+    
+    // Dashboard
+    'Add Child' => 'Kind hinzufügen',
+    'Import CSV' => 'CSV importieren',
+    'Quick Actions' => 'Schnellaktionen',
+    
+    // Children
+    'Add Child' => 'Kind hinzufügen',
+    'Active' => 'Aktiv',
+    'Integrative Child' => 'Integratives Kind',
+    '(No Sibling Group)' => '(Keine Geschwistergruppe)',
+    'Sibling Group' => 'Geschwistergruppe',
+    'Name' => 'Name',
+    
+    // Sibling Groups
+    'Add Sibling Group' => 'Geschwistergruppe hinzufügen',
     
     // Common
     'Submit' => 'Absenden',
