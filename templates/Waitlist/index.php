@@ -35,7 +35,7 @@ $this->assign('title', __('Waitlist'));
         <div class="available-children">
             <h4><?= __('Available Children') ?></h4>
             <div style="background: #f5f7fa; padding: 1rem; border-radius: 8px; min-height: 300px;">
-                <?php if ($availableChildren->count() > 0): ?>
+                <?php if (!empty($availableChildren) && (is_countable($availableChildren) ? count($availableChildren) : $availableChildren->count()) > 0): ?>
                     <?php foreach ($availableChildren as $child): ?>
                         <div style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
                             <div>
@@ -72,7 +72,7 @@ $this->assign('title', __('Waitlist'));
         <div class="waitlist-children">
             <h4><?= __('Children on Waitlist') ?> <span style="font-size: 0.9rem; color: #666;">(<?= __('Drag to reorder') ?>)</span></h4>
             <div id="waitlist-sortable" style="background: #fff3e0; padding: 1rem; border-radius: 8px; min-height: 300px;">
-                <?php if ($waitlistEntries->count() > 0): ?>
+                <?php if (!empty($waitlistEntries) && (is_countable($waitlistEntries) ? count($waitlistEntries) : $waitlistEntries->count()) > 0): ?>
                     <?php foreach ($waitlistEntries as $entry): ?>
                         <div class="waitlist-item" data-id="<?= $entry->id ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; cursor: move; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #ff9800;">
                             <div style="display: flex; align-items: center; gap: 1rem;">
