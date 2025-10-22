@@ -27,5 +27,8 @@
   "bugs": {
     "url": "https://github.com/Eastcoast-Laboratories/Ausfallplan-Generator/issues"
   },
-  "homepage": "https://github.com/Eastcoast-Laboratories/Ausfallplan-Generator#readme"
+  "homepage": "https://github.com/Eastcoast-Laboratories/Ausfallplan-Generator#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.56.1"
+  }
 }
