@@ -58,6 +58,16 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
             // The bake plugin requires fallback table classes to work properly
             FactoryLocator::add('Table', (new TableLocator())->allowFallbackClass(false));
         }
+        
+        // Load plugins
+        $this->addPlugin('Authentication');
+        $this->addPlugin('Authorization');
+        $this->addPlugin('Migrations');
+        
+        // Only load DebugKit in development mode
+        if (Configure::read('debug')) {
+            $this->addPlugin('DebugKit');
+        }
     }
 
     /**
@@ -94,15 +104,6 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
             ->add(new CsrfProtectionMiddleware([
                 'httponly' => true,
             ]))
-
-            $this->addPlugin('Authentication');
-        $this->addPlugin('Authorization');
-        $this->addPlugin('Migrations');
-        
-        // Only load DebugKit in development mode
-        if (Configure::read('debug')) {
-            $this->addPlugin('DebugKit');
-        }
 
             // Add Authentication middleware
             ->add(new AuthenticationMiddleware($this))
