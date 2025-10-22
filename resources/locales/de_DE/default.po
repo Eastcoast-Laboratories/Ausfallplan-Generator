@@ -1,0 +1,250 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Ausfallplan-Generator\n"
+"POT-Creation-Date: 2025-10-22 12:00+0200\n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Navigation
+msgid "Dashboard"
+msgstr "Übersicht"
+
+msgid "Children"
+msgstr "Kinder"
+
+msgid "Sibling Groups"
+msgstr "Geschwistergruppen"
+
+msgid "Schedules"
+msgstr "Dienstpläne"
+
+msgid "Waitlist"
+msgstr "Warteliste"
+
+msgid "Reports"
+msgstr "Berichte"
+
+# Common
+msgid "Submit"
+msgstr "Absenden"
+
+msgid "Save"
+msgstr "Speichern"
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+msgid "Delete"
+msgstr "Löschen"
+
+msgid "Edit"
+msgstr "Bearbeiten"
+
+msgid "View"
+msgstr "Ansehen"
+
+msgid "Actions"
+msgstr "Aktionen"
+
+msgid "Created"
+msgstr "Erstellt"
+
+msgid "Modified"
+msgstr "Geändert"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Active"
+msgstr "Aktiv"
+
+msgid "Inactive"
+msgstr "Inaktiv"
+
+msgid "Yes"
+msgstr "Ja"
+
+msgid "No"
+msgstr "Nein"
+
+# Children
+msgid "New Child"
+msgstr "Neues Kind"
+
+msgid "Add Child"
+msgstr "Kind hinzufügen"
+
+msgid "Edit Child"
+msgstr "Kind bearbeiten"
+
+msgid "Integrative"
+msgstr "Integrativ"
+
+msgid "Integrative Child"
+msgstr "Integrationskind"
+
+msgid "Sibling Group"
+msgstr "Geschwistergruppe"
+
+msgid "(No Sibling Group)"
+msgstr "(Keine Geschwistergruppe)"
+
+msgid "The child has been saved."
+msgstr "Das Kind wurde gespeichert."
+
+msgid "The child could not be saved. Please try again."
+msgstr "Das Kind konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
+
+msgid "The child has been updated."
+msgstr "Das Kind wurde aktualisiert."
+
+msgid "The child could not be updated. Please try again."
+msgstr "Das Kind konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut."
+
+msgid "The child has been deleted."
+msgstr "Das Kind wurde gelöscht."
+
+msgid "The child could not be deleted. Please try again."
+msgstr "Das Kind konnte nicht gelöscht werden. Bitte versuchen Sie es erneut."
+
+msgid "Are you sure you want to delete # {0}?"
+msgstr "Möchten Sie wirklich # {0} löschen?"
+
+# Sibling Groups
+msgid "New Sibling Group"
+msgstr "Neue Geschwistergruppe"
+
+msgid "Add Sibling Group"
+msgstr "Geschwistergruppe hinzufügen"
+
+msgid "Edit Sibling Group"
+msgstr "Geschwistergruppe bearbeiten"
+
+msgid "The sibling group has been saved."
+msgstr "Die Geschwistergruppe wurde gespeichert."
+
+msgid "The sibling group could not be saved. Please try again."
+msgstr "Die Geschwistergruppe konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
+
+msgid "The sibling group has been updated."
+msgstr "Die Geschwistergruppe wurde aktualisiert."
+
+msgid "The sibling group could not be updated. Please try again."
+msgstr "Die Geschwistergruppe konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut."
+
+msgid "The sibling group has been deleted."
+msgstr "Die Geschwistergruppe wurde gelöscht."
+
+msgid "The sibling group could not be deleted. Please try again."
+msgstr "Die Geschwistergruppe konnte nicht gelöscht werden. Bitte versuchen Sie es erneut."
+
+# Schedules
+msgid "New Schedule"
+msgstr "Neuer Dienstplan"
+
+msgid "Add Schedule"
+msgstr "Dienstplan hinzufügen"
+
+msgid "Edit Schedule"
+msgstr "Dienstplan bearbeiten"
+
+msgid "Title"
+msgstr "Titel"
+
+msgid "Starts On"
+msgstr "Beginnt am"
+
+msgid "Ends On"
+msgstr "Endet am"
+
+msgid "State"
+msgstr "Status"
+
+msgid "Draft"
+msgstr "Entwurf"
+
+msgid "Final"
+msgstr "Fertig"
+
+msgid "The schedule has been created."
+msgstr "Der Dienstplan wurde erstellt."
+
+msgid "The schedule has been saved."
+msgstr "Der Dienstplan wurde gespeichert."
+
+msgid "The schedule could not be saved. Please try again."
+msgstr "Der Dienstplan konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
+
+msgid "The schedule has been updated."
+msgstr "Der Dienstplan wurde aktualisiert."
+
+msgid "The schedule could not be updated. Please try again."
+msgstr "Der Dienstplan konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut."
+
+msgid "The schedule has been deleted."
+msgstr "Der Dienstplan wurde gelöscht."
+
+msgid "The schedule could not be deleted. Please try again."
+msgstr "Der Dienstplan konnte nicht gelöscht werden. Bitte versuchen Sie es erneut."
+
+# User Menu
+msgid "Settings"
+msgstr "Einstellungen"
+
+msgid "My Account"
+msgstr "Mein Konto"
+
+msgid "Logout"
+msgstr "Abmelden"
+
+msgid "Change Language"
+msgstr "Sprache ändern"
+
+# Dashboard
+msgid "Welcome back!"
+msgstr "Willkommen zurück!"
+
+msgid "Quick Actions"
+msgstr "Schnellzugriff"
+
+msgid "Recent Activity"
+msgstr "Letzte Aktivitäten"
+
+msgid "Total Schedules"
+msgstr "Dienstpläne gesamt"
+
+msgid "Active Schedules"
+msgstr "Aktive Dienstpläne"
+
+msgid "Waitlist Entries"
+msgstr "Wartelisten-Einträge"
+
+msgid "Add Child"
+msgstr "Kind hinzufügen"
+
+msgid "Create Schedule"
+msgstr "Dienstplan erstellen"
+
+msgid "Import CSV"
+msgstr "CSV importieren"
+
+msgid "No recent activity to display."
+msgstr "Keine aktuellen Aktivitäten vorhanden."
+
+msgid "Start by adding children or creating a schedule."
+msgstr "Beginnen Sie mit dem Hinzufügen von Kindern oder erstellen Sie einen Dienstplan."
+
+# Errors & Validation
+msgid "This field is required"
+msgstr "Dieses Feld ist erforderlich"
+
+msgid "Invalid email address"
+msgstr "Ungültige E-Mail-Adresse"
+
+msgid "Password must be at least 8 characters"
+msgstr "Das Passwort muss mindestens 8 Zeichen lang sein"
