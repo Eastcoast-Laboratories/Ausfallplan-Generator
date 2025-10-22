@@ -13,6 +13,12 @@ return [
     'Number of days for the schedule (default: number of assigned children)' => 'Anzahl der Tage für den Ausfallplan (Vorschlag: Anzahl zugeordneter Kinder)',
     'Generate Report' => 'Ausfallplan generieren',
     'Report generation for {0} days is not yet implemented.' => 'Report-Generierung für {0} Tage ist noch nicht implementiert.',
+    'Nachrückliste' => 'Nachrückliste',
+    'Immer am Ende' => 'Immer am Ende',
+    'Note for parents:' => 'Hinweis für Eltern:',
+    'If places become available due to illness, appointments, etc., the parents can fill these spots by consulting the substitute list in order. The integrative children count double here.' => 'Sollten Plätze durch Krankheit, Termine o.ä. der Kinder nicht besetzt sein, können die Eltern diese anhand der Nachrückliste durch Absprechen in der WhatsApp-Gruppe füllen. Hierbei ist zu beachten, dass die Anzahl von 9 Zählkindern nicht überschritten wird. Die integrativ Kinder zählen hierbei doppelt.',
+    'Print' => 'Drucken',
+    'No entries' => 'Keine Einträge',
     
     // Common
     'Submit' => 'Absenden',

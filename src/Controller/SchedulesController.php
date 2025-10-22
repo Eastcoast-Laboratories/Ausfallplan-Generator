@@ -247,10 +247,10 @@ class SchedulesController extends AppController
     }
 
     /**
-     * Generate Report - Create Ausfallplan PDF
+     * Generate Report - Create Ausfallplan
      *
      * @param string|null $id Schedule id.
-     * @return \Cake\Http\Response|null
+     * @return \Cake\Http\Response|null|void
      */
     public function generateReport($id = null)
     {
@@ -266,10 +266,12 @@ class SchedulesController extends AppController
         // Use days_count from schedule or default to assigned children count
         $daysCount = $schedule->days_count ?? $assignedChildrenCount;
         
-        // TODO: Implement actual PDF generation logic
-        // For now, show a placeholder message
-        $this->Flash->info(__('Report generation for {0} days is not yet implemented.', $daysCount));
+        // Generate report using ReportService
+        $reportService = new \App\Service\ReportService();
+        $reportData = $reportService->generateReportData((int)$id, $daysCount);
         
-        return $this->redirect(['action' => 'index']);
+        // Render report view
+        $this->viewBuilder()->setLayout('ajax'); // No layout for clean print
+        $this->set(compact('reportData'));
     }
 }
