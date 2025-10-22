@@ -25,6 +25,27 @@ Die eigentliche PDF/PNG-Generierung wie im Beispiel (dev/Kindergarten-Ausfallpla
 - Nachrückliste rechts
 - "Immer am Ende" Sektion
 
+- die registration seite ist noch englisch, und "Please enter your email and password to access your account."im login screen, dort auch "Create new account"
+
+"New Child" buttton auf http://localhost:8080/children/add da alles noch englisch
+
+auf http://localhost:8080/children ist "Sibling group" noch enlisch und auch noch nicht gefüllt, die spalte
+
+
+playwright muss janich tin dem docker laufen sondern lokal im host. wie kann die datei nicht im docker container sein? die ist doch gemountet, oder?
+
+$ ssh eclabs-vm06 ls /var/kunden/webs/ruben/www/ausfallplan-generator.z11.de -la
+insgesamt 8
+drwxr-xr-x 2 root root 4096 22. Okt 06:35 .
+drwxr-xr-x 9 root root 4096 22. Okt 06:34 ..
+ruben@heisenberg:/var/www/Ausfallplan-Generator$ 
+
+mache dort ein git clone rein aus git@github.com:Eastcoast-Laboratories/Ausfallplan-Generator.git und installiere alles dort, was nötig ist, also vervollständige die app dort
+
+das mysql passwort dort ist i1aeLZFUmoo7mWdy für die db "ausfallplan_generator" speichere dies in einer .env datei, die in gitignore ist
+
+
+
 
 ## Fertiggestellt
 

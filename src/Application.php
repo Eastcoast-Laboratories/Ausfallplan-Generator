@@ -95,6 +95,15 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
                 'httponly' => true,
             ]))
 
+            $this->addPlugin('Authentication');
+        $this->addPlugin('Authorization');
+        $this->addPlugin('Migrations');
+        
+        // Only load DebugKit in development mode
+        if (Configure::read('debug')) {
+            $this->addPlugin('DebugKit');
+        }
+
             // Add Authentication middleware
             ->add(new AuthenticationMiddleware($this))
 
