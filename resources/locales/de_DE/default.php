@@ -5,6 +5,7 @@ return [
     'Children' => 'Kinder',
     'Sibling Groups' => 'Geschwistergruppen',
     'Ausfallplan' => 'Ausfallplan',
+    'Ausfallplan Generator' => 'Ausfallplan Generator',
     'Schedules' => 'Ausfallpläne',
     'Waitlist' => 'Warteliste',
     'Reports' => 'Berichte',
