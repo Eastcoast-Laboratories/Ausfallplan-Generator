@@ -9,7 +9,7 @@ $this->assign('title', __('Edit Child'));
 <div class="children form content">
     <?= $this->Form->create($child) ?>
     <fieldset>
-        <legend><?= __('Edit Child')) ?></legend>
+        <legend><?= __('Edit Child') ?></legend>
         <?php
             echo $this->Form->control('name', ['required' => true]);
             echo $this->Form->control('is_active', ['type' => 'checkbox', 'label' => __('Active')]);
