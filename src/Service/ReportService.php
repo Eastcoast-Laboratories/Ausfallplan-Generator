@@ -54,8 +54,8 @@ class ReportService
         // Generate day boxes
         $days = $this->generateDays($daysCount, $assignedChildren, $schedule->capacity_per_day ?? 9);
 
-        // Find "always at end" children (appear in waitlist with high priority)
-        $alwaysAtEnd = $this->findAlwaysAtEndChildren($assignedChildren);
+        // Find "always at end" children (assigned but NOT on waitlist)
+        $alwaysAtEnd = $this->findAlwaysAtEndChildren($assignedChildren, $waitlist);
 
         return [
             'schedule' => $schedule,
@@ -182,15 +182,23 @@ class ReportService
 
     /**
      * Find children that are "always at end"
+     * These are children assigned to the schedule but NOT on the waitlist
      *
-     * @param array $children
+     * @param array $children All assigned children
+     * @param array $waitlist Waitlist entries
      * @return array
      */
-    private function findAlwaysAtEndChildren(array $children): array
+    private function findAlwaysAtEndChildren(array $children, array $waitlist): array
     {
-        // Children with very high weight (e.g., >= 10) are "always at end"
-        return array_filter($children, function ($child) {
-            return $child['weight'] >= 10;
+        // Get IDs of children on waitlist
+        $waitlistChildIds = [];
+        foreach ($waitlist as $entry) {
+            $waitlistChildIds[] = $entry->child_id;
+        }
+
+        // Return only children NOT on waitlist
+        return array_filter($children, function ($child) use ($waitlistChildIds) {
+            return !in_array($child['child']->id, $waitlistChildIds);
         });
     }
 }
