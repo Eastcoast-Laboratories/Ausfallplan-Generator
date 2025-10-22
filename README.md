@@ -1,319 +1,371 @@
-# Ausfallplan-Generator (CakePHP 5) â€” Project Blueprint
+# Ausfallplan-Generator
 
-> **Purpose**  
-> This single file is a complete blueprint for GitHub Copilot (and developers) to generate a full CakePHP 5 application that creates printable **AusfallplÃ¤ne** (absence/day plans) for childcare groups. It includes domain model, APIs, UX flows, security, i18n (de/en), tests, and acceptance criteria. Drop this file into an empty repo as `README.md`, push to GitHub, and start buildingâ€”Copilot can infer files, classes, and tests from here.
+> A multi-tenant web application for childcare organizations (Kitas) to create and manage day schedules (Ausfallpläne) with automatic distribution, waitlist management, and beautiful PDF/PNG exports.
 
----
-
-## 0. Tech Stack & Nonâ€‘functional Requirements
-
-- **Language/Runtime:** PHP 8.2+
-- **Framework:** CakePHP 5.x (ORM, Authentication & Authorization plugins)
-- **DB:** PostgreSQL 14+ (preferred) or MySQL 8
-- **Frontend:** Server-rendered CakePHP templates + HTMX/Alpine.js for interactivity
-- **Build/Dev:** Composer, PHPStan (level 8), PHPUnit, Psalm (optional), Rector (optional)
-- **Security:** HTTPS, strong password hashing (password_hash default), CSRF, rate limiting
-- **PDF/PNG Export:** dompdf/dompdf or spatie/browsershot
-- **i18n:** de_DE & en_US locales (UI + emails + PDF labels)
-- **Container:** Optional Docker dev setup
-- **License:** MIT
+[![PHP Version](https://img.shields.io/badge/PHP-8.4%2B-blue)](https://www.php.net/)
+[![CakePHP](https://img.shields.io/badge/CakePHP-5.x-red)](https://cakephp.org/)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-blue)](https://www.mysql.com/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue)](https://www.docker.com/)
 
 ---
 
-## 1. Product Summary
+## Project Status
 
-A multi-tenant web app for Kitas (organizations) to create and manage **Schedules** (a whole plan for a period), consisting of multiple **ScheduleDays** (â€œAmeisen-Tag 1â€, â€¦). Children are assigned fairly across days with capacity limits, **integrative** children count double, **sibling groups** are assigned atomically, and a **waitlist** fills empty slots with **priorities**. Each day supports a **start child** to rotate waitlist fairness. Admins export beautiful PDF/PNG posters.
+**Status:** ✅ Concept Phase Complete — Ready for Implementation
 
-### Core Features
-- Organizations, users, roles (admin/editor/viewer)
-- Children management, flags (integrative), sibling groups
-- Schedules with multiple days, capacities, ordering
-- Automatic distribution algorithm + manual drag & drop
-- Global waitlist per schedule with **priority** and per-day **start child**
-- Rules per schedule (JSON): `integrative_weight`, `always_last`, `max_per_child`
-- PDF/PNG export styled as multi-card layout (like provided sample image)
-- DE/EN localization for UI and exports
-- Registration, email verification, password recovery
-- Brute-force protection (rate limit & lockouts)
-- Pricing plans & landing page; free **Test Plan**
+**Documentation:**
+- [📘 README.md](dev/README.md) - Complete project blueprint (encoding fixed)
+- [📋 CONCEPT.md](dev/CONCEPT.md) - Full implementation concept
+- [✅ IMPLEMENTATION_CHECKLIST.md](dev/IMPLEMENTATION_CHECKLIST.md) - Detailed task breakdown
 
 ---
 
-## 2. Domain Model (ER overview)
+## Quick Overview
 
-```
-Organization 1â€”* Users
-Organization 1â€”* Children
-Organization 1â€”* Schedules
-Schedule 1â€”* ScheduleDays
-Schedule 1â€”* Rules
-Schedule 1â€”* WaitlistEntries
-ScheduleDay 1â€”* Assignments
-Child 0..1 â€” 1 SiblingGroup  (aka Family)    // a group has many Children
-```
+### What It Does
 
-### Entities & Fields
+- **Multi-tenant:** Each organization (Kita) has isolated data
+- **Schedule Management:** Create weekly/period schedules with multiple days
+- **Smart Distribution:** Automatic fair distribution with round-robin algorithm
+- **Sibling Groups:** Children in same family placed together (atomically)
+- **Integrative Support:** Children with special needs count double (configurable weight)
+- **Waitlist:** Priority-based backfill with rotation fairness
+- **Drag & Drop:** Manual adjustments with capacity validation
+- **Export:** Beautiful PDF/PNG posters for printing
+- **i18n:** German & English support
 
-**organizations**
-- id, name, locale(default), created, modified
+### Key Features
 
-**users**
-- id, organization_id FK
-- email (unique per org), password, role: `admin|editor|viewer`
-- email_verified_at (nullable)
-- last_login_at
-- created, modified
-
-**children**
-- id, organization_id FK
-- name (unique within org), is_integrative(bool), is_active(bool)
-- sibling_group_id (nullable)
-- created, modified
-
-**sibling_groups** (aka families)
-- id, organization_id, label (optional)
-- created, modified
-
-**schedules**
-- id, organization_id FK
-- title, starts_on(date), ends_on(date), state: `draft|final`
-- created, modified
-
-**schedule_days**
-- id, schedule_id FK
-- title (e.g., â€œAmeisen-Tag 1â€), position(int), capacity(int, default 9)
-- start_child_id (nullable, FK to children)  // rotates waitlist start per day
-- created, modified
-
-**assignments**
-- id, schedule_day_id FK, child_id FK
-- weight(int default 1)  // integrative children use schedule rule weight
-- source: `auto|manual|waitlist`
-- created, modified
-- unique(schedule_day_id, child_id)
-
-**waitlist_entries**
-- id, schedule_id FK, child_id FK
-- priority(int, higher = more important)
-- remaining(int default 1) // number of times the child may be added from waitlist
-- created, modified
-- unique(schedule_id, child_id)
-
-**rules**
-- id, schedule_id FK
-- key(varchar) e.g. `integrative_weight`, `always_last`, `max_per_child`
-- value(json)
+✅ Automatic distribution algorithm  
+✅ Sibling group atomic placement  
+✅ Integrative children weighting (×2)  
+✅ Priority waitlist with rotation  
+✅ Capacity constraints (never exceeded)  
+✅ Max-per-child rules  
+✅ Always-last processing  
+✅ PDF/PNG export  
+✅ HTMX + Alpine.js UI  
+✅ Role-based access (admin/editor/viewer)  
+✅ Email verification  
+✅ Rate limiting & lockout  
+✅ CSV import  
 
 ---
 
-## 3. Business Logic (Algorithm Blueprint)
+## Tech Stack
 
-### 3.1 Automatic Distribution
-- Build a candidate list of active children in the organization.
-- Exclude `always_last` names initially; add them in a second pass.
-- Respect **sibling groups**: a group is assigned **atomically** to a day. The sum of member weights counts against capacity. If the group doesnâ€™t fit, try the next day.
-- Weight: `1` normal, `integrative_weight` (default `2`) for `is_integrative` children.
-
-**Fairness approach:**
-- Round-robin over days; for each step, attempt to place the next candidate (or sibling group) on the next day that has room and where the child/group is not yet assigned.
-- Enforce `max_per_child` per schedule.
-- After main loop, process `always_last` list with the same constraints.
-
-### 3.2 Waitlist Filling
-- Sort `waitlist_entries` by `priority DESC, created ASC`.
-- For each **ScheduleDay**, set cursor to `start_child_id` if present, otherwise first in the sorted list. Iterate circularly (round-robin) to try filling gaps until capacity reached.
-- Each time a child/group is added from the waitlist:
-  - decrement its `remaining` (stop when zero)
-  - update dayâ€™s `start_child_id` to the **next** child in the round-robin sequence for fairness over time.
-
-### 3.3 Manual Overrides
-- Drag & drop UI must: validate capacity (including group weights), prevent partial sibling placement unless user explicitly opts into a â€œSplit onceâ€ override, which is tracked on the assignment(s).
+| Component | Technology |
+|-----------|-----------|
+| Backend | PHP 8.4 + CakePHP 5 |
+| Database | MySQL 8.0 |
+| Cache/Sessions | Redis 7 |
+| Frontend | HTMX + Alpine.js |
+| PDF Export | dompdf |
+| PNG Export | spatie/browsershot |
+| Container | Docker + docker-compose |
+| Web Server | Nginx (production) |
+| CI/CD | GitHub Actions |
+| Testing | PHPUnit + PHPStan Level 8 |
 
 ---
 
-## 4. API & Pages (minimal contract)
+## Local Development
 
-### Public
-- **Landing Page** `/` â€” marketing, features, screenshots, pricing tiers, free Test Plan CTA.
-- **Auth** `/register`, `/login`, `/logout`
-- **Email verification** `/verify/:token`
-- **Password reset** `/password/forgot`, `/password/reset/:token`
+### Prerequisites
 
-### App (authenticated)
-- **Dashboard**: recent schedules, alerts, capacity warnings
-- **Children**: list, create, edit, CSV import, sibling group assignment
-- **Schedules**: CRUD
-  - Detail view: grid of **ScheduleDays** (cards), live counters (used/total), badges for integrative (Ã—2)
-  - Buttons: *Auto-distribute*, *Apply Waitlist*, *Export PDF/PNG*, *Finalize*
-  - Panel: **Waitlist** with priorities and remaining; **Rules** (JSON form)
-  - Per day: **start child** picker, capacity, position drag
-- **Exports**: `/schedules/:id/export.pdf`, `/schedules/:id/export.png`
+- Docker & docker-compose
+- Make (optional)
+- Git
 
-### REST (example)
-- `POST /api/schedules/:id/build` â€” run auto distribution
-- `POST /api/schedules/:id/apply-waitlist` â€” fill from waitlist
-- CRUD for children, schedules, schedule_days, waitlist_entries, rules
-
----
-
-## 5. Security & Compliance
-
-- Email verification before full access
-- Rate limit & lockout:
-  - after 5 failed logins: 15 min lockout
-  - IP rate limit on auth endpoints
-  - soft-CAPTCHA on anomalous patterns
-- Password reset tokens: 60 min validity, one-time, invalidate old sessions
-- Roles:
-  - **admin**: all, billing
-  - **editor**: manage children, schedules
-  - **viewer**: read-only
-- GDPR: imprint, privacy, data export/delete on request
-- CSP, SameSite cookies, CSRF, HTTPS, secure headers
-
----
-
-## 6. Localization (DE/EN)
-
-- Use CakePHP i18n. Provide language switcher and org default locale.
-- Resource files:
-  - `resources/locales/de_DE/app.php` / `en_US/app.php`
-- Translate: UI labels, emails, PDF headings, errors.
-- Date/number formatting based on locale.
-
----
-
-## 7. Pricing & Plans (for landing page)
-
-- **Test Plan (Free):** 1 org, 1 schedule active, up to 25 children, PDF export, community support.
-- **Pro:** Unlimited schedules, priority waitlist, CSV import, custom PDF themes.
-- **Enterprise:** SSO/SAML, SLAs, audit logs, dedicated support.
-
-Billing via Stripe (monthly).
-
----
-
-## 8. Acceptance Criteria & Test Matrix
-
-### 8.1 Unit Tests (examples)
-- **RulesService**: returns defaults; overrides per schedule.
-- **Weighting**: integrative child uses `integrative_weight` in sums.
-- **SiblingGroup**: assignment is atomic; partial only with override flag.
-- **Capacity**: sums of weights never exceed capacity.
-- **MaxPerChild**: child not assigned beyond limit.
-- **Waitlist**: priority ordering respected; `remaining` decremented; per-day `start_child_id` rotation works.
-
-### 8.2 Integration Tests
-- `POST /api/schedules/:id/build` results in expected number of assignments.
-- Applying waitlist fills only remaining capacity and honors priorities & rotation.
-- Manual drag & drop preserves invariants (no duplicates, capacity OK).
-
-### 8.3 Feature/BDD (Gherkin samples)
-
-```gherkin
-Feature: Sibling groups are placed atomically
-  Scenario: A day has capacity 9 and a 3â€‘child family (weights 1,1,2)
-    Given a schedule day with capacity 9
-    And a sibling group of three children where one is integrative
-    When I auto-distribute
-    Then the family is placed together on a day
-    And the used capacity is 4
-```
-
-```gherkin
-Feature: Waitlist fairness with start child
-  Scenario: Start rotates after a successful fill
-    Given a sorted waitlist [A(priority 3), B(2), C(1)]
-    And the schedule day start child is B
-    When I apply the waitlist and only one slot is free
-    Then B is assigned
-    And the dayâ€™s start child becomes C
-```
-
----
-
-## 9. Developer Tasks (Guided for Copilot)
-
-Create files and implementations in this order:
-
-1. **Bootstrap**
-   - Composer `cakephp/app` skeleton, Docker (optional), `.env.example`
-   - Install plugins: `cakephp/authentication`, `cakephp/authorization`, `dompdf/dompdf`
-2. **Migrations & Seeds**
-   - Implement tables described above + seed demo data
-3. **Models & Associations**
-   - All entities, validation rules, integrity rules, behaviors (Timestamp, CounterCache if needed)
-4. **Services**
-   - `ScheduleBuilder` (auto distribution + waitlist apply)
-   - `WaitlistService`, `RulesService`
-5. **Controllers & Routes**
-   - Web & minimal REST per contract
-6. **Views**
-   - Dashboard, Children CRUD, Schedules show (card grid with live counters), Waitlist panel, Rules form
-   - Export templates for PDF/PNG
-7. **Auth & Security**
-   - Registration, email verification, password recovery, lockout/ratelimit
-8. **i18n**
-   - Locale files de/en; language switcher
-9. **Landing Page**
-   - Marketing copy, pricing, CTA
-10. **QA**
-   - PHPUnit suites: Unit, Integration, Feature
-   - PHPStan level 8, CI workflow (GitHub Actions)
-
----
-
-## 10. Sample CI (to be created by Copilot)
-
-- GitHub Actions:
-  - `php-actions/composer@v6`
-  - setup PHP 8.2, run `composer test`
-  - run `phpstan analyse`
-  - cache Composer and npm (if used)
-
----
-
-## 11. UX Notes (for implementation)
-
-- Card layout resembles the sample image; show used vs capacity (e.g., `7/9`), with integrative badges `Ã—2`.
-- Day cards show the **start child** selector.
-- Sibling groups displayed with a small â€œfamilyâ€ icon.
-- Drag & drop across days; capacity meter turns red on overflow, prevents save.
-- Export matches the A4 multi-card aesthetic.
-
----
-
-## 12. Glossary
-
-- **Schedule**: The whole plan for a period (e.g., a week), containing many **ScheduleDays**.
-- **ScheduleDay**: A single day/card in the plan with a capacity.
-- **Assignment**: Link of child to a day with a weight (1 or 2).
-- **Waitlist**: Global list per schedule used to fill remaining slots.
-- **Start Child**: Per-day pointer into the waitlist to rotate fairness.
-- **Sibling Group**: Children that must be placed together (atomic).
-
----
-
-## 13. Getting Started (dev placeholder)
+### Setup (5 minutes)
 
 ```bash
-# Copilot will generate these files; outline for humans:
-composer create-project cakephp/app ausfallplan
-cp .env.example .env  # set DB creds
-bin/cake migrations migrate
-bin/cake server
+# 1. Clone repository
+git clone <repo-url> /var/www/Ausfallplan-Generator
+cd /var/www/Ausfallplan-Generator
+
+# 2. Add local host entry
+sudo bash -c 'echo "127.0.0.1 ausfallplan-local" >> /etc/hosts'
+
+# 3. Copy environment file
+cp app/config/.env.example app/config/.env
+
+# 4. Start Docker containers
+docker-compose up -d
+
+# 5. Install dependencies
+docker-compose exec app composer install
+
+# 6. Run database migrations
+docker-compose exec app bin/cake migrations migrate
+
+# 7. Seed demo data
+docker-compose exec app bin/cake migrations seed
+
+# 8. Access application
+open http://ausfallplan-local
+```
+
+### Demo Login Credentials
+
+After seeding, login with:
+
+- **Admin:** `admin@demo.kita` / `password`
+- **Editor:** `editor@demo.kita` / `password`
+- **Viewer:** `viewer@demo.kita` / `password`
+
+### Development Commands
+
+```bash
+# Run tests
+docker-compose exec app composer test
+
+# Static analysis
+docker-compose exec app composer phpstan
+
+# Code style check
+docker-compose exec app composer cs-check
+
+# Fix code style
+docker-compose exec app composer cs-fix
+
+# Clear caches
+docker-compose exec app bin/cake cache clear_all
+
+# Shell into container
+docker-compose exec app bash
+
+# View logs
+docker-compose logs -f app
+
+# Check MailHog (email testing)
+open http://localhost:8025
 ```
 
 ---
 
-## 14. Legal & Privacy
+## Production Deployment
 
-Include **Impressum** and **Datenschutz** (GDPR). Provide data export/delete options for organizations.
+### Target
+
+**URL:** https://ausfallplan-generator.z11.de
+
+### First Deployment
+
+```bash
+# 1. Setup server (Ubuntu 22.04)
+# Install: Nginx, PHP 8.4-FPM, MySQL 8.0, Redis, Composer
+
+# 2. Create database
+sudo mysql
+CREATE DATABASE ausfallplan_prod;
+CREATE USER 'ausfallplan'@'localhost' IDENTIFIED BY 'secure_password';
+GRANT ALL PRIVILEGES ON ausfallplan_prod.* TO 'ausfallplan'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+
+# 3. Clone repository
+cd /var/www
+git clone <repo-url> ausfallplan
+cd ausfallplan
+
+# 4. Copy production environment
+cp deploy/production.env.template app/config/.env
+# Edit .env with production values
+
+# 5. Initialize database
+bash deploy/post-deploy.sh
+
+# 6. Configure Nginx
+# Copy vhost config, enable SSL (Let's Encrypt)
+sudo systemctl reload nginx
+
+# 7. Test
+curl https://ausfallplan-generator.z11.de/health
+```
+
+### Subsequent Deployments
+
+```bash
+# Push a version tag to trigger CI/CD
+git tag -a v1.0.0 -m "Release 1.0.0"
+git push origin v1.0.0
+
+# Or manually on server
+ssh user@ausfallplan-generator.z11.de
+cd /var/www/ausfallplan
+bash deploy/deploy.sh
+```
 
 ---
 
-## 15. Roadmap (optional)
-- OAuth/SSO (Google, Microsoft) for enterprise
-- Theming for exports
-- Mobile-friendly kiosk view
-- Audit log
+## Testing
+
+### Test Suite
+
+- **90+ Unit Tests** (Models + Services)
+- **30+ Integration Tests** (Controllers + Workflows)
+- **Target:** >85% code coverage
+- **PHPStan:** Level 8 (strictest)
+
+### Run Tests
+
+```bash
+# All tests
+composer test
+
+# With coverage
+composer test -- --coverage-html coverage/
+
+# Static analysis
+composer phpstan
+
+# Specific test
+composer test -- --filter=testAutoDistributionRoundRobin
+```
+
+---
+
+## Architecture
+
+### Domain Model
+
+```
+Organization 1--* Users
+Organization 1--* Children
+Organization 1--* Schedules
+Schedule 1--* ScheduleDays
+Schedule 1--* WaitlistEntries
+Schedule 1--* Rules
+ScheduleDay 1--* Assignments
+Child 0..1 -- 1 SiblingGroup
+```
+
+### Key Services
+
+- **ScheduleBuilderService** - Auto-distribution algorithm
+- **WaitlistService** - Priority-based backfill
+- **RulesService** - Per-schedule configuration
+- **ExportService** - PDF/PNG generation
+
+### Business Rules
+
+1. **Sibling Groups:** Placed atomically (all or none)
+2. **Integrative Children:** Weight ×2 (configurable)
+3. **Capacity:** Never exceeded, validated on every change
+4. **Max Per Child:** Configurable limit per schedule
+5. **Always Last:** Specific children processed in second pass
+6. **Waitlist Rotation:** Start child rotates for fairness
+
+---
+
+## Project Structure
+
+```
+/var/www/Ausfallplan-Generator/
+├── dev/                          # Documentation
+│   ├── README.md                 # Blueprint (original spec)
+│   ├── CONCEPT.md                # Implementation concept
+│   └── IMPLEMENTATION_CHECKLIST.md
+├── docker/                       # Docker configs
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   ├── nginx/
+│   ├── php/
+│   └── mysql/
+├── app/                          # CakePHP application
+│   ├── src/
+│   │   ├── Controller/
+│   │   ├── Model/
+│   │   ├── Service/             # Business logic
+│   │   └── Command/
+│   ├── templates/
+│   ├── tests/
+│   └── composer.json
+├── migrations/                   # Database migrations
+├── seeds/                        # Demo data
+├── deploy/                       # Deployment scripts
+│   ├── deploy.sh
+│   └── post-deploy.sh
+└── .github/workflows/            # CI/CD
+    ├── test.yml
+    └── deploy.yml
+```
+
+---
+
+## Implementation Status
+
+### ✅ Completed
+- [x] Project concept & architecture
+- [x] Complete documentation
+- [x] Implementation checklist
+- [x] Docker configuration planned
+- [x] Database schema designed
+- [x] Service layer designed
+- [x] Testing strategy defined
+- [x] CI/CD pipeline designed
+- [x] Deployment strategy defined
+
+### 🔄 In Progress
+- [ ] Docker environment setup
+- [ ] CakePHP skeleton creation
+- [ ] Database migrations
+- [ ] Core models
+- [ ] Business logic services
+- [ ] Controllers & views
+- [ ] Authentication
+- [ ] Testing suite
+- [ ] Production deployment
+
+### 📋 Todo
+See [IMPLEMENTATION_CHECKLIST.md](dev/IMPLEMENTATION_CHECKLIST.md) for detailed breakdown.
+
+---
+
+## Timeline
+
+**Estimated:** 10 weeks (2.5 months)
+
+- Week 1: Foundation (Docker, skeleton, DB)
+- Week 2: Core models
+- Week 3: Business logic services
+- Week 4: Authentication & authorization
+- Weeks 5-6: Controllers & views
+- Week 7: Landing page & exports
+- Week 8: Testing
+- Week 9: CI/CD
+- Week 10: Production deployment
+
+---
+
+## Contributing
+
+This is a private project. Implementation follows the checklist in:
+`dev/IMPLEMENTATION_CHECKLIST.md`
+
+---
+
+## License
+
+MIT License
+
+---
+
+## Contact
+
+**Project:** Ausfallplan-Generator  
+**Production:** https://ausfallplan-generator.z11.de (when deployed)  
+**Local:** http://ausfallplan-local  
+
+---
+
+## Next Steps
+
+1. **Start Implementation:** Begin with Phase 1 of checklist
+2. **Setup Docker:** Create docker-compose.yml and Dockerfile
+3. **Initialize CakePHP:** Create app skeleton
+4. **Create Migrations:** Implement all 8 tables
+5. **Run Tests:** Aim for >85% coverage from the start
+
+**Ready to build! 🚀**
