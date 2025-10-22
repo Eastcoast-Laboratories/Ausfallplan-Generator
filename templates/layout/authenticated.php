@@ -374,11 +374,6 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
                 <span class="sidebar-nav-icon">📋</span>
                 <span><?= __('Waitlist') ?></span>
             </a>
-            
-            <a href="<?= $this->Url->build(['controller' => 'Reports', 'action' => 'index']) ?>" class="sidebar-nav-item <?= $this->request->getParam('controller') === 'Reports' ? 'active' : '' ?>">
-                <span class="sidebar-nav-icon">📈</span>
-                <span><?= __('Reports') ?></span>
-            </a>
         </nav>
     </aside>
     
