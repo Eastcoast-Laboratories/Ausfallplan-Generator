@@ -31,7 +31,6 @@ $this->assign('title', __('Children'));
                     <td><?= $child->has('sibling_group') && $child->sibling_group ? h($child->sibling_group->name) : '' ?></td>
                     <td><?= h($child->created) ?></td>
                     <td class="actions">
-                        <?= $this->Html->link(__('View'), ['action' => 'view', $child->id]) ?>
                         <?= $this->Html->link(__('Edit'), ['action' => 'edit', $child->id]) ?>
                         <?= $this->Form->postLink(__('Delete'), ['action' => 'delete', $child->id], ['confirm' => __('Are you sure you want to delete # {0}?', $child->id)]) ?>
                     </td>
