@@ -47,25 +47,23 @@ class UsersController extends AppController
     public function login()
     {
         $this->request->allowMethod(['get', 'post']);
+        $result = $this->Authentication->getResult();
         
-        // Check if Authentication component is loaded
-        if (isset($this->Authentication)) {
-            $result = $this->Authentication->getResult();
+        // If user is already logged in, redirect
+        if ($result && $result->isValid()) {
+            // Update last login timestamp
+            $user = $this->Authentication->getIdentity();
+            $usersTable = $this->fetchTable('Users');
+            $userEntity = $usersTable->get($user->id);
+            $userEntity->last_login_at = date('Y-m-d H:i:s');
+            $usersTable->save($userEntity);
             
-            // If user is already logged in, redirect
-            if ($result && $result->isValid()) {
-                $target = $this->Authentication->getLoginRedirect() ?? '/';
-                return $this->redirect($target);
-            }
-            
-            if ($this->request->is('post') && !$result->isValid()) {
-                $this->Flash->error(__('Invalid email or password'));
-            }
-        } else {
-            // Temporary: Show info that authentication is not yet configured
-            if ($this->request->is('post')) {
-                $this->Flash->warning(__('Authentication system is not yet configured. Please use the registration form for now.'));
-            }
+            $target = $this->Authentication->getLoginRedirect() ?? '/';
+            return $this->redirect($target);
+        }
+        
+        if ($this->request->is('post') && !$result->isValid()) {
+            $this->Flash->error(__('Invalid email or password'));
         }
     }
 
@@ -93,9 +91,7 @@ class UsersController extends AppController
     {
         parent::beforeFilter($event);
         
-        // Allow public access to register and login (if Authentication component is loaded)
-        if (isset($this->Authentication)) {
-            $this->Authentication->addUnauthenticatedActions(['login', 'register']);
-        }
+        // Allow public access to register and login
+        $this->Authentication->addUnauthenticatedActions(['login', 'register']);
     }
 }
