@@ -119,4 +119,130 @@ class SchedulesController extends AppController
 
         return $this->redirect(['action' => 'index']);
     }
+
+    /**
+     * Manage Children method - Assign/remove children to/from schedule
+     *
+     * @param string|null $id Schedule id.
+     * @return \Cake\Http\Response|null|void
+     */
+    public function manageChildren($id = null)
+    {
+        $schedule = $this->Schedules->get($id);
+        
+        // Get all children in this schedule (via assignments)
+        $assignedChildrenIds = $this->fetchTable('Assignments')->find()
+            ->select(['child_id' => 'DISTINCT Assignments.child_id'])
+            ->innerJoinWith('ScheduleDays')
+            ->where(['ScheduleDays.schedule_id' => $schedule->id])
+            ->all()
+            ->extract('child_id')
+            ->toArray();
+        
+        // Get assigned children details
+        $assignedChildren = [];
+        if (!empty($assignedChildrenIds)) {
+            $assignedChildren = $this->fetchTable('Children')->find()
+                ->where(['Children.id IN' => $assignedChildrenIds])
+                ->orderBy(['Children.name' => 'ASC'])
+                ->all();
+        }
+        
+        // Get available children (not yet assigned)
+        $user = $this->Authentication->getIdentity();
+        $availableChildrenQuery = $this->fetchTable('Children')->find()
+            ->where([
+                'Children.organization_id' => $user->organization_id,
+                'Children.is_active' => true,
+            ])
+            ->orderBy(['Children.name' => 'ASC']);
+        
+        if (!empty($assignedChildrenIds)) {
+            $availableChildrenQuery->where([
+                'Children.id NOT IN' => $assignedChildrenIds
+            ]);
+        }
+        
+        $availableChildren = $availableChildrenQuery->all();
+        
+        $this->set(compact('schedule', 'assignedChildren', 'availableChildren'));
+    }
+
+    /**
+     * Add child to schedule - Creates assignment
+     *
+     * @return \Cake\Http\Response|null Redirects back
+     */
+    public function assignChild()
+    {
+        $this->request->allowMethod(['post']);
+        
+        $data = $this->request->getData();
+        $scheduleId = $data['schedule_id'];
+        $childId = $data['child_id'];
+        
+        // Get or create first schedule day for this schedule
+        $scheduleDaysTable = $this->fetchTable('ScheduleDays');
+        $scheduleDay = $scheduleDaysTable->find()
+            ->where(['schedule_id' => $scheduleId])
+            ->first();
+        
+        if (!$scheduleDay) {
+            // Create default schedule day
+            $scheduleDay = $scheduleDaysTable->newEntity([
+                'schedule_id' => $scheduleId,
+                'title' => 'Default Day',
+                'position' => 1,
+                'capacity' => 9,
+            ]);
+            $scheduleDaysTable->save($scheduleDay);
+        }
+        
+        // Create assignment
+        $assignment = $this->fetchTable('Assignments')->newEntity([
+            'schedule_day_id' => $scheduleDay->id,
+            'child_id' => $childId,
+            'weight' => 1,
+            'source' => 'manual',
+        ]);
+        
+        if ($this->fetchTable('Assignments')->save($assignment)) {
+            $this->Flash->success(__('Child assigned to schedule.'));
+        } else {
+            $this->Flash->error(__('Could not assign child to schedule.'));
+        }
+        
+        return $this->redirect(['action' => 'manageChildren', $scheduleId]);
+    }
+
+    /**
+     * Remove child from schedule - Deletes assignment
+     *
+     * @return \Cake\Http\Response|null Redirects back
+     */
+    public function removeChild()
+    {
+        $this->request->allowMethod(['post']);
+        
+        $data = $this->request->getData();
+        $scheduleId = $data['schedule_id'];
+        $childId = $data['child_id'];
+        
+        // Find and delete assignment
+        $assignment = $this->fetchTable('Assignments')->find()
+            ->innerJoinWith('ScheduleDays')
+            ->where([
+                'ScheduleDays.schedule_id' => $scheduleId,
+                'Assignments.child_id' => $childId,
+            ])
+            ->first();
+        
+        if ($assignment && $this->fetchTable('Assignments')->delete($assignment)) {
+            $this->Flash->success(__('Child removed from schedule.'));
+        } else {
+            $this->Flash->error(__('Could not remove child from schedule.'));
+        }
+        
+        return $this->redirect(['action' => 'manageChildren', $scheduleId]);
+    }
 }

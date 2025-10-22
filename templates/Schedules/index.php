@@ -31,6 +31,7 @@ $this->assign('title', __('Schedules'));
                     <td><?= __($schedule->state) ?></td>
                     <td><?= h($schedule->created) ?></td>
                     <td class="actions">
+                        <?= $this->Html->link(__('Manage Children'), ['action' => 'manageChildren', $schedule->id], ['class' => 'button']) ?>
                         <?= $this->Html->link(__('View'), ['action' => 'view', $schedule->id]) ?>
                         <?= $this->Html->link(__('Edit'), ['action' => 'edit', $schedule->id]) ?>
                         <?= $this->Form->postLink(__('Delete'), ['action' => 'delete', $schedule->id], ['confirm' => __('Are you sure you want to delete # {0}?', $schedule->id)]) ?>
