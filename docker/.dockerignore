@@ -1,0 +1,15 @@
+.git
+.github
+node_modules
+vendor
+tmp/*
+!tmp/.gitkeep
+logs/*
+!logs/.gitkeep
+.env
+.env.*
+config/app_local.php
+*.md
+dev/
+tests/
+phpunit.xml.dist

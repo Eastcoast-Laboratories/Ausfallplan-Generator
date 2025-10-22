@@ -16,7 +16,7 @@
 - [ ] Create `docker/php/php.ini` (PHP settings)
 - [ ] Create `docker/mysql/init.sql` (DB initialization)
 - [ ] Add `/etc/hosts` entry: `127.0.0.1 ausfallplan-local`
-- [ ] Test: `docker-compose up -d` works
+- [ ] Test: `docker compose up -d` works
 
 ### 1.2 CakePHP Skeleton
 - [ ] Run: `composer create-project cakephp/app app`
@@ -453,15 +453,15 @@
 ### Local Testing
 ```bash
 # Start Docker environment
-docker-compose up -d
+docker compose up -d
 
 # Run migrations
-docker-compose exec app bin/cake migrations migrate
-docker-compose exec app bin/cake migrations seed
+docker compose exec app bin/cake migrations migrate
+docker compose exec app bin/cake migrations seed
 
 # Run tests
-docker-compose exec app composer test
-docker-compose exec app composer phpstan
+docker compose exec app composer test
+docker compose exec app composer phpstan
 
 # Manual testing
 open http://ausfallplan-local

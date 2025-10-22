@@ -1,0 +1,22 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: ausfallplan-generator
+    ports:
+      - "8080:80"
+    volumes:
+      - ../tmp:/var/www/html/tmp
+      - ../logs:/var/www/html/logs
+    environment:
+      - DEBUG=true
+      - SECURITY_SALT=your-secret-salt-change-this-in-production
+      - DATABASE_URL=sqlite:////var/www/html/tmp/app.sqlite
+    networks:
+      - ausfallplan-network
+    restart: unless-stopped
+
+networks:
+  ausfallplan-network:
+    driver: bridge

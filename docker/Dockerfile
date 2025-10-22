@@ -1,0 +1,69 @@
+FROM ubuntu:24.04
+
+# Install Apache and PHP 8.4 with all extensions
+RUN apt-get update && apt-get install -y \
+    software-properties-common \
+    && add-apt-repository ppa:ondrej/php -y \
+    && apt-get update && apt-get install -y \
+    apache2 \
+    php8.4 \
+    libapache2-mod-php8.4 \
+    php8.4-sqlite3 \
+    php8.4-mbstring \
+    php8.4-gd \
+    php8.4-intl \
+    php8.4-bcmath \
+    php8.4-xml \
+    php8.4-curl \
+    php8.4-zip \
+    git \
+    curl \
+    zip \
+    unzip \
+    sqlite3 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite php8.4
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Copy application files (context is parent directory)
+COPY . /var/www/html
+
+# Install PHP dependencies (with dev for local development)
+RUN composer install --optimize-autoloader --no-interaction
+
+# Create necessary directories with proper permissions
+RUN mkdir -p tmp/cache/models tmp/cache/persistent tmp/cache/views tmp/sessions tmp/tests logs \
+    && chmod -R 775 tmp logs \
+    && chown -R www-data:www-data tmp logs
+
+# Copy Apache vhost configuration
+COPY docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
+
+# Enable the site
+RUN a2ensite 000-default
+
+# Configure Apache environment variables
+ENV APACHE_RUN_USER=www-data \
+    APACHE_RUN_GROUP=www-data \
+    APACHE_LOG_DIR=/var/log/apache2 \
+    APACHE_PID_FILE=/var/run/apache2.pid \
+    APACHE_LOCK_DIR=/var/lock/apache2
+
+# Create app_local.php if it doesn't exist
+RUN if [ ! -f config/app_local.php ]; then \
+    cp config/app_local.example.php config/app_local.php && \
+    sed -i "s/'url' => env('DATABASE_URL', null)/'url' => 'sqlite:\/\/\/var\/www\/html\/tmp\/app.sqlite'/" config/app_local.php; \
+    fi
+
+# Expose port 80
+EXPOSE 80
+
+# Start Apache in foreground
+CMD ["apachectl", "-D", "FOREGROUND"]
