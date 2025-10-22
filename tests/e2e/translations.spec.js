@@ -31,7 +31,7 @@ test.describe('German Translation Tests', () => {
     // Check for German translations
     const dashboardText = sidebar.locator('text=Übersicht');
     const childrenText = sidebar.locator('text=Kinder');
-    const schedulesText = sidebar.locator('text=Dienstpläne');
+    const schedulesText = sidebar.locator('text=Ausfallpläne');
     
     // Log what we actually see
     const sidebarContent = await sidebar.textContent();
