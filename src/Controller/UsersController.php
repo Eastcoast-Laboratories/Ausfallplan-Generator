@@ -82,6 +82,61 @@ class UsersController extends AppController
     }
 
     /**
+     * Change language - Switch between German and English
+     *
+     * @param string|null $lang Language code (de or en)
+     * @return \Cake\Http\Response|null|void
+     */
+    public function changeLanguage(?string $lang = null)
+    {
+        $validLanguages = ['de', 'en'];
+        
+        if ($lang && in_array($lang, $validLanguages)) {
+            $this->request->getSession()->write('Config.language', $lang);
+            $this->Flash->success(__('Language changed to {0}', $lang === 'de' ? 'Deutsch' : 'English'));
+        }
+        
+        // Redirect back to where we came from
+        return $this->redirect($this->referer(['controller' => 'Dashboard', 'action' => 'index']));
+    }
+
+    /**
+     * Profile settings - Edit user details
+     *
+     * @return \Cake\Http\Response|null|void
+     */
+    public function profile()
+    {
+        $user = $this->Authentication->getIdentity();
+        $userEntity = $this->Users->get($user->id);
+
+        if ($this->request->is(['patch', 'post', 'put'])) {
+            $userEntity = $this->Users->patchEntity($userEntity, $this->request->getData());
+            
+            // Don't allow role change through profile
+            unset($userEntity->role);
+            
+            if ($this->Users->save($userEntity)) {
+                $this->Flash->success(__('Your profile has been updated.'));
+                return $this->redirect(['action' => 'profile']);
+            }
+            $this->Flash->error(__('Unable to update your profile.'));
+        }
+
+        $this->set(compact('userEntity'));
+    }
+
+    /**
+     * Account settings - Same as profile for now
+     *
+     * @return \Cake\Http\Response|null|void
+     */
+    public function account()
+    {
+        return $this->redirect(['action' => 'profile']);
+    }
+
+    /**
      * beforeFilter callback - Allow public access to register and login
      *
      * @param \Cake\Event\EventInterface $event Event
