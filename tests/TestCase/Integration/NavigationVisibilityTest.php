@@ -25,6 +25,9 @@ class NavigationVisibilityTest extends TestCase
         parent::setUp();
         $this->enableCsrfToken();
         $this->enableSecurityToken();
+        
+        // Set English locale for tests
+        \Cake\I18n\I18n::setLocale('en_US');
     }
 
     /**
