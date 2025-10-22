@@ -28,7 +28,7 @@ $this->assign('title', __('Children'));
                     <td><?= h($child->name) ?></td>
                     <td><?= $child->is_active ? __('Active') : __('Inactive') ?></td>
                     <td><?= $child->is_integrative ? __('Yes') : __('No') ?></td>
-                    <td><?= $child->has('sibling_group') ? h($child->sibling_group->name) : '' ?></td>
+                    <td><?= $child->has('sibling_group') && $child->sibling_group ? h($child->sibling_group->name) : '' ?></td>
                     <td><?= h($child->created) ?></td>
                     <td class="actions">
                         <?= $this->Html->link(__('View'), ['action' => 'view', $child->id]) ?>
