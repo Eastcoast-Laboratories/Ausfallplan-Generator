@@ -133,18 +133,26 @@ class ReportServiceTest extends TestCase
 
     /**
      * Test always at end children are identified
+     * "Immer am Ende" shows children assigned to schedule but NOT on waitlist
      */
     public function testAlwaysAtEndIdentification(): void
     {
-        $scheduleId = $this->createTestScheduleWithHighWeightChildren();
+        $scheduleId = $this->createTestScheduleWithWaitlist();
         
         $reportData = $this->service->generateReportData($scheduleId, 1);
 
-        // Should have children with weight >= 10 in alwaysAtEnd
+        // Should have children that are assigned but NOT on waitlist
         $this->assertNotEmpty($reportData['alwaysAtEnd']);
         
+        // Get waitlist child IDs
+        $waitlistChildIds = [];
+        foreach ($reportData['waitlist'] as $entry) {
+            $waitlistChildIds[] = $entry->child_id;
+        }
+        
+        // All children in "alwaysAtEnd" should NOT be on waitlist
         foreach ($reportData['alwaysAtEnd'] as $child) {
-            $this->assertGreaterThanOrEqual(10, $child['weight']);
+            $this->assertNotContains($child['child']->id, $waitlistChildIds);
         }
     }
 
@@ -251,9 +259,10 @@ class ReportServiceTest extends TestCase
     }
 
     /**
-     * Helper: Create test schedule with high weight children
+     * Helper: Create test schedule with waitlist
+     * Some children are assigned AND on waitlist, others are only assigned
      */
-    private function createTestScheduleWithHighWeightChildren(): int
+    private function createTestScheduleWithWaitlist(): int
     {
         $scheduleId = $this->createTestSchedule();
         
@@ -268,25 +277,41 @@ class ReportServiceTest extends TestCase
         
         $childrenTable = $this->getTableLocator()->get('Children');
         $assignmentsTable = $this->getTableLocator()->get('Assignments');
+        $waitlistTable = $this->getTableLocator()->get('WaitlistEntries');
         
-        // Create 2 high-weight children
-        foreach ([['Noah', 15], ['Amadeus', 12]] as $childData) {
+        // Create 4 children
+        $childIds = [];
+        foreach (['Anna', 'Ben', 'Clara', 'David'] as $name) {
             $child = $childrenTable->newEntity([
                 'organization_id' => 1,
-                'name' => $childData[0],
+                'name' => $name,
                 'is_integrative' => false,
                 'is_active' => true,
             ]);
             $childrenTable->save($child);
+            $childIds[] = $child->id;
             
+            // All children are assigned to schedule
             $assignment = $assignmentsTable->newEntity([
                 'schedule_day_id' => $scheduleDay->id,
                 'child_id' => $child->id,
-                'weight' => $childData[1],
+                'weight' => 5,
                 'source' => 'manual',
             ]);
             $assignmentsTable->save($assignment);
         }
+        
+        // But only first 2 children are on waitlist
+        foreach (array_slice($childIds, 0, 2) as $priority => $childId) {
+            $waitlistEntry = $waitlistTable->newEntity([
+                'schedule_id' => $scheduleId,
+                'child_id' => $childId,
+                'priority' => $priority + 1,
+            ]);
+            $waitlistTable->save($waitlistEntry);
+        }
+        
+        // So "alwaysAtEnd" should contain Clara and David (not on waitlist)
         
         return $scheduleId;
     }
