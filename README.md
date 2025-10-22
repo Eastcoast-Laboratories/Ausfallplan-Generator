@@ -82,6 +82,8 @@ bin/cake server
 
 ### Running Tests
 
+#### PHPUnit (Backend Tests)
+
 ```bash
 # Run all tests
 vendor/bin/phpunit
@@ -99,6 +101,50 @@ docker compose -f docker/docker-compose.yml exec app vendor/bin/phpunit tests/Te
 # Run with coverage (requires Xdebug)
 vendor/bin/phpunit --coverage-html tmp/coverage
 ```
+
+#### Playwright (E2E Browser Tests)
+
+The project includes end-to-end browser tests using Playwright for testing user interactions, navigation, and visual components.
+
+```bash
+# Install Playwright browsers (first time only)
+npx playwright install chromium
+
+# Run all E2E tests
+npm run test
+
+# Run specific test file
+npm run test:screenshots        # Navigation tests with screenshots
+npx playwright test tests/e2e/navigation.spec.js
+
+# Run tests with UI mode (interactive)
+npm run test:ui
+
+# Run tests in headed mode (see browser)
+npm run test:headed
+
+# Run specific browser
+npm run test:chromium
+npm run test:firefox
+npm run test:webkit
+
+# Debug mode
+npm run test:debug
+```
+
+**E2E Test Coverage:**
+- ✅ Navigation visibility (logged in vs public pages)
+- ✅ Mobile hamburger menu functionality
+- ✅ User dropdown and logout
+- ✅ Language switcher (DE/EN)
+- ✅ Registration flow (user not auto-logged in)
+- 🚧 Schedule creation workflow (in progress)
+
+Screenshots are saved to `screenshots/` directory (gitignored).
+
+**Test User Credentials:**
+- Email: `admin@example.com`
+- Password: `password123`
 
 ## Tech Stack
 
