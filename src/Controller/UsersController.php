@@ -58,7 +58,8 @@ class UsersController extends AppController
             $userEntity->last_login_at = date('Y-m-d H:i:s');
             $usersTable->save($userEntity);
             
-            $target = $this->Authentication->getLoginRedirect() ?? '/';
+            // Redirect to dashboard after successful login
+            $target = $this->Authentication->getLoginRedirect() ?? ['controller' => 'Dashboard', 'action' => 'index'];
             return $this->redirect($target);
         }
         
