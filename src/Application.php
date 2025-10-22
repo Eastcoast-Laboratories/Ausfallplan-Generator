@@ -62,7 +62,6 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
         // Load plugins
         $this->addPlugin('Authentication');
         $this->addPlugin('Authorization');
-        $this->addPlugin('Migrations');
         
         // Only load DebugKit in development mode
         if (Configure::read('debug')) {
