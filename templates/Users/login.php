@@ -12,11 +12,13 @@
         <?php
             echo $this->Form->control('email', [
                 'type' => 'email',
+                'label' => __('Email'),
                 'required' => true,
                 'placeholder' => 'email@example.com'
             ]);
             echo $this->Form->control('password', [
                 'type' => 'password',
+                'label' => __('Password'),
                 'required' => true
             ]);
         ?>
