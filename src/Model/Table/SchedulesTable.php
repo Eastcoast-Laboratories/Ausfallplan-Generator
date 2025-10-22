@@ -91,8 +91,7 @@ class SchedulesTable extends Table
 
         $validator
             ->date('ends_on')
-            ->requirePresence('ends_on', 'create')
-            ->notEmptyDate('ends_on');
+            ->allowEmptyDate('ends_on');
 
         $validator
             ->scalar('state')
