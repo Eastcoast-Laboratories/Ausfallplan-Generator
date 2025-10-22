@@ -24,6 +24,8 @@ return [
     'Inactive' => 'Inaktiv',
     'Yes' => 'Ja',
     'No' => 'Nein',
+    'New' => 'Neu',
+    'Add' => 'Hinzufügen',
     
     // Children
     'New Child' => 'Neues Kind',
