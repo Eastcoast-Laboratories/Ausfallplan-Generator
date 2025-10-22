@@ -14,6 +14,7 @@ use Cake\ORM\Entity;
  * @property \Cake\I18n\Date $starts_on
  * @property \Cake\I18n\Date $ends_on
  * @property string $state
+ * @property int|null $capacity_per_day
  * @property \Cake\I18n\DateTime $created
  * @property \Cake\I18n\DateTime $modified
  *
@@ -35,6 +36,7 @@ class Schedule extends Entity
         'starts_on' => true,
         'ends_on' => true,
         'state' => true,
+        'capacity_per_day' => true,
         'created' => true,
         'modified' => true,
         'organization' => true,

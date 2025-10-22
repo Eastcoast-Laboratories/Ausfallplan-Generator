@@ -62,6 +62,8 @@ return [
     'State' => 'Status',
     'Draft' => 'Entwurf',
     'Final' => 'Fertig',
+    'Max Children per Day' => 'Max. Kinder pro Tag',
+    'Maximum number of children that can be assigned per day' => 'Maximale Anzahl der Kinder, die pro Tag zugewiesen werden können',
     'The schedule has been created.' => 'Der Dienstplan wurde erstellt.',
     'The schedule has been saved.' => 'Der Dienstplan wurde gespeichert.',
     'The schedule could not be saved. Please try again.' => 'Der Dienstplan konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.',
