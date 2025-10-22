@@ -6,21 +6,18 @@ use Migrations\AbstractMigration;
 class AddDaysCountToSchedules extends AbstractMigration
 {
     /**
-     * Change Method.
-     *
-     * More information on this method is available here:
-     * https://book.cakephp.org/phinx/0/en/migrations.html#the-change-method
-     * @return void
+     * Migrate Up.
      */
-    public function change(): void
+    public function up(): void
     {
-        $table = $this->table('schedules');
-        $table->addColumn('days_count', 'integer', [
-            'default' => null,
-            'limit' => 11,
-            'null' => true,
-            'after' => 'capacity_per_day'
-        ]);
-        $table->update();
+        $this->execute('ALTER TABLE schedules ADD COLUMN days_count INTEGER NULL DEFAULT NULL');
+    }
+
+    /**
+     * Migrate Down.
+     */
+    public function down(): void
+    {
+        $this->execute('ALTER TABLE schedules DROP COLUMN days_count');
     }
 }
