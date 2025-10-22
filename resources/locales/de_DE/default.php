@@ -71,6 +71,11 @@ return [
     // Sibling Groups
     'Add Sibling Group' => 'Geschwistergruppe hinzufügen',
     
+    // Navigation & Links
+    'Back to Schedules' => 'Zurück zu Ausfallplänen',
+    'Manage Children' => 'Kinder verwalten',
+    'Change Language' => 'Sprache wechseln',
+    
     // Common
     'Submit' => 'Absenden',
     'Save' => 'Speichern',
