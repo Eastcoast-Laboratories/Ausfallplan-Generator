@@ -11,6 +11,8 @@
 - [ ] im Ausfallplan muss man festlegen können, wieviele zählkinder maximal pro tag dürfen  bei http://localhost:8080/schedules/edit/10 - man  muss im Ausfallplan bei edit  dort die kinder hinzufügen können 
 - [ ] die nachrücklisten müssen einem Ausfallplan zugeordnet werden
 - [ ] man darf in einer nachrückliste nur kinder auswählen, die in dem zugehörigen Ausfallplan liegen
+- [ ] man muss pro scedule noch festlegen können, wieviele tage man im Report generiert haben will, vorgeschlagen wird dabei die anzahl dem scedule zugeordneter  zählkinder (z.b. 18) 
+- [ ] bei scedule edit muss man analog zu der warteliste auch kinder zuordnen können mit einer join verknüpfung
 
 ## Fertiggestellt
 

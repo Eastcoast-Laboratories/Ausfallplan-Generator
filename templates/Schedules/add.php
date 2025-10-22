@@ -12,7 +12,12 @@ $this->assign('title', __('Create Schedule'));
         <?php
             echo $this->Form->control('title', ['required' => true]);
             echo $this->Form->control('starts_on', ['type' => 'date', 'required' => true]);
-            echo $this->Form->control('ends_on', ['type' => 'date', 'required' => true]);
+            echo $this->Form->control('ends_on', [
+                'type' => 'date',
+                'required' => false,
+                'empty' => true,
+                'help' => __('Leave empty for schedules that never end')
+            ]);
             echo $this->Form->control('capacity_per_day', [
                 'label' => __('Max Children per Day'),
                 'type' => 'number',
