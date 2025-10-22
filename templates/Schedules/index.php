@@ -28,7 +28,7 @@ $this->assign('title', __('Schedules'));
                     <td><?= h($schedule->title) ?></td>
                     <td><?= h($schedule->starts_on) ?></td>
                     <td><?= h($schedule->ends_on) ?></td>
-                    <td><?= h($schedule->state) ?></td>
+                    <td><?= __($schedule->state) ?></td>
                     <td><?= h($schedule->created) ?></td>
                     <td class="actions">
                         <?= $this->Html->link(__('View'), ['action' => 'view', $schedule->id]) ?>
