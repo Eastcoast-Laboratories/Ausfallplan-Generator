@@ -69,15 +69,62 @@ $this->disableAutoLayout();
         .btn-primary:hover {
             background: #5568d3;
         }
+        .header-nav {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-nav .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .header-nav .nav-links a {
+            margin-left: 1.5rem;
+            color: #333;
+            text-decoration: none;
+        }
+        .header-nav .nav-links a:hover {
+            color: #667eea;
+        }
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
     </style>
 </head>
 <body>
+    <nav class="header-nav">
+        <div class="logo">🌟 Ausfallplan-Generator</div>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#pricing">Preise</a>
+            <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'login']) ?>" class="btn-secondary">Login</a>
+            <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'register']) ?>" class="btn-primary">Registrieren</a>
+        </div>
+    </nav>
+
     <div class="hero">
         <div class="container">
             <h1>🌟 Ausfallplan-Generator</h1>
             <p>Einfache und faire Planung für Kitas und Kindergärten</p>
             <p>Verwalten Sie Kinder, erstellen Sie Zeitpläne und exportieren Sie wunderschöne PDFs</p>
-            <a href="#features" class="btn-primary">Mehr erfahren</a>
+            <div style="margin-top: 2rem;">
+                <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'register']) ?>" class="btn-primary" style="margin-right: 1rem;">Kostenlos registrieren</a>
+                <a href="#features" class="btn-secondary">Mehr erfahren</a>
+            </div>
         </div>
     </div>
 
@@ -145,7 +192,7 @@ $this->disableAutoLayout();
                             <li>PDF Export</li>
                             <li>Community Support</li>
                         </ul>
-                        <a href="#" class="btn-primary">Jetzt starten</a>
+                        <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'register']) ?>" class="btn-primary">Jetzt starten</a>
                     </div>
                 </div>
                 <div class="column">
@@ -180,11 +227,11 @@ $this->disableAutoLayout();
         </div>
     </div>
 
-    <div style="background: #667eea; color: white; padding: 2rem; text-align: center;">
+    <div id="pricing" style="background: #667eea; color: white; padding: 2rem; text-align: center;">
         <div class="container">
             <h3>Bereit anzufangen?</h3>
             <p>Erstellen Sie Ihren kostenlosen Account und probieren Sie es aus!</p>
-            <a href="#" class="btn-primary" style="background: white; color: #667eea;">Kostenlos registrieren</a>
+            <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'register']) ?>" class="btn-primary" style="background: white; color: #667eea;">Kostenlos registrieren</a>
         </div>
     </div>
 
