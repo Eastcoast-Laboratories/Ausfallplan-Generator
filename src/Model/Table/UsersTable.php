@@ -77,9 +77,32 @@ class UsersTable extends Table
         $validator
             ->scalar('role')
             ->maxLength('role', 20)
-            ->notEmptyString('role')
-            ->inList('role', ['admin', 'editor', 'viewer']);
+            ->allowEmptyString('role')  // Allow empty, will be filled with default
+            ->inList('role', ['admin', 'editor', 'viewer'], 'Invalid role', 'create');
+
+        // Add unique constraint for email per organization
+        $validator
+            ->add('email', 'unique', [
+                'rule' => 'validateUnique',
+                'provider' => 'table',
+                'message' => 'This email is already registered for this organization'
+            ]);
 
         return $validator;
+    }
+
+    /**
+     * Returns a rules checker object that will be used for validating
+     * application integrity.
+     *
+     * @param \Cake\ORM\RulesChecker $rules The rules object to be modified.
+     * @return \Cake\ORM\RulesChecker
+     */
+    public function buildRules(\Cake\ORM\RulesChecker $rules): \Cake\ORM\RulesChecker
+    {
+        $rules->add($rules->existsIn(['organization_id'], 'Organizations'), ['errorField' => 'organization_id']);
+        $rules->add($rules->isUnique(['email', 'organization_id'], 'This email is already registered for this organization'));
+
+        return $rules;
     }
 }

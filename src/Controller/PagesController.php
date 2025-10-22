@@ -32,6 +32,20 @@ use Cake\View\Exception\MissingTemplateException;
 class PagesController extends AppController
 {
     /**
+     * beforeFilter callback - Allow public access to all pages
+     *
+     * @param \Cake\Event\EventInterface $event Event
+     * @return \Cake\Http\Response|null|void
+     */
+    public function beforeFilter(\Cake\Event\EventInterface $event)
+    {
+        parent::beforeFilter($event);
+        
+        // Allow public access to all static pages
+        $this->Authentication->addUnauthenticatedActions(['display']);
+    }
+
+    /**
      * Displays a view
      *
      * @param string ...$path Path segments.

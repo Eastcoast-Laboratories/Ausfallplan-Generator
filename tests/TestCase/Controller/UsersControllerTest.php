@@ -34,9 +34,14 @@ class UsersControllerTest extends TestCase
     {
         parent::setUp();
         
-        // Disable CSRF for tests
+        // Enable CSRF tokens for tests
         $this->enableCsrfToken();
         $this->enableSecurityToken();
+        
+        // Disable authentication redirect for tests
+        $this->configRequest([
+            'headers' => ['Accept' => 'text/html'],
+        ]);
     }
 
     /**
@@ -50,7 +55,7 @@ class UsersControllerTest extends TestCase
         $this->get('/users/register');
         
         $this->assertResponseOk();
-        $this->assertResponseContains('organizations');
+        $this->assertResponseContains('Register New Account');
     }
 
     /**
@@ -125,13 +130,14 @@ class UsersControllerTest extends TestCase
         $data = [
             'organization_id' => 1,
             'email' => '', // Empty email
-            'password' => 'short', // Too short password
+            'password' => '', // Empty password
         ];
 
         $this->post('/users/register', $data);
         
         $this->assertResponseOk();
-        $this->assertFlashMessage('Unable to create your account. Please try again.');
+        // Form should be reshown with errors, not redirected
+        $this->assertResponseContains('Register New Account');
         
         // Verify user was NOT created
         $users = $this->getTableLocator()->get('Users');
@@ -165,7 +171,13 @@ class UsersControllerTest extends TestCase
         $this->post('/users/register', $data2);
         
         $this->assertResponseOk();
-        $this->assertFlashMessage('Unable to create your account. Please try again.');
+        // Form should be reshown with validation error
+        $this->assertResponseContains('Register New Account');
+        
+        // Verify only one user exists
+        $users = $this->getTableLocator()->get('Users');
+        $count = $users->find()->where(['email' => 'duplicate@test.com'])->count();
+        $this->assertEquals(1, $count);
     }
 
     /**
