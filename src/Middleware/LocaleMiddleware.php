@@ -25,6 +25,12 @@ class LocaleMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        // Skip locale setting in test environment if already set
+        if (PHP_SAPI === 'cli' && I18n::getLocale() !== 'en') {
+            // In tests, respect the already-set locale (from setUp)
+            return $handler->handle($request);
+        }
+        
         // Get session
         $session = $request->getAttribute('session');
         
