@@ -11,7 +11,7 @@ return [
     'Reports' => 'Berichte',
     'Number of Days' => 'Anzahl Tage',
     'Number of days for the schedule (default: number of assigned children)' => 'Anzahl der Tage für den Ausfallplan (Vorschlag: Anzahl zugeordneter Kinder)',
-    'Generate Report' => 'Ausfallplan generieren',
+    'Generate List' => 'Ausfallplan generieren',
     'Report generation for {0} days is not yet implemented.' => 'Report-Generierung für {0} Tage ist noch nicht implementiert.',
     'Nachrückliste' => 'Nachrückliste',
     'Immer am Ende' => 'Immer am Ende',
