@@ -147,8 +147,8 @@ $this->disableAutoLayout();
                 </div>
                 <div class="column">
                     <div class="feature-card">
-                        <h3>📋 Wartelisten</h3>
-                        <p>Prioritätsbasierte Wartelisten mit fairem Rotationssystem. Füllen Sie freie Plätze automatisch.</p>
+                        <h3>📋 Nachrücklisten</h3>
+                        <p>Prioritätsbasierte Nachrücklisten mit fairem Rotationssystem. Füllen Sie freie Plätze automatisch.</p>
                     </div>
                 </div>
             </div>
@@ -201,7 +201,7 @@ $this->disableAutoLayout();
                         <div class="price">€29/Monat</div>
                         <ul style="text-align: left;">
                             <li>Unbegrenzte Pläne</li>
-                            <li>Prioritäts-Warteliste</li>
+                            <li>Prioritäts-Nachrückliste</li>
                             <li>CSV Import</li>
                             <li>Custom PDF Themes</li>
                             <li>Priority Support</li>

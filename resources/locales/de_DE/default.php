@@ -79,12 +79,12 @@ return [
     'Change Language' => 'Sprache wechseln',
     
     // Waitlist
-    'Children on Waitlist' => 'Kinder auf der Warteliste',
+    'Children on Waitlist' => 'Kinder auf der Nachrückliste',
     'Drag to reorder' => 'Ziehen zum Sortieren',
-    'Child removed from waitlist.' => 'Kind von der Warteliste entfernt.',
+    'Child removed from waitlist.' => 'Kind von der Nachrückliste entfernt.',
     'Select Schedule' => 'Ausfallplan wählen',
     '-- Select Schedule --' => '-- Ausfallplan wählen --',
-    'Could not remove child from waitlist.' => 'Kind konnte nicht von der Warteliste entfernt werden.',
+    'Could not remove child from waitlist.' => 'Kind konnte nicht von der Nachrückliste entfernt werden.',
     
     // Common
     'Submit' => 'Absenden',
@@ -173,7 +173,7 @@ return [
     'Recent Activity' => 'Letzte Aktivitäten',
     'Total Schedules' => 'Ausfallpläne gesamt',
     'Active Schedules' => 'Aktive Ausfallpläne',
-    'Waitlist Entries' => 'Wartelisten-Einträge',
+    'Waitlist Entries' => 'Nachrücklisten-Einträge',
     'Create Schedule' => 'Ausfallplan erstellen',
     'Import CSV' => 'CSV importieren',
     'No recent activity to display.' => 'Keine aktuellen Aktivitäten vorhanden.',
@@ -185,18 +185,18 @@ return [
     'Are you sure?' => 'Sind Sie sicher?',
     
     // Waitlist
-    'Waitlist' => 'Warteliste',
-    'Add to Waitlist' => 'Zur Warteliste hinzufügen',
+    'Waitlist' => 'Nachrückliste',
+    'Add to Waitlist' => 'Zur Nachrückliste hinzufügen',
     'Priority' => 'Priorität',
     'Position' => 'Position',
-    'Remove from Waitlist' => 'Von Warteliste entfernen',
+    'Remove from Waitlist' => 'Von Nachrückliste entfernen',
     'Move Up' => 'Nach oben',
     'Move Down' => 'Nach unten',
     'Drag to reorder' => 'Ziehen zum Sortieren',
-    'No children on waitlist.' => 'Keine Kinder auf der Warteliste.',
-    'All children are on the waitlist.' => 'Alle Kinder sind auf der Warteliste.',
+    'No children on waitlist.' => 'Keine Kinder auf der Nachrückliste.',
+    'All children are on the waitlist.' => 'Alle Kinder sind auf der Nachrückliste.',
     'Available Children' => 'Verfügbare Kinder',
-    'Children on Waitlist' => 'Kinder auf der Warteliste',
+    'Children on Waitlist' => 'Kinder auf der Nachrückliste',
     
     // Errors & Validation
     'This field is required' => 'Dieses Feld ist erforderlich',
