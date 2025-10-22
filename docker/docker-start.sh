@@ -57,6 +57,12 @@ echo ""
 echo "⏳ Waiting for container to be ready..."
 sleep 3
 
+# Fix permissions for logs and tmp (required for volume mounts)
+echo ""
+echo "🔧 Fixing permissions for logs and tmp directories..."
+$DOCKER_COMPOSE -f docker/docker-compose.yml exec -T app chown -R www-data:www-data /var/www/html/logs /var/www/html/tmp
+$DOCKER_COMPOSE -f docker/docker-compose.yml exec -T app chmod -R 775 /var/www/html/logs /var/www/html/tmp
+
 # Run migrations
 echo ""
 echo "🗄️  Running database migrations..."
