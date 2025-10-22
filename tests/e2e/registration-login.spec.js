@@ -35,11 +35,29 @@ test.describe('Registration and Login Flow', () => {
     // Step 3: Submit registration form
     await page.click('button[type="submit"]');
     
-    // Wait for redirect (either to login or dashboard)
-    await page.waitForURL(/\/(users\/login|dashboard)/, { timeout: 10000 });
+    // Wait a bit for processing
+    await page.waitForTimeout(2000);
+    
+    // Check if there are any error messages
+    const bodyContent = await page.textContent('body');
+    console.log('📄 Page after submit (first 500 chars):', bodyContent.substring(0, 500));
+    
+    // Check for validation errors
+    if (bodyContent.includes('error') || bodyContent.includes('Error') || 
+        bodyContent.includes('Fehler') || bodyContent.includes('required')) {
+      await page.screenshot({ 
+        path: `screenshots/registration-validation-error-${timestamp}.png`,
+        fullPage: true 
+      });
+      console.log('⚠️  Possible validation error detected!');
+    }
+    
+    // Registration was successful - check for success message
+    await expect(page.locator('body')).toContainText('Your account has been created', { timeout: 5000 });
+    console.log('✅ Registration successful! Account created.');
     
     const currentUrl = page.url();
-    console.log(`✅ Redirected to: ${currentUrl}`);
+    console.log(`📍 Current URL: ${currentUrl}`);
     
     // Take screenshot after registration
     await page.screenshot({ 
@@ -47,11 +65,10 @@ test.describe('Registration and Login Flow', () => {
       fullPage: true 
     });
     
-    // Step 4: If we're not on login page, go there
-    if (!currentUrl.includes('/users/login')) {
-      console.log('⚠️  Not on login page, navigating there...');
-      await page.goto('/users/login');
-    }
+    // Step 4: Navigate to login page (explicit navigation to ensure clean state)
+    console.log('🔄 Navigating to login page...');
+    await page.goto('/users/login');
+    await page.waitForLoadState('networkidle');
     
     // Step 5: Login with the newly created user
     console.log(`🔐 Attempting to login with: ${testEmail}`);
