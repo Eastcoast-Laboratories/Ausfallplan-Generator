@@ -28,10 +28,10 @@
   * - optional: Do not throw an exception if the plugin is not found. Default false.
   */
 return [
-    // DebugKit is loaded in Application.php now
+    // DebugKit is loaded in Application.php now (with conditional debug check)
     // 'DebugKit' => ['onlyDebug' => true],
     'Bake' => ['onlyCli' => true, 'optional' => true],
-    // Migrations is loaded in bootstrap.php now
-    // 'Migrations' => ['onlyCli' => true],
+    'Migrations' => ['onlyCli' => true],
+    // Authentication and Authorization are loaded in Application.php
     // Additional plugins here
 ];
