@@ -239,6 +239,21 @@ msgstr "Keine aktuellen Aktivitäten vorhanden."
 msgid "Start by adding children or creating a schedule."
 msgstr "Beginnen Sie mit dem Hinzufügen von Kindern oder erstellen Sie einen Dienstplan."
 
+msgid "No children in this sibling group."
+msgstr "Keine Kinder in dieser Geschwistergruppe."
+
+msgid "List Children"
+msgstr "Kinder auflisten"
+
+msgid "List Sibling Groups"
+msgstr "Geschwistergruppen auflisten"
+
+msgid "None"
+msgstr "Keine"
+
+msgid "Are you sure?"
+msgstr "Sind Sie sicher?"
+
 # Errors & Validation
 msgid "This field is required"
 msgstr "Dieses Feld ist erforderlich"
