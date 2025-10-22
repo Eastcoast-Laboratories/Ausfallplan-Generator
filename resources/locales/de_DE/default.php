@@ -4,6 +4,7 @@ return [
     'Dashboard' => 'Übersicht',
     'Children' => 'Kinder',
     'Sibling Groups' => 'Geschwistergruppen',
+    'Ausfallplan' => 'Ausfallplan',
     'Schedules' => 'Ausfallpläne',
     'Waitlist' => 'Warteliste',
     'Reports' => 'Berichte',
