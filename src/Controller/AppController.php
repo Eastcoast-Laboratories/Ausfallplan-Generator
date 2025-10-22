@@ -50,4 +50,21 @@ class AppController extends Controller
          */
         //$this->loadComponent('FormProtection');
     }
+
+    /**
+     * beforeFilter callback - Set layout based on authentication
+     *
+     * @param \Cake\Event\EventInterface $event Event
+     * @return \Cake\Http\Response|null|void
+     */
+    public function beforeFilter(\Cake\Event\EventInterface $event)
+    {
+        parent::beforeFilter($event);
+        
+        // Use authenticated layout for logged-in users
+        $result = $this->Authentication->getResult();
+        if ($result && $result->isValid()) {
+            $this->viewBuilder()->setLayout('authenticated');
+        }
+    }
 }
