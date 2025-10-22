@@ -111,10 +111,25 @@ class UsersController extends AppController
         $userEntity = $this->Users->get($user->id);
 
         if ($this->request->is(['patch', 'post', 'put'])) {
-            $userEntity = $this->Users->patchEntity($userEntity, $this->request->getData());
+            $data = $this->request->getData();
             
-            // Don't allow role change through profile
-            unset($userEntity->role);
+            // Handle password change
+            if (!empty($data['new_password'])) {
+                if ($data['new_password'] !== $data['confirm_password']) {
+                    $this->Flash->error(__('Passwords do not match.'));
+                    $this->set(compact('userEntity'));
+                    return;
+                }
+                $data['password'] = $data['new_password'];
+            }
+            
+            // Remove password-related fields from data
+            unset($data['new_password'], $data['confirm_password']);
+            
+            // Don't allow role or organization_id change through profile
+            unset($data['role'], $data['organization_id']);
+            
+            $userEntity = $this->Users->patchEntity($userEntity, $data);
             
             if ($this->Users->save($userEntity)) {
                 $this->Flash->success(__('Your profile has been updated.'));

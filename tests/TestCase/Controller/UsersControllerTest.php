@@ -236,4 +236,163 @@ class UsersControllerTest extends TestCase
         $this->assertResponseNotContains('SecurePassword123!');
         $this->assertResponseNotContains('$2y$'); // No password hash in response either
     }
+
+    /**
+     * Test login page loads
+     *
+     * @return void
+     * @uses \App\Controller\UsersController::login()
+     */
+    public function testLoginPageLoads(): void
+    {
+        $this->get('/users/login');
+        
+        $this->assertResponseOk();
+        $this->assertResponseContains('Login');
+    }
+
+    /**
+     * Test profile update email
+     *
+     * @return void
+     * @uses \App\Controller\UsersController::profile()
+     */
+    public function testProfileUpdateEmail(): void
+    {
+        // Create and login as test user
+        $users = $this->getTableLocator()->get('Users');
+        $user = $users->newEntity([
+            'organization_id' => 1,
+            'email' => 'profile@test.com',
+            'password' => 'password123',
+            'role' => 'viewer',
+        ]);
+        $users->save($user);
+
+        // Simulate logged in user
+        $this->session(['Auth' => $user]);
+
+        // Update email
+        $this->post('/users/profile', [
+            'email' => 'newemail@test.com',
+        ]);
+
+        $this->assertResponseSuccess();
+        $this->assertFlashMessage('Your profile has been updated.');
+        
+        // Verify email was updated
+        $updatedUser = $users->get($user->id);
+        $this->assertEquals('newemail@test.com', $updatedUser->email);
+    }
+
+    /**
+     * Test profile password change
+     *
+     * @return void
+     * @uses \App\Controller\UsersController::profile()
+     */
+    public function testProfileChangePassword(): void
+    {
+        // Create and login as test user
+        $users = $this->getTableLocator()->get('Users');
+        $user = $users->newEntity([
+            'organization_id' => 1,
+            'email' => 'changepass@test.com',
+            'password' => 'oldpassword123',
+            'role' => 'viewer',
+        ]);
+        $users->save($user);
+        $oldPasswordHash = $user->password;
+
+        // Simulate logged in user
+        $this->session(['Auth' => $user]);
+
+        // Change password
+        $this->post('/users/profile', [
+            'email' => 'changepass@test.com',
+            'new_password' => 'newpassword123',
+            'confirm_password' => 'newpassword123',
+        ]);
+
+        $this->assertResponseSuccess();
+        $this->assertFlashMessage('Your profile has been updated.');
+        
+        // Verify password was changed
+        $updatedUser = $users->get($user->id);
+        $this->assertNotEquals($oldPasswordHash, $updatedUser->password);
+        
+        // Verify new password works
+        $hasher = new \Authentication\PasswordHasher\DefaultPasswordHasher();
+        $this->assertTrue($hasher->check('newpassword123', $updatedUser->password));
+    }
+
+    /**
+     * Test profile password mismatch
+     *
+     * @return void
+     * @uses \App\Controller\UsersController::profile()
+     */
+    public function testProfilePasswordMismatch(): void
+    {
+        // Create and login as test user
+        $users = $this->getTableLocator()->get('Users');
+        $user = $users->newEntity([
+            'organization_id' => 1,
+            'email' => 'mismatch@test.com',
+            'password' => 'oldpassword123',
+            'role' => 'viewer',
+        ]);
+        $users->save($user);
+        $oldPasswordHash = $user->password;
+
+        // Simulate logged in user
+        $this->session(['Auth' => $user]);
+
+        // Try to change password with mismatch
+        $this->post('/users/profile', [
+            'email' => 'mismatch@test.com',
+            'new_password' => 'newpassword123',
+            'confirm_password' => 'differentpassword',
+        ]);
+
+        $this->assertResponseOk();
+        
+        // Verify password was NOT changed
+        $updatedUser = $users->get($user->id);
+        $this->assertEquals($oldPasswordHash, $updatedUser->password);
+    }
+
+    /**
+     * Test profile cannot change role
+     *
+     * @return void
+     * @uses \App\Controller\UsersController::profile()
+     */
+    public function testProfileCannotChangeRole(): void
+    {
+        // Create and login as test user
+        $users = $this->getTableLocator()->get('Users');
+        $user = $users->newEntity([
+            'organization_id' => 1,
+            'email' => 'norole@test.com',
+            'password' => 'password123',
+            'role' => 'viewer',
+        ]);
+        $users->save($user);
+
+        // Simulate logged in user
+        $this->session(['Auth' => $user]);
+
+        // Try to change role
+        $this->post('/users/profile', [
+            'email' => 'norole@test.com',
+            'role' => 'admin',
+        ]);
+
+        $this->assertResponseSuccess();
+        
+        // Verify role was NOT changed
+        $updatedUser = $users->get($user->id);
+        $this->assertEquals('viewer', $updatedUser->role);
+    }
 }
