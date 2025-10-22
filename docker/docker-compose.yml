@@ -12,6 +12,9 @@ services:
       - ../src:/var/www/html/src
       - ../tests:/var/www/html/tests
       - ../templates:/var/www/html/templates
+      - ../resources:/var/www/html/resources
+      - ../config:/var/www/html/config
+      - ../webroot:/var/www/html/webroot
     environment:
       - DEBUG=true
       - SECURITY_SALT=your-secret-salt-change-this-in-production
