@@ -7,7 +7,7 @@
 - [ ] die navigation muss einen logout button oben rechts anzeigen, wenn man eingeloggt ist und den usernamen in einem kreis
 - [ ] eine möglichkeit seine email und sein passwort zu öndern
 - [ ] die navigation links einbauen mit wenn kleiner als 600px als hamburger umschalten
-- [ ] Dienstplan (Schedule) umbenennen in Ausfallplan, (entsprechend in englisch)
+- [x] Dienstplan (Schedule) umbenennen in Ausfallplan, (entsprechend in englisch) - ✅ 22.10. 18:55
 - [ ] im Ausfallplan wieviele zählkinder maximal pro tag dürfen wird noch nciht korrekt gespeichert. baue einen unittest, der die anzahl der zählkinder speichert und prüft ob sie beim erneuten editieren angezeigt werden
 - [ ] die nachrücklisten müssen einem Ausfallplan zugeordnet werden
 - [ ] man darf in einer nachrückliste nur kinder auswählen, die in dem zugehörigen Ausfallplan liegen
