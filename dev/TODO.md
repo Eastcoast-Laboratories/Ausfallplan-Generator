@@ -13,6 +13,18 @@
 - [ ] man darf in einer nachrückliste nur kinder auswählen, die in dem zugehörigen Ausfallplan liegen
 - [ ] man muss pro scedule noch festlegen können, wieviele tage man im Report generiert haben will, vorgeschlagen wird dabei die anzahl dem scedule zugeordneter  zählkinder (z.b. 18) 
 - [ ] bei scedule edit muss man analog zu der warteliste auch kinder zuordnen können mit einer join verknüpfung
+- im ausfallplan muss man noch angeben können, über wieviele tage der plan gehen soll, als vorschlag wird die anzahl zählkinder angeboten, die dem plan zugeordnet sind
+
+- Berichte kann entfernt werden aus der navígation, stattdessen muss in jedem ausflallplan in der zeile ein Buton "Ausfallplan generieren" eingebaut werden, der dann den plan erstellt, in der artwie dev/Kindergarten-Ausfallplan_melsdorfer Str. ab 2025-10.png
+
+- Nächster Schritt:
+Die eigentliche PDF/PNG-Generierung wie im Beispiel (dev/Kindergarten-Ausfallplan_melsdorfer Str. ab 2025-10.png) muss noch implementiert werden:
+
+- Tages-Boxen mit Tiernamen
+- Kinder-Listen pro Tag
+- Nachrückliste rechts
+- "Immer am Ende" Sektion
+
 
 ## Fertiggestellt
 
