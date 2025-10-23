@@ -124,7 +124,7 @@ class ReportService
     {
         $days = [];
         $waitlistIndex = 0; // Current position in waitlist (round-robin)
-        $currentDayChildren = []; // Children currently assigned to days
+        $skippedChildren = []; // Children skipped because they didn't fit (integrative)
 
         for ($i = 0; $i < $daysCount; $i++) {
             $animalName = self::ANIMAL_NAMES[$i % count(self::ANIMAL_NAMES)];
@@ -132,6 +132,23 @@ class ReportService
             // Fill day with children from waitlist (round-robin), respecting capacity
             $dayChildren = [];
             $countingChildrenSum = 0;
+            
+            // First, try to add skipped children from previous day
+            $remainingSkipped = [];
+            foreach ($skippedChildren as $skippedChild) {
+                $countingValue = $skippedChild['is_integrative'] ? 2 : 1;
+                
+                if ($countingChildrenSum + $countingValue <= $capacity) {
+                    $dayChildren[] = $skippedChild;
+                    $countingChildrenSum += $countingValue;
+                } else {
+                    // Still doesn't fit, keep for next day
+                    $remainingSkipped[] = $skippedChild;
+                }
+            }
+            $skippedChildren = $remainingSkipped;
+            
+            // Now continue with round-robin
             $attempts = 0;
             $maxAttempts = count($children) * 2; // Prevent infinite loop
             
@@ -142,7 +159,6 @@ class ReportService
                 
                 // Get next child from waitlist (round-robin)
                 $nextChild = $children[$waitlistIndex % count($children)];
-                $waitlistIndex++;
                 $attempts++;
                 
                 // Check if child is already in this day
@@ -155,6 +171,7 @@ class ReportService
                 }
                 
                 if ($alreadyInDay) {
+                    $waitlistIndex++; // Move to next child
                     continue;
                 }
                 
@@ -165,7 +182,13 @@ class ReportService
                 if ($countingChildrenSum + $countingValue <= $capacity) {
                     $dayChildren[] = $nextChild;
                     $countingChildrenSum += $countingValue;
-                    $currentDayChildren[] = $nextChild;
+                    $waitlistIndex++; // Child added, move to next
+                } else {
+                    // Child doesn't fit - if integrative, skip for next day
+                    if ($nextChild['is_integrative']) {
+                        $skippedChildren[] = $nextChild;
+                    }
+                    $waitlistIndex++; // Move to next child
                 }
             }
             
@@ -193,13 +216,6 @@ class ReportService
                 'leavingChild' => $leavingChild,
                 'countingChildrenSum' => $countingChildrenSum,
             ];
-
-            // Remove leaving child from current pool for next days
-            if ($leavingChild) {
-                $currentDayChildren = array_filter($currentDayChildren, function ($c) use ($leavingChild) {
-                    return $c['child']->id !== $leavingChild['child']->id;
-                });
-            }
         }
 
         return $days;
