@@ -61,9 +61,10 @@ return function (RouteBuilder $routes): void {
          * THESE MUST COME BEFORE WILDCARD ROUTES!
          */
         $builder->setRouteClass(Route::class);
+        $builder->connect('/', ['controller' => 'Dashboard', 'action' => 'index']);
         $builder->connect('/login', ['controller' => 'Users', 'action' => 'login']);
-        $builder->connect('/logout', ['controller' => 'Users', 'action' => 'logout']);
         $builder->connect('/register', ['controller' => 'Users', 'action' => 'register']);
+        $builder->connect('/logout', ['controller' => 'Users', 'action' => 'logout']);
         $builder->connect('/profile', ['controller' => 'Users', 'action' => 'profile']);
         $builder->connect('/dashboard', ['controller' => 'Dashboard', 'action' => 'index']);
         
