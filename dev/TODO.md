@@ -32,7 +32,13 @@ Die eigentliche PDF/PNG-Generierung wie im Beispiel (dev/Kindergarten-Ausfallpla
 auf http://localhost:8080/children ist "Sibling group" noch enlisch und auch noch nicht gefüllt, die spalte
 
 
-playwright muss janich tin dem docker laufen sondern lokal im host. wie kann die datei nicht im docker container sein? die ist doch gemountet, oder?
+merke dir: playwright muss ja nicht  in dem docker laufen sondern lokal im host.
+
+- Sorge dafür, dass die übersetzungsdateien in dem dochḱer mit gemountet sind, falls sie das noch nciht sind, (also nicht kopieren in den docker beim docker build)
+
+- http://localhost:8080/schedules/manage-children/1 soll einen button add child bekommen#
+
+
 
 $ ssh eclabs-vm06 ls /var/kunden/webs/ruben/www/ausfallplan-generator.z11.de -la
 insgesamt 8
