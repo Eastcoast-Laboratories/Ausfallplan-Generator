@@ -29,13 +29,25 @@ class WaitlistController extends AppController
             ->orderBy(['Schedules.created' => 'DESC'])
             ->all();
         
-        // Get selected schedule (default to first)
+        // Get selected schedule with priority: Query param > Session > First schedule
         $scheduleId = $this->request->getQuery('schedule_id');
         $selectedSchedule = null;
         
+        // 1. Try query parameter
         if ($scheduleId) {
             $selectedSchedule = $schedulesTable->get($scheduleId);
-        } elseif ($schedules->count() > 0) {
+        }
+        // 2. Try active schedule from session
+        elseif ($activeScheduleId = $this->request->getSession()->read('activeScheduleId')) {
+            try {
+                $selectedSchedule = $schedulesTable->get($activeScheduleId);
+                $scheduleId = $selectedSchedule->id;
+            } catch (\Exception $e) {
+                // Schedule doesn't exist anymore, fall through to default
+            }
+        }
+        // 3. Default to first schedule
+        if (!$selectedSchedule && $schedules->count() > 0) {
             $selectedSchedule = $schedules->first();
             $scheduleId = $selectedSchedule->id;
         }
