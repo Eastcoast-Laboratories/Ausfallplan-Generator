@@ -125,6 +125,7 @@ class ReportService
         $days = [];
         $waitlistIndex = 0; // Current position in waitlist (round-robin)
         $leavingChildIndex = 0; // Separate index for leaving child rotation
+        $skippedChildren = []; // Children that didn't fit in previous day
 
         for ($i = 0; $i < $daysCount; $i++) {
             $animalName = self::ANIMAL_NAMES[$i % count(self::ANIMAL_NAMES)];
@@ -132,6 +133,23 @@ class ReportService
             // Fill day with children from waitlist (round-robin), respecting capacity
             $dayChildren = [];
             $countingChildrenSum = 0;
+            
+            // FIRST: Try to add skipped children from previous day (priority)
+            $remainingSkipped = [];
+            foreach ($skippedChildren as $skippedChild) {
+                $countingValue = $skippedChild['is_integrative'] ? 2 : 1;
+                
+                if ($countingChildrenSum + $countingValue <= $capacity) {
+                    $dayChildren[] = $skippedChild;
+                    $countingChildrenSum += $countingValue;
+                } else {
+                    // Still doesn't fit, keep for next day
+                    $remainingSkipped[] = $skippedChild;
+                }
+            }
+            $skippedChildren = $remainingSkipped;
+            
+            // THEN: Continue with normal round-robin
             $attempts = 0;
             $maxAttempts = count($children) * 3; // Prevent infinite loop
             
@@ -165,9 +183,10 @@ class ReportService
                 if ($countingChildrenSum + $countingValue <= $capacity) {
                     $dayChildren[] = $nextChild;
                     $countingChildrenSum += $countingValue;
+                } else {
+                    // Child doesn't fit - add to skipped for next day
+                    $skippedChildren[] = $nextChild;
                 }
-                // If child doesn't fit, continue to next child in round-robin
-                // (no special handling for integrative children - just skip and continue)
             }
             
             // Determine leaving child using round-robin (not always first from waitlist)
