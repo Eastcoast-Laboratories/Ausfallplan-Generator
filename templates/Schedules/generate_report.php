@@ -97,6 +97,9 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
             display: flex;
             flex-direction: column;
             gap: 20px;
+            position: sticky;
+            top: 20px;
+            align-self: flex-start;
         }
 
         .waitlist-box, .always-end-box {
@@ -239,7 +242,7 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
                 $totalCountingChildren += $childData['child']->is_integrative ? 2 : 1;
             }
             ?>
-            <div class="total-counting-children">
+            <div class="total-counting-children" style="text-align: right;">
                 <?= __('Summe aller Zählkinder') ?>: <?= h($totalCountingChildren) ?>
             </div>
         </div>
