@@ -9,10 +9,10 @@ $this->assign('title', h($organization->name));
     <h3><?= h($organization->name) ?></h3>
     
     <div class="actions" style="margin-bottom: 2rem;">
-        <?= $this->Html->link(__('Edit'), ['action' => 'edit', $organization->id], ['class' => 'button']) ?>
-        <?= $this->Html->link(__('Back to List'), ['action' => 'index'], ['class' => 'button']) ?>
+        <?= $this->Html->link(__('Bearbeiten'), ['action' => 'edit', $organization->id], ['class' => 'button']) ?>
+        <?= $this->Html->link(__('Zurück zur Liste'), ['action' => 'index'], ['class' => 'button']) ?>
         <?= $this->Form->postLink(
-            $organization->is_active ? __('Deactivate') : __('Activate'), 
+            $organization->is_active ? __('Deaktivieren') : __('Aktivieren'), 
             ['action' => 'toggleActive', $organization->id],
             ['class' => 'button']
         ) ?>
@@ -25,18 +25,18 @@ $this->assign('title', h($organization->name));
                     <th><?= __('Status') ?></th>
                     <td>
                         <?php if ($organization->is_active): ?>
-                            <span style="color: green; font-weight: bold;">● <?= __('Active') ?></span>
+                            <span style="color: green; font-weight: bold;">● <?= __('Aktiv') ?></span>
                         <?php else: ?>
-                            <span style="color: red; font-weight: bold;">● <?= __('Inactive') ?></span>
+                            <span style="color: red; font-weight: bold;">● <?= __('Inaktiv') ?></span>
                         <?php endif; ?>
                     </td>
                 </tr>
                 <tr>
-                    <th><?= __('Contact Email') ?></th>
+                    <th><?= __('Kontakt E-Mail') ?></th>
                     <td><?= h($organization->contact_email ?? '-') ?></td>
                 </tr>
                 <tr>
-                    <th><?= __('Contact Phone') ?></th>
+                    <th><?= __('Telefon') ?></th>
                     <td><?= h($organization->contact_phone ?? '-') ?></td>
                 </tr>
             </table>
@@ -44,13 +44,13 @@ $this->assign('title', h($organization->name));
     </div>
 
     <div class="related">
-        <h4><?= __('Users') ?> (<?= count($organization->users) ?>)</h4>
+        <h4><?= __('Benutzer') ?> (<?= count($organization->users) ?>)</h4>
         <?php if (\!empty($organization->users)): ?>
         <div class="table-responsive">
             <table>
                 <tr>
-                    <th><?= __('Email') ?></th>
-                    <th><?= __('Role') ?></th>
+                    <th><?= __('E-Mail') ?></th>
+                    <th><?= __('Rolle') ?></th>
                 </tr>
                 <?php foreach ($organization->users as $user): ?>
                 <tr>
