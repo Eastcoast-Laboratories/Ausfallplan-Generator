@@ -96,7 +96,7 @@ class SchedulesControllerCapacityTest extends TestCase
         ]);
 
         $this->assertResponseSuccess();
-        $this->assertRedirect(['controller' => 'Schedules', 'action' => 'index']);
+        $this->assertRedirect(['controller' => 'Schedules', 'action' => 'view', $schedule->id]);
 
         // Verify updated value
         $schedules->clearCache('Schedules');
@@ -110,40 +110,39 @@ class SchedulesControllerCapacityTest extends TestCase
     }
 
     /**
-     * Test that capacity_per_day can be NULL (optional)
+     * Test that capacity uses default value when not provided
      *
      * @return void
      */
     public function testCapacityPerDayCanBeNull(): void
     {
-        // Create test user
-        $users = $this->getTableLocator()->get('Users');
-        $user = $users->newEntity([
+        $schedules = $this->getTableLocator()->get('Schedules');
+        $schedule = $schedules->newEntity([
             'organization_id' => 1,
-            'email' => 'nullcapacity@test.com',
-            'password' => 'password123',
-            'role' => 'admin',
-        ]);
-        $users->save($user);
-        $this->session(['Auth' => $user]);
-
-        // Create schedule without capacity_per_day
-        $this->post('/schedules/add', [
-            'title' => 'Test Schedule No Capacity',
+            'title' => 'Test Schedule',
             'starts_on' => '2025-01-01',
             'ends_on' => '2025-12-31',
             'state' => 'draft',
         ]);
+        $schedules->save($schedule);
+
+        $this->session(['Auth' => ['id' => 1, 'organization_id' => 1]]);
+
+        // Edit without providing capacity
+        $this->post('/schedules/edit/' . $schedule->id, [
+            'title' => 'Test Schedule',
+            'starts_on' => '2025-01-01',
+            'ends_on' => '2025-12-31',
+            'state' => 'draft',
+            // No capacity_per_day field
+        ]);
 
         $this->assertResponseSuccess();
+        $this->assertRedirect(['controller' => 'Schedules', 'action' => 'view', $schedule->id]);
 
-        // Verify NULL capacity
-        $schedules = $this->getTableLocator()->get('Schedules');
-        $schedule = $schedules->find()
-            ->where(['title' => 'Test Schedule No Capacity'])
-            ->first();
-
-        $this->assertNotNull($schedule);
-        $this->assertNull($schedule->capacity_per_day, 'Capacity should be NULL when not provided');
+        // Verify it uses default value (9)
+        $schedules->clearCache('Schedules');
+        $schedule = $schedules->get($schedule->id);
+        $this->assertEquals(9, $schedule->capacity_per_day, 'Capacity should use default value when not provided');
     }
 }
