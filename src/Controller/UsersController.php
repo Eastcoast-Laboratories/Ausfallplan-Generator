@@ -64,8 +64,17 @@ class UsersController extends AppController
                 $user->role = 'viewer';
             }
             
+            // Set initial status and email verification
+            $user->status = 'pending';
+            $user->email_verified = false;
+            $user->email_token = bin2hex(random_bytes(16));
+            
             if ($this->Users->save($user)) {
-                $this->Flash->success(__('Registration successful. Please login.'));
+                // TODO: Send verification email with link: /users/verify/{token}
+                // For now, we log it
+                $this->log("Registration: User {$user->email} needs to verify email with token: {$user->email_token}", 'info');
+                
+                $this->Flash->success(__('Registration successful. Please check your email to verify your account (Email disabled in development).'));
                 return $this->redirect(['action' => 'login']);
             }
             $this->Flash->error(__('Registration failed. Please try again.'));
