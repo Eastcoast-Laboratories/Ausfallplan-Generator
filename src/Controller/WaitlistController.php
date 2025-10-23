@@ -35,17 +35,26 @@ class WaitlistController extends AppController
         
         // 1. Try query parameter
         if ($scheduleId) {
-            $selectedSchedule = $schedulesTable->get($scheduleId);
-            // Update session when user manually selects a schedule
-            $this->request->getSession()->write('activeScheduleId', $scheduleId);
+            try {
+                $selectedSchedule = $schedulesTable->get($scheduleId);
+                // Update session when user manually selects a schedule
+                $this->request->getSession()->write('activeScheduleId', (int)$scheduleId);
+            } catch (\Exception $e) {
+                // Invalid schedule ID
+                $scheduleId = null;
+            }
         }
         // 2. Try active schedule from session
-        elseif ($activeScheduleId = $this->request->getSession()->read('activeScheduleId')) {
-            try {
-                $selectedSchedule = $schedulesTable->get($activeScheduleId);
-                $scheduleId = $selectedSchedule->id;
-            } catch (\Exception $e) {
-                // Schedule doesn't exist anymore, fall through to default
+        if (!$selectedSchedule) {
+            $activeScheduleId = $this->request->getSession()->read('activeScheduleId');
+            if ($activeScheduleId) {
+                try {
+                    $selectedSchedule = $schedulesTable->get($activeScheduleId);
+                    $scheduleId = $selectedSchedule->id;
+                } catch (\Exception $e) {
+                    // Schedule doesn't exist anymore, clear from session
+                    $this->request->getSession()->delete('activeScheduleId');
+                }
             }
         }
         // 3. Default to first schedule
@@ -53,7 +62,7 @@ class WaitlistController extends AppController
             $selectedSchedule = $schedules->first();
             $scheduleId = $selectedSchedule->id;
             // Also set as active in session
-            $this->request->getSession()->write('activeScheduleId', $scheduleId);
+            $this->request->getSession()->write('activeScheduleId', (int)$scheduleId);
         }
         
         // Get waitlist entries for selected schedule
