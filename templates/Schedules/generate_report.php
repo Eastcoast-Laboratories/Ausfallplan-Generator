@@ -185,7 +185,7 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
                             </li>
                         <?php endforeach; ?>
                     </ul>
-                    <div class="day-sum" style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #ccc; font-size: 11px; font-weight: bold;">
+                    <div class="day-sum" style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #ccc; font-size: 11px; font-weight: bold; text-align: right;">
                         Σ <?= h($day['countingChildrenSum']) ?> / 9
                     </div>
                     <?php if ($day['leavingChild']): ?>

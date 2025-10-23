@@ -79,7 +79,6 @@ $this->assign('title', __('Manage Children') . ' - ' . h($schedule->title));
                                 '✕',
                                 ['action' => 'removeChild'],
                                 [
-                                    'confirm' => __('Remove {0} from this schedule?', $child->name),
                                     'data' => [
                                         'schedule_id' => $schedule->id,
                                         'child_id' => $child->id,
