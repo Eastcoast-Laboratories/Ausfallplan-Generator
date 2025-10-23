@@ -271,12 +271,15 @@ class WaitlistController extends AppController
             ])
             ->all();
         
-        // Get existing waitlist entries
+        // Get existing waitlist entries - build array of child IDs
         $existingEntries = $waitlistTable->find()
             ->where(['schedule_id' => $scheduleId])
-            ->all()
-            ->indexBy('child_id')
-            ->toArray();
+            ->all();
+        
+        $existingChildIds = [];
+        foreach ($existingEntries as $entry) {
+            $existingChildIds[] = (int)$entry->child_id;  // Cast to int to ensure type consistency
+        }
         
         // Find next priority number
         $maxPriority = $waitlistTable->find()
@@ -284,17 +287,21 @@ class WaitlistController extends AppController
             ->select(['max_priority' => $waitlistTable->find()->func()->max('priority')])
             ->first();
         
-        $nextPriority = ($maxPriority && isset($maxPriority->max_priority)) ? $maxPriority->max_priority + 1 : 1;
+        $nextPriority = ($maxPriority && isset($maxPriority->max_priority)) ? (int)$maxPriority->max_priority + 1 : 1;
         $addedCount = 0;
         
         // Add children that aren't already on the waitlist
         foreach ($allChildren as $child) {
-            if (!isset($existingEntries[$child->id])) {
+            $childId = (int)$child->id;
+            $isInArray = in_array($childId, $existingChildIds, true);
+            
+            if (!$isInArray) {
                 $entry = $waitlistTable->newEntity([
-                    'schedule_id' => $scheduleId,
-                    'child_id' => $child->id,
-                    'priority' => $nextPriority++
+                    'schedule_id' => (int)$scheduleId,
+                    'child_id' => $childId,
+                    'priority' => (int)$nextPriority
                 ]);
+                $nextPriority++;
                 
                 if ($waitlistTable->save($entry)) {
                     $addedCount++;
