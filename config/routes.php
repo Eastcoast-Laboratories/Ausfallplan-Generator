@@ -62,6 +62,10 @@ return function (RouteBuilder $routes): void {
         $builder->connect('/logout', ['controller' => 'Users', 'action' => 'logout']);
         $builder->connect('/profile', ['controller' => 'Users', 'action' => 'profile']);
         $builder->connect('/dashboard', ['controller' => 'Dashboard', 'action' => 'index']);
+        $builder->connect('/children', ['controller' => 'Children', 'action' => 'index']);
+        $builder->connect('/sibling-groups', ['controller' => 'SiblingGroups', 'action' => 'index']);
+        $builder->connect('/schedules', ['controller' => 'Schedules', 'action' => 'index']);
+        $builder->connect('/waitlist', ['controller' => 'Waitlist', 'action' => 'index']);
         
         /*
          * Switch back to DashedRoute for the rest
