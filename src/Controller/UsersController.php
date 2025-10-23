@@ -26,10 +26,11 @@ class UsersController extends AppController
             $organizationName = trim($data['organization_name'] ?? '');
             
             if (!empty($organizationName)) {
-                // Create new organization
+                // Create new organization with creator's email as contact
                 $organizationsTable = $this->fetchTable('Organizations');
                 $organization = $organizationsTable->newEntity([
-                    'name' => $organizationName
+                    'name' => $organizationName,
+                    'contact_email' => $data['email']
                 ]);
                 
                 if ($organizationsTable->save($organization)) {
