@@ -56,13 +56,13 @@ return function (RouteBuilder $routes): void {
          * THESE MUST COME BEFORE WILDCARD ROUTES!
          */
         $builder->setRouteClass(Route::class);
-        $builder->connect('/', ['controller' => 'Dashboard', 'action' => 'index']);
+        $builder->connect('/', ['controller' => 'Dashboard', 'action' => 'index'], ['_name' => 'home']);
         $builder->connect('/login', ['controller' => 'Users', 'action' => 'login']);
         $builder->connect('/waitlist', ['controller' => 'Waitlist', 'action' => 'index']);
         $builder->connect('/register', ['controller' => 'Users', 'action' => 'register']);
         $builder->connect('/logout', ['controller' => 'Users', 'action' => 'logout']);
         $builder->connect('/profile', ['controller' => 'Users', 'action' => 'profile']);
-        $builder->connect('/dashboard', ['controller' => 'Dashboard', 'action' => 'index']);
+        $builder->connect('/dashboard', ['controller' => 'Dashboard', 'action' => 'index'], ['_name' => 'dashboard']);
         $builder->connect('/children', ['controller' => 'Children', 'action' => 'index']);
         $builder->connect('/sibling-groups', ['controller' => 'SiblingGroups', 'action' => 'index']);
         $builder->connect('/schedules', ['controller' => 'Schedules', 'action' => 'index']);
