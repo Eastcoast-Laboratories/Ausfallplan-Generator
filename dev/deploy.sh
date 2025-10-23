@@ -1,4 +1,26 @@
 #!/bin/bash
+set -e
+
+echo "🚀 Deploying to production server..."
+
+# 1. Commit and push to GitHub
+echo "📤 Step 1: Pushing to GitHub..."
+git add -A
+git status
+read -p "Commit message: " commit_msg
+git commit -m "$commit_msg" || echo "Nothing to commit"
+git push origin main
+
+# 2. Deploy to server
+echo "🌐 Step 2: Deploying to eclabs-vm06..."
+ssh eclabs-vm06 "cd /var/kunden/webs/ruben/www/ausfallplan-generator.z11.de && \
+    git pull origin main && \
+    rm -rf tmp/cache/* && \
+    echo '✅ Deployment completed!'"
+
+echo ""
+echo "✅ Deployment successful!"
+echo "🔗 Check: https://ausfallplan-generator.z11.de/"
 
 # Check for uncommitted changes
 if ! git diff --quiet || ! git diff --cached --quiet; then

@@ -12,12 +12,13 @@
         <p><?= __('Create your account to start managing your Kita schedules.') ?></p>
         
         <?php
-            echo $this->Form->control('organization_id', [
-                'options' => $organizations,
-                'empty' => __('Select your organization'),
-                'label' => __('Organization'),
-                'required' => true,
-                'autofocus' => true
+            echo $this->Form->control('organization_name', [
+                'type' => 'text',
+                'label' => __('Organization (optional)'),
+                'placeholder' => __('e.g., Kita Sonnenschein'),
+                'required' => false,
+                'autofocus' => true,
+                'help' => __('Leave empty if you don\'t belong to an organization')
             ]);
             echo $this->Form->control('email', [
                 'type' => 'email',
