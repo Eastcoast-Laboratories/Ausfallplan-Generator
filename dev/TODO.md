@@ -18,6 +18,7 @@
 - [ ] Editor kann nur eigene Org-Daten bearbeiten (filter implementieren)
 
 
+- Wenn kinder geschwisterkinder sind beim report extra berücksichtigen: die müssen immer an einem tag zusammen oder gar nicht. auch in der nachrückliste muessen die immer hintereinander stehen
 
 ---
 

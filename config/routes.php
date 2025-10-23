@@ -57,16 +57,17 @@ return function (RouteBuilder $routes): void {
          */
         $builder->setRouteClass(Route::class);
         $builder->connect('/', ['controller' => 'Dashboard', 'action' => 'index'], ['_name' => 'home']);
-        $builder->connect('/login', ['controller' => 'Users', 'action' => 'login']);
-        $builder->connect('/waitlist', ['controller' => 'Waitlist', 'action' => 'index']);
+        $builder->connect('/login', ['controller' => 'Users', 'action' => 'login'], ['_name' => 'login']);
+        $builder->connect('/logout', ['controller' => 'Users', 'action' => 'logout'], ['_name' => 'logout']);
         $builder->connect('/register', ['controller' => 'Users', 'action' => 'register']);
-        $builder->connect('/logout', ['controller' => 'Users', 'action' => 'logout']);
         $builder->connect('/profile', ['controller' => 'Users', 'action' => 'profile']);
         $builder->connect('/dashboard', ['controller' => 'Dashboard', 'action' => 'index'], ['_name' => 'dashboard']);
         $builder->connect('/children', ['controller' => 'Children', 'action' => 'index']);
         $builder->connect('/sibling-groups', ['controller' => 'SiblingGroups', 'action' => 'index']);
         $builder->connect('/schedules', ['controller' => 'Schedules', 'action' => 'index']);
         $builder->connect('/waitlist', ['controller' => 'Waitlist', 'action' => 'index']);
+        $builder->connect('/forgot-password', ['controller' => 'Users', 'action' => 'forgotPassword']);
+        $builder->connect('/reset-password', ['controller' => 'Users', 'action' => 'resetPassword']);
         
         // Admin Routes - Prefix scope automatically adds /admin/ to URLs
         $builder->prefix('Admin', function (RouteBuilder $routes) {
