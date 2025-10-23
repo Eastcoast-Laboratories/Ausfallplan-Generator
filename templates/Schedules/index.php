@@ -15,6 +15,10 @@ $this->assign('title', __('Schedules'));
             <thead>
                 <tr>
                     <th><?= __('Title') ?></th>
+                    <?php if (isset($user) && $user->role === 'admin'): ?>
+                        <th><?= __('User') ?></th>
+                        <th><?= __('Organization') ?></th>
+                    <?php endif; ?>
                     <th><?= __('Starts On') ?></th>
                     <th><?= __('Ends On') ?></th>
                     <th><?= __('State') ?></th>
@@ -26,6 +30,10 @@ $this->assign('title', __('Schedules'));
                 <?php foreach ($schedules as $schedule): ?>
                 <tr>
                     <td><?= h($schedule->title) ?></td>
+                    <?php if (isset($user) && $user->role === 'admin'): ?>
+                        <td><?= h($schedule->user->email ?? 'N/A') ?></td>
+                        <td><?= h($schedule->organization->name ?? 'N/A') ?></td>
+                    <?php endif; ?>
                     <td><?= h($schedule->starts_on) ?></td>
                     <td><?= h($schedule->ends_on) ?></td>
                     <td><?= __($schedule->state) ?></td>
