@@ -87,11 +87,17 @@ class UsersController extends AppController
         $validLanguages = ['de', 'en'];
         
         if ($lang && in_array($lang, $validLanguages)) {
-            $this->request->getSession()->write('Config.language', $lang);
+            // Write to session
+            $session = $this->request->getSession();
+            $session->write('Config.language', $lang);
+            
+            // Also set locale immediately for current request
+            \Cake\I18n\I18n::setLocale($lang === 'de' ? 'de_DE' : 'en_US');
+            
             $this->Flash->success(__('Language changed to {0}', $lang === 'de' ? 'Deutsch' : 'English'));
         }
         
-        // Redirect back to where we came from
+        // Redirect back to where we came from to reload page with new language
         return $this->redirect($this->referer(['controller' => 'Dashboard', 'action' => 'index']));
     }
 
