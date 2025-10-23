@@ -14,7 +14,7 @@ class OrganizationsController extends AppController
     public function initialize(): void
     {
         parent::initialize();
-        $this->loadComponent('RequestHandler');
+        // RequestHandler is loaded automatically in AppController
     }
 
     public function beforeFilter(\Cake\Event\EventInterface $event)
@@ -34,34 +34,32 @@ class OrganizationsController extends AppController
         $this->request->allowMethod(['get']);
         $query = $this->request->getQuery('q', '');
         
-        $organizations = [];
+        $organizationsTable = $this->fetchTable('Organizations');
+        $finder = $organizationsTable->find()
+            ->where(['name !=' => 'keine organisation'])
+            ->select(['id', 'name'])
+            ->orderBy(['name' => 'ASC']);
         
-        if (strlen($query) >= 2) {
-            $organizationsTable = $this->fetchTable('Organizations');
-            $results = $organizationsTable->find()
-                ->where([
-                    'name LIKE' => '%' . $query . '%',
-                    'name !=' => 'keine organisation'
-                ])
-                ->select(['id', 'name'])
-                ->orderBy(['name' => 'ASC'])
-                ->limit(10)
-                ->all();
-            
-            foreach ($results as $org) {
-                $organizations[] = [
-                    'id' => $org->id,
-                    'name' => $org->name
-                ];
-            }
+        // If query provided, filter by it
+        if (strlen($query) >= 1) {
+            $finder->where(['name LIKE' => '%' . $query . '%']);
         }
         
-        $this->set([
-            'organizations' => $organizations,
-            '_serialize' => ['organizations']
-        ]);
+        $results = $finder->limit(50)->all();
         
-        $this->viewBuilder()->setOption('serialize', ['organizations']);
-        $this->RequestHandler->renderAs($this, 'json');
+        $organizations = [];
+        foreach ($results as $org) {
+            $organizations[] = [
+                'id' => $org->id,
+                'name' => $org->name
+            ];
+        }
+        
+        // Return JSON directly
+        $this->response = $this->response
+            ->withType('application/json')
+            ->withStringBody(json_encode(['organizations' => $organizations]));
+        
+        return $this->response;
     }
 }
