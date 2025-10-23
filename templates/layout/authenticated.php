@@ -480,7 +480,7 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
                             <span>👤</span>
                             <span><?= __('My Account') ?></span>
                         </a>
-                        <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'logout']) ?>" class="user-dropdown-item logout">
+                        <a href="/logout" class="user-dropdown-item logout">
                             <span>🚪</span>
                             <span><?= __('Logout') ?></span>
                         </a>
