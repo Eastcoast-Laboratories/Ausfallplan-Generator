@@ -49,13 +49,14 @@ class UsersController extends AppController
         $this->request->allowMethod(['get', 'post']);
         $result = $this->Authentication->getResult();
         
-        // If user is already logged in, redirect
+        // If user is already logged in or just logged in successfully, redirect
         if ($result && $result->isValid()) {
             // Redirect to dashboard after successful login
             $target = $this->Authentication->getLoginRedirect() ?? ['controller' => 'Dashboard', 'action' => 'index'];
             return $this->redirect($target);
         }
         
+        // If POST request but login failed, show error
         if ($this->request->is('post') && !$result->isValid()) {
             $this->Flash->error(__('Invalid email or password'));
         }
