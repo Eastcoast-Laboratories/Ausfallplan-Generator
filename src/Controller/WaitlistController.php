@@ -36,6 +36,8 @@ class WaitlistController extends AppController
         // 1. Try query parameter
         if ($scheduleId) {
             $selectedSchedule = $schedulesTable->get($scheduleId);
+            // Update session when user manually selects a schedule
+            $this->request->getSession()->write('activeScheduleId', $scheduleId);
         }
         // 2. Try active schedule from session
         elseif ($activeScheduleId = $this->request->getSession()->read('activeScheduleId')) {
@@ -50,6 +52,8 @@ class WaitlistController extends AppController
         if (!$selectedSchedule && $schedules->count() > 0) {
             $selectedSchedule = $schedules->first();
             $scheduleId = $selectedSchedule->id;
+            // Also set as active in session
+            $this->request->getSession()->write('activeScheduleId', $scheduleId);
         }
         
         // Get waitlist entries for selected schedule
