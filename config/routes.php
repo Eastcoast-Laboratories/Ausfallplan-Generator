@@ -68,6 +68,13 @@ return function (RouteBuilder $routes): void {
         $builder->connect('/schedules', ['controller' => 'Schedules', 'action' => 'index']);
         $builder->connect('/waitlist', ['controller' => 'Waitlist', 'action' => 'index']);
         
+        // Admin Routes
+        $builder->connect('/admin/organizations', ['prefix' => 'Admin', 'controller' => 'Organizations', 'action' => 'index']);
+        $builder->connect('/admin/organizations/view/:id', ['prefix' => 'Admin', 'controller' => 'Organizations', 'action' => 'view'], ['pass' => ['id']]);
+        $builder->connect('/admin/organizations/edit/:id', ['prefix' => 'Admin', 'controller' => 'Organizations', 'action' => 'edit'], ['pass' => ['id']]);
+        $builder->connect('/admin/organizations/delete/:id', ['prefix' => 'Admin', 'controller' => 'Organizations', 'action' => 'delete'], ['pass' => ['id']]);
+        $builder->connect('/admin/organizations/toggle-active/:id', ['prefix' => 'Admin', 'controller' => 'Organizations', 'action' => 'toggleActive'], ['pass' => ['id']]);
+        
         // API Routes
         $builder->prefix('Api', function ($routes) {
             $routes->setExtensions(['json']);

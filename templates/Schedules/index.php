@@ -19,9 +19,8 @@ $this->assign('title', __('Schedules'));
                         <th><?= __('User') ?></th>
                         <th><?= __('Organization') ?></th>
                     <?php endif; ?>
-                    <th><?= __('Starts On') ?></th>
-                    <th><?= __('Ends On') ?></th>
-                    <th><?= __('State') ?></th>
+                    <th><?= __('Days') ?></th>
+                    <th><?= __('Max Children per Day') ?></th>
                     <th><?= __('Created') ?></th>
                     <th class="actions"><?= __('Actions') ?></th>
                 </tr>
@@ -31,13 +30,12 @@ $this->assign('title', __('Schedules'));
                 <tr>
                     <td><?= h($schedule->title) ?></td>
                     <?php if (isset($user) && $user->role === 'admin'): ?>
-                        <td><?= h($schedule->user->email ?? 'N/A') ?></td>
-                        <td><?= h($schedule->organization->name ?? 'N/A') ?></td>
+                        <td><?= isset($schedule->user) ? h($schedule->user->email) : '-' ?></td>
+                        <td><?= h($schedule->organization->name) ?></td>
                     <?php endif; ?>
-                    <td><?= h($schedule->starts_on) ?></td>
-                    <td><?= h($schedule->ends_on) ?></td>
-                    <td><?= __($schedule->state) ?></td>
-                    <td><?= h($schedule->created) ?></td>
+                    <td><?= h($schedule->days_count) ?></td>
+                    <td><?= h($schedule->capacity_per_day) ?></td>
+                    <td><?= h($schedule->created->format('Y-m-d H:i')) ?></td>
                     <td class="actions">
                         <?= $this->Html->link(__('Generate List'), ['action' => 'generateReport', $schedule->id], ['class' => 'button', 'style' => 'background: #2196F3; color: white;']) ?>
                         <?= $this->Html->link(__('Manage Children'), ['action' => 'manageChildren', $schedule->id], ['class' => 'button']) ?>

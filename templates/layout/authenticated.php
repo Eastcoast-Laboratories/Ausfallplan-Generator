@@ -416,10 +416,17 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
                 <span><?= __('Schedules') ?></span>
             </a>
             
-            <a href="<?= $this->Url->build(['controller' => 'Waitlist', 'action' => 'index']) ?>" class="sidebar-nav-item <?= $this->request->getParam('controller') === 'Waitlist' ? 'active' : '' ?>">
-                <span class="sidebar-nav-icon">📋</span>
+            <a href="/waitlist" class="sidebar-nav-item <?= $this->request->getParam('controller') === 'Waitlist' ? 'active' : '' ?>">
+                <span>📋</span>
                 <span><?= __('Waitlist') ?></span>
             </a>
+            
+            <?php if ($user && $user->role === 'admin'): ?>
+            <a href="/admin/organizations" class="sidebar-nav-item <?= $this->request->getParam('controller') === 'Organizations' && $this->request->getParam('prefix') === 'Admin' ? 'active' : '' ?>">
+                <span>🏢</span>
+                <span><?= __('Organizations') ?></span>
+            </a>
+            <?php endif; ?>
         </nav>
     </aside>
     
