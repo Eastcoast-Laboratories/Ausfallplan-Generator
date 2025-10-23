@@ -8,7 +8,7 @@ $this->assign('title', __('Children'));
 <div class="children index content">
     <h3><?= __('Children') ?></h3>
     <div class="actions">
-        <?= $this->Html->link(__('New Child'), ['action' => 'add'], ['class' => 'button float-right']) ?>
+        <?= $this->Html->link(__('New Child'), ['action' => 'add'], ['class' => 'button float-right', 'id' => 'new-child-button']) ?>
     </div>
     <div class="table-responsive">
         <table>
@@ -40,3 +40,16 @@ $this->assign('title', __('Children'));
         </table>
     </div>
 </div>
+
+<script>
+// Auto-focus "New Child" button after saving a child (when success message is present)
+document.addEventListener('DOMContentLoaded', function() {
+    const successMessage = document.querySelector('.message.success');
+    const newChildButton = document.getElementById('new-child-button');
+    
+    if (successMessage && newChildButton) {
+        // Focus the button so user can press Enter to add another child
+        newChildButton.focus();
+    }
+});
+</script>

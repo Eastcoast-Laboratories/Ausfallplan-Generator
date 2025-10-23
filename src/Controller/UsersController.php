@@ -92,8 +92,11 @@ class UsersController extends AppController
                 ]);
                 
                 $debugLink = \Cake\Routing\Router::url(['controller' => 'Debug', 'action' => 'emails'], true);
-                $this->Flash->success(__('Registration successful. Please check your email to verify your account.') . 
-                    " (Dev: <a href='{$debugLink}' style='color: white; text-decoration: underline;'>View Emails</a>)");
+                $this->Flash->success(
+                    __('Registration successful. Please check your email to verify your account.') . 
+                    " (Dev: <a href='{$debugLink}' style='color: white; text-decoration: underline;'>View Emails</a>)",
+                    ['escape' => false]
+                );
                 return $this->redirect(['action' => 'login']);
             }
             $this->Flash->error(__('Registration failed. Please try again.'));
