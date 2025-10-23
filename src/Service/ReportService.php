@@ -124,6 +124,7 @@ class ReportService
     {
         $days = [];
         $waitlistIndex = 0; // Current position in waitlist (round-robin)
+        $leavingChildIndex = 0; // Separate index for leaving child rotation
 
         for ($i = 0; $i < $daysCount; $i++) {
             $animalName = self::ANIMAL_NAMES[$i % count(self::ANIMAL_NAMES)];
@@ -169,18 +170,26 @@ class ReportService
                 // (no special handling for integrative children - just skip and continue)
             }
             
-            // Determine who leaves at end of day (first child from waitlist NOT already in this day)
+            // Determine leaving child using round-robin (not always first from waitlist)
+            // Go through waitlist starting from leavingChildIndex, find first NOT in this day
             $leavingChild = null;
-            foreach ($children as $waitlistChild) {
+            $leavingAttempts = 0;
+            while ($leavingAttempts < count($children) && !$leavingChild) {
+                $candidateChild = $children[$leavingChildIndex % count($children)];
+                $leavingChildIndex++;
+                $leavingAttempts++;
+                
+                // Check if this candidate is already in the day
                 $isInDay = false;
                 foreach ($dayChildren as $dc) {
-                    if ($dc['child']->id === $waitlistChild['child']->id) {
+                    if ($dc['child']->id === $candidateChild['child']->id) {
                         $isInDay = true;
                         break;
                     }
                 }
+                
                 if (!$isInDay) {
-                    $leavingChild = $waitlistChild;
+                    $leavingChild = $candidateChild;
                     break;
                 }
             }
