@@ -1,12 +1,14 @@
 <?php
 /**
  * @var \App\View\AppView $this
- * @var array $reportData
+ * @var \App\Model\Entity\Schedule $schedule
+ * @var array $days
+ * @var array $waitlist
+ * @var array $alwaysAtEnd
+ * @var int $daysCount
+ * @var array $childStats
  */
-$schedule = $reportData['schedule'];
-$days = $reportData['days'];
-$waitlist = $reportData['waitlist'];
-$alwaysAtEnd = $reportData['alwaysAtEnd'];
+// Variables are passed directly from controller
 
 $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
 ?>
@@ -208,11 +210,15 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
                     
                     <?php if (!empty($waitlist)): ?>
                         <?php foreach ($waitlist as $entry): 
-                            $count = $entry->child->is_integrative ? 2 : 1;
-                            $childId = $entry->child_id;
+                            // Check both possible property names (child vs children)
+                            $childEntity = $entry->child ?? $entry->children ?? null;
+                            if (!$childEntity) continue;
+                            
+                            $count = $childEntity->is_integrative ? 2 : 1;
+                            $childId = $childEntity->id;
                             $stats = isset($childStats[$childId]) ? $childStats[$childId] : ['daysCount' => 0, 'leavingCount' => 0];
                         ?>
-                            <div style="padding: 2px 0;"><?= h($entry->child->name) ?></div>
+                            <div style="padding: 2px 0;"><?= h($childEntity->name) ?></div>
                             <div style="background: #e3f2fd; padding: 2px 6px; border-radius: 3px; font-weight: bold; text-align: center;"><?= h($count) ?></div>
                             <div style="color: #999; text-align: center;"><?= h($stats['daysCount']) ?></div>
                             <div style="color: #999; text-align: center;"><?= h($stats['leavingCount']) ?></div>
