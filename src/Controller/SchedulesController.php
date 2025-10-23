@@ -20,19 +20,19 @@ class SchedulesController extends AppController
         // Get current user
         $user = $this->Authentication->getIdentity();
         
-        // Admin sees ALL schedules, others only see their own
-        $query = $this->Schedules->find();
-        
+        // Admin sees all schedules with user info, normal users only their own
         if ($user->role === 'admin') {
-            // Admin: Show all schedules with user info
-            $query->contain(['Organizations', 'Users']);
+            $schedules = $this->Schedules->find()
+                ->contain(['Organizations', 'Users'])
+                ->orderBy(['Schedules.created' => 'DESC'])
+                ->all();
         } else {
-            // Non-admin: Only show own schedules
-            $query->where(['Schedules.user_id' => $user->id])
-                  ->contain(['Organizations']);
+            $schedules = $this->Schedules->find()
+                ->where(['Schedules.user_id' => $user->id])
+                ->contain(['Organizations'])
+                ->orderBy(['Schedules.created' => 'DESC'])
+                ->all();
         }
-        
-        $schedules = $query->orderBy(['Schedules.created' => 'DESC'])->all();
 
         $this->set(compact('schedules', 'user'));
     }
