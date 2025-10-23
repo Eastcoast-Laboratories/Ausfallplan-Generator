@@ -7,7 +7,7 @@
 
 ## 0. Tech Stack & Nonâ€‘functional Requirements
 
-- **Language/Runtime:** PHP 8.2+
+- **Language/Runtime:** PHP 8.4
 - **Framework:** CakePHP 5.x (ORM, Authentication & Authorization plugins)
 - **DB:** PostgreSQL 14+ (preferred) or MySQL 8
 - **Frontend:** Server-rendered CakePHP templates + HTMX/Alpine.js for interactivity
@@ -267,7 +267,7 @@ Create files and implementations in this order:
 
 - GitHub Actions:
   - `php-actions/composer@v6`
-  - setup PHP 8.2, run `composer test`
+  - setup PHP 8.4, run `composer test`
   - run `phpstan analyse`
   - cache Composer and npm (if used)
 

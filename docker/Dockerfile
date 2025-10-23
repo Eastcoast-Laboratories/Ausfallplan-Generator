@@ -16,6 +16,8 @@ RUN apt-get update && apt-get install -y \
     php8.4-xml \
     php8.4-curl \
     php8.4-zip \
+    php8.4-pdo-mysql \
+    php8.4-mysqli \
     git \
     curl \
     zip \

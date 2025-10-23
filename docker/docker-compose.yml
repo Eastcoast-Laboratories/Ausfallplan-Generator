@@ -18,11 +18,34 @@ services:
     environment:
       - DEBUG=true
       - SECURITY_SALT=your-secret-salt-change-this-in-production
-      - DATABASE_URL=sqlite:////var/www/html/tmp/app.sqlite
+      - DATABASE_URL=mysql://ausfallplan:ausfallplan_secret@db:3306/ausfallplan?encoding=utf8mb4
+      - DATABASE_TEST_URL=mysql://ausfallplan:ausfallplan_secret@db:3306/ausfallplan_test?encoding=utf8mb4
+    depends_on:
+      - db
     networks:
       - ausfallplan-network
     restart: unless-stopped
 
+  db:
+    image: mysql:8.0
+    container_name: ausfallplan-db
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_secret
+      - MYSQL_DATABASE=ausfallplan
+      - MYSQL_USER=ausfallplan
+      - MYSQL_PASSWORD=ausfallplan_secret
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - ausfallplan-network
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
 networks:
   ausfallplan-network:
     driver: bridge
+
+volumes:
+  mysql-data:

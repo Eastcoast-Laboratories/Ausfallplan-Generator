@@ -145,7 +145,7 @@ docker compose -f docker/docker-compose.yml exec app vendor/bin/phpunit --testdo
 
 - **PHP Version**: 8.4.13 (Docker), 8.3.6 (Local)
 - **PHPUnit Version**: 12.4.1
-- **Database**: SQLite (in-memory for tests, file for Docker)
+- **Database**: MySQL (in-memory for tests, file for Docker)
 - **CakePHP**: 5.2.9
 - **Test Framework**: CakePHP TestSuite
 - **Coverage Tool**: PHPUnit Code Coverage (requires Xdebug)
@@ -188,4 +188,4 @@ The project includes a GitHub Actions workflow (`.github/workflows/ci.yml`) for 
 - Push to main branch
 - Pull requests
 
-Tests run on PHP 8.2+ with multiple database backends.
+Tests run on PHP 8.4 with MySQL database.
