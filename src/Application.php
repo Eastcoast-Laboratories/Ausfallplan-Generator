@@ -28,6 +28,7 @@ use Cake\ORM\Locator\TableLocator;
 use Cake\Routing\Middleware\AssetMiddleware;
 use Cake\Routing\Middleware\RoutingMiddleware;
 use App\Middleware\LocaleMiddleware;
+use App\Middleware\AuthorizationMiddleware;
 use Authentication\AuthenticationService;
 use Authentication\AuthenticationServiceInterface;
 use Authentication\AuthenticationServiceProviderInterface;
@@ -106,6 +107,9 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
 
             // Add Authentication middleware
             ->add(new AuthenticationMiddleware($this))
+
+            // Add Authorization middleware AFTER authentication
+            ->add(new AuthorizationMiddleware())
 
             // Add locale middleware AFTER authentication to access session
             ->add(new LocaleMiddleware());
