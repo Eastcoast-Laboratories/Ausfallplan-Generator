@@ -40,9 +40,11 @@ merke dir: playwright muss ja nicht  in dem docker laufen sondern lokal im host.
 
 - im report sollen nur die kinder bei "Immer am Ende" stehen, die zwar im ausfallplan sind, aber nicht in der nachrückliste
 
-- bei [add child](http://localhost:8080/children/index) soll der erste tab zum button "Add Child" führen
+- bei [add child](http://localhost:8080/children/index) soll der erste tab zum button "Add Child" führen, der soll auch den autofocus haben
 
+- Es soll immer ein der zuletzt erstellte/bearbeitete ausfallplan der aktive sein in der session, wenn man ein neues kind erstellt hat, soll es automatisch zum aktuellen ausfallplan hinzugefügt werden
 
+- die summe aller zählkinder sol unterhalb von der box "immer am Ende" stehen und in grau, ganz klein und alle zählen auch die die nicht in der liste sind
 
 $ ssh eclabs-vm06 ls /var/kunden/webs/ruben/www/ausfallplan-generator.z11.de -la
 insgesamt 8

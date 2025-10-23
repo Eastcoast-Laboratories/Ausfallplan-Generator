@@ -127,11 +127,10 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
             font-weight: bold;
         }
 
-        .waitlist-sum {
-            margin-top: 12px;
-            padding-top: 8px;
-            border-top: 2px solid #000;
-            font-size: 11px;
+        .total-counting-children {
+            margin-top: 8px;
+            font-size: 8px;
+            color: #999;
             text-align: center;
         }
 
@@ -196,20 +195,14 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
             <div class="waitlist-box">
                 <div class="box-title"><?= __('Nachrückliste') ?></div>
                 <?php if (!empty($waitlist)): ?>
-                    <?php 
-                    $totalCount = 0;
-                    foreach ($waitlist as $entry): 
+                    <?php foreach ($waitlist as $entry): 
                         $count = $entry->child->is_integrative ? 2 : 1;
-                        $totalCount += $count;
                     ?>
                         <div class="waitlist-item">
                             <span><?= h($entry->child->name) ?></span>
                             <span class="priority-badge"><?= h($count) ?></span>
                         </div>
                     <?php endforeach; ?>
-                    <div class="waitlist-sum">
-                        <?= __('Summe aller Zählkinder') ?>: <strong><?= h($totalCount) ?></strong>
-                    </div>
                 <?php else: ?>
                     <p style="color: #666; font-size: 10px;"><?= __('No entries') ?></p>
                 <?php endif; ?>
@@ -227,6 +220,24 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
                 <?php else: ?>
                     <p style="color: #666; font-size: 10px;"><?= __('None') ?></p>
                 <?php endif; ?>
+            </div>
+            
+            <?php
+            // Calculate total counting children (ALL children, not just in waitlist)
+            $totalCountingChildren = 0;
+            
+            // Count from waitlist
+            foreach ($waitlist as $entry) {
+                $totalCountingChildren += $entry->child->is_integrative ? 2 : 1;
+            }
+            
+            // Count from "always at end"
+            foreach ($alwaysAtEnd as $childData) {
+                $totalCountingChildren += $childData['child']->is_integrative ? 2 : 1;
+            }
+            ?>
+            <div class="total-counting-children">
+                <?= __('Summe aller Zählkinder') ?>: <?= h($totalCountingChildren) ?>
             </div>
         </div>
     </div>
