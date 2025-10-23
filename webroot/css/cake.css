@@ -37,6 +37,34 @@
     border-color: var(--color-cakephp-red);
 }
 
+/* Ensure buttons keep their default styling (not affected by .message styles) */
+a.button, .button {
+    display: inline-block !important;
+    padding: 0 1rem !important;
+    text-decoration: none;
+    background: var(--color-cakephp-red) !important;
+    color: white !important;
+    border: 1px solid var(--color-cakephp-red) !important;
+    border-radius: .4rem;
+    font-weight: normal !important;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: none !important;
+    transition: background-color 0.2s ease;
+}
+
+a.button:hover, .button:hover {
+    background: #606c76 !important;
+    border-color: #606c76 !important;
+    color: white !important;
+}
+
+a.button:focus, .button:focus {
+    outline: none;
+    border: 2px solid #2779bd !important;
+    box-shadow: 0 0 0 3px rgba(39, 121, 189, 0.2) !important;
+}
+
 body {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-weight: 400;
@@ -147,35 +175,59 @@ th {
     margin-top: 2rem;
 }
 
-/* Flash messages */
+/* Alerts and messages */
 .message {
-    padding: .5rem 1rem;
-    background: var(--color-message-info-bg);
-    color: var(--color-message-info-text);
-    border-color: var(--color-message-info-border);
-    border-width: 1px;
+    padding: 1.25rem 1.5rem;
+    border-width: 2px;
     border-style: solid;
-    border-radius: 4px;
-    margin-bottom: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
     cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem;
+    line-height: 1.5;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+}
+.message:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
 }
 .message.hidden {
     display: none;
 }
 .message.success {
-    background: var(--color-message-success-bg);
-    color: var(--color-message-success-text);
-    border-color: var(--color-message-success-border);
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    color: white;
+    border-color: #4ade80;
+}
+.message.success::before {
+    content: '✓';
+    font-size: 1.5em;
+    font-weight: bold;
 }
 .message.warning {
-    background: var(--color-message-warning-bg);
-    color: var(--color-message-warning-text);
-    border-color: var(--color-message-warning-border);
+    background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+    color: white;
+    border-color: #fb923c;
+}
+.message.warning::before {
+    content: '⚠';
+    font-size: 1.5em;
 }
 .message.error {
-    background: var(--color-message-error-bg);
-    color: var(--color-message-error-text);
-    border-color: var(--color-message-error-border);
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: white;
+    border-color: #f87171;
+}
+.message.error::before {
+    content: '✗';
+    font-size: 1.5em;
+    font-weight: bold;
 }
 
 /* Forms */

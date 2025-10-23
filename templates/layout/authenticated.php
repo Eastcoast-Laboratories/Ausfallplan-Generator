@@ -23,7 +23,10 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
         <?= $this->fetch('title', 'Ausfallplan-Generator') ?>
     </title>
     <?= $this->Html->meta('icon') ?>
-    <?= $this->Html->css(['normalize.min', 'milligram.min', 'authenticated']) ?>
+    <?= $this->Html->css(['normalize.min', 'milligram.min']) ?>
+    <!-- Force reload CSS with cache busting -->
+    <link rel="stylesheet" href="/css/cake.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="/css/authenticated.css?v=<?= time() ?>">
     <?= $this->fetch('meta') ?>
     <?= $this->fetch('css') ?>
     

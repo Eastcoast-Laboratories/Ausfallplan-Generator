@@ -46,10 +46,21 @@ class AuthorizationMiddleware implements MiddlewareInterface
             $allowedActions = ['index', 'view', 'display'];
             
             if (!in_array($action, $allowedActions)) {
+                // Redirect with flash message
+                $session = $request->getAttribute('session');
+                $session->write('Flash.flash', [
+                    [
+                        'message' => 'You do not have permission to perform this action. (Viewer role is read-only)',
+                        'key' => 'flash',
+                        'element' => 'Flash/error',
+                        'params' => ['class' => 'error']
+                    ]
+                ]);
+                
                 $response = new Response();
                 return $response
-                    ->withStatus(403)
-                    ->withStringBody('You do not have permission to perform this action. (Viewer role is read-only)');
+                    ->withStatus(302)
+                    ->withHeader('Location', '/');
             }
         }
         
@@ -57,10 +68,21 @@ class AuthorizationMiddleware implements MiddlewareInterface
         if ($role === 'editor') {
             // Editor cannot access admin user management
             if ($controller === 'Users' && in_array($action, ['index', 'add', 'edit', 'delete', 'approve'])) {
+                // Redirect with flash message
+                $session = $request->getAttribute('session');
+                $session->write('Flash.flash', [
+                    [
+                        'message' => 'Editors cannot manage users.',
+                        'key' => 'flash',
+                        'element' => 'Flash/error',
+                        'params' => ['class' => 'error']
+                    ]
+                ]);
+                
                 $response = new Response();
                 return $response
-                    ->withStatus(403)
-                    ->withStringBody('Editors cannot manage users.');
+                    ->withStatus(302)
+                    ->withHeader('Location', '/');
             }
         }
         

@@ -126,7 +126,7 @@ $class .= ' flash-' . h($params['class'] ?? 'info');
 }
 
 /* Error style - RED with high contrast */
-.flash-error {
+.flash-error, .error {
     background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
     color: white;
     border: 2px solid #f87171;
