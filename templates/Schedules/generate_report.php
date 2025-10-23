@@ -184,7 +184,7 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
                     </ul>
                     <?php if ($day['leavingChild']): ?>
                         <div class="leaving-child">
-                            <?= h($day['leavingChild']['child']->name) ?> <span class="flag-icon">🏁</span>
+                            <?= h($day['leavingChild']['child']->name) ?> <span class="flag-icon">⬇️</span>
                         </div>
                     <?php endif; ?>
                 </div>

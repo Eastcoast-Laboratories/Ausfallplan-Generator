@@ -17,37 +17,53 @@ $this->assign('title', __('Dashboard'));
     </div>
 
     <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon">👶</div>
-            <div class="stat-content">
-                <div class="stat-value"><?= h($stats['children']) ?></div>
-                <div class="stat-label"><?= __('Children') ?></div>
-            </div>
-        </div>
+        <?= $this->Html->link(
+            '<div class="stat-card">
+                <div class="stat-icon">👶</div>
+                <div class="stat-content">
+                    <div class="stat-value">' . h($stats['children']) . '</div>
+                    <div class="stat-label">' . __('Children') . '</div>
+                </div>
+            </div>',
+            ['controller' => 'Children', 'action' => 'index'],
+            ['escape' => false, 'style' => 'text-decoration: none; color: inherit;']
+        ) ?>
 
-        <div class="stat-card">
-            <div class="stat-icon">📅</div>
-            <div class="stat-content">
-                <div class="stat-value"><?= h($stats['schedules']) ?></div>
-                <div class="stat-label"><?= __('Total Schedules') ?></div>
-            </div>
-        </div>
+        <?= $this->Html->link(
+            '<div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-content">
+                    <div class="stat-value">' . h($stats['schedules']) . '</div>
+                    <div class="stat-label">' . __('Total Schedules') . '</div>
+                </div>
+            </div>',
+            ['controller' => 'Schedules', 'action' => 'index'],
+            ['escape' => false, 'style' => 'text-decoration: none; color: inherit;']
+        ) ?>
 
-        <div class="stat-card">
-            <div class="stat-icon">✅</div>
-            <div class="stat-content">
-                <div class="stat-value"><?= h($stats['active_schedules']) ?></div>
-                <div class="stat-label"><?= __('Active Schedules') ?></div>
-            </div>
-        </div>
+        <?= $this->Html->link(
+            '<div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-content">
+                    <div class="stat-value">' . h($stats['active_schedules']) . '</div>
+                    <div class="stat-label">' . __('Active Schedules') . '</div>
+                </div>
+            </div>',
+            ['controller' => 'Schedules', 'action' => 'index'],
+            ['escape' => false, 'style' => 'text-decoration: none; color: inherit;']
+        ) ?>
 
-        <div class="stat-card">
-            <div class="stat-icon">📋</div>
-            <div class="stat-content">
-                <div class="stat-value"><?= h($stats['waitlist_entries']) ?></div>
-                <div class="stat-label"><?= __('Waitlist Entries') ?></div>
-            </div>
-        </div>
+        <?= $this->Html->link(
+            '<div class="stat-card">
+                <div class="stat-icon">📋</div>
+                <div class="stat-content">
+                    <div class="stat-value">' . h($stats['waitlist_entries']) . '</div>
+                    <div class="stat-label">' . __('Waitlist Entries') . '</div>
+                </div>
+            </div>',
+            ['controller' => 'Waitlist', 'action' => 'index'],
+            ['escape' => false, 'style' => 'text-decoration: none; color: inherit;']
+        ) ?>
     </div>
 
     <div class="quick-actions">

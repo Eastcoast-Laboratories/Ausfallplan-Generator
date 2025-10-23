@@ -51,8 +51,18 @@ class ReportService
             ->all()
             ->toArray();
 
-        // Generate day boxes
-        $days = $this->generateDays($daysCount, $assignedChildren, $schedule->capacity_per_day ?? 9);
+        // Convert waitlist to children array (only waitlist children should appear in day boxes)
+        $waitlistChildren = [];
+        foreach ($waitlist as $entry) {
+            $waitlistChildren[] = [
+                'child' => $entry->child,
+                'weight' => 1, // Default weight for waitlist children
+                'is_integrative' => $entry->child->is_integrative,
+            ];
+        }
+
+        // Generate day boxes (only with waitlist children, using round-robin)
+        $days = $this->generateDays($daysCount, $waitlistChildren, $schedule->capacity_per_day ?? 9);
 
         // Find "always at end" children (assigned but NOT on waitlist)
         $alwaysAtEnd = $this->findAlwaysAtEndChildren($assignedChildren, $waitlist);

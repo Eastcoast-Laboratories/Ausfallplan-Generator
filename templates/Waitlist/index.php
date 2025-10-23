@@ -16,16 +16,28 @@ $this->assign('title', __('Waitlist'));
     <h3><?= __('Waitlist') ?></h3>
     
     <!-- Schedule Selector -->
-    <div class="schedule-selector" style="margin-bottom: 2rem;">
-        <label for="schedule-select"><?= __('Select Schedule') ?>:</label>
-        <select id="schedule-select" onchange="window.location.href='<?= $this->Url->build(['action' => 'index']) ?>?schedule_id=' + this.value" style="margin-left: 1rem; padding: 0.5rem;">
-            <option value=""><?= __('-- Select Schedule --') ?></option>
-            <?php foreach ($schedules as $schedule): ?>
-                <option value="<?= $schedule->id ?>" <?= $selectedSchedule && $selectedSchedule->id == $schedule->id ? 'selected' : '' ?>>
-                    <?= h($schedule->title) ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
+    <div class="schedule-selector" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <label for="schedule-select"><?= __('Select Schedule') ?>:</label>
+            <select id="schedule-select" onchange="window.location.href='<?= $this->Url->build(['action' => 'index']) ?>?schedule_id=' + this.value" style="margin-left: 1rem; padding: 0.5rem;">
+                <option value=""><?= __('-- Select Schedule --') ?></option>
+                <?php foreach ($schedules as $schedule): ?>
+                    <option value="<?= $schedule->id ?>" <?= $selectedSchedule && $selectedSchedule->id == $schedule->id ? 'selected' : '' ?>>
+                        <?= h($schedule->title) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <?php if ($selectedSchedule && !empty($availableChildren)): ?>
+            <?= $this->Form->postLink(
+                '+ ' . __('Add All Children'),
+                ['action' => 'addAll', $selectedSchedule->id],
+                [
+                    'class' => 'button',
+                    'style' => 'background: #4caf50; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; font-weight: bold;'
+                ]
+            ) ?>
+        <?php endif; ?>
     </div>
     
     <?php if ($selectedSchedule): ?>
