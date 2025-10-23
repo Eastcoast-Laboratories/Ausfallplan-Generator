@@ -30,8 +30,19 @@ $this->assign('title', __('Schedules'));
                 <tr>
                     <td><?= h($schedule->title) ?></td>
                     <?php if (isset($user) && $user->role === 'admin'): ?>
-                        <td><?= isset($schedule->user) ? h($schedule->user->email) : '-' ?></td>
-                        <td><?= h($schedule->organization->name) ?></td>
+                        <td><?= h($schedule->user->email ?? $schedule->organization->name ?? '-') ?></td>
+                        <td>
+                            <?php if ($schedule->has('organization')): ?>
+                                <?= $this->Html->link(h($schedule->organization->name), [
+                                    'prefix' => 'Admin',
+                                    'controller' => 'Organizations',
+                                    'action' => 'view',
+                                    $schedule->organization->id
+                                ]) ?>
+                            <?php else: ?>
+                                -
+                            <?php endif; ?>
+                        </td>
                     <?php endif; ?>
                     <td><?= h($schedule->days_count) ?></td>
                     <td><?= h($schedule->capacity_per_day) ?></td>
