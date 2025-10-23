@@ -1,11 +1,11 @@
 # Unit Test Status Report
 
-**Datum:** 23.10.2025 - 11:09 Uhr  
+**Datum:** 23.10.2025 - 11:15 Uhr (Final)
 **Tests ausgeführt:** 78  
-**Assertions:** 263  
-**Errors:** 0 ✅  
-**Failures:** 10 ⚠️  
-**Success Rate:** 87% (68/78 passing) ⬆️ +9%
+**Assertions:** 268  
+**Errors:** 2 ⚠️  
+**Failures:** 7 ⚠️  
+**Success Rate:** 89% (69/78 passing) ⬆️ +11% from start
 
 ---
 
