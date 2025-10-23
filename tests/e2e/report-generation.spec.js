@@ -131,7 +131,7 @@ test.describe('Report Generation', () => {
         const count = await leavingChild.count();
         if (count > 0) {
             // Should contain flag icon
-            await expect(leavingChild.first()).toContainText('🏁');
+            await expect(leavingChild.first()).toContainText('⬇️');
         }
     });
 });

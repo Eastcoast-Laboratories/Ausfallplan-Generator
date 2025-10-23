@@ -203,4 +203,71 @@ class WaitlistController extends AppController
             $this->fetchTable('WaitlistEntries')->save($entry);
         }
     }
+
+    /**
+     * Add all available children to waitlist
+     *
+     * @param string|null $scheduleId Schedule ID
+     * @return \Cake\Http\Response|null Redirects back to index
+     */
+    public function addAll($scheduleId = null)
+    {
+        $this->request->allowMethod(['post']);
+        
+        if (!$scheduleId) {
+            $this->Flash->error(__('Invalid schedule.'));
+            return $this->redirect(['action' => 'index']);
+        }
+        
+        $user = $this->Authentication->getIdentity();
+        $childrenTable = $this->fetchTable('Children');
+        $waitlistTable = $this->fetchTable('WaitlistEntries');
+        
+        // Get all active children for this organization
+        $allChildren = $childrenTable->find()
+            ->where([
+                'Children.organization_id' => $user->organization_id,
+                'Children.is_active' => true
+            ])
+            ->all();
+        
+        // Get existing waitlist entries
+        $existingEntries = $waitlistTable->find()
+            ->where(['schedule_id' => $scheduleId])
+            ->all()
+            ->indexBy('child_id')
+            ->toArray();
+        
+        // Find next priority number
+        $maxPriority = $waitlistTable->find()
+            ->where(['schedule_id' => $scheduleId])
+            ->select(['max_priority' => $waitlistTable->find()->func()->max('priority')])
+            ->first();
+        
+        $nextPriority = ($maxPriority && isset($maxPriority->max_priority)) ? $maxPriority->max_priority + 1 : 1;
+        $addedCount = 0;
+        
+        // Add children that aren't already on the waitlist
+        foreach ($allChildren as $child) {
+            if (!isset($existingEntries[$child->id])) {
+                $entry = $waitlistTable->newEntity([
+                    'schedule_id' => $scheduleId,
+                    'child_id' => $child->id,
+                    'priority' => $nextPriority++
+                ]);
+                
+                if ($waitlistTable->save($entry)) {
+                    $addedCount++;
+                }
+            }
+        }
+        
+        if ($addedCount > 0) {
+            $this->Flash->success(__('Added {0} children to waitlist.', $addedCount));
+        } else {
+            $this->Flash->info(__('All children are already on the waitlist.'));
+        }
+        
+        return $this->redirect(['action' => 'index', '?' => ['schedule_id' => $scheduleId]]);
+    }
 }
