@@ -156,7 +156,6 @@ return [
     'Child assigned to schedule.' => 'Kind dem Ausfallplan zugeordnet.',
     'Could not assign child to schedule.' => 'Kind konnte nicht dem Ausfallplan zugeordnet werden.',
     'Child removed from schedule.' => 'Kind vom Ausfallplan entfernt.',
-    'Could not remove child from schedule.' => 'Kind konnte nicht vom Ausfallplan entfernt werden.',
     'The schedule has been created.' => 'Der Ausfallplan wurde erstellt.',
     'The schedule has been saved.' => 'Der Ausfallplan wurde gespeichert.',
     'The schedule could not be saved. Please try again.' => 'Der Ausfallplan konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.',
