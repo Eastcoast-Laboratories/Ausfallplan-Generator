@@ -1,26 +1,23 @@
 # TODO
 
-## Current Sprint
+## Current Sprint - Completed! 🎉
 
 - [x] Admin kann alle Schedules/Ausfallpläne sehen (mit User/Org-Spalten) - ✅ 23.10. 22:50
 - [x] Admin kann Organisationen verwalten - ✅ 23.10. 23:00
 - [x] Playwright Test: Admin login und Berechtigungen testen - ✅ 23.10. 23:00
+- [x] Email und Passwort ändern - ✅ 23.10. 23:15
+- [x] Password recovery mit Konfirmationscode - ✅ 23.10. 23:15
+- [x] Organization Autocomplete bei Registration - ✅ 23.10. 23:20
+- [x] Viewer Role (Read-Only) - ✅ 23.10. 23:20
+- [x] organization_id in children table - ✅ 23.10. 23:20
 
 ## Backlog
 
-- [ ] die navigation links einbauen mit wenn kleiner als 600px als hamburger umschalten
-- [ ] eine möglichkeit seine email und sein passwort zu ändern
-- [ ] Password recovery mit einem Konfirmationscode
+- [ ] Email-Bestätigung: Admin bekommt Mail bei neuem User in seiner Org
+- [ ] Admin einer Org kann Users seiner Org freischalten
+- [ ] Editor kann nur eigene Org-Daten bearbeiten (filter implementieren)
 
 
-Wenn man bei register in organisation eine aus denen schon vorhandenen autovervollständigen vorschlagen und wenn es keine autovervollständigung gibt, dann soll der Text eine andere Farbe kriegen und daneben ein Hinweis neue Organisation erstellen. Tu es allé? Organisationen. Wenn sich jemand anmeldet bei einer schon vorhandenen Organisation, dann muss er eine Ok Google tot, um seine E-Mail zu bestätigen und der Admin der Organisation muss auch eine Mail bekommen, um den User freizuschalten. Für seine Organisation. Der Admin von einer Organisation muss einen Element finden. Deaktivieren. 
-
-
-Wenn jemand nur Mitglied einer Organisation ist, dann darf er nur die datenorganisation sehen, aber nicht editieren 
-
-Ein admin Konto kann alles sehen und alles editieren 
-
-Ein Bearbeiter Konto kann nur die Kinder, die seine Organisation zu gehören, editieren und hinzufügen und löschen. Das heißt im Kinder tabelle muss ein Feld für die zugehörige Organisation mit rein
 
 ---
 

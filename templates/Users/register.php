@@ -91,23 +91,30 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Check if input matches existing organization
-    orgInput.addEventListener('input', function() {
+    function checkOrganization() {
         const value = orgInput.value.trim();
         hintExisting.style.display = 'none';
         hintNew.style.display = 'none';
+        orgInput.style.borderColor = '';
         
         if (!value) return;
         
-        const exists = organizations.some(org => org.name.toLowerCase() === value.toLowerCase());
+        const exists = organizations.some(org => 
+            org.name.toLowerCase() === value.toLowerCase()
+        );
         
         if (exists) {
             hintExisting.style.display = 'block';
             orgInput.style.borderColor = '#27ae60';
-        } else if (value.length > 2) {
+        } else if (value.length > 0) {
             hintNew.style.display = 'block';
             orgInput.style.borderColor = '#f39c12';
         }
-    });
+    }
+    
+    orgInput.addEventListener('input', checkOrganization);
+    orgInput.addEventListener('change', checkOrganization);
+    orgInput.addEventListener('blur', checkOrganization);
 });
 </script>
 
