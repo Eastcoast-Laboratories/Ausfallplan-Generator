@@ -178,10 +178,13 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
                         <?php foreach ($day['children'] as $childData): ?>
                             <li class="child-item">
                                 <span class="child-name"><?= h($childData['child']->name) ?></span>
-                                <span class="child-weight"><?= h($childData['weight']) ?></span>
+                                <span class="child-weight"><?= $childData['is_integrative'] ? '2' : '1' ?></span>
                             </li>
                         <?php endforeach; ?>
                     </ul>
+                    <div class="day-sum" style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #ccc; font-size: 11px; font-weight: bold;">
+                        Σ <?= h($day['countingChildrenSum']) ?> / 9
+                    </div>
                     <?php if ($day['leavingChild']): ?>
                         <div class="leaving-child">
                             <?= h($day['leavingChild']['child']->name) ?> <span class="flag-icon">⬇️</span>

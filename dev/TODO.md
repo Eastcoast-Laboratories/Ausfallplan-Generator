@@ -40,8 +40,6 @@ merke dir: playwright muss ja nicht  in dem docker laufen sondern lokal im host.
 
  - das dashboard soll die boxen verlinken zu children, shedules, ...
 
-- im report dürfen die die nicht in der nachrückliste stehen nicht unter den tages-boxen ersheinen, nur die anderen kinder sollen um round robin aus der nachrücklistenreihenfolge ergänzt werden, aber immer nur, wenn sie nicht schon in der liste für den tag sind
-
 - im report soll pro tag die summe aller zählkinder berechnet werden also integrative doppelt, und dann pro tag  maximal 9 zählkinder
 
 - bei [add child](http://localhost:8080/children/index) soll der erste tab zum button "Add Child" führen, der soll auch den autofocus haben
