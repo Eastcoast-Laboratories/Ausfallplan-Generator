@@ -67,12 +67,16 @@ class ReportService
         // Find "always at end" children (assigned but NOT on waitlist)
         $alwaysAtEnd = $this->findAlwaysAtEndChildren($assignedChildren, $waitlist);
 
+        // Calculate statistics for each waitlist child
+        $childStats = $this->calculateChildStats($waitlist, $days);
+
         return [
             'schedule' => $schedule,
             'days' => $days,
             'waitlist' => $waitlist,
             'alwaysAtEnd' => $alwaysAtEnd,
             'daysCount' => $daysCount,
+            'childStats' => $childStats,
         ];
     }
 
@@ -262,5 +266,48 @@ class ReportService
         return array_filter($children, function ($child) use ($waitlistChildIds) {
             return !in_array($child['child']->id, $waitlistChildIds);
         });
+    }
+
+    /**
+     * Calculate statistics for each child
+     * - How many times they appear in day boxes
+     * - How many times they appear as leaving child
+     *
+     * @param array $waitlist Waitlist entries
+     * @param array $days Generated days
+     * @return array Statistics per child ID
+     */
+    private function calculateChildStats(array $waitlist, array $days): array
+    {
+        $stats = [];
+        
+        // Initialize stats for all waitlist children
+        foreach ($waitlist as $entry) {
+            $stats[$entry->child_id] = [
+                'daysCount' => 0,
+                'leavingCount' => 0,
+            ];
+        }
+        
+        // Count appearances in days and as leaving child
+        foreach ($days as $day) {
+            // Count children in day boxes
+            foreach ($day['children'] as $childData) {
+                $childId = $childData['child']->id;
+                if (isset($stats[$childId])) {
+                    $stats[$childId]['daysCount']++;
+                }
+            }
+            
+            // Count leaving children
+            if ($day['leavingChild']) {
+                $leavingChildId = $day['leavingChild']['child']->id;
+                if (isset($stats[$leavingChildId])) {
+                    $stats[$leavingChildId]['leavingCount']++;
+                }
+            }
+        }
+        
+        return $stats;
     }
 }

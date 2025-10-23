@@ -200,18 +200,29 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
         <div class="sidebar">
             <div class="waitlist-box">
                 <div class="box-title"><?= __('Nachrückliste') ?></div>
-                <?php if (!empty($waitlist)): ?>
-                    <?php foreach ($waitlist as $entry): 
-                        $count = $entry->child->is_integrative ? 2 : 1;
-                    ?>
-                        <div class="waitlist-item">
-                            <span><?= h($entry->child->name) ?></span>
-                            <span class="priority-badge"><?= h($count) ?></span>
+                <div style="display: grid; grid-template-columns: 1fr auto auto auto; gap: 4px; font-size: 10px;">
+                    <div style="font-weight: bold; padding-bottom: 4px; border-bottom: 1px solid #ccc;">Name</div>
+                    <div style="font-weight: bold; padding-bottom: 4px; border-bottom: 1px solid #ccc; text-align: center;">Z</div>
+                    <div style="font-weight: bold; padding-bottom: 4px; border-bottom: 1px solid #ccc; color: #999; text-align: center;">D</div>
+                    <div style="font-weight: bold; padding-bottom: 4px; border-bottom: 1px solid #ccc; color: #999; text-align: center;">⬇️</div>
+                    
+                    <?php if (!empty($waitlist)): ?>
+                        <?php foreach ($waitlist as $entry): 
+                            $count = $entry->child->is_integrative ? 2 : 1;
+                            $childId = $entry->child_id;
+                            $stats = isset($childStats[$childId]) ? $childStats[$childId] : ['daysCount' => 0, 'leavingCount' => 0];
+                        ?>
+                            <div style="padding: 2px 0;"><?= h($entry->child->name) ?></div>
+                            <div style="background: #e3f2fd; padding: 2px 6px; border-radius: 3px; font-weight: bold; text-align: center;"><?= h($count) ?></div>
+                            <div style="color: #999; text-align: center;"><?= h($stats['daysCount']) ?></div>
+                            <div style="color: #999; text-align: center;"><?= h($stats['leavingCount']) ?></div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div style="grid-column: 1 / -1; color: #666; text-align: center; padding: 2rem;">
+                            <?= __('No entries') ?>
                         </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <p style="color: #666; font-size: 10px;"><?= __('No entries') ?></p>
-                <?php endif; ?>
+                    <?php endif; ?>
+                </div>
             </div>
 
             <div class="always-end-box">
