@@ -45,7 +45,7 @@ $this->assign('title', h($organization->name));
 
     <div class="related">
         <h4><?= __('Benutzer') ?> (<?= count($organization->users) ?>)</h4>
-        <?php if (\!empty($organization->users)): ?>
+        <?php if (!empty($organization->users)): ?>
         <div class="table-responsive">
             <table>
                 <tr>
