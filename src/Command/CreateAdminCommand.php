@@ -67,8 +67,7 @@ class CreateAdminCommand extends Command
             'organization_id' => $org->id,
             'email' => 'admin@demo.kita',
             'password' => 'asbdasdaddd',
-            'role' => 'admin',
-            'email_verified_at' => date('Y-m-d H:i:s')
+            'role' => 'admin'
         ]);
 
         if ($usersTable->save($user)) {
