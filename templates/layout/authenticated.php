@@ -424,7 +424,7 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
             <?php if ($user && $user->role === 'admin'): ?>
             <a href="/admin/organizations" class="sidebar-nav-item <?= $this->request->getParam('controller') === 'Organizations' && $this->request->getParam('prefix') === 'Admin' ? 'active' : '' ?>">
                 <span>🏢</span>
-                <span><?= __('Organizations') ?></span>
+                <span><?= __('Organisationen') ?></span>
             </a>
             <?php endif; ?>
         </nav>
