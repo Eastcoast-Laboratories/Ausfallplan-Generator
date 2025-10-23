@@ -151,7 +151,7 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
                 'username' => 'email',
                 'password' => 'password',
             ],
-            'loginUrl' => '/users/login',
+            'loginUrl' => null, // Allow login from any URL
         ]);
         
         // Load identifiers
