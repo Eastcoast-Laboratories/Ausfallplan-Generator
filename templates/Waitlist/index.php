@@ -92,7 +92,6 @@ $this->assign('title', __('Waitlist'));
                                 '✕',
                                 ['action' => 'delete', $entry->id],
                                 [
-                                    'confirm' => __('Remove {0} from waitlist?', $entry->child->name),
                                     'class' => 'button button-small',
                                     'style' => 'background: #f44336; color: white; padding: 0.5rem 0.75rem; text-decoration: none; border-radius: 4px;'
                                 ]
