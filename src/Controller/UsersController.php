@@ -51,8 +51,14 @@ class UsersController extends AppController
         
         // If user is already logged in or just logged in successfully, redirect
         if ($result && $result->isValid()) {
-            // Redirect to dashboard after successful login
-            $target = $this->Authentication->getLoginRedirect() ?? ['controller' => 'Dashboard', 'action' => 'index'];
+            // Get redirect target from authentication or fallback to dashboard
+            $target = $this->Authentication->getLoginRedirect();
+            
+            // If no redirect target, explicitly set dashboard
+            if (!$target) {
+                $target = ['controller' => 'Dashboard', 'action' => 'index'];
+            }
+            
             return $this->redirect($target);
         }
         
