@@ -11,17 +11,26 @@
         <legend><?= __('Register New Account') ?></legend>
         <p><?= __('Create your account to start managing your Kita schedules.') ?></p>
         
-        <?php
-            echo $this->Form->control('organization_name', [
+        <div class="form-group">
+            <?= $this->Form->control('organization_name', [
                 'type' => 'text',
                 'label' => __('Organization (optional)'),
-                'placeholder' => __('e.g., Kita Sonnenschein'),
+                'placeholder' => __('Start typing to search...'),
                 'required' => false,
                 'autofocus' => true,
-                'help' => __('Leave empty if you don\'t belong to an organization'),
                 'id' => 'organization-input',
-                'autocomplete' => 'off'
-            ]);
+                'autocomplete' => 'off',
+                'list' => 'organization-list'
+            ]) ?>
+            <datalist id="organization-list"></datalist>
+            <small id="org-hint" style="display:none; color: #27ae60; margin-top: 0.5rem;">
+                ✓ <?= __('Existing organization selected') ?>
+            </small>
+            <small id="org-new" style="display:none; color: #f39c12; margin-top: 0.5rem;">
+                ⚠ <?= __('New organization will be created') ?>
+            </small>
+        </div>
+        <?php
             echo $this->Form->control('email', [
                 'type' => 'email',
                 'label' => __('Email'),
@@ -54,6 +63,53 @@
     </div>
     <?= $this->Form->end() ?>
 </div>
+
+<script>
+// Organization autocomplete
+document.addEventListener('DOMContentLoaded', function() {
+    const orgInput = document.getElementById('organization-input');
+    const orgList = document.getElementById('organization-list');
+    const hintExisting = document.getElementById('org-hint');
+    const hintNew = document.getElementById('org-new');
+    let organizations = [];
+    
+    // Fetch organizations from API
+    fetch('/api/organizations/search.json')
+        .then(res => res.json())
+        .then(data => {
+            organizations = data.organizations || [];
+            updateDatalist();
+        });
+    
+    function updateDatalist() {
+        orgList.innerHTML = '';
+        organizations.forEach(org => {
+            const option = document.createElement('option');
+            option.value = org.name;
+            orgList.appendChild(option);
+        });
+    }
+    
+    // Check if input matches existing organization
+    orgInput.addEventListener('input', function() {
+        const value = orgInput.value.trim();
+        hintExisting.style.display = 'none';
+        hintNew.style.display = 'none';
+        
+        if (!value) return;
+        
+        const exists = organizations.some(org => org.name.toLowerCase() === value.toLowerCase());
+        
+        if (exists) {
+            hintExisting.style.display = 'block';
+            orgInput.style.borderColor = '#27ae60';
+        } else if (value.length > 2) {
+            hintNew.style.display = 'block';
+            orgInput.style.borderColor = '#f39c12';
+        }
+    });
+});
+</script>
 
 <style>
 .users.form {

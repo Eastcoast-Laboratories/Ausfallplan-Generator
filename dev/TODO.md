@@ -15,7 +15,6 @@
 
 Wenn man bei register in organisation eine aus denen schon vorhandenen autovervollständigen vorschlagen und wenn es keine autovervollständigung gibt, dann soll der Text eine andere Farbe kriegen und daneben ein Hinweis neue Organisation erstellen. Tu es allé? Organisationen. Wenn sich jemand anmeldet bei einer schon vorhandenen Organisation, dann muss er eine Ok Google tot, um seine E-Mail zu bestätigen und der Admin der Organisation muss auch eine Mail bekommen, um den User freizuschalten. Für seine Organisation. Der Admin von einer Organisation muss einen Element finden. Deaktivieren. 
 
-Password recoveryan mit einem konfirmationscode. 
 
 Wenn jemand nur Mitglied einer Organisation ist, dann darf er nur die datenorganisation sehen, aber nicht editieren 
 
