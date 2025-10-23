@@ -67,7 +67,6 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
         }
 
         .children-list {
-            flex: 1;
             list-style: none;
         }
 
@@ -176,10 +175,15 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
 
     <div class="container">
         <div class="days-grid">
+            <?php 
+            // Calculate dynamic min-height based on capacity_per_day (15px per child)
+            $capacityPerDay = $schedule->capacity_per_day ?? 9;
+            $minHeight = $capacityPerDay * 15;
+            ?>
             <?php foreach ($days as $day): ?>
                 <div class="day-box">
                     <div class="day-title"><?= h($day['title']) ?></div>
-                    <ul class="children-list">
+                    <ul class="children-list" style="min-height: <?= $minHeight ?>px;">
                         <?php foreach ($day['children'] as $childData): ?>
                             <li class="child-item">
                                 <span class="child-name"><?= h($childData['child']->name) ?></span>
@@ -187,8 +191,8 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
                             </li>
                         <?php endforeach; ?>
                     </ul>
-                    <div class="day-sum" style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #ccc; font-size: 11px; font-weight: bold; text-align: right;">
-                        Σ <?= h($day['countingChildrenSum']) ?> / 9
+                    <div class="day-sum" style="margin-top: 0; padding-top: 5px; border-top: 1px solid #ccc; font-size: 9px; text-align: right; color:#666">
+                        <?= h($day['countingChildrenSum']) ?>
                     </div>
                     <?php if ($day['leavingChild']): ?>
                         <div class="leaving-child">
