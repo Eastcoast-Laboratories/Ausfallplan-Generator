@@ -78,8 +78,10 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(res => res.json())
         .then(data => {
             organizations = data.organizations || [];
+            console.log('Loaded organizations:', organizations);
             updateDatalist();
-        });
+        })
+        .catch(err => console.error('Failed to load organizations:', err));
     
     function updateDatalist() {
         orgList.innerHTML = '';
@@ -102,6 +104,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const exists = organizations.some(org => 
             org.name.toLowerCase() === value.toLowerCase()
         );
+        
+        console.log('Check:', value, 'exists:', exists, 'orgs:', organizations.length);
         
         if (exists) {
             hintExisting.style.display = 'block';
