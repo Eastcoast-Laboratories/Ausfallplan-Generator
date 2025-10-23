@@ -89,7 +89,22 @@ class WaitlistController extends AppController
             $availableChildren = $availableChildrenQuery->all();
         }
         
-        $this->set(compact('schedules', 'selectedSchedule', 'waitlistEntries', 'availableChildren'));
+        // Count total children not yet on waitlist (for "Add All" button visibility)
+        $childrenNotOnWaitlist = $this->fetchTable('Children')->find()
+            ->where([
+                'Children.organization_id' => $user->organization_id,
+                'Children.is_active' => true
+            ]);
+        
+        if (!empty($childrenOnWaitlist)) {
+            $childrenNotOnWaitlist->where([
+                'Children.id NOT IN' => $childrenOnWaitlist
+            ]);
+        }
+        
+        $countNotOnWaitlist = $childrenNotOnWaitlist->count();
+        
+        $this->set(compact('schedules', 'selectedSchedule', 'waitlistEntries', 'availableChildren', 'countNotOnWaitlist'));
     }
 
     /**
