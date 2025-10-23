@@ -28,7 +28,7 @@ $this->assign('title', __('Waitlist'));
                 <?php endforeach; ?>
             </select>
         </div>
-        <?php if ($selectedSchedule && !empty($availableChildren)): ?>
+        <?php if ($selectedSchedule && isset($countNotOnWaitlist) && $countNotOnWaitlist > 0): ?>
             <?= $this->Form->postLink(
                 '+ ' . __('Add All Children'),
                 ['action' => 'add-all', $selectedSchedule->id],
