@@ -20,7 +20,44 @@ class UsersController extends AppController
         $user = $this->Users->newEmptyEntity();
         
         if ($this->request->is('post')) {
-            $user = $this->Users->patchEntity($user, $this->request->getData());
+            $data = $this->request->getData();
+            
+            // Handle organization: create new or use "keine organisation"
+            $organizationName = trim($data['organization_name'] ?? '');
+            
+            if (!empty($organizationName)) {
+                // Create new organization
+                $organizationsTable = $this->fetchTable('Organizations');
+                $organization = $organizationsTable->newEntity([
+                    'name' => $organizationName
+                ]);
+                
+                if ($organizationsTable->save($organization)) {
+                    $data['organization_id'] = $organization->id;
+                } else {
+                    $this->Flash->error(__('Could not create organization.'));
+                    $this->set(compact('user'));
+                    return;
+                }
+            } else {
+                // Use "keine organisation"
+                $organizationsTable = $this->fetchTable('Organizations');
+                $noOrg = $organizationsTable->find()
+                    ->where(['name' => 'keine organisation'])
+                    ->first();
+                
+                if (!$noOrg) {
+                    // Create "keine organisation" if it doesn't exist
+                    $noOrg = $organizationsTable->newEntity(['name' => 'keine organisation']);
+                    $organizationsTable->save($noOrg);
+                }
+                
+                $data['organization_id'] = $noOrg->id;
+            }
+            
+            unset($data['organization_name']); // Remove the text field, we use organization_id
+            
+            $user = $this->Users->patchEntity($user, $data);
             
             // Set default role to 'viewer' if not specified
             if (empty($user->role)) {
@@ -28,15 +65,13 @@ class UsersController extends AppController
             }
             
             if ($this->Users->save($user)) {
-                $this->Flash->success(__('Your account has been created. Please check your email to verify your account.'));
+                $this->Flash->success(__('Registration successful. Please login.'));
                 return $this->redirect(['action' => 'login']);
             }
-            
-            $this->Flash->error(__('Unable to create your account. Please try again.'));
+            $this->Flash->error(__('Registration failed. Please try again.'));
         }
         
-        $organizations = $this->Users->Organizations->find('list', limit: 200)->all();
-        $this->set(compact('user', 'organizations'));
+        $this->set(compact('user'));
     }
 
     /**
