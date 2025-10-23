@@ -55,8 +55,8 @@ class AuthorizationMiddleware implements MiddlewareInterface
         
         // Editor: Can edit own organization data
         if ($role === 'editor') {
-            // Editor cannot access user management
-            if ($controller === 'Users' && !in_array($action, ['profile', 'logout'])) {
+            // Editor cannot access admin user management
+            if ($controller === 'Users' && in_array($action, ['index', 'add', 'edit', 'delete', 'approve'])) {
                 $response = new Response();
                 return $response
                     ->withStatus(403)
