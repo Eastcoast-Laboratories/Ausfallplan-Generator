@@ -31,7 +31,7 @@ $this->assign('title', __('Waitlist'));
         <?php if ($selectedSchedule && !empty($availableChildren)): ?>
             <?= $this->Form->postLink(
                 '+ ' . __('Add All Children'),
-                ['action' => 'addAll', $selectedSchedule->id],
+                ['action' => 'add-all', $selectedSchedule->id],
                 [
                     'class' => 'button',
                     'style' => 'background: #4caf50; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; font-weight: bold;'
