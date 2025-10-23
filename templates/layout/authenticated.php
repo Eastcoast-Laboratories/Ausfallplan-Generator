@@ -396,22 +396,22 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
         </div>
         
         <nav class="sidebar-nav">
-            <a href="<?= $this->Url->build(['controller' => 'Dashboard', 'action' => 'index']) ?>" class="sidebar-nav-item <?= $this->request->getParam('controller') === 'Dashboard' ? 'active' : '' ?>">
+            <a href="/dashboard" class="sidebar-nav-item <?= $this->request->getParam('controller') === 'Dashboard' ? 'active' : '' ?>">
                 <span class="sidebar-nav-icon">📊</span>
                 <span><?= __('Dashboard') ?></span>
             </a>
             
-            <a href="<?= $this->Url->build(['controller' => 'Children', 'action' => 'index']) ?>" class="sidebar-nav-item <?= $this->request->getParam('controller') === 'Children' ? 'active' : '' ?>">
+            <a href="/children" class="sidebar-nav-item <?= $this->request->getParam('controller') === 'Children' ? 'active' : '' ?>">
                 <span class="sidebar-nav-icon">👶</span>
                 <span><?= __('Children') ?></span>
             </a>
             
-            <a href="<?= $this->Url->build(['controller' => 'SiblingGroups', 'action' => 'index']) ?>" class="sidebar-nav-item <?= $this->request->getParam('controller') === 'SiblingGroups' ? 'active' : '' ?>">
+            <a href="/sibling-groups" class="sidebar-nav-item <?= $this->request->getParam('controller') === 'SiblingGroups' ? 'active' : '' ?>">
                 <span class="sidebar-nav-icon">👨‍👩‍👧</span>
                 <span><?= __('Sibling Groups') ?></span>
             </a>
             
-            <a href="<?= $this->Url->build(['controller' => 'Schedules', 'action' => 'index']) ?>" class="sidebar-nav-item <?= $this->request->getParam('controller') === 'Schedules' ? 'active' : '' ?>">
+            <a href="/schedules" class="sidebar-nav-item <?= $this->request->getParam('controller') === 'Schedules' ? 'active' : '' ?>">
                 <span class="sidebar-nav-icon">📅</span>
                 <span><?= __('Schedules') ?></span>
             </a>
@@ -472,11 +472,11 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
                             <div class="user-dropdown-name"><?= h($user->email ?? __('User')) ?></div>
                             <div class="user-dropdown-email"><?= h($user->role ?? 'viewer') ?></div>
                         </div>
-                        <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'profile']) ?>" class="user-dropdown-item">
+                        <a href="/profile" class="user-dropdown-item">
                             <span>⚙️</span>
                             <span><?= __('Settings') ?></span>
                         </a>
-                        <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'account']) ?>" class="user-dropdown-item">
+                        <a href="/profile" class="user-dropdown-item">
                             <span>👤</span>
                             <span><?= __('My Account') ?></span>
                         </a>
