@@ -32,13 +32,11 @@ $this->assign('title', __('Schedules'));
                     <?php if (isset($user) && $user->role === 'admin'): ?>
                         <td><?= h($schedule->user->email ?? $schedule->organization->name ?? '-') ?></td>
                         <td>
-                            <?php if ($schedule->has('organization')): ?>
-                                <?= $this->Html->link(h($schedule->organization->name), [
-                                    'prefix' => 'Admin',
-                                    'controller' => 'Organizations',
-                                    'action' => 'view',
-                                    $schedule->organization->id
-                                ]) ?>
+                            <?php if ($schedule->has('organization') && isset($schedule->organization->id)): ?>
+                                <?= $this->Html->link(
+                                    h($schedule->organization->name), 
+                                    '/admin/organizations/view/' . $schedule->organization->id
+                                ) ?>
                             <?php else: ?>
                                 -
                             <?php endif; ?>

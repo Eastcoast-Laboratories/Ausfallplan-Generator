@@ -68,12 +68,15 @@ return function (RouteBuilder $routes): void {
         $builder->connect('/schedules', ['controller' => 'Schedules', 'action' => 'index']);
         $builder->connect('/waitlist', ['controller' => 'Waitlist', 'action' => 'index']);
         
-        // Admin Routes
-        $builder->connect('/admin/organizations', ['prefix' => 'Admin', 'controller' => 'Organizations', 'action' => 'index']);
-        $builder->connect('/admin/organizations/view/:id', ['prefix' => 'Admin', 'controller' => 'Organizations', 'action' => 'view'], ['pass' => ['id']]);
-        $builder->connect('/admin/organizations/edit/:id', ['prefix' => 'Admin', 'controller' => 'Organizations', 'action' => 'edit'], ['pass' => ['id']]);
-        $builder->connect('/admin/organizations/delete/:id', ['prefix' => 'Admin', 'controller' => 'Organizations', 'action' => 'delete'], ['pass' => ['id']]);
-        $builder->connect('/admin/organizations/toggle-active/:id', ['prefix' => 'Admin', 'controller' => 'Organizations', 'action' => 'toggleActive'], ['pass' => ['id']]);
+        // Admin Routes - Using prefix scope
+        $builder->prefix('Admin', function (RouteBuilder $routes) {
+            $routes->setRouteClass(Route::class);
+            $routes->connect('/admin/organizations', ['controller' => 'Organizations', 'action' => 'index']);
+            $routes->connect('/admin/organizations/view/:id', ['controller' => 'Organizations', 'action' => 'view'], ['pass' => ['id']]);
+            $routes->connect('/admin/organizations/edit/:id', ['controller' => 'Organizations', 'action' => 'edit'], ['pass' => ['id']]);
+            $routes->connect('/admin/organizations/delete/:id', ['controller' => 'Organizations', 'action' => 'delete'], ['pass' => ['id']]);
+            $routes->connect('/admin/organizations/toggle-active/:id', ['controller' => 'Organizations', 'action' => 'toggleActive'], ['pass' => ['id']]);
+        });
         
         // API Routes
         $builder->prefix('Api', function ($routes) {
