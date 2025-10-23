@@ -123,9 +123,16 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
             background: #e3f2fd;
             padding: 2px 6px;
             border-radius: 3px;
-            font-weight: bold;
             font-size: 10px;
-            margin-left: 8px;
+            font-weight: bold;
+        }
+
+        .waitlist-sum {
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 2px solid #000;
+            font-size: 11px;
+            text-align: center;
         }
 
         .explanation {
@@ -189,13 +196,20 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
             <div class="waitlist-box">
                 <div class="box-title"><?= __('Nachrückliste') ?></div>
                 <?php if (!empty($waitlist)): ?>
-                    <?php foreach ($waitlist as $entry): ?>
+                    <?php 
+                    $totalCount = 0;
+                    foreach ($waitlist as $entry): 
+                        $count = $entry->child->is_integrative ? 2 : 1;
+                        $totalCount += $count;
+                    ?>
                         <div class="waitlist-item">
                             <span><?= h($entry->child->name) ?></span>
-                            <span class="priority-badge"><?= h($entry->priority) ?></span>
+                            <span class="priority-badge"><?= h($count) ?></span>
                         </div>
                     <?php endforeach; ?>
-                    <div style="text-align: center; margin-top: 8px; font-size: 10px;">...</div>
+                    <div class="waitlist-sum">
+                        <?= __('Summe aller Zählkinder') ?>: <strong><?= h($totalCount) ?></strong>
+                    </div>
                 <?php else: ?>
                     <p style="color: #666; font-size: 10px;"><?= __('No entries') ?></p>
                 <?php endif; ?>
