@@ -206,7 +206,18 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
                     <div style="font-weight: bold; padding-bottom: 4px; border-bottom: 1px solid #ccc;">Name</div>
                     <div style="font-weight: bold; padding-bottom: 4px; border-bottom: 1px solid #ccc; text-align: center;">Z</div>
                     <div style="font-weight: bold; padding-bottom: 4px; border-bottom: 1px solid #ccc; color: #999; text-align: center;">D</div>
-d
+                    <div style="font-weight: bold; padding-bottom: 4px; border-bottom: 1px solid #ccc; color: #999; text-align: center;">⬇️</div>
+                    
+                    <?php if (!empty($waitlist)): ?>
+                        <?php foreach ($waitlist as $entry): 
+                            // Check both possible property names (child vs children)
+                            $childEntity = $entry->child ?? $entry->children ?? null;
+                            if (!$childEntity) continue;
+                            
+                            $count = $childEntity->is_integrative ? 2 : 1;
+                            $childId = $childEntity->id;
+                            $stats = isset($childStats[$childId]) ? $childStats[$childId] : ['daysCount' => 0, 'leavingCount' => 0];
+                        ?>
                             <div style="padding: 2px 0;"><?= h($childEntity->name) ?></div>
                             <div style="background: #e3f2fd; padding: 2px 6px; border-radius: 3px; font-weight: bold; text-align: center;"><?= h($count) ?></div>
                             <div style="color: #999; text-align: center;"><?= h($stats['daysCount']) ?></div>
