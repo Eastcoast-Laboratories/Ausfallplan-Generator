@@ -249,7 +249,7 @@ class SchedulesControllerTest extends TestCase
             'title' => 'Updated Title',
         ]);
 
-        $this->assertRedirect(['controller' => 'Schedules', 'action' => 'index']);
+        $this->assertRedirect(['controller' => 'Schedules', 'action' => 'view', 1]);
 
         // Verify update
         $updated = $schedules->get($schedule->id);

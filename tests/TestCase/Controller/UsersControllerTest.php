@@ -77,7 +77,7 @@ class UsersControllerTest extends TestCase
         
         $this->assertResponseSuccess();
         $this->assertRedirect(['action' => 'login']);
-        $this->assertFlashMessage('Your account has been created. Please check your email to verify your account.');
+        $this->assertFlashMessage('Registration successful. Please login.');
         
         // Verify user was created in database
         $users = $this->getTableLocator()->get('Users');
