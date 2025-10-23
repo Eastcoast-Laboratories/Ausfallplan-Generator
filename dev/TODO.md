@@ -38,6 +38,8 @@ merke dir: playwright muss ja nicht  in dem docker laufen sondern lokal im host.
 
 - http://localhost:8080/schedules/manage-children/1 soll einen button add child bekommen#
 
+- füge überall autofocus in dem sinnvollsten input feld ein, bei jedem view
+
 
 
 $ ssh eclabs-vm06 ls /var/kunden/webs/ruben/www/ausfallplan-generator.z11.de -la
