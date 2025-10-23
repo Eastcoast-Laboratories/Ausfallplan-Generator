@@ -70,11 +70,30 @@ class UsersController extends AppController
             $user->email_token = bin2hex(random_bytes(16));
             
             if ($this->Users->save($user)) {
-                // TODO: Send verification email with link: /users/verify/{token}
-                // For now, we log it
-                $this->log("Registration: User {$user->email} needs to verify email with token: {$user->email_token}", 'info');
+                // Send verification email (or store for debug on localhost)
+                $verifyUrl = \Cake\Routing\Router::url([
+                    'controller' => 'Users',
+                    'action' => 'verify',
+                    $user->email_token
+                ], true);
                 
-                $this->Flash->success(__('Registration successful. Please check your email to verify your account (Email disabled in development).'));
+                \App\Service\EmailDebugService::send([
+                    'to' => $user->email,
+                    'subject' => 'Verify your email address',
+                    'body' => "Hello,\n\nPlease verify your email address by clicking the link below:\n\n{$verifyUrl}\n\nIf you did not register, please ignore this email.",
+                    'links' => [
+                        'Verify Email' => $verifyUrl
+                    ],
+                    'data' => [
+                        'user_id' => $user->id,
+                        'email' => $user->email,
+                        'token' => $user->email_token
+                    ]
+                ]);
+                
+                $debugLink = \Cake\Routing\Router::url(['controller' => 'Debug', 'action' => 'emails'], true);
+                $this->Flash->success(__('Registration successful. Please check your email to verify your account.') . 
+                    " (Dev: <a href='{$debugLink}' style='color: white; text-decoration: underline;'>View Emails</a>)");
                 return $this->redirect(['action' => 'login']);
             }
             $this->Flash->error(__('Registration failed. Please try again.'));
@@ -282,8 +301,22 @@ class UsersController extends AppController
                 ]);
                 
                 if ($this->fetchTable('PasswordResets')->save($reset)) {
-                    $this->log("Reset code: {$resetCode}", 'info');
-                    $this->Flash->success(__('Reset code sent.'));
+                    // Send password reset email (or store for debug on localhost)
+                    \App\Service\EmailDebugService::send([
+                        'to' => $user->email,
+                        'subject' => 'Password Reset Code',
+                        'body' => "Hello,\n\nYour password reset code is: {$resetCode}\n\nThis code will expire in 1 hour.\n\nIf you did not request a password reset, please ignore this email.",
+                        'links' => [
+                            'Reset Password' => \Cake\Routing\Router::url(['controller' => 'Users', 'action' => 'resetPassword'], true)
+                        ],
+                        'data' => [
+                            'user_id' => $user->id,
+                            'email' => $user->email,
+                            'code' => $resetCode
+                        ]
+                    ]);
+                    
+                    $this->Flash->success(__('Reset code sent. Check your email.'));
                     return $this->redirect(['action' => 'resetPassword']);
                 }
             }

@@ -33,7 +33,7 @@ $class .= ' flash-' . h($params['class'] ?? 'info');
             <?php endif; ?>
         </div>
         <div class="flash-message-text">
-            <?= h($message) ?>
+            <?= $message ?> <?php // Allow HTML for debug links ?>
         </div>
         <button class="flash-close" onclick="this.parentElement.parentElement.remove(); event.stopPropagation();">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
