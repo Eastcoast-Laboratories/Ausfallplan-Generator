@@ -27,21 +27,23 @@ Die eigentliche PDF/PNG-Generierung wie im Beispiel (dev/Kindergarten-Ausfallpla
 
 - die registration seite ist noch englisch, und "Please enter your email and password to access your account."im login screen, dort auch "Create new account"
 
-"New Child" buttton auf http://localhost:8080/children/add da alles noch englisch
-
 auf http://localhost:8080/children ist "Sibling group" noch enlisch und auch noch nicht gefüllt, die spalte
 
 
-merke dir: playwright muss ja nicht  in dem docker laufen sondern lokal im host.
+- Sorge dafür, dass die übersetzungsdateien in dem docker mit gemountet sind, falls sie das noch nciht sind, (also nicht kopieren in den docker beim docker build)
 
-- Sorge dafür, dass die übersetzungsdateien in dem dochḱer mit gemountet sind, falls sie das noch nciht sind, (also nicht kopieren in den docker beim docker build)
+- in der waitlist der button zum hinzufügen aller kinder geht noch nciht, er sagt immer "All children are already on the waitlist." . mache einen playwright test, der das testet: er soll einen neuen schedule anlegen, zwei kinder erstellen, diese dann mit dem button alle hinzufügen
 
-- in der witlist der button zum hinzufügen aller kinder geht noch nciht, er sagt immer "All children are already on the waitlist." (dies auch ncoch auf deutsch übersetzen)
-
+- report: neben der nachrückliste zwei weitere kontrollspalten in grau:
+ - eine zeigt an, wie oft ein kind in allen tagen gelistet ist
+ - eine zeigt an, wie oft ein kind unten als erstes kind der nachrückliste vorkommt
 
 - bei [add child](http://localhost:8080/children/index) soll der erste tab zum button "Add Child" führen, der soll auch den autofocus haben
 
-- "Remove from schedule confirm soll weg, auch die translation s löschen
+- "Remove from schedule" confirm soll weg, auch die translation s löschen
+
+
+- im report die verteilung der kinder muss noch sicherstellen, dass ein kind das übersprungen wurde, weil es integrativ ist, an dem tag aber keine 2 zählkinder mehr platz haben, dass dieses kind dann am nächsten tag eingefügt wird, damit alle kinder im endeffekt gleich oft vorkommen
 
 
 $ ssh eclabs-vm06 ls /var/kunden/webs/ruben/www/ausfallplan-generator.z11.de -la

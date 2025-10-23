@@ -283,7 +283,9 @@ class ReportService
         
         // Initialize stats for all waitlist children
         foreach ($waitlist as $entry) {
-            $stats[$entry->child_id] = [
+            // Use child->id instead of child_id property
+            $childId = $entry->child->id;
+            $stats[$childId] = [
                 'daysCount' => 0,
                 'leavingCount' => 0,
             ];
@@ -292,15 +294,17 @@ class ReportService
         // Count appearances in days and as leaving child
         foreach ($days as $day) {
             // Count children in day boxes
-            foreach ($day['children'] as $childData) {
-                $childId = $childData['child']->id;
-                if (isset($stats[$childId])) {
-                    $stats[$childId]['daysCount']++;
+            if (isset($day['children'])) {
+                foreach ($day['children'] as $childData) {
+                    $childId = $childData['child']->id;
+                    if (isset($stats[$childId])) {
+                        $stats[$childId]['daysCount']++;
+                    }
                 }
             }
             
             // Count leaving children
-            if ($day['leavingChild']) {
+            if (isset($day['leavingChild']) && $day['leavingChild']) {
                 $leavingChildId = $day['leavingChild']['child']->id;
                 if (isset($stats[$leavingChildId])) {
                     $stats[$leavingChildId]['leavingCount']++;

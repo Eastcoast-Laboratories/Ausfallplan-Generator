@@ -276,8 +276,18 @@ class SchedulesController extends AppController
         $reportService = new \App\Service\ReportService();
         $reportData = $reportService->generateReportData((int)$id, $daysCount);
         
+        // Extract data for template (use reportSchedule to avoid overwriting $schedule)
+        $reportSchedule = $reportData['schedule'];
+        $days = $reportData['days'];
+        $waitlist = $reportData['waitlist'];
+        $alwaysAtEnd = $reportData['alwaysAtEnd'];
+        $reportDaysCount = $reportData['daysCount'];
+        $childStats = $reportData['childStats'];
+        
         // Render report view
         $this->viewBuilder()->setLayout('ajax'); // No layout for clean print
-        $this->set(compact('reportData'));
+        $this->set(compact('reportSchedule', 'days', 'waitlist', 'alwaysAtEnd', 'reportDaysCount', 'childStats'));
+        $this->set('schedule', $reportSchedule); // Also set schedule for backward compatibility
+        $this->set('daysCount', $reportDaysCount);
     }
 }
