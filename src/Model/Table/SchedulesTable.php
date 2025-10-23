@@ -51,6 +51,10 @@ class SchedulesTable extends Table
             'joinType' => 'INNER',
             'className' => 'Organizations',
         ]);
+        $this->belongsTo('Users', [
+            'foreignKey' => 'user_id',
+            'className' => 'Users',
+        ]);
         $this->hasMany('ScheduleDays', [
             'foreignKey' => 'schedule_id',
             'className' => 'ScheduleDays',

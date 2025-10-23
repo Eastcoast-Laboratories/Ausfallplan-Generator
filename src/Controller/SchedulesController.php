@@ -17,16 +17,24 @@ class SchedulesController extends AppController
      */
     public function index()
     {
-        // Get current user's organization
+        // Get current user
         $user = $this->Authentication->getIdentity();
         
-        $schedules = $this->Schedules->find()
-            ->where(['Schedules.organization_id' => $user->organization_id])
-            ->contain(['Organizations'])
-            ->orderBy(['Schedules.created' => 'DESC'])
-            ->all();
+        // Admin sees ALL schedules, others only see their own
+        $query = $this->Schedules->find();
+        
+        if ($user->role === 'admin') {
+            // Admin: Show all schedules with user info
+            $query->contain(['Organizations', 'Users']);
+        } else {
+            // Non-admin: Only show own schedules
+            $query->where(['Schedules.user_id' => $user->id])
+                  ->contain(['Organizations']);
+        }
+        
+        $schedules = $query->orderBy(['Schedules.created' => 'DESC'])->all();
 
-        $this->set(compact('schedules'));
+        $this->set(compact('schedules', 'user'));
     }
 
     /**
@@ -54,9 +62,10 @@ class SchedulesController extends AppController
         if ($this->request->is('post')) {
             $data = $this->request->getData();
             
-            // Set organization from authenticated user
+            // Set organization and user from current user
             $user = $this->Authentication->getIdentity();
             $data['organization_id'] = $user->organization_id;
+            $data['user_id'] = $user->id;
             
             // Set default state to 'draft'
             if (empty($data['state'])) {
