@@ -9,10 +9,19 @@ $this->assign('title', __('Manage Children') . ' - ' . h($schedule->title));
 ?>
 
 <div class="manage-children content">
-    <h3><?= __('Manage Children') ?> - <?= h($schedule->title) ?></h3>
-    <p><?= $this->Html->link('← ' . __('Back to Schedules'), ['action' => 'index']) ?></p>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div>
+            <h3 style="margin: 0;"><?= __('Manage Children') ?> - <?= h($schedule->title) ?></h3>
+            <p style="margin: 0.5rem 0 0 0;"><?= $this->Html->link('← ' . __('Back to Schedules'), ['action' => 'index']) ?></p>
+        </div>
+        <?= $this->Html->link(
+            '+ ' . __('Add Child'),
+            ['controller' => 'Children', 'action' => 'add'],
+            ['class' => 'button', 'style' => 'background: #4caf50; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; font-weight: bold;']
+        ) ?>
+    </div>
     
-    <div class="row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+    <div class="row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1rem;">
         
         <!-- Available Children -->
         <div class="available-children">
