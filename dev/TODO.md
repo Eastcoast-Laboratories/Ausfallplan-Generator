@@ -36,7 +36,7 @@ merke dir: playwright muss ja nicht  in dem docker laufen sondern lokal im host.
 
 - Sorge dafür, dass die übersetzungsdateien in dem dochḱer mit gemountet sind, falls sie das noch nciht sind, (also nicht kopieren in den docker beim docker build)
 
-- in der witlist der button zum hinzufügen aller kinder geht noch nciht
+- in der witlist der button zum hinzufügen aller kinder geht noch nciht, er sagt immer "All children are already on the waitlist." (dies auch ncoch auf deutsch übersetzen)
 
  - das dashboard soll die boxen verlinken zu children, shedules, ...
 
@@ -46,7 +46,11 @@ merke dir: playwright muss ja nicht  in dem docker laufen sondern lokal im host.
 
 - Es soll immer ein der zuletzt erstellte/bearbeitete ausfallplan der aktive sein in der session, wenn man ein neues kind erstellt hat, soll es automatisch zum aktuellen ausfallplan hinzugefügt werden
 
-- die summe aller zählkinder sol unterhalb von der box "immer am Ende" stehen und in grau, ganz klein und alle zählen auch die die nicht in der liste sind
+- die summe aller zählkinder soll in jedem tag rechtsbündig
+
+- Das erste kind der nachrückliste darf kienes sein, das schon in der liste für den tag ist, es muss 
+
+- beim scrollen des reports soll die nachrückliste mit scrollen also immer sichtbar bleiben
 
 $ ssh eclabs-vm06 ls /var/kunden/webs/ruben/www/ausfallplan-generator.z11.de -la
 insgesamt 8

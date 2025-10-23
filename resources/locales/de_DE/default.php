@@ -110,6 +110,9 @@ return [
     // Children
     'New Child' => 'Neues Kind',
     'Add Child' => 'Kind hinzufügen',
+    'Add All Children' => 'Alle Kinder hinzufügen',
+    'All children are already on the waitlist.' => 'Alle Kinder sind bereits in der Nachrückliste.',
+    'Added {0} children to waitlist.' => '{0} Kinder zur Nachrückliste hinzugefügt.',
     'Edit Child' => 'Kind bearbeiten',
     'Integrative' => 'Integrativ',
     'Integrative Child' => 'Integrationskind',

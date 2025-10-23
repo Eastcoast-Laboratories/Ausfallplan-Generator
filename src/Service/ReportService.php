@@ -165,8 +165,21 @@ class ReportService
                 }
             }
             
-            // Determine who leaves at end of day (first child in the day)
-            $leavingChild = !empty($dayChildren) ? $dayChildren[0] : null;
+            // Determine who leaves at end of day (first child from waitlist NOT already in this day)
+            $leavingChild = null;
+            foreach ($children as $waitlistChild) {
+                $isInDay = false;
+                foreach ($dayChildren as $dc) {
+                    if ($dc['child']->id === $waitlistChild['child']->id) {
+                        $isInDay = true;
+                        break;
+                    }
+                }
+                if (!$isInDay) {
+                    $leavingChild = $waitlistChild;
+                    break;
+                }
+            }
 
             $days[] = [
                 'number' => $i + 1,
