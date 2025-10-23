@@ -112,23 +112,61 @@ class ReportService
      * Generate days with children distribution
      *
      * @param int $daysCount
-     * @param array $children
-     * @param int $capacity
+     * @param array $children Waitlist children in priority order
+     * @param int $capacity Maximum counting children per day (default 9)
      * @return array
      */
     private function generateDays(int $daysCount, array $children, int $capacity): array
     {
         $days = [];
-        $childrenPool = $children;
+        $waitlistIndex = 0; // Current position in waitlist (round-robin)
+        $currentDayChildren = []; // Children currently assigned to days
 
         for ($i = 0; $i < $daysCount; $i++) {
             $animalName = self::ANIMAL_NAMES[$i % count(self::ANIMAL_NAMES)];
             
-            // Distribute children for this day
-            $dayChildren = $this->distributeChildrenForDay($childrenPool, $capacity);
+            // Fill day with children from waitlist (round-robin), respecting capacity
+            $dayChildren = [];
+            $countingChildrenSum = 0;
+            $attempts = 0;
+            $maxAttempts = count($children) * 2; // Prevent infinite loop
             
-            // Determine who leaves at end of day (lowest weight/priority)
-            $leavingChild = $this->findLeavingChild($dayChildren);
+            while ($countingChildrenSum < $capacity && $attempts < $maxAttempts) {
+                if (empty($children)) {
+                    break;
+                }
+                
+                // Get next child from waitlist (round-robin)
+                $nextChild = $children[$waitlistIndex % count($children)];
+                $waitlistIndex++;
+                $attempts++;
+                
+                // Check if child is already in this day
+                $alreadyInDay = false;
+                foreach ($dayChildren as $dc) {
+                    if ($dc['child']->id === $nextChild['child']->id) {
+                        $alreadyInDay = true;
+                        break;
+                    }
+                }
+                
+                if ($alreadyInDay) {
+                    continue;
+                }
+                
+                // Calculate counting value (integrative = 2, normal = 1)
+                $countingValue = $nextChild['is_integrative'] ? 2 : 1;
+                
+                // Check if adding this child would exceed capacity
+                if ($countingChildrenSum + $countingValue <= $capacity) {
+                    $dayChildren[] = $nextChild;
+                    $countingChildrenSum += $countingValue;
+                    $currentDayChildren[] = $nextChild;
+                }
+            }
+            
+            // Determine who leaves at end of day (first child in the day)
+            $leavingChild = !empty($dayChildren) ? $dayChildren[0] : null;
 
             $days[] = [
                 'number' => $i + 1,
@@ -136,11 +174,12 @@ class ReportService
                 'title' => sprintf('%s-Tag %d', $animalName, $i + 1),
                 'children' => $dayChildren,
                 'leavingChild' => $leavingChild,
+                'countingChildrenSum' => $countingChildrenSum,
             ];
 
-            // Remove leaving child from pool for next day
+            // Remove leaving child from current pool for next days
             if ($leavingChild) {
-                $childrenPool = array_filter($childrenPool, function ($c) use ($leavingChild) {
+                $currentDayChildren = array_filter($currentDayChildren, function ($c) use ($leavingChild) {
                     return $c['child']->id !== $leavingChild['child']->id;
                 });
             }
