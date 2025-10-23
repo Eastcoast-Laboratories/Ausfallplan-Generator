@@ -38,9 +38,7 @@ merke dir: playwright muss ja nicht  in dem docker laufen sondern lokal im host.
 
 - http://localhost:8080/schedules/manage-children/1 soll einen button add child bekommen#
 
-- füge überall autofocus in dem sinnvollsten input feld ein, bei jedem view
-
-- im lreport sollen nur die kinder bei "Immer am Ende" stehen, die zwar im ausfallplan sind, aber nicht in der nachrückliste
+- im report sollen nur die kinder bei "Immer am Ende" stehen, die zwar im ausfallplan sind, aber nicht in der nachrückliste
 
 - "Remove Amadeus from waitlist?" confirm soll weg
 
