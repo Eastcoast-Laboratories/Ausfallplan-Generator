@@ -12,8 +12,8 @@ class CreatePasswordResetsTable extends BaseMigration
     {
         $this->execute("
             CREATE TABLE IF NOT EXISTS password_resets (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
                 reset_token VARCHAR(255) NOT NULL,
                 reset_code VARCHAR(10) NOT NULL,
                 expires_at DATETIME NOT NULL,

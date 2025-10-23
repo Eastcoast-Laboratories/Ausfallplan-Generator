@@ -19,7 +19,7 @@ class InitialSchema extends BaseMigration
         // Organizations table
         $this->execute("
             CREATE TABLE IF NOT EXISTS organizations (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id INT AUTO_INCREMENT PRIMARY KEY,
                 name VARCHAR(255) NOT NULL,
                 created DATETIME,
                 modified DATETIME
@@ -29,8 +29,8 @@ class InitialSchema extends BaseMigration
         // Users table
         $this->execute("
             CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                organization_id INTEGER NOT NULL,
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                organization_id INT NOT NULL,
                 email VARCHAR(255) NOT NULL UNIQUE,
                 password VARCHAR(255) NOT NULL,
                 role VARCHAR(50) DEFAULT 'viewer',
@@ -43,8 +43,8 @@ class InitialSchema extends BaseMigration
         // Sibling Groups table
         $this->execute("
             CREATE TABLE IF NOT EXISTS sibling_groups (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                organization_id INTEGER NOT NULL,
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                organization_id INT NOT NULL,
                 label VARCHAR(255),
                 created DATETIME,
                 modified DATETIME,
@@ -55,8 +55,8 @@ class InitialSchema extends BaseMigration
         // Children table
         $this->execute("
             CREATE TABLE IF NOT EXISTS children (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                organization_id INTEGER NOT NULL,
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                organization_id INT NOT NULL,
                 name VARCHAR(255) NOT NULL,
                 is_active BOOLEAN DEFAULT 1,
                 is_integrative BOOLEAN DEFAULT 0,
@@ -71,13 +71,13 @@ class InitialSchema extends BaseMigration
         // Schedules table
         $this->execute("
             CREATE TABLE IF NOT EXISTS schedules (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                organization_id INTEGER NOT NULL,
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                organization_id INT NOT NULL,
                 title VARCHAR(255) NOT NULL,
                 starts_on DATE,
                 ends_on DATE,
                 state VARCHAR(50) DEFAULT 'draft',
-                capacity_per_day INTEGER DEFAULT 9,
+                capacity_per_day INT DEFAULT 9,
                 days_count INTEGER,
                 created DATETIME,
                 modified DATETIME,
@@ -88,11 +88,11 @@ class InitialSchema extends BaseMigration
         // Schedule Days table
         $this->execute("
             CREATE TABLE IF NOT EXISTS schedule_days (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                schedule_id INTEGER NOT NULL,
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                schedule_id INT NOT NULL,
                 title VARCHAR(255),
                 position INTEGER,
-                capacity INTEGER DEFAULT 9,
+                capacity INT DEFAULT 9,
                 created DATETIME,
                 modified DATETIME,
                 FOREIGN KEY (schedule_id) REFERENCES schedules(id) ON DELETE CASCADE
@@ -102,10 +102,10 @@ class InitialSchema extends BaseMigration
         // Assignments table
         $this->execute("
             CREATE TABLE IF NOT EXISTS assignments (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                schedule_day_id INTEGER NOT NULL,
-                child_id INTEGER NOT NULL,
-                weight INTEGER DEFAULT 1,
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                schedule_day_id INT NOT NULL,
+                child_id INT NOT NULL,
+                weight INT DEFAULT 1,
                 source VARCHAR(50) DEFAULT 'manual',
                 created DATETIME,
                 modified DATETIME,
@@ -117,9 +117,9 @@ class InitialSchema extends BaseMigration
         // Waitlist Entries table
         $this->execute("
             CREATE TABLE IF NOT EXISTS waitlist_entries (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                schedule_id INTEGER NOT NULL,
-                child_id INTEGER NOT NULL,
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                schedule_id INT NOT NULL,
+                child_id INT NOT NULL,
                 priority INTEGER,
                 created DATETIME,
                 modified DATETIME,
@@ -132,8 +132,8 @@ class InitialSchema extends BaseMigration
         // Rules table
         $this->execute("
             CREATE TABLE IF NOT EXISTS rules (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                schedule_id INTEGER NOT NULL,
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                schedule_id INT NOT NULL,
                 type VARCHAR(50),
                 parameters TEXT,
                 created DATETIME,

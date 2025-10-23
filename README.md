@@ -53,9 +53,9 @@
 ## Quick Start
 
 ### Prerequisites
-- PHP 8.2+
+- PHP 8.4
 - Composer
-- PostgreSQL 14+ or MySQL 8 (SQLite for testing)
+- MySQL 8
 
 ### Installation
 
