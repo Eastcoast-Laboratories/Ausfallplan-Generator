@@ -58,6 +58,7 @@ return function (RouteBuilder $routes): void {
         $builder->setRouteClass(Route::class);
         $builder->connect('/', ['controller' => 'Dashboard', 'action' => 'index']);
         $builder->connect('/login', ['controller' => 'Users', 'action' => 'login']);
+        $routes->get('/waitlist', ['controller' => 'Waitlist', 'action' => 'index']);
         $builder->connect('/register', ['controller' => 'Users', 'action' => 'register']);
         $builder->connect('/logout', ['controller' => 'Users', 'action' => 'logout']);
         $builder->connect('/profile', ['controller' => 'Users', 'action' => 'profile']);
@@ -66,6 +67,12 @@ return function (RouteBuilder $routes): void {
         $builder->connect('/sibling-groups', ['controller' => 'SiblingGroups', 'action' => 'index']);
         $builder->connect('/schedules', ['controller' => 'Schedules', 'action' => 'index']);
         $builder->connect('/waitlist', ['controller' => 'Waitlist', 'action' => 'index']);
+        
+        // API Routes
+        $builder->prefix('Api', function ($routes) {
+            $routes->setExtensions(['json']);
+            $routes->get('/organizations/search', ['controller' => 'Organizations', 'action' => 'search']);
+        });
         
         /*
          * Switch back to DashedRoute for the rest

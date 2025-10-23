@@ -95,6 +95,21 @@ class UsersController extends AppController
         
         // If user is already logged in or just logged in successfully, redirect
         if ($result && $result->isValid()) {
+            // Check email verification and account status
+            $identity = $this->Authentication->getIdentity();
+            
+            if (!$identity->email_verified) {
+                $this->Authentication->logout();
+                $this->Flash->error(__('Please verify your email before logging in.'));
+                return;
+            }
+            
+            if ($identity->status !== 'active') {
+                $this->Authentication->logout();
+                $this->Flash->error(__('Your account is pending approval by an administrator.'));
+                return;
+            }
+            
             // Get redirect target from query parameter or use dashboard as fallback
             $redirect = $this->request->getQuery('redirect');
             
@@ -213,7 +228,95 @@ class UsersController extends AppController
     {
         parent::beforeFilter($event);
         
-        // Allow public access to register and login
-        $this->Authentication->addUnauthenticatedActions(['login', 'register']);
+        // Allow public access to register, login, and password recovery
+        $this->Authentication->addUnauthenticatedActions(['login', 'register', 'setLanguage', 'verify', 'forgotPassword', 'resetPassword']);
+    }
+
+    public function verify($token = null)
+    {
+        if (!$token) {
+            $this->Flash->error(__('Invalid verification link.'));
+            return $this->redirect(['action' => 'login']);
+        }
+        
+        $user = $this->Users->find()->where(['email_token' => $token])->first();
+        if (!$user) {
+            $this->Flash->error(__('Invalid token.'));
+            return $this->redirect(['action' => 'login']);
+        }
+        
+        $user->email_verified = true;
+        $user->email_token = null;
+        
+        $org = $this->fetchTable('Organizations')->get($user->organization_id);
+        $userCount = $this->Users->find()->where(['organization_id' => $user->organization_id])->count();
+        
+        if ($userCount === 1 || $org->name === 'keine organisation') {
+            $user->status = 'active';
+            $user->approved_at = new \DateTime();
+            $this->Flash->success(__('Email verified! You can now login.'));
+        } else {
+            $user->status = 'pending';
+            $this->Flash->info(__('Email verified! Admin approval needed.'));
+        }
+        
+        $this->Users->save($user);
+        return $this->redirect(['action' => 'login']);
+    }
+
+    public function forgotPassword()
+    {
+        $this->request->allowMethod(['get', 'post']);
+        
+        if ($this->request->is('post')) {
+            $email = $this->request->getData('email');
+            $user = $this->Users->find()->where(['email' => $email])->first();
+            
+            if ($user) {
+                $resetCode = str_pad((string)rand(0, 999999), 6, '0', STR_PAD_LEFT);
+                $reset = $this->fetchTable('PasswordResets')->newEntity([
+                    'user_id' => $user->id,
+                    'reset_token' => bin2hex(random_bytes(16)),
+                    'reset_code' => $resetCode,
+                    'expires_at' => new \DateTime('+1 hour'),
+                ]);
+                
+                if ($this->fetchTable('PasswordResets')->save($reset)) {
+                    $this->log("Reset code: {$resetCode}", 'info');
+                    $this->Flash->success(__('Reset code sent.'));
+                    return $this->redirect(['action' => 'resetPassword']);
+                }
+            }
+            $this->Flash->success(__('If email exists, reset sent.'));
+            return $this->redirect(['action' => 'resetPassword']);
+        }
+    }
+
+    public function resetPassword()
+    {
+        $this->request->allowMethod(['get', 'post']);
+        
+        if ($this->request->is('post')) {
+            $code = $this->request->getData('code');
+            $newPassword = $this->request->getData('new_password');
+            
+            $reset = $this->fetchTable('PasswordResets')->find()
+                ->where(['reset_code' => $code, 'expires_at >' => new \DateTime(), 'used_at IS' => null])
+                ->contain(['Users'])
+                ->first();
+            
+            if ($reset) {
+                $user = $reset->user;
+                $user->password = $newPassword;
+                
+                if ($this->Users->save($user)) {
+                    $reset->used_at = new \DateTime();
+                    $this->fetchTable('PasswordResets')->save($reset);
+                    $this->Flash->success(__('Password reset successful!'));
+                    return $this->redirect(['action' => 'login']);
+                }
+            }
+            $this->Flash->error(__('Invalid or expired code.'));
+        }
     }
 }

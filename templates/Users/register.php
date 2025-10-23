@@ -18,7 +18,9 @@
                 'placeholder' => __('e.g., Kita Sonnenschein'),
                 'required' => false,
                 'autofocus' => true,
-                'help' => __('Leave empty if you don\'t belong to an organization')
+                'help' => __('Leave empty if you don\'t belong to an organization'),
+                'id' => 'organization-input',
+                'autocomplete' => 'off'
             ]);
             echo $this->Form->control('email', [
                 'type' => 'email',
@@ -88,4 +90,170 @@
 .form-actions .button {
     flex: 1;
 }
+
+.autocomplete-container {
+    position: relative;
+}
+
+.autocomplete-suggestions {
+    position: absolute;
+    border: 1px solid #ddd;
+    border-top: none;
+    z-index: 99;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.autocomplete-suggestion {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.autocomplete-suggestion:hover {
+    background-color: #f0f0f0;
+}
+
+.autocomplete-suggestion.existing {
+    background-color: #e8f5e9;
+}
+
+.autocomplete-suggestion.new {
+    background-color: #fff3e0;
+}
+
+.autocomplete-suggestion .label {
+    font-size: 0.85em;
+    color: #666;
+    margin-top: 2px;
+}
+
+#organization-input.has-suggestions {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+#organization-input.new-org {
+    border-color: #ff9800;
+    background-color: #fff8e1;
+}
 </style>
+
+<script>
+(function() {
+    const input = document.getElementById('organization-input');
+    if (!input) return;
+    
+    let currentFocus = -1;
+    let suggestionsDiv = null;
+    
+    function createSuggestionsDiv() {
+        const container = input.parentElement;
+        if (!suggestionsDiv) {
+            suggestionsDiv = document.createElement('div');
+            suggestionsDiv.className = 'autocomplete-suggestions';
+            suggestionsDiv.style.display = 'none';
+            container.appendChild(container);
+            container.style.position = 'relative';
+            container.appendChild(suggestionsDiv);
+        }
+        return suggestionsDiv;
+    }
+    
+    function closeSuggestions() {
+        if (suggestionsDiv) {
+            suggestionsDiv.style.display = 'none';
+            suggestionsDiv.innerHTML = '';
+        }
+        input.classList.remove('has-suggestions');
+        currentFocus = -1;
+    }
+    
+    function showSuggestions(organizations, query) {
+        closeSuggestions();
+        
+        const div = createSuggestionsDiv();
+        
+        if (organizations.length === 0) {
+            // No existing organizations found
+            div.innerHTML = `
+                <div class="autocomplete-suggestion new">
+                    <strong>${query}</strong>
+                    <div class="label">✨ <?= __('Create new organization') ?></div>
+                </div>
+            `;
+            input.classList.add('new-org');
+        } else {
+            // Show existing organizations
+            organizations.forEach((org, index) => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-suggestion existing';
+                item.innerHTML = `
+                    <strong>${org.name}</strong>
+                    <div class="label">✓ <?= __('Join existing organization') ?></div>
+                `;
+                item.addEventListener('click', () => {
+                    input.value = org.name;
+                    input.classList.remove('new-org');
+                    closeSuggestions();
+                });
+                div.appendChild(item);
+            });
+            
+            // Add "Create new" option at the end
+            const newItem = document.createElement('div');
+            newItem.className = 'autocomplete-suggestion new';
+            newItem.innerHTML = `
+                <strong>${query}</strong>
+                <div class="label">✨ <?= __('Create new organization') ?></div>
+            `;
+            newItem.addEventListener('click', () => {
+                input.value = query;
+                input.classList.add('new-org');
+                closeSuggestions();
+            });
+            div.appendChild(newItem);
+            
+            input.classList.remove('new-org');
+        }
+        
+        div.style.display = 'block';
+        input.classList.add('has-suggestions');
+    }
+    
+    let debounceTimer = null;
+    input.addEventListener('input', function() {
+        const query = this.value.trim();
+        
+        if (query.length < 2) {
+            closeSuggestions();
+            input.classList.remove('new-org');
+            return;
+        }
+        
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            fetch(`/api/organizations/search?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    showSuggestions(data.organizations || [], query);
+                })
+                .catch(error => {
+                    console.error('Autocomplete error:', error);
+                });
+        }, 300);
+    });
+    
+    // Close suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (e.target !== input) {
+            closeSuggestions();
+        }
+    });
+})();
+</script>
