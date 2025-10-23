@@ -189,6 +189,25 @@ Log::setConfig(Configure::consume('Log'));
 Security::setSalt(Configure::consume('Security.salt'));
 
 /*
+ * Configure I18n to load PHP array translation files
+ * Load translations from resources/locales/de_DE/default.php
+ */
+use Cake\I18n\I18n;
+use Cake\I18n\Package;
+
+$translationsFile = ROOT . DS . 'resources' . DS . 'locales' . DS . 'de_DE' . DS . 'default.php';
+if (file_exists($translationsFile)) {
+    $translations = include $translationsFile;
+    
+    // Create a custom translator
+    I18n::setTranslator('default', function () use ($translations) {
+        $package = new Package('default');
+        $package->setMessages($translations);
+        return $package;
+    }, 'de_DE');
+}
+
+/*
  * Setup detectors for mobile and tablet.
  * If you don't use these checks you can safely remove this code
  * and the mobiledetect package from composer.json.
