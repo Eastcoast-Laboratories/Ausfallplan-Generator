@@ -41,6 +41,7 @@ merke dir: playwright muss ja nicht  in dem docker laufen sondern lokal im host.
 - füge überall autofocus in dem sinnvollsten input feld ein, bei jedem view
 
 
+- verändere die cake einstellungen so, dass er keinen cache mehr benutztt oder besser, wenn das geht, dass der cache nur 10s gültig ist
 
 $ ssh eclabs-vm06 ls /var/kunden/webs/ruben/www/ausfallplan-generator.z11.de -la
 insgesamt 8
