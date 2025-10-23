@@ -10,6 +10,12 @@ $this->assign('title', __('Create Schedule'));
     <fieldset>
         <legend><?= __('Add Schedule') ?></legend>
         <?php
+            echo $this->Form->control('name', [
+                'label' => __('Schedule Name'),
+                'required' => true,
+                'placeholder' => __('e.g., January 2024'),
+                'autofocus' => true
+            ]);
             echo $this->Form->control('title', ['required' => true]);
             echo $this->Form->control('starts_on', ['type' => 'date', 'required' => true]);
             echo $this->Form->control('ends_on', [
