@@ -34,22 +34,31 @@ class LocaleMiddleware implements MiddlewareInterface
         // Get session
         $session = $request->getAttribute('session');
         
+        // Always set German as default first
+        I18n::setLocale('de_DE');
+        
         if ($session) {
-            // Read language from session, default to 'de'
-            $language = $session->read('Config.language') ?: 'de';
+            // Read language from session
+            $language = $session->read('Config.language');
             
-            // Map short locale to full locale (de -> de_DE)
-            $localeMap = [
-                'de' => 'de_DE',
-                'en' => 'en_US',
-            ];
-            $fullLocale = $localeMap[$language] ?? $language;
-            
-            // Set I18n locale
-            I18n::setLocale($fullLocale);
+            if ($language) {
+                // Map short locale to full locale (de -> de_DE)
+                $localeMap = [
+                    'de' => 'de_DE',
+                    'en' => 'en_US',
+                ];
+                $fullLocale = $localeMap[$language] ?? $language;
+                
+                // Set I18n locale
+                I18n::setLocale($fullLocale);
+                
+                // Debug logging (can be removed later)
+                error_log("LocaleMiddleware: Set locale to {$fullLocale} (from session: {$language})");
+            } else {
+                error_log("LocaleMiddleware: No language in session, using default de_DE");
+            }
         } else {
-            // Set default German for non-authenticated requests
-            I18n::setLocale('de_DE');
+            error_log("LocaleMiddleware: No session attribute");
         }
         
         return $handler->handle($request);
