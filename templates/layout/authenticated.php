@@ -147,6 +147,37 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
             gap: 1.5rem;
         }
         
+        .topbar-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+        
+        /* Reduce font size for long titles (>20 characters) */
+        @supports (container-type: inline-size) {
+            .topbar-left {
+                container-type: inline-size;
+            }
+            
+            @container (max-width: 400px) {
+                .topbar-title {
+                    font-size: 1rem;
+                }
+            }
+        }
+        
+        /* Fallback for browsers without container queries */
+        @media (max-width: 768px) {
+            .topbar-title {
+                font-size: 1rem;
+            }
+        }
+        
         /* Language Switcher */
         .language-switcher {
             position: relative;
