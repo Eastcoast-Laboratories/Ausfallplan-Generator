@@ -74,6 +74,14 @@ class ChildrenController extends AppController
             $child = $this->Children->patchEntity($child, $data);
             
             if ($this->Children->save($child)) {
+                // Check if there's an active schedule in session
+                $activeScheduleId = $this->request->getSession()->read('activeScheduleId');
+                
+                if ($activeScheduleId) {
+                    // Automatically assign child to active schedule
+                    $this->autoAssignToSchedule($child->id, $activeScheduleId);
+                }
+                
                 $this->Flash->success(__('The child has been saved.'));
                 return $this->redirect(['action' => 'index']);
             }
@@ -134,5 +142,43 @@ class ChildrenController extends AppController
         }
 
         return $this->redirect(['action' => 'index']);
+    }
+
+    /**
+     * Automatically assign a child to a schedule
+     *
+     * @param int $childId Child ID
+     * @param int $scheduleId Schedule ID
+     * @return void
+     */
+    private function autoAssignToSchedule(int $childId, int $scheduleId): void
+    {
+        $scheduleDaysTable = $this->fetchTable('ScheduleDays');
+        $assignmentsTable = $this->fetchTable('Assignments');
+        
+        // Get all schedule days for this schedule
+        $scheduleDays = $scheduleDaysTable->find()
+            ->where(['schedule_id' => $scheduleId])
+            ->all();
+        
+        // Create assignments for all days
+        foreach ($scheduleDays as $scheduleDay) {
+            // Check if assignment already exists
+            $existingAssignment = $assignmentsTable->find()
+                ->where([
+                    'schedule_day_id' => $scheduleDay->id,
+                    'child_id' => $childId
+                ])
+                ->first();
+            
+            if (!$existingAssignment) {
+                $assignment = $assignmentsTable->newEntity([
+                    'schedule_day_id' => $scheduleDay->id,
+                    'child_id' => $childId,
+                    'weight' => 1 // Default weight
+                ]);
+                $assignmentsTable->save($assignment);
+            }
+        }
     }
 }

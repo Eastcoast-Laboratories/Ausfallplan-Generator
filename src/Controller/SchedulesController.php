@@ -66,6 +66,9 @@ class SchedulesController extends AppController
             $schedule = $this->Schedules->patchEntity($schedule, $data);
             
             if ($this->Schedules->save($schedule)) {
+                // Set this as the active schedule in session
+                $this->request->getSession()->write('activeScheduleId', $schedule->id);
+                
                 $this->Flash->success(__('The schedule has been created.'));
                 return $this->redirect(['action' => 'index']);
             }
@@ -90,8 +93,11 @@ class SchedulesController extends AppController
             $schedule = $this->Schedules->patchEntity($schedule, $this->request->getData());
             
             if ($this->Schedules->save($schedule)) {
+                // Set this as the active schedule in session
+                $this->request->getSession()->write('activeScheduleId', $schedule->id);
+                
                 $this->Flash->success(__('The schedule has been updated.'));
-                return $this->redirect(['action' => 'index']);
+                return $this->redirect(['action' => 'view', $schedule->id]);
             }
             
             $this->Flash->error(__('The schedule could not be updated. Please try again.'));

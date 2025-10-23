@@ -40,6 +40,9 @@ merke dir: playwright muss ja nicht  in dem docker laufen sondern lokal im host.
 
 - im report sollen nur die kinder bei "Immer am Ende" stehen, die zwar im ausfallplan sind, aber nicht in der nachrückliste
 
+- bei [add child](http://localhost:8080/children/index) soll der erste tab zum button "Add Child" führen
+
+
 
 $ ssh eclabs-vm06 ls /var/kunden/webs/ruben/www/ausfallplan-generator.z11.de -la
 insgesamt 8
