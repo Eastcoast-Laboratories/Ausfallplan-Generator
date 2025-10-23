@@ -19,17 +19,28 @@ class DashboardController extends AppController
     {
         $user = $this->Authentication->getIdentity();
         
-        // Get stats for dashboard
-        $stats = [
-            'children' => 0,
-            'schedules' => 0,
-            'active_schedules' => 0,
-            'waitlist_entries' => 0,
-        ];
+        // Load actual stats from database
+        $childrenTable = $this->fetchTable('Children');
+        $schedulesTable = $this->fetchTable('Schedules');
         
-        // TODO: Load actual stats from database when tables are ready
-        // $stats['children'] = $this->fetchTable('Children')->find()->where(['organization_id' => $user->organization_id])->count();
-        // $stats['schedules'] = $this->fetchTable('Schedules')->find()->where(['organization_id' => $user->organization_id])->count();
+        $stats = [
+            'children' => $childrenTable->find()
+                ->where(['organization_id' => $user->organization_id])
+                ->count(),
+            'schedules' => $schedulesTable->find()
+                ->where(['organization_id' => $user->organization_id])
+                ->count(),
+            'active_schedules' => $schedulesTable->find()
+                ->where([
+                    'organization_id' => $user->organization_id,
+                    'OR' => [
+                        ['ends_on IS' => null],
+                        ['ends_on >=' => date('Y-m-d')]
+                    ]
+                ])
+                ->count(),
+            'waitlist_entries' => 0, // TODO: Implement when waitlist is added
+        ];
         
         $this->set(compact('stats', 'user'));
     }

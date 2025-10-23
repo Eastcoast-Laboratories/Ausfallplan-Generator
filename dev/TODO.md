@@ -40,8 +40,9 @@ merke dir: playwright muss ja nicht  in dem docker laufen sondern lokal im host.
 
 - füge überall autofocus in dem sinnvollsten input feld ein, bei jedem view
 
+- im lreport sollen nur die kinder bei "Immer am Ende" stehen, die zwar im ausfallplan sind, aber nicht in der nachrückliste
 
-- verändere die cake einstellungen so, dass er keinen cache mehr benutztt oder besser, wenn das geht, dass der cache nur 10s gültig ist
+- "Remove Amadeus from waitlist?" confirm soll weg
 
 $ ssh eclabs-vm06 ls /var/kunden/webs/ruben/www/ausfallplan-generator.z11.de -la
 insgesamt 8

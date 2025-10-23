@@ -16,7 +16,8 @@
                 'options' => $organizations,
                 'empty' => __('Select your organization'),
                 'label' => __('Organization'),
-                'required' => true
+                'required' => true,
+                'autofocus' => true
             ]);
             echo $this->Form->control('email', [
                 'type' => 'email',

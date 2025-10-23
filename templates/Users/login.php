@@ -14,7 +14,8 @@
                 'type' => 'email',
                 'label' => __('Email'),
                 'required' => true,
-                'placeholder' => 'email@example.com'
+                'placeholder' => 'email@example.com',
+                'autofocus' => true
             ]);
             echo $this->Form->control('password', [
                 'type' => 'password',

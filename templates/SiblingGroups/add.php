@@ -10,8 +10,11 @@ $this->assign('title', __('Add Sibling Group'));
     <fieldset>
         <legend><?= __('Add Sibling Group') ?></legend>
         <?php
-            echo $this->Form->control('label', ['label' => __('Name'), 'required' => true]);
-        ?>
+            echo $this->Form->control('name', [
+                'label' => __('Group Name'),
+                'required' => true,
+                'autofocus' => true
+            ]);?>
     </fieldset>
     <?= $this->Form->button(__('Submit')) ?>
     <?= $this->Form->end() ?>
