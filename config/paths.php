@@ -66,6 +66,11 @@ define('TESTS', ROOT . DS . 'tests' . DS);
 define('TMP', ROOT . DS . 'tmp' . DS);
 
 /*
+ * Path to the locale files directory.
+ */
+define('LOCALES', ROOT . DS . 'resources' . DS . 'locales' . DS);
+
+/*
  * Path to the logs directory.
  */
 define('LOGS', ROOT . DS . 'logs' . DS);
