@@ -23,7 +23,7 @@ class OrganizationsController extends AppController
         $user = $this->Authentication->getIdentity();
         if ($user->role !== 'admin') {
             $this->Flash->error(__('Access denied.'));
-            return $this->redirect(['controller' => 'Dashboard', 'action' => 'index', 'prefix' => false]);
+            return $this->redirect(['_name' => 'dashboard']);
         }
 
         $organizations = $this->Organizations->find()
@@ -57,7 +57,7 @@ class OrganizationsController extends AppController
         $user = $this->Authentication->getIdentity();
         if ($user->role !== 'admin') {
             $this->Flash->error(__('Access denied.'));
-            return $this->redirect(['controller' => 'Dashboard', 'action' => 'index', 'prefix' => false]);
+            return $this->redirect(['_name' => 'dashboard']);
         }
 
         $organization = $this->Organizations->get($id, [
@@ -84,7 +84,7 @@ class OrganizationsController extends AppController
         $user = $this->Authentication->getIdentity();
         if ($user->role !== 'admin') {
             $this->Flash->error(__('Access denied.'));
-            return $this->redirect(['controller' => 'Dashboard', 'action' => 'index', 'prefix' => false]);
+            return $this->redirect(['_name' => 'dashboard']);
         }
 
         $organization = $this->Organizations->get($id);
@@ -113,7 +113,7 @@ class OrganizationsController extends AppController
         $user = $this->Authentication->getIdentity();
         if ($user->role !== 'admin') {
             $this->Flash->error(__('Access denied.'));
-            return $this->redirect(['controller' => 'Dashboard', 'action' => 'index', 'prefix' => false]);
+            return $this->redirect(['_name' => 'dashboard']);
         }
 
         $this->request->allowMethod(['post', 'delete']);
@@ -145,7 +145,7 @@ class OrganizationsController extends AppController
         $user = $this->Authentication->getIdentity();
         if ($user->role !== 'admin') {
             $this->Flash->error(__('Access denied.'));
-            return $this->redirect(['controller' => 'Dashboard', 'action' => 'index', 'prefix' => false]);
+            return $this->redirect(['_name' => 'dashboard']);
         }
 
         $this->request->allowMethod(['post']);
