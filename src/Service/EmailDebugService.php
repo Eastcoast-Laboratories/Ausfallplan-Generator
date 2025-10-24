@@ -182,15 +182,13 @@ class EmailDebugService
                     $htmlBody .= sprintf('<a href="%s">%s</a><br>', htmlspecialchars($url), htmlspecialchars($label));
                 }
                 $mailer->setEmailFormat('html');
-                $mailer->setBodyText($email['body'] ?? ''); // Plain text fallback
-                $mailer->setBodyHtml($htmlBody);
+                // Send HTML email with deliver()
+                $mailer->deliver($htmlBody);
             } else {
                 $mailer->setEmailFormat('text');
-                $mailer->setBodyText($email['body'] ?? '');
+                // Send plain text email with deliver()
+                $mailer->deliver($email['body'] ?? '');
             }
-            
-            // Send the email
-            $mailer->send();
             
             return true;
         } catch (\Exception $e) {
