@@ -13,6 +13,8 @@
 
 ## Backlog
 
+- rstelle mir eine möglichkeit die db mit phpmyadmin zugreifen
+
 - eine Organisation kann mehrere Admins haben
 - der Admin einer Organisation hat folgende Featres:
     - [ ] Email-Bestätigung: Admin einer Organisation bekommt Mail wen sich ein neuer User in seiner Organisation registriert
