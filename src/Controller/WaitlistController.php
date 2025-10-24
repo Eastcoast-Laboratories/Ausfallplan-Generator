@@ -178,13 +178,47 @@ class WaitlistController extends AppController
         $scheduleId = $data['schedule_id'];
         $childId = $data['child_id'];
         
-        // Get next priority
-        $maxPriority = $this->fetchTable('WaitlistEntries')->find()
-            ->where(['schedule_id' => $scheduleId])
-            ->select(['max_priority' => 'MAX(priority)'])
-            ->first();
+        // Load child to check for siblings
+        $child = $this->fetchTable('Children')->get($childId);
         
-        $nextPriority = ($maxPriority && $maxPriority->max_priority) ? $maxPriority->max_priority + 1 : 1;
+        // Check if child has siblings already on waitlist
+        $nextPriority = null;
+        if ($child->sibling_group_id) {
+            // Find sibling on waitlist with highest priority
+            $siblingEntry = $this->fetchTable('WaitlistEntries')->find()
+                ->contain(['Children'])
+                ->where([
+                    'WaitlistEntries.schedule_id' => $scheduleId,
+                    'Children.sibling_group_id' => $child->sibling_group_id,
+                    'Children.id !=' => $childId
+                ])
+                ->orderBy(['WaitlistEntries.priority' => 'DESC'])
+                ->first();
+            
+            if ($siblingEntry) {
+                // Place directly after sibling
+                $nextPriority = $siblingEntry->priority + 1;
+                
+                // Shift all following entries down by 1
+                $this->fetchTable('WaitlistEntries')->updateAll(
+                    ['priority' => new \Cake\Database\Expression\QueryExpression('priority + 1')],
+                    [
+                        'schedule_id' => $scheduleId,
+                        'priority >=' => $nextPriority
+                    ]
+                );
+            }
+        }
+        
+        // If no sibling found or no siblings, add at end
+        if ($nextPriority === null) {
+            $maxPriority = $this->fetchTable('WaitlistEntries')->find()
+                ->where(['schedule_id' => $scheduleId])
+                ->select(['max_priority' => 'MAX(priority)'])
+                ->first();
+            
+            $nextPriority = ($maxPriority && $maxPriority->max_priority) ? $maxPriority->max_priority + 1 : 1;
+        }
         
         $entry = $this->fetchTable('WaitlistEntries')->newEntity([
             'schedule_id' => $scheduleId,
