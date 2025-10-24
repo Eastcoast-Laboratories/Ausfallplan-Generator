@@ -61,10 +61,25 @@ class CreateAdminCommand extends Command
             $io->out('is_system_admin: ' . ($existingUser->is_system_admin ? 'Yes' : 'No'));
             
             // Update to system admin if not already
+            $needsUpdate = false;
             if (!$existingUser->is_system_admin) {
                 $existingUser->is_system_admin = true;
+                $needsUpdate = true;
+                $io->info('Updated is_system_admin = true');
+            }
+            if (!$existingUser->email_verified) {
+                $existingUser->email_verified = true;
+                $needsUpdate = true;
+                $io->info('Updated email_verified = true');
+            }
+            if ($existingUser->status !== 'active') {
+                $existingUser->status = 'active';
+                $needsUpdate = true;
+                $io->info('Updated status = active');
+            }
+            if ($needsUpdate) {
                 $usersTable->save($existingUser);
-                $io->info('Updated to system admin!');
+                $io->success('Admin user updated successfully!');
             }
             return self::CODE_SUCCESS;
         }
