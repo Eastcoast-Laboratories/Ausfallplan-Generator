@@ -78,20 +78,31 @@ class WaitlistController extends AppController
         // Build sibling groups map and load sibling names
         $siblingGroupsMap = [];
         $siblingNames = [];
+        $missingSiblings = []; // Track siblings not in schedule
+        
         foreach ($waitlistEntries as $entry) {
             if ($entry->child->sibling_group_id) {
                 $siblingGroupsMap[$entry->id] = $entry->child->sibling_group_id;
                 
-                // Load sibling names for tooltip
+                // Load all siblings for this group
                 $siblings = $this->fetchTable('Children')->find()
                     ->where([
                         'sibling_group_id' => $entry->child->sibling_group_id,
                         'id !=' => $entry->child->id
                     ])
                     ->all();
+                
                 $names = [];
                 foreach ($siblings as $sib) {
                     $names[] = $sib->name;
+                    
+                    // Check if sibling is in schedule
+                    if (!in_array($sib->id, $childrenInSchedule)) {
+                        $missingSiblings[] = [
+                            'name' => $sib->name,
+                            'sibling_of' => $entry->child->name,
+                        ];
+                    }
                 }
                 $siblingNames[$entry->child->id] = implode(', ', $names);
             }
@@ -151,7 +162,7 @@ class WaitlistController extends AppController
         
         $countNotOnWaitlist = $childrenNotOnWaitlist->count();
         
-        $this->set(compact('schedules', 'selectedSchedule', 'waitlistEntries', 'availableChildren', 'countNotOnWaitlist', 'siblingGroupsMap', 'siblingNames'));
+        $this->set(compact('schedules', 'selectedSchedule', 'waitlistEntries', 'availableChildren', 'countNotOnWaitlist', 'siblingGroupsMap', 'siblingNames', 'missingSiblings'));
     }
 
     /**
