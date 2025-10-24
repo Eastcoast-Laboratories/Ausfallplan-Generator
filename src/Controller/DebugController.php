@@ -43,6 +43,15 @@ class DebugController extends AppController
      */
     public function emails()
     {
+        // On production: Only allow admin users
+        if (!$this->isLocalhost()) {
+            $user = $this->Authentication->getIdentity();
+            if (!$user || $user->role !== 'admin') {
+                $this->Flash->error(__('Debug routes are only available for administrators.'));
+                return $this->redirect(['controller' => 'Users', 'action' => 'login']);
+            }
+        }
+        
         $emails = EmailDebugService::getEmails();
         $this->set(compact('emails'));
     }
@@ -52,6 +61,15 @@ class DebugController extends AppController
      */
     public function clearEmails()
     {
+        // On production: Only allow admin users
+        if (!$this->isLocalhost()) {
+            $user = $this->Authentication->getIdentity();
+            if (!$user || $user->role !== 'admin') {
+                $this->Flash->error(__('Debug routes are only available for administrators.'));
+                return $this->redirect(['controller' => 'Users', 'action' => 'login']);
+            }
+        }
+        
         EmailDebugService::clearEmails();
         $this->Flash->success(__('Debug emails cleared'));
         return $this->redirect(['action' => 'emails']);
