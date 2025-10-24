@@ -48,12 +48,8 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                             </div>
                             <?= $this->Form->postLink(
                                 "+ " . __("Add"),
-                                ["action" => "assignChild"],
+                                ["action" => "assignChild", "?" => ["schedule_id" => $schedule->id, "child_id" => $child->id]],
                                 [
-                                    "data" => [
-                                        "schedule_id" => $schedule->id,
-                                        "child_id" => $child->id,
-                                    ],
                                     "class" => "button button-small",
                                     "style" => "background: #4caf50; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px;"
                                 ]
@@ -102,12 +98,8 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                             </div>
                             <?= $this->Form->postLink(
                                 "✕",
-                                ["action" => "removeChild"],
+                                ["action" => "removeChild", "?" => ["schedule_id" => $schedule->id, "child_id" => $child->id]],
                                 [
-                                    "data" => [
-                                        "schedule_id" => $schedule->id,
-                                        "child_id" => $child->id,
-                                    ],
                                     "class" => "button button-small",
                                     "style" => "background: #f44336; color: white; padding: 0.5rem 0.75rem; text-decoration: none; border-radius: 4px;"
                                 ]
@@ -132,12 +124,8 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                                     </div>
                                     <?= $this->Form->postLink(
                                         "✕",
-                                        ["action" => "removeChild"],
+                                        ["action" => "removeChild", "?" => ["schedule_id" => $schedule->id, "child_id" => $child->id]],
                                         [
-                                            "data" => [
-                                                "schedule_id" => $schedule->id,
-                                                "child_id" => $child->id,
-                                            ],
                                             "class" => "button button-small",
                                             "style" => "background: #f44336; color: white; padding: 0.5rem 0.75rem; text-decoration: none; border-radius: 4px;"
                                         ]

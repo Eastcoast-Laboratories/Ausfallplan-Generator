@@ -199,9 +199,8 @@ class SchedulesController extends AppController
     {
         $this->request->allowMethod(["post"]);
         
-        $data = $this->request->getData();
-        $scheduleId = $data["schedule_id"];
-        $childId = $data["child_id"];
+        $scheduleId = $this->request->getQuery("schedule_id");
+        $childId = $this->request->getQuery("child_id");
         
         // Get schedule days for this schedule
         $scheduleDaysTable = $this->fetchTable("ScheduleDays");
@@ -257,9 +256,8 @@ class SchedulesController extends AppController
     {
         $this->request->allowMethod(['post']);
         
-        $data = $this->request->getData();
-        $scheduleId = $data['schedule_id'];
-        $childId = $data['child_id'];
+        $scheduleId = $this->request->getQuery('schedule_id');
+        $childId = $this->request->getQuery('child_id');
         
         // Find and delete assignment
         $assignment = $this->fetchTable('Assignments')->find()
