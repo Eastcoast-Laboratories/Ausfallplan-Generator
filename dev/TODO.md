@@ -13,13 +13,43 @@
 
 ## Backlog
 
-- [ ] Email-Bestätigung: Admin bekommt Mail bei neuem User in seiner Org
-- [ ] Admin einer Org kann Users seiner Org freischalten
-- [ ] Editor kann nur eigene Org-Daten bearbeiten (filter implementieren)
+- eine Organisation kann mehrere Admins haben
+- der Admin einer Organisation hat folgende Featres:
+    - [ ] Email-Bestätigung: Admin einer Organisation bekommt Mail wen sich ein neuer User in seiner Organisation registriert
+        - [ ] Admin einer Organisation kann Users seiner Organisation freischalten über den link in der mail
+    - [ ] der Admin der Organisation kann den Namen der eigenen Organisation bearbeiten
+- [ ] Editor kann nur eigene Organisations-Daten bearbeiten (filter implementieren für Kinder, Schedules, Waitlist)
 
-
-- die kinder in einem scedule müssen noch extra sortiert werden können analog zu den waitlists. diese sortierung muss im report benutzt werden für die verteilung auf die tage (nicht mehr die sortierung der waitlist)
+# Geschwisterkinder
+- http://localhost:8080/sibling-groups/delete/1geht noch nicht (loeschen)
+- [ ] die kinder in einem scedule müssen noch extra sortiert werden können analog zu den waitlists. diese sortierung muss im report benutzt werden für die verteilung auf die tage (nicht mehr die sortierung der waitlist)
 - [ ] Wenn kinder geschwisterkinder sind beim report extra berücksichtigen: die müssen immer an einem tag zusammen oder gar nicht. auch in der nachrückliste muessen die immer hintereinander stehen
+
+# implementation:
+- Den Waitlist view so anpassen dass die Geschwisterkinder immer nur als verbundene Einheit dargestellt werden und bewegt werden können
+- den vorhandenen Scedule Kinder View (/schedules/manage-children/ID) erweitern um eine Sortier-UI für Schedule-Kinder (wie Waitlist)
+- Controller Action zum Anzeigen/Sortieren der zugewiesenen Kinder
+- View mit Drag & Drop (analog zu Waitlist) Geschwister werden als verbundene Einheit verschoben
+- Ajax endpoint zum Speichern der Sortierung (sort_order Update)
+
+2. Report-Service Änderung
+Aktuell: Nutzt WaitlistEntries sortiert nach priority Neu: Nutzt direkt die Kinder aus dem Schedule, sortiert nach assignments.sort_order
+
+Dabei:
+
+Geschwister zusammen halten (immer gemeinsam an einem Tag oder gar nicht)
+
+3. Geschwister-Logik
+php
+// Pseudo-Code:
+- Load children mit sibling_groups
+- Beim Verteilen: Wenn Kind A zugewiesen wird, checke sibling_group
+- Wenn Geschwister existieren: Prüfe ob ALLE Geschwister passen (capacity check)
+- Wenn ja: Alle zusammen zuweisen
+- Wenn nein: alle geschwister merken für den nächsten Tag und dort als errstes (zur nächsten Runde)
+
+
+
 
 ---
 

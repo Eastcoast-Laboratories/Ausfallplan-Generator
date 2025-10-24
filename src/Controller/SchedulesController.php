@@ -141,48 +141,54 @@ class SchedulesController extends AppController
      * @param string|null $id Schedule id.
      * @return \Cake\Http\Response|null|void
      */
+
     public function manageChildren($id = null)
     {
         $schedule = $this->Schedules->get($id);
         
-        // Get all children in this schedule (via assignments)
-        $assignedChildrenIds = $this->fetchTable('Assignments')->find()
-            ->select(['child_id' => 'DISTINCT Assignments.child_id'])
-            ->innerJoinWith('ScheduleDays')
-            ->where(['ScheduleDays.schedule_id' => $schedule->id])
+        // Get all children in this schedule (via assignments) with sort_order
+        $assignedChildrenIds = $this->fetchTable("Assignments")->find()
+            ->select(["child_id" => "DISTINCT Assignments.child_id", "sort_order" => "MIN(Assignments.sort_order)"])
+            ->innerJoinWith("ScheduleDays")
+            ->where(["ScheduleDays.schedule_id" => $schedule->id])
+            ->group(["Assignments.child_id"])
+            ->orderBy(["sort_order" => "ASC"])
             ->all()
-            ->extract('child_id')
+            ->extract("child_id")
             ->toArray();
         
-        // Get assigned children details
+        // Get assigned children details with sibling_group_id
         $assignedChildren = [];
         if (!empty($assignedChildrenIds)) {
-            $assignedChildren = $this->fetchTable('Children')->find()
-                ->where(['Children.id IN' => $assignedChildrenIds])
-                ->orderBy(['Children.name' => 'ASC'])
+            $childrenTable = $this->fetchTable("Children");
+            $assignedChildren = $childrenTable->find()
+                ->where(["Children.id IN" => $assignedChildrenIds])
+                ->orderBy([
+                    // Maintain the sort order from assignments
+                    "FIELD(Children.id, " . implode(",", $assignedChildrenIds) . ")" => "ASC"
+                ])
                 ->all();
         }
         
         // Get available children (not yet assigned)
         $user = $this->Authentication->getIdentity();
-        $availableChildrenQuery = $this->fetchTable('Children')->find()
+        $availableChildrenQuery = $this->fetchTable("Children")->find()
             ->where([
-                'Children.organization_id' => $user->organization_id,
-                'Children.is_active' => true,
+                "Children.organization_id" => $user->organization_id,
+                "Children.is_active" => true,
             ])
-            ->orderBy(['Children.name' => 'ASC']);
+            ->orderBy(["Children.name" => "ASC"]);
         
         if (!empty($assignedChildrenIds)) {
             $availableChildrenQuery->where([
-                'Children.id NOT IN' => $assignedChildrenIds
+                "Children.id NOT IN" => $assignedChildrenIds
             ]);
         }
         
         $availableChildren = $availableChildrenQuery->all();
         
-        $this->set(compact('schedule', 'assignedChildren', 'availableChildren'));
+        $this->set(compact("schedule", "assignedChildren", "availableChildren"));
     }
-
     /**
      * Add child to schedule - Creates assignment
      *
@@ -298,5 +304,66 @@ class SchedulesController extends AppController
         $this->set(compact('reportSchedule', 'days', 'waitlist', 'alwaysAtEnd', 'reportDaysCount', 'childStats'));
         $this->set('schedule', $reportSchedule); // Also set schedule for backward compatibility
         $this->set('daysCount', $reportDaysCount);
+    }
+
+    /**
+     * Reorder assigned children via AJAX
+     *
+     * @return \Cake\Http\Response
+     */
+    public function reorderChildren()
+    {
+        $this->request->allowMethod(["post"]);
+        $data = $this->request->getData();
+        
+        $scheduleId = $data["schedule_id"] ?? null;
+        $order = $data["order"] ?? [];
+        
+        if (!$scheduleId || empty($order)) {
+            return $this->response
+                ->withType("application/json")
+                ->withStringBody(json_encode(["success" => false, "error" => "Invalid data"]));
+        }
+        
+        // Get schedule_days for this schedule
+        $scheduleDaysTable = $this->fetchTable("ScheduleDays");
+        $scheduleDays = $scheduleDaysTable->find()
+            ->where(["schedule_id" => $scheduleId])
+            ->all()
+            ->extract("id")
+            ->toArray();
+        
+        if (empty($scheduleDays)) {
+            return $this->response
+                ->withType("application/json")
+                ->withStringBody(json_encode(["success" => false, "error" => "No schedule days found"]));
+        }
+        
+        // Update sort_order for assignments
+        $assignmentsTable = $this->fetchTable("Assignments");
+        $success = true;
+        
+        foreach ($order as $index => $childId) {
+            $sortOrder = $index + 1;
+            
+            // Update all assignments for this child in this schedule
+            $assignments = $assignmentsTable->find()
+                ->where([
+                    "child_id" => $childId,
+                    "schedule_day_id IN" => $scheduleDays
+                ])
+                ->all();
+            
+            foreach ($assignments as $assignment) {
+                $assignment->sort_order = $sortOrder;
+                if (!$assignmentsTable->save($assignment)) {
+                    $success = false;
+                }
+            }
+        }
+        
+        return $this->response
+            ->withType("application/json")
+            ->withStringBody(json_encode(["success" => $success]));
     }
 }
