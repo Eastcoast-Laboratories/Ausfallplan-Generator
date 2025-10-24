@@ -147,10 +147,11 @@ class EmailDebugService
                 foreach ($email['links'] as $label => $url) {
                     $htmlBody .= sprintf('<a href="%s">%s</a><br>', htmlspecialchars($url), htmlspecialchars($label));
                 }
-                $mailer->setHtmlFormat();
+                $mailer->setEmailFormat('html');
+                $mailer->setBodyText($email['body'] ?? ''); // Plain text fallback
                 $mailer->setBodyHtml($htmlBody);
             } else {
-                $mailer->setTextFormat();
+                $mailer->setEmailFormat('text');
                 $mailer->setBodyText($email['body'] ?? '');
             }
             
