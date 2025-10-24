@@ -17,11 +17,12 @@ class ChildrenController extends AppController
      */
     public function index()
     {
-        // Get current user's organization
-        $user = $this->Authentication->getIdentity();
+        // Get all organizations user is member of
+        $organizations = $this->getUserOrganizations();
+        $orgIds = collection($organizations)->extract('id')->toList();
         
         $children = $this->Children->find()
-            ->where(['Children.organization_id' => $user->organization_id])
+            ->where(['Children.organization_id IN' => $orgIds])
             ->contain(['Organizations', 'SiblingGroups'])
             ->orderBy(['Children.is_active' => 'DESC', 'Children.name' => 'ASC'])
             ->all();
@@ -43,6 +44,12 @@ class ChildrenController extends AppController
             'Assignments',
             'WaitlistEntries',
         ]);
+        
+        // Permission check: User must be member of child's organization
+        if (!$this->hasOrgRole($child->organization_id)) {
+            $this->Flash->error(__('Zugriff verweigert.'));
+            return $this->redirect(['action' => 'index']);
+        }
 
         $this->set(compact('child'));
     }
@@ -59,9 +66,16 @@ class ChildrenController extends AppController
         if ($this->request->is('post')) {
             $data = $this->request->getData();
             
-            // Set organization from authenticated user
+            // Set organization from user's primary organization
             $user = $this->Authentication->getIdentity();
-            $data['organization_id'] = $user->organization_id;
+            
+            $primaryOrg = $this->getPrimaryOrganization();
+            if (!$primaryOrg) {
+                $this->Flash->error(__('Sie müssen einer Organisation angehören, um Kinder zu erstellen.'));
+                return $this->redirect(['action' => 'index']);
+            }
+            
+            $data['organization_id'] = $primaryOrg->id;
             
             // Set defaults
             if (!isset($data['is_active'])) {
@@ -89,8 +103,10 @@ class ChildrenController extends AppController
             $this->Flash->error(__('The child could not be saved. Please try again.'));
         }
         
+        // Get sibling groups from user's primary organization
+        $primaryOrg = $this->getPrimaryOrganization();
         $siblingGroups = $this->Children->SiblingGroups->find('list')
-            ->where(['SiblingGroups.organization_id' => $this->Authentication->getIdentity()->organization_id])
+            ->where(['SiblingGroups.organization_id' => $primaryOrg ? $primaryOrg->id : 0])
             ->all();
         
         $this->set(compact('child', 'siblingGroups'));
@@ -105,6 +121,12 @@ class ChildrenController extends AppController
     public function edit($id = null)
     {
         $child = $this->Children->get($id, contain: []);
+        
+        // Permission check: User must have editor role in child's organization
+        if (!$this->hasOrgRole($child->organization_id, 'editor')) {
+            $this->Flash->error(__('Sie haben keine Berechtigung Kinder zu bearbeiten.'));
+            return $this->redirect(['action' => 'index']);
+        }
 
         if ($this->request->is(['patch', 'post', 'put'])) {
             $child = $this->Children->patchEntity($child, $this->request->getData());
@@ -117,8 +139,9 @@ class ChildrenController extends AppController
             $this->Flash->error(__('The child could not be updated. Please try again.'));
         }
         
+        // Get sibling groups from child's organization
         $siblingGroups = $this->Children->SiblingGroups->find('list')
-            ->where(['SiblingGroups.organization_id' => $this->Authentication->getIdentity()->organization_id])
+            ->where(['SiblingGroups.organization_id' => $child->organization_id])
             ->all();
         
         $this->set(compact('child', 'siblingGroups'));
@@ -134,6 +157,12 @@ class ChildrenController extends AppController
     {
         $this->request->allowMethod(['post', 'delete']);
         $child = $this->Children->get($id);
+        
+        // Permission check: User must have editor role in child's organization
+        if (!$this->hasOrgRole($child->organization_id, 'editor')) {
+            $this->Flash->error(__('Sie haben keine Berechtigung Kinder zu löschen.'));
+            return $this->redirect(['action' => 'index']);
+        }
 
         if ($this->Children->delete($child)) {
             $this->Flash->success(__('The child has been deleted.'));
