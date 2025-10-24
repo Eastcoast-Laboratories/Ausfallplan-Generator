@@ -210,8 +210,8 @@ class SchedulesController extends AppController
             ->all();
         
         if ($scheduleDays->count() === 0) {
-            $this->Flash->error(__("No schedule days found for this schedule."));
-            return $this->redirect(["action" => "manageChildren", $scheduleId]);
+            $this->Flash->error(__("Dieser Dienstplan hat noch keine Tage. Bitte fügen Sie zuerst Tage zum Dienstplan hinzu, bevor Sie Kinder zuweisen können."));
+            return $this->redirect(["action" => "view", $scheduleId]);
         }
         
         // Get max sort_order for this schedule
