@@ -46,6 +46,13 @@ class SchedulesController extends AppController
     public function view($id = null)
     {
         $schedule = $this->Schedules->get($id, contain: ['Organizations', 'ScheduleDays']);
+        
+        // Permission check: Only admin or users from same organization
+        $user = $this->Authentication->getIdentity();
+        if ($user->role !== 'admin' && $schedule->organization_id !== $user->organization_id) {
+            $this->Flash->error(__('Zugriff verweigert.'));
+            return $this->redirect(['action' => 'index']);
+        }
 
         $this->set(compact('schedule'));
     }
@@ -100,6 +107,21 @@ class SchedulesController extends AppController
     public function edit($id = null)
     {
         $schedule = $this->Schedules->get($id, contain: []);
+        
+        // Permission check
+        $user = $this->Authentication->getIdentity();
+        
+        // Viewer cannot edit
+        if ($user->role === 'viewer') {
+            $this->Flash->error(__('Sie haben keine Berechtigung Dienstpläne zu bearbeiten.'));
+            return $this->redirect(['action' => 'index']);
+        }
+        
+        // Editor can only edit own organization's schedules
+        if ($user->role !== 'admin' && $schedule->organization_id !== $user->organization_id) {
+            $this->Flash->error(__('Zugriff verweigert.'));
+            return $this->redirect(['action' => 'index']);
+        }
 
         if ($this->request->is(['patch', 'post', 'put'])) {
             $schedule = $this->Schedules->patchEntity($schedule, $this->request->getData());
@@ -131,6 +153,21 @@ class SchedulesController extends AppController
     {
         $this->request->allowMethod(['post', 'delete']);
         $schedule = $this->Schedules->get($id);
+        
+        // Permission check
+        $user = $this->Authentication->getIdentity();
+        
+        // Viewer cannot delete
+        if ($user->role === 'viewer') {
+            $this->Flash->error(__('Sie haben keine Berechtigung Dienstpläne zu löschen.'));
+            return $this->redirect(['action' => 'index']);
+        }
+        
+        // Editor can only delete own organization's schedules
+        if ($user->role !== 'admin' && $schedule->organization_id !== $user->organization_id) {
+            $this->Flash->error(__('Zugriff verweigert.'));
+            return $this->redirect(['action' => 'index']);
+        }
 
         if ($this->Schedules->delete($schedule)) {
             $this->Flash->success(__('The schedule has been deleted.'));

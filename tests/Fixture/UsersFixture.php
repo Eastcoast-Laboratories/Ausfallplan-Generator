@@ -45,6 +45,15 @@ class UsersFixture extends TestFixture
                 'created' => '2024-10-22 10:00:00',
                 'modified' => '2024-10-22 10:00:00',
             ],
+            [
+                'id' => 4,
+                'organization_id' => 2,
+                'email' => 'editor2@example.com',
+                'password' => '$2y$10$u05j8FjsvLBNdfhBhc21LOuVMpzpabVXQ9OpC2wO3pSO0q6t7HHMO',
+                'role' => 'editor',
+                'created' => '2024-10-22 10:00:00',
+                'modified' => '2024-10-22 10:00:00',
+            ],
         ];
         parent::init();
     }
