@@ -110,11 +110,24 @@ Vollständige Dokumentation aller End-to-End Tests mit Playwright.
 
 ---
 
-### 14. **registration-login.spec.js**
-**Funktion:** Testet den kompletten User-Registrierungs- und Login-Flow.
+### 14. **registration-login.spec.js** 🔥 ERWEITERT!
+**Funktion:** Testet den kompletten User-Registrierungs- und Login-Flow mit ALLEN Szenarien.
 
-**Git Commit:** `94fa417` (2025-10-22)  
-**Commit Message:** Fix login - remove last_login_at tracking
+**8 umfassende Tests:**
+1. ✅ Neue Organisation erstellen → User wird org_admin
+2. ✅ Bestehender Organisation als VIEWER beitreten
+3. ✅ Bestehender Organisation als EDITOR beitreten  
+4. ✅ ORG_ADMIN-Rolle anfordern (erfordert Genehmigung)
+5. ✅ Ohne Organisation registrieren ("keine organisation")
+6. ✅ Unterschiedliche Success-Messages je nach Szenario
+7. ✅ Login mit ungültigen Credentials
+8. ✅ Pflichtfeld-Validierung
+
+**Organisation Impact:** ✅ CRITICAL - Testet komplettes organization_users System mit Rollen und Benachrichtigungen
+
+**Git Commit:** `6d9fd06` (2025-10-25)  
+**Commit Message:** test: Comprehensive registration tests for all scenarios  
+**Original Commit:** `94fa417` (2025-10-22)
 
 ---
 
