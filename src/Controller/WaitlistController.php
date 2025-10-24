@@ -75,6 +75,26 @@ class WaitlistController extends AppController
                 ->all();
         }
         
+        // Get children that are assigned to any day in this schedule
+        $childrenInSchedule = [];
+        if ($scheduleId) {
+            $assignments = $this->fetchTable('Assignments')->find()
+                ->select(['child_id' => 'DISTINCT Assignments.child_id'])
+                ->innerJoinWith('ScheduleDays')
+                ->where(['ScheduleDays.schedule_id' => $scheduleId])
+                ->all();
+            
+            foreach ($assignments as $assignment) {
+                $childrenInSchedule[] = $assignment->child_id;
+            }
+        }
+        
+        // Get children already on waitlist
+        $childrenOnWaitlist = [];
+        foreach ($waitlistEntries as $entry) {
+            $childrenOnWaitlist[] = $entry->child_id;
+        }
+        
         // Build sibling groups map and load sibling names
         $siblingGroupsMap = [];
         $siblingNames = [];
@@ -105,26 +125,6 @@ class WaitlistController extends AppController
                     }
                 }
                 $siblingNames[$entry->child->id] = implode(', ', $names);
-            }
-        }
-        
-        // Get children already on waitlist
-        $childrenOnWaitlist = [];
-        foreach ($waitlistEntries as $entry) {
-            $childrenOnWaitlist[] = $entry->child_id;
-        }
-        
-        // Get children that are assigned to any day in this schedule
-        $childrenInSchedule = [];
-        if ($scheduleId) {
-            $assignments = $this->fetchTable('Assignments')->find()
-                ->select(['child_id' => 'DISTINCT Assignments.child_id'])
-                ->innerJoinWith('ScheduleDays')
-                ->where(['ScheduleDays.schedule_id' => $scheduleId])
-                ->all();
-            
-            foreach ($assignments as $assignment) {
-                $childrenInSchedule[] = $assignment->child_id;
             }
         }
         
