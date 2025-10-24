@@ -91,7 +91,7 @@ $this->assign('title', __('Waitlist'));
             <div id="waitlist-sortable" style="background: #fff3e0; padding: 1rem; border-radius: 8px; min-height: 300px;">
                 <?php if (!empty($waitlistEntries) && (is_countable($waitlistEntries) ? count($waitlistEntries) : $waitlistEntries->count()) > 0): ?>
                     <?php foreach ($waitlistEntries as $entry): ?>
-                        <div class="waitlist-item" data-id="<?= $entry->id ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; cursor: move; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #ff9800;">
+                        <div class="waitlist-item" data-id="<?= $entry->id ?>" data-sibling-group="<?= $entry->child->sibling_group_id ?? '' ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; cursor: move; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #ff9800;">
                             <div style="display: flex; align-items: center; gap: 1rem;">
                                 <span style="background: #ff9800; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">
                                     <?= $entry->priority ?>
@@ -201,3 +201,56 @@ style.textContent = `
 document.head.appendChild(style);
 </script>
 <?php endif; ?>
+
+// Create warning div for sibling order check
+const warningDiv = document.createElement('div');
+warningDiv.id = 'sibling-warning';
+warningDiv.style.cssText = 'display:none; background: #fff3cd; border: 2px solid #ffc107; padding: 1rem; margin-bottom: 1rem; border-radius: 4px; color: #856404; font-weight: bold;';
+warningDiv.innerHTML = '⚠️ Hinweis: Geschwister sollten auch in der Nachrückliste hintereinander angeordnet werden';
+el.parentElement.insertBefore(warningDiv, el);
+
+// Function to check if siblings are consecutive
+function checkSiblingOrder() {
+    const items = Array.from(el.querySelectorAll('.waitlist-item'));
+    const siblingGroups = {};
+    
+    // Build sibling groups
+    items.forEach((item, index) => {
+        const groupId = item.dataset.siblingGroup;
+        if (groupId && groupId \!== '') {
+            if (\!siblingGroups[groupId]) {
+                siblingGroups[groupId] = [];
+            }
+            siblingGroups[groupId].push(index);
+        }
+    });
+    
+    // Check if any group has non-consecutive members
+    let hasSeparatedSiblings = false;
+    for (const groupId in siblingGroups) {
+        const positions = siblingGroups[groupId];
+        if (positions.length < 2) continue;
+        
+        // Check if positions are consecutive
+        for (let i = 1; i < positions.length; i++) {
+            if (positions[i] \!== positions[i-1] + 1) {
+                hasSeparatedSiblings = true;
+                break;
+            }
+        }
+        if (hasSeparatedSiblings) break;
+    }
+    
+    // Show/hide warning
+    warningDiv.style.display = hasSeparatedSiblings ? 'block' : 'none';
+}
+
+// Check on load
+checkSiblingOrder();
+
+// Also add to the existing onEnd callback
+const originalOnEnd = sortable.option('onEnd');
+sortable.option('onEnd', function(evt) {
+    if (originalOnEnd) originalOnEnd.call(this, evt);
+    setTimeout(checkSiblingOrder, 100);
+});
