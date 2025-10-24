@@ -21,7 +21,8 @@
 - [ ] Editor kann nur eigene Organisations-Daten bearbeiten (filter implementieren für Kinder, Schedules, Waitlist)
 
 # Geschwisterkinder
-- http://localhost:8080/sibling-groups/delete/1geht noch nicht (loeschen)
+- http://localhost:8080/sibling-groups/delete/1 geht noch nicht (loeschen)
+- in der nachrückliste, müssen die Geschwister auch als einheit verschoben werden, wie bei den waitlist kindern (DRY: benutze das selbe JS)
 - [ ] die kinder in einem scedule müssen noch extra sortiert werden können analog zu den waitlists. diese sortierung muss im report benutzt werden für die verteilung auf die tage (nicht mehr die sortierung der waitlist)
 - [ ] Wenn kinder geschwisterkinder sind beim report extra berücksichtigen: die müssen immer an einem tag zusammen oder gar nicht. auch in der nachrückliste muessen die immer hintereinander stehen
 
