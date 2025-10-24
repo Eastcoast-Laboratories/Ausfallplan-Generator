@@ -189,53 +189,65 @@ class SchedulesController extends AppController
         
         $this->set(compact("schedule", "assignedChildren", "availableChildren"));
     }
+
     /**
-     * Add child to schedule - Creates assignment
+     * Assign child to schedule
      *
-     * @return \Cake\Http\Response|null Redirects back
+     * @return \Cake\Http\Response|null
      */
     public function assignChild()
     {
-        $this->request->allowMethod(['post']);
+        $this->request->allowMethod(["post"]);
         
         $data = $this->request->getData();
-        $scheduleId = $data['schedule_id'];
-        $childId = $data['child_id'];
+        $scheduleId = $data["schedule_id"];
+        $childId = $data["child_id"];
         
-        // Get or create first schedule day for this schedule
-        $scheduleDaysTable = $this->fetchTable('ScheduleDays');
-        $scheduleDay = $scheduleDaysTable->find()
-            ->where(['schedule_id' => $scheduleId])
+        // Get schedule days for this schedule
+        $scheduleDaysTable = $this->fetchTable("ScheduleDays");
+        $scheduleDays = $scheduleDaysTable->find()
+            ->where(["schedule_id" => $scheduleId])
+            ->all();
+        
+        if ($scheduleDays->count() === 0) {
+            $this->Flash->error(__("No schedule days found for this schedule."));
+            return $this->redirect(["action" => "manageChildren", $scheduleId]);
+        }
+        
+        // Get max sort_order for this schedule
+        $assignmentsTable = $this->fetchTable("Assignments");
+        $maxSortOrder = $assignmentsTable->find()
+            ->select(["max_sort" => "MAX(sort_order)"])
+            ->innerJoinWith("ScheduleDays")
+            ->where(["ScheduleDays.schedule_id" => $scheduleId])
             ->first();
         
-        if (!$scheduleDay) {
-            // Create default schedule day
-            $scheduleDay = $scheduleDaysTable->newEntity([
-                'schedule_id' => $scheduleId,
-                'title' => 'Default Day',
-                'position' => 1,
-                'capacity' => 9,
+        $nextSortOrder = ($maxSortOrder && $maxSortOrder->max_sort) ? $maxSortOrder->max_sort + 1 : 1;
+        
+        // Assign child to all schedule days
+        $success = true;
+        foreach ($scheduleDays as $day) {
+            $assignment = $assignmentsTable->newEntity([
+                "schedule_day_id" => $day->id,
+                "child_id" => $childId,
+                "weight" => 1,
+                "source" => "manual",
+                "sort_order" => $nextSortOrder,
             ]);
-            $scheduleDaysTable->save($scheduleDay);
+            
+            if (!$assignmentsTable->save($assignment)) {
+                $success = false;
+            }
         }
         
-        // Create assignment
-        $assignment = $this->fetchTable('Assignments')->newEntity([
-            'schedule_day_id' => $scheduleDay->id,
-            'child_id' => $childId,
-            'weight' => 1,
-            'source' => 'manual',
-        ]);
-        
-        if ($this->fetchTable('Assignments')->save($assignment)) {
-            $this->Flash->success(__('Child assigned to schedule.'));
+        if ($success) {
+            $this->Flash->success(__("Child assigned to schedule."));
         } else {
-            $this->Flash->error(__('Could not assign child to schedule.'));
+            $this->Flash->error(__("Could not assign child to schedule."));
         }
         
-        return $this->redirect(['action' => 'manageChildren', $scheduleId]);
+        return $this->redirect(["action" => "manageChildren", $scheduleId]);
     }
-
     /**
      * Remove child from schedule - Deletes assignment
      *
