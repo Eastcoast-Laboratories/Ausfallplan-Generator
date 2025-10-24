@@ -26,6 +26,7 @@
   - Permission-Check:
     - Viewer/Editor: Nur eigene Schedules
     - Admin: Alle Schedules
+
 6. erstelle eine neue join tabelle, die die user den organisationen zuordnen kann un dworin die rollle in der organisation definierrt wird, dazu müssen auch alle anzeigen aktualisiert werden, organisation index, view und edit, beiedit auch der bereich benutzer verwalten 
 
 ---
@@ -611,6 +612,16 @@ UPDATE users SET role = 'admin' WHERE is_system_admin = TRUE;
 - [ ] Deploy Phase 3 (Cleanup)
 
 ---
+
+
+
+
+
+# weitere TODOs
+
+ erstelle in jedem vorhandenen playwright test im head eine Beschreibung, was der test genau tut. wenn sich dabei herausstellt , dass der test etwas testet, was die neue organisation betrifft, dann aktualisiere diese tests bis sie erfolgreich durchlaufen
+
+höre nicht auf, bevor nicht alle spec.js aktualisiert sind im repository
 
 ## Checkliste: Admin-Features
 

@@ -10,10 +10,11 @@ use Cake\ORM\Entity;
  * User Entity
  *
  * @property int $id
- * @property int $organization_id
+ * @property int|null $organization_id
  * @property string $email
  * @property string $password
- * @property string $role
+ * @property string|null $role
+ * @property bool $is_system_admin
  * @property bool $email_verified
  * @property string|null $email_token
  * @property string $status
@@ -23,6 +24,8 @@ use Cake\ORM\Entity;
  * @property \Cake\I18n\DateTime $modified
  *
  * @property \App\Model\Entity\Organization $organization
+ * @property \App\Model\Entity\Organization[] $organizations
+ * @property \App\Model\Entity\OrganizationUser[] $organization_users
  */
 class User extends Entity
 {
@@ -36,6 +39,7 @@ class User extends Entity
         'email' => true,
         'password' => true,
         'role' => true,
+        'is_system_admin' => true,
         'email_verified' => true,
         'email_token' => true,
         'status' => true,
@@ -44,6 +48,8 @@ class User extends Entity
         'created' => true,
         'modified' => true,
         'organization' => true,
+        'organizations' => true,
+        'organization_users' => true,
     ];
 
     /**
@@ -68,5 +74,65 @@ class User extends Entity
             return $hasher->hash($value);
         }
         return null;
+    }
+
+    /**
+     * Check if user has a specific role in an organization
+     *
+     * @param int $organizationId Organization ID
+     * @param string|null $requiredRole Required role (null = just check membership)
+     * @return bool
+     */
+    public function hasOrgRole(int $organizationId, ?string $requiredRole = null): bool
+    {
+        // System admins have access to everything
+        if ($this->is_system_admin) {
+            return true;
+        }
+
+        // Check if user is member of the organization
+        if (!isset($this->organization_users) || empty($this->organization_users)) {
+            return false;
+        }
+
+        $orgUser = collection($this->organization_users)
+            ->firstMatch(['organization_id' => $organizationId]);
+
+        if (!$orgUser) {
+            return false;
+        }
+
+        // If no specific role required, just membership is enough
+        if ($requiredRole === null) {
+            return true;
+        }
+
+        // Check role hierarchy
+        return OrganizationUser::getRoleHierarchy($orgUser->role) >= OrganizationUser::getRoleHierarchy($requiredRole);
+    }
+
+    /**
+     * Get user's primary organization
+     *
+     * @return \App\Model\Entity\OrganizationUser|null
+     */
+    public function getPrimaryOrganization(): ?OrganizationUser
+    {
+        if (!isset($this->organization_users) || empty($this->organization_users)) {
+            return null;
+        }
+
+        return collection($this->organization_users)
+            ->firstMatch(['is_primary' => true]);
+    }
+
+    /**
+     * Check if user is system admin
+     *
+     * @return bool
+     */
+    public function isSystemAdmin(): bool
+    {
+        return (bool)$this->is_system_admin;
     }
 }

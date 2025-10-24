@@ -50,6 +50,18 @@ class OrganizationsTable extends Table
             'foreignKey' => 'organization_id',
             'className' => 'Users',
         ]);
+        
+        // Many-to-Many through OrganizationUsers
+        $this->belongsToMany('Users', [
+            'through' => 'OrganizationUsers',
+            'foreignKey' => 'organization_id',
+            'targetForeignKey' => 'user_id',
+        ]);
+        
+        $this->hasMany('OrganizationUsers', [
+            'foreignKey' => 'organization_id',
+        ]);
+        
         $this->hasMany('Children', [
             'foreignKey' => 'organization_id',
             'className' => 'Children',

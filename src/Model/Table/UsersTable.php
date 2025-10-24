@@ -45,8 +45,19 @@ class UsersTable extends Table
 
         $this->belongsTo('Organizations', [
             'foreignKey' => 'organization_id',
-            'joinType' => 'INNER',
+            'joinType' => 'LEFT',  // Changed to LEFT as org_id will be optional
             'className' => 'Organizations',
+        ]);
+
+        // Many-to-Many through OrganizationUsers
+        $this->belongsToMany('Organizations', [
+            'through' => 'OrganizationUsers',
+            'foreignKey' => 'user_id',
+            'targetForeignKey' => 'organization_id',
+        ]);
+
+        $this->hasMany('OrganizationUsers', [
+            'foreignKey' => 'user_id',
         ]);
     }
 
@@ -60,8 +71,7 @@ class UsersTable extends Table
     {
         $validator
             ->integer('organization_id')
-            ->requirePresence('organization_id', 'create')
-            ->notEmptyString('organization_id');
+            ->allowEmptyString('organization_id');  // Optional now, using OrganizationUsers join table
 
         $validator
             ->email('email')
@@ -77,8 +87,11 @@ class UsersTable extends Table
         $validator
             ->scalar('role')
             ->maxLength('role', 20)
-            ->allowEmptyString('role')  // Allow empty, will be filled with default
-            ->inList('role', ['admin', 'editor', 'viewer'], 'Invalid role', 'create');
+            ->allowEmptyString('role');  // Will be removed in next migration
+
+        $validator
+            ->boolean('is_system_admin')
+            ->notEmptyString('is_system_admin');
 
         // Add unique constraint for email per organization
         $validator
@@ -100,8 +113,8 @@ class UsersTable extends Table
      */
     public function buildRules(\Cake\ORM\RulesChecker $rules): \Cake\ORM\RulesChecker
     {
-        $rules->add($rules->existsIn(['organization_id'], 'Organizations'), ['errorField' => 'organization_id']);
-        $rules->add($rules->isUnique(['email', 'organization_id'], 'This email is already registered for this organization'));
+        // Email must be unique globally
+        $rules->add($rules->isUnique(['email'], 'This email is already registered'));
 
         return $rules;
     }
