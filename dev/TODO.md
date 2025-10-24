@@ -155,11 +155,22 @@ ADD COLUMN is_system_admin BOOLEAN DEFAULT FALSE;
 // System-Admins markieren (die mit role='admin')
 UPDATE users SET is_system_admin = TRUE WHERE role = 'admin';
 
-// OPTIONAL: organization_id und role entfernen
-// ODER: Behalten für backwards compatibility / primary org
+// ENTFERNEN von role und organization_id (Clean Design!)
+// Alle Authorization-Daten sind jetzt in organization_users
 ALTER TABLE users DROP COLUMN role;
--- organization_id KANN bleiben als "primary_organization_id"
+ALTER TABLE users DROP COLUMN organization_id;
+
+// WICHTIG: Foreign Keys in anderen Tabellen bleiben!
+// schedules.user_id → users.id (Creator)
+// schedules.organization_id → organizations.id (Ownership)
 ```
+
+**Warum entfernen?**
+- ✅ Single Source of Truth: Nur organization_users definiert Zugehörigkeit
+- ✅ Keine Redundanz/Inkonsistenzen
+- ✅ Saubere Trennung: users = Auth, organization_users = Authorization
+- ✅ Flexibel für Multiple Orgs
+- ⚠️ Erfordert: Identity muss organization_users vorladen
 
 ### Model/Entity Änderungen
 
@@ -428,7 +439,24 @@ public function removeUser($orgId, $userId)
 ### Authentication Änderungen
 
 #### Authentication/Identity anpassen
+
+**WICHTIG: Identity muss organization_users vorladen!**
+
 ```php
+// config/authentication.php oder AppController
+'identityClass' => function($user) {
+    // Lade organization_users beim Login
+    $user->organization_users = TableRegistry::getTableLocator()
+        ->get('OrganizationUsers')
+        ->find()
+        ->where(['user_id' => $user->id])
+        ->contain(['Organizations'])
+        ->all()
+        ->toArray();
+    
+    return $user;
+}
+
 // In AppController oder Authentication setup
 $user = $this->Authentication->getIdentity();
 
@@ -437,6 +465,28 @@ $user->isSystemAdmin() // statt $user->role === 'admin'
 $user->hasOrgRole($orgId, 'editor')
 $user->getOrganizations()
 $user->getPrimaryOrganization()
+
+// Beispiel Implementation in User Entity:
+public function hasOrgRole($orgId, $requiredRole = null): bool
+{
+    if ($this->is_system_admin) {
+        return true;
+    }
+    
+    $orgUser = collection($this->organization_users)
+        ->firstMatch(['organization_id' => $orgId]);
+    
+    if (!$orgUser) {
+        return false;
+    }
+    
+    if ($requiredRole === null) {
+        return true; // Just membership check
+    }
+    
+    $hierarchy = ['viewer' => 1, 'editor' => 2, 'org_admin' => 3];
+    return $hierarchy[$orgUser->role] >= $hierarchy[$requiredRole];
+}
 ```
 
 ### Validierung & Regeln
@@ -460,6 +510,30 @@ public function buildRules(RulesChecker $rules): RulesChecker
         
         return true;
     }, 'lastAdminCheck');
+    
+    return $rules;
+}
+```
+
+#### UsersTable Rules (NEU)
+```php
+public function buildRules(RulesChecker $rules): RulesChecker
+{
+    // User muss entweder System-Admin ODER in mindestens 1 Org sein
+    $rules->addDelete(function ($entity, $options) {
+        if (!$entity->is_system_admin) {
+            $orgCount = $this->fetchTable('OrganizationUsers')
+                ->find()
+                ->where(['user_id' => $entity->id])
+                ->count();
+            
+            if ($orgCount === 0) {
+                return 'User muss entweder System-Admin sein oder mindestens einer Organisation angehören.';
+            }
+        }
+        
+        return true;
+    }, 'userMustHaveOrgOrBeAdmin');
     
     return $rules;
 }
