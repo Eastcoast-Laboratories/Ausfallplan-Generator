@@ -3,19 +3,24 @@ const { test, expect } = require('@playwright/test');
 
 /**
  * TEST DESCRIPTION:
- * Tests the complete user registration and login flow.
+ * Tests the complete user registration and login flow with all scenarios.
  * 
  * ORGANIZATION IMPACT: ✅ HIGH
  * - Registration now creates entry in organization_users table (not just users.organization_id)
  * - New users are automatically org_admin of their new organization
- * - Tests organization field (text input for new org) instead of dropdown
+ * - Existing organization members get requested_role (viewer/editor/org_admin)
+ * - Org-admins receive email notifications when new users join
+ * - Tests organization field (text input) with autocomplete
  * 
  * WHAT IT TESTS:
- * 1. User can register with new organization name
- * 2. Registration creates user + organization + organization_user entry
- * 3. User can login with registered credentials
- * 4. Invalid credentials show error
- * 5. Required field validation works
+ * 1. NEW ORG: User can register with new organization name → becomes org_admin
+ * 2. EXISTING ORG: User can join existing organization with role selection
+ * 3. NO ORG: User can register without organization
+ * 4. ROLES: requested_role field works (viewer, editor, org_admin)
+ * 5. NOTIFICATIONS: Org-admins receive emails when new members join
+ * 6. LOGIN: User can login with registered credentials
+ * 7. VALIDATION: Invalid credentials show error
+ * 8. VALIDATION: Required field validation works
  */
 test.describe('Registration and Login Flow', () => {
   
@@ -32,14 +37,15 @@ test.describe('Registration and Login Flow', () => {
     
     // NEW: Organization is now a text input for new org name (with autocomplete)
     const orgName = `Test-Org-${timestamp}`;
-    await page.fill('input[name="organization"]', orgName);
+    await page.fill('input[name="organization_name"]', orgName);
     
     // Fill in email and password
     await page.fill('input[name="email"]', testEmail);
     await page.fill('input[name="password"]', testPassword);
     await page.fill('input[name="password_confirm"]', testPassword);
     
-    // NOTE: Role is no longer in registration form - automatically org_admin for new org
+    // Select role - for new org will be org_admin automatically, but we still select
+    await page.selectOption('select[name="requested_role"]', 'editor');
     
     // Take screenshot before submission
     await page.screenshot({ 
@@ -181,5 +187,224 @@ test.describe('Registration and Login Flow', () => {
     
     await expect(emailInput).toHaveAttribute('required', '');
     await expect(passwordInput).toHaveAttribute('required', '');
+  });
+
+  test('NEW: should register user joining EXISTING organization with viewer role', async ({ page }) => {
+    const timestamp = Date.now();
+    
+    // First, create an organization by registering first user
+    const orgName = `Existing-Org-${timestamp}`;
+    const firstUserEmail = `orgadmin${timestamp}@test.local`;
+    const firstUserPassword = 'Admin123!';
+    
+    console.log('📍 Step 1: Create organization with first user (org_admin)');
+    await page.goto('/users/register');
+    await page.fill('input[name="organization_name"]', orgName);
+    await page.fill('input[name="email"]', firstUserEmail);
+    await page.fill('input[name="password"]', firstUserPassword);
+    await page.fill('input[name="password_confirm"]', firstUserPassword);
+    await page.selectOption('select[name="requested_role"]', 'org_admin');
+    await page.click('button[type="submit"]');
+    await page.waitForTimeout(2000);
+    
+    // Now register second user joining the same organization as viewer
+    const secondUserEmail = `viewer${timestamp}@test.local`;
+    const secondUserPassword = 'Viewer123!';
+    
+    console.log('📍 Step 2: Second user joins EXISTING organization as viewer');
+    await page.goto('/users/register');
+    await page.fill('input[name="organization_name"]', orgName);
+    await page.fill('input[name="email"]', secondUserEmail);
+    await page.fill('input[name="password"]', secondUserPassword);
+    await page.fill('input[name="password_confirm"]', secondUserPassword);
+    await page.selectOption('select[name="requested_role"]', 'viewer');
+    
+    await page.screenshot({ 
+      path: `screenshots/registration-existing-org-viewer-${timestamp}.png`,
+      fullPage: true 
+    });
+    
+    await page.click('button[type="submit"]');
+    await page.waitForTimeout(2000);
+    
+    // Should show message that org-admins have been notified
+    const successMsg = await page.textContent('body');
+    console.log('Success message:', successMsg.substring(0, 300));
+    
+    expect(
+      successMsg.includes('Organization admins have been notified') ||
+      successMsg.includes('admins have been notified')
+    ).toBeTruthy();
+    
+    console.log('✅ Registration successful - org-admins notified!');
+  });
+
+  test('NEW: should register user joining existing org as EDITOR', async ({ page }) => {
+    const timestamp = Date.now();
+    
+    // Create organization first
+    const orgName = `Editor-Test-Org-${timestamp}`;
+    const adminEmail = `admin${timestamp}@test.local`;
+    
+    await page.goto('/users/register');
+    await page.fill('input[name="organization_name"]', orgName);
+    await page.fill('input[name="email"]', adminEmail);
+    await page.fill('input[name="password"]', 'Test123!');
+    await page.fill('input[name="password_confirm"]', 'Test123!');
+    await page.click('button[type="submit"]');
+    await page.waitForTimeout(2000);
+    
+    // Second user joins as editor
+    const editorEmail = `editor${timestamp}@test.local`;
+    
+    console.log('📍 User joins existing org with EDITOR role');
+    await page.goto('/users/register');
+    await page.fill('input[name="organization_name"]', orgName);
+    await page.fill('input[name="email"]', editorEmail);
+    await page.fill('input[name="password"]', 'Editor123!');
+    await page.fill('input[name="password_confirm"]', 'Editor123!');
+    await page.selectOption('select[name="requested_role"]', 'editor');
+    
+    await page.click('button[type="submit"]');
+    await page.waitForTimeout(2000);
+    
+    const bodyText = await page.textContent('body');
+    expect(
+      bodyText.includes('successful') || 
+      bodyText.includes('erfolgreich')
+    ).toBeTruthy();
+    
+    console.log('✅ Editor registration successful');
+  });
+
+  test('NEW: should register user requesting ORG_ADMIN role in existing org', async ({ page }) => {
+    const timestamp = Date.now();
+    
+    // Create organization
+    const orgName = `Multi-Admin-Org-${timestamp}`;
+    const firstAdmin = `firstadmin${timestamp}@test.local`;
+    
+    await page.goto('/users/register');
+    await page.fill('input[name="organization_name"]', orgName);
+    await page.fill('input[name="email"]', firstAdmin);
+    await page.fill('input[name="password"]', 'Admin123!');
+    await page.fill('input[name="password_confirm"]', 'Admin123!');
+    await page.click('button[type="submit"]');
+    await page.waitForTimeout(2000);
+    
+    // Second user requests org_admin role
+    const secondAdmin = `secondadmin${timestamp}@test.local`;
+    
+    console.log('📍 User requests ORG_ADMIN role in existing organization');
+    await page.goto('/users/register');
+    await page.fill('input[name="organization_name"]', orgName);
+    await page.fill('input[name="email"]', secondAdmin);
+    await page.fill('input[name="password"]', 'SecondAdmin123!');
+    await page.fill('input[name="password_confirm"]', 'SecondAdmin123!');
+    await page.selectOption('select[name="requested_role"]', 'org_admin');
+    
+    await page.screenshot({ 
+      path: `screenshots/registration-org-admin-request-${timestamp}.png`,
+      fullPage: true 
+    });
+    
+    await page.click('button[type="submit"]');
+    await page.waitForTimeout(2000);
+    
+    // Should mention that admins need to approve
+    const bodyText = await page.textContent('body');
+    expect(
+      bodyText.includes('admins have been notified') ||
+      bodyText.includes('review your request')
+    ).toBeTruthy();
+    
+    console.log('✅ Org-admin request submitted - requires approval');
+  });
+
+  test('NEW: should register user WITHOUT organization ("keine organisation")', async ({ page }) => {
+    const timestamp = Date.now();
+    const email = `noorg${timestamp}@test.local`;
+    const password = 'NoOrg123!';
+    
+    console.log('📍 Register user WITHOUT organization');
+    await page.goto('/users/register');
+    
+    // Leave organization field EMPTY
+    await page.fill('input[name="organization_name"]', '');
+    await page.fill('input[name="email"]', email);
+    await page.fill('input[name="password"]', password);
+    await page.fill('input[name="password_confirm"]', password);
+    // Role selection when no org
+    await page.selectOption('select[name="requested_role"]', 'viewer');
+    
+    await page.screenshot({ 
+      path: `screenshots/registration-no-org-${timestamp}.png`,
+      fullPage: true 
+    });
+    
+    await page.click('button[type="submit"]');
+    await page.waitForTimeout(2000);
+    
+    // Should still succeed
+    const bodyText = await page.textContent('body');
+    expect(
+      bodyText.includes('successful') || 
+      bodyText.includes('erfolgreich')
+    ).toBeTruthy();
+    
+    // Try to login
+    console.log('📍 Login without organization');
+    await page.goto('/users/login');
+    await page.fill('input[name="email"]', email);
+    await page.fill('input[name="password"]', password);
+    await page.click('button[type="submit"]');
+    await page.waitForTimeout(2000);
+    
+    // Should be able to login
+    expect(page.url()).toContain('/dashboard');
+    console.log('✅ Login successful even without organization');
+  });
+
+  test('NEW: should show different success messages for new vs existing org', async ({ page }) => {
+    const timestamp = Date.now();
+    
+    // Test 1: New organization
+    console.log('📍 Test message for NEW organization');
+    const newOrgEmail = `neworg${timestamp}@test.local`;
+    await page.goto('/users/register');
+    await page.fill('input[name="organization_name"]', `Brand-New-Org-${timestamp}`);
+    await page.fill('input[name="email"]', newOrgEmail);
+    await page.fill('input[name="password"]', 'Test123!');
+    await page.fill('input[name="password_confirm"]', 'Test123!');
+    await page.click('button[type="submit"]');
+    await page.waitForTimeout(2000);
+    
+    let bodyText = await page.textContent('body');
+    // Should mention "admin of your new organization"
+    expect(
+      bodyText.includes('admin of your new organization') ||
+      bodyText.includes('You are the admin')
+    ).toBeTruthy();
+    console.log('✅ Correct message for new org creator');
+    
+    // Test 2: Existing organization
+    console.log('📍 Test message for EXISTING organization');
+    const existingOrgEmail = `existingorg${timestamp}@test.local`;
+    await page.goto('/users/register');
+    await page.fill('input[name="organization_name"]', `Brand-New-Org-${timestamp}`);
+    await page.fill('input[name="email"]', existingOrgEmail);
+    await page.fill('input[name="password"]', 'Test123!');
+    await page.fill('input[name="password_confirm"]', 'Test123!');
+    await page.selectOption('select[name="requested_role"]', 'viewer');
+    await page.click('button[type="submit"]');
+    await page.waitForTimeout(2000);
+    
+    bodyText = await page.textContent('body');
+    // Should mention notification to admins
+    expect(
+      bodyText.includes('admins have been notified') ||
+      bodyText.includes('will review your request')
+    ).toBeTruthy();
+    console.log('✅ Correct message for joining existing org');
   });
 });
