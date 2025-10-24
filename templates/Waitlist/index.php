@@ -99,10 +99,8 @@ $this->assign('title', __('Waitlist'));
                                 <div>
                                     <strong><?= h($entry->child->name) ?></strong>
                                     <?php if ($entry->child->sibling_group_id): ?>
-                                        <span style="background: #fff3cd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem; cursor: help;" title="Geschwister: <?php
                                         <span style="background: #fff3cd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem; cursor: help;" title="Geschwister: <?= isset($siblingNames[$entry->child->id]) ? h($siblingNames[$entry->child->id]) : "" ?>">
                                             👨‍👩‍👧 <?= __("Geschwister") ?>
-                                        </span>
                                         </span>
                                     <?php endif; ?>
                                     <?php if ($entry->child->is_integrative): ?>
