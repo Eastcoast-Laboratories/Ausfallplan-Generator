@@ -12,6 +12,21 @@ $this->assign('title', __('Add Child'));
         <legend><?= __('Add Child') ?></legend>
         <?php
             echo $this->Form->control('name', ['label' => __('Name'), 'required' => true, 'autofocus' => true]);
+            echo $this->Form->control('gender', [
+                'type' => 'select',
+                'options' => [
+                    'm' => __('Male'),
+                    'f' => __('Female'),
+                    'd' => __('Diverse'),
+                ],
+                'empty' => __('(Not specified)'),
+                'label' => __('Gender')
+            ]);
+            echo $this->Form->control('birthdate', [
+                'type' => 'date',
+                'label' => __('Birthdate'),
+                'empty' => true,
+            ]);
             echo $this->Form->control('is_active', ['type' => 'checkbox', 'label' => __('Active'), 'checked' => true]);
             echo $this->Form->control('is_integrative', ['type' => 'checkbox', 'label' => __('Integrative Child')]);
             echo $this->Form->control('sibling_group_id', [

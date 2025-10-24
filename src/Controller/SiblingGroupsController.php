@@ -107,7 +107,13 @@ class SiblingGroupsController extends AppController
     public function delete($id = null)
     {
         $this->request->allowMethod(['post', 'delete']);
-        $siblingGroup = $this->SiblingGroups->get($id);
+        $siblingGroup = $this->SiblingGroups->get($id, ['contain' => ['Children']]);
+
+        // Check if group has children
+        if (count($siblingGroup->children) > 0) {
+            $this->Flash->error(__('Cannot delete sibling group with children. Please remove children from this group first.'));
+            return $this->redirect(['action' => 'index']);
+        }
 
         if ($this->SiblingGroups->delete($siblingGroup)) {
             $this->Flash->success(__('The sibling group has been deleted.'));

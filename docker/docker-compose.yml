@@ -43,6 +43,23 @@ services:
     restart: unless-stopped
     command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
 
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: ausfallplan-phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      - PMA_HOST=db
+      - PMA_PORT=3306
+      - PMA_USER=ausfallplan
+      - PMA_PASSWORD=ausfallplan_secret
+      - MYSQL_ROOT_PASSWORD=root_secret
+    depends_on:
+      - db
+    networks:
+      - ausfallplan-network
+    restart: unless-stopped
+
 networks:
   ausfallplan-network:
     driver: bridge
