@@ -161,6 +161,15 @@ class ChildrenController extends AppController
             ->where(['schedule_id' => $scheduleId])
             ->all();
         
+        // Get max sort_order for this schedule
+        $maxSortOrder = $assignmentsTable->find()
+            ->select(['max_sort' => 'MAX(sort_order)'])
+            ->innerJoinWith('ScheduleDays')
+            ->where(['ScheduleDays.schedule_id' => $scheduleId])
+            ->first();
+        
+        $nextSortOrder = ($maxSortOrder && $maxSortOrder->max_sort) ? $maxSortOrder->max_sort + 1 : 1;
+        
         // Create assignments for all days
         foreach ($scheduleDays as $scheduleDay) {
             // Check if assignment already exists
@@ -175,7 +184,8 @@ class ChildrenController extends AppController
                 $assignment = $assignmentsTable->newEntity([
                     'schedule_day_id' => $scheduleDay->id,
                     'child_id' => $childId,
-                    'weight' => 1 // Default weight
+                    'weight' => 1, // Default weight
+                    'sort_order' => $nextSortOrder,
                 ]);
                 $assignmentsTable->save($assignment);
             }
