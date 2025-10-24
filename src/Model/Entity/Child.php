@@ -32,6 +32,8 @@ class Child extends Entity
     protected array $_accessible = [
         'organization_id' => true,
         'name' => true,
+        'gender' => true,
+        'birthdate' => true,
         'is_integrative' => true,
         'is_active' => true,
         'sibling_group_id' => true,
