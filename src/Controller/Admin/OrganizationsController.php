@@ -19,9 +19,9 @@ class OrganizationsController extends AppController
      */
     public function index()
     {
-        // Only admin can access
+        // Only system admin can access
         $user = $this->Authentication->getIdentity();
-        if ($user->role !== 'admin') {
+        if (!$user || !$user->is_system_admin) {
             $this->Flash->error(__('Access denied.'));
             return $this->redirect(['_name' => 'dashboard']);
         }
@@ -34,10 +34,10 @@ class OrganizationsController extends AppController
                 'Organizations.contact_email',
                 'Organizations.contact_phone',
                 'Organizations.created',
-                'user_count' => $this->Organizations->find()->func()->count('DISTINCT Users.id'),
+                'user_count' => $this->Organizations->find()->func()->count('DISTINCT OrganizationUsers.user_id'),
                 'children_count' => $this->Organizations->find()->func()->count('DISTINCT Children.id'),
             ])
-            ->leftJoinWith('Users')
+            ->leftJoin('OrganizationUsers', ['OrganizationUsers.organization_id = Organizations.id'])
             ->leftJoinWith('Children')
             ->group(['Organizations.id'])
             ->orderBy(['Organizations.name' => 'ASC'])
@@ -55,13 +55,13 @@ class OrganizationsController extends AppController
     public function view($id = null)
     {
         $user = $this->Authentication->getIdentity();
-        if ($user->role !== 'admin') {
+        if (!$user || !$user->is_system_admin) {
             $this->Flash->error(__('Access denied.'));
             return $this->redirect(['_name' => 'dashboard']);
         }
 
         $organization = $this->Organizations->get($id, [
-            'contain' => ['Users', 'Children']
+            'contain' => ['OrganizationUsers' => ['Users'], 'Children']
         ]);
 
         // Get schedules count for this org
@@ -82,13 +82,13 @@ class OrganizationsController extends AppController
     public function edit($id = null)
     {
         $user = $this->Authentication->getIdentity();
-        if ($user->role !== 'admin') {
+        if (!$user || !$user->is_system_admin) {
             $this->Flash->error(__('Access denied.'));
             return $this->redirect(['_name' => 'dashboard']);
         }
 
         $organization = $this->Organizations->get($id, [
-            'contain' => ['Users']
+            'contain' => ['OrganizationUsers' => ['Users']]
         ]);
 
         if ($this->request->is(['patch', 'post', 'put'])) {
@@ -121,7 +121,7 @@ class OrganizationsController extends AppController
     public function delete($id = null)
     {
         $user = $this->Authentication->getIdentity();
-        if ($user->role !== 'admin') {
+        if (!$user || !$user->is_system_admin) {
             $this->Flash->error(__('Zugriff verweigert.'));
             return $this->redirect(['_name' => 'dashboard']);
         }
@@ -205,7 +205,7 @@ class OrganizationsController extends AppController
     public function toggleActive($id = null)
     {
         $user = $this->Authentication->getIdentity();
-        if ($user->role !== 'admin') {
+        if (!$user || !$user->is_system_admin) {
             $this->Flash->error(__('Access denied.'));
             return $this->redirect(['_name' => 'dashboard']);
         }
@@ -234,23 +234,43 @@ class OrganizationsController extends AppController
     public function addUser($id = null)
     {
         $user = $this->Authentication->getIdentity();
-        if ($user->role !== 'admin') {
+        if (!$user || !$user->is_system_admin) {
             $this->Flash->error(__('Access denied.'));
             return $this->redirect(['_name' => 'dashboard']);
         }
 
         $this->request->allowMethod(['post']);
         $userId = $this->request->getData('user_id');
+        $role = $this->request->getData('role') ?? 'viewer';
 
         if ($userId) {
-            $usersTable = $this->fetchTable('Users');
-            $userToUpdate = $usersTable->get($userId);
-            $userToUpdate->organization_id = $id;
-
-            if ($usersTable->save($userToUpdate)) {
-                $this->Flash->success(__('User has been added to organization.'));
+            // Check if user is already member
+            $orgUsersTable = $this->fetchTable('OrganizationUsers');
+            $existing = $orgUsersTable->find()
+                ->where([
+                    'organization_id' => $id,
+                    'user_id' => $userId
+                ])
+                ->first();
+                
+            if ($existing) {
+                $this->Flash->error(__('User is already a member of this organization.'));
             } else {
-                $this->Flash->error(__('Could not add user to organization.'));
+                // Create organization_users entry
+                $orgUser = $orgUsersTable->newEntity([
+                    'organization_id' => $id,
+                    'user_id' => $userId,
+                    'role' => $role,
+                    'is_primary' => false,
+                    'joined_at' => new \DateTime(),
+                    'invited_by' => $user->id,
+                ]);
+                
+                if ($orgUsersTable->save($orgUser)) {
+                    $this->Flash->success(__('User has been added to organization.'));
+                } else {
+                    $this->Flash->error(__('Could not add user to organization.'));
+                }
             }
         }
 
@@ -267,32 +287,40 @@ class OrganizationsController extends AppController
     public function removeUser($id = null, $userId = null)
     {
         $user = $this->Authentication->getIdentity();
-        if ($user->role !== 'admin') {
+        if (!$user || !$user->is_system_admin) {
             $this->Flash->error(__('Access denied.'));
             return $this->redirect(['_name' => 'dashboard']);
         }
 
         $this->request->allowMethod(['post']);
 
-        // Find "keine organisation"
-        $noOrg = $this->Organizations->find()
-            ->where(['name' => 'keine organisation'])
+        // Remove organization_users entry
+        $orgUsersTable = $this->fetchTable('OrganizationUsers');
+        $orgUser = $orgUsersTable->find()
+            ->where([
+                'organization_id' => $id,
+                'user_id' => $userId
+            ])
             ->first();
 
-        if (!$noOrg) {
-            // Create if it doesn't exist
-            $noOrg = $this->Organizations->newEntity(['name' => 'keine organisation']);
-            $this->Organizations->save($noOrg);
-        }
-
-        $usersTable = $this->fetchTable('Users');
-        $userToUpdate = $usersTable->get($userId);
-        $userToUpdate->organization_id = $noOrg->id;
-
-        if ($usersTable->save($userToUpdate)) {
-            $this->Flash->success(__('User has been removed from organization.'));
+        if ($orgUser) {
+            // Check if this is the last org_admin
+            $adminCount = $orgUsersTable->find()
+                ->where([
+                    'organization_id' => $id,
+                    'role' => 'org_admin'
+                ])
+                ->count();
+                
+            if ($adminCount === 1 && $orgUser->role === 'org_admin') {
+                $this->Flash->error(__('Cannot remove last admin from organization.'));
+            } else if ($orgUsersTable->delete($orgUser)) {
+                $this->Flash->success(__('User has been removed from organization.'));
+            } else {
+                $this->Flash->error(__('Could not remove user from organization.'));
+            }
         } else {
-            $this->Flash->error(__('Could not remove user from organization.'));
+            $this->Flash->error(__('User is not a member of this organization.'));
         }
 
         return $this->redirect(['action' => 'edit', $id]);
