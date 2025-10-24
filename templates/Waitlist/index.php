@@ -41,6 +41,26 @@ $this->assign('title', __('Waitlist'));
     </div>
     
     <?php if ($selectedSchedule): ?>
+    
+    <?php if (!empty($missingSiblings)): ?>
+        <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
+            <strong>⚠️ <?= __('Warning') ?>:</strong> 
+            <?= __('The following siblings are not assigned to this schedule') ?>:
+            <ul style="margin: 0.5rem 0 0 1.5rem;">
+                <?php foreach ($missingSiblings as $missing): ?>
+                    <li>
+                        <strong><?= h($missing['name']) ?></strong> 
+                        (<?= __('Sibling of') ?> <?= h($missing['sibling_of']) ?>)
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+            <em style="font-size: 0.9rem; color: #856404;">
+                <?= __('Add them in') ?> 
+                <?= $this->Html->link(__('Manage Children'), ['controller' => 'Schedules', 'action' => 'manageChildren', $selectedSchedule->id]) ?>
+            </em>
+        </div>
+    <?php endif; ?>
+    
     <div class="row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
         
         <!-- Available Children -->
