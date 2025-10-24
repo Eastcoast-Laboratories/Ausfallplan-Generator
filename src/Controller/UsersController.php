@@ -295,10 +295,10 @@ class UsersController extends AppController
         if ($userCount === 1 || $org->name === 'keine organisation') {
             $user->status = 'active';
             $user->approved_at = new \DateTime();
-            $this->Flash->success(__('Email verified! You can now login.'));
+            $this->Flash->success(__('E-Mail verifiziert! Sie können sich jetzt anmelden.'));
         } else {
             $user->status = 'pending';
-            $this->Flash->info(__('Email verified! Admin approval needed.'));
+            $this->Flash->info(__('E-Mail verifiziert! Admin-Freigabe erforderlich.'));
         }
         
         $this->Users->save($user);
