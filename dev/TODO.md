@@ -34,6 +34,16 @@
 
 ---
 
+**Email Notifications:**
+- Admin bekommt Email bei neuer Organisation-Registrierung
+- Admin bekommt Email bei neuem User in bestehender Organiston
+- wenn emails verschickt werden, auch immer eine kopie an ausfallplan-sysadmin@it.z11.de schicken. jede confirmation email und jede mail an organisations-admins, die user freischalten sollen, also ALLE emails als kopie an ausfallplan-sysadmin@it.z11.de schicken
+
+-----
+
+mach du und löse alle probleme online, checke am ende mit einem playwright test, ob man sich online registrieren kann als neuere dmin mit test-daten, und einen scedule anlegen und kinder und waitlist und report. alles in dem lokalen playwright test von hier aus und erst aufhren wenn alles geht
+
+
 ## Zusätzliche Features (Nice-to-have)
 
 **Organisation Stats Dashboard:**
@@ -42,11 +52,5 @@
 - Grafik: Aktivität (Schedules erstellt pro Monat)
 
 **Bulk Actions:**
-- Mehrere Organisationen gleichzeitig deaktivieren
 - Merge von Organisationen (bei Duplikaten)
 
-**Email Notifications:**
-- Admin bekommt Email bei neuer Organisation-Registrierung
-- Admin bekommt Email bei neuem User in bestehender Org
-
-mach du und löse alle probleme online, checke am ende mit einem playwright test, ob man sich online registrieren kann als neuere dmin mit test-daten, und einen scedule anlegen und kinder und waitlist und report. alles in dem lokalen playwright test von hier aus und erst aufhren wenn alles geht

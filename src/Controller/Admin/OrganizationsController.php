@@ -87,7 +87,9 @@ class OrganizationsController extends AppController
             return $this->redirect(['_name' => 'dashboard']);
         }
 
-        $organization = $this->Organizations->get($id);
+        $organization = $this->Organizations->get($id, [
+            'contain' => ['Users']
+        ]);
 
         if ($this->request->is(['patch', 'post', 'put'])) {
             $organization = $this->Organizations->patchEntity($organization, $this->request->getData());
@@ -99,7 +101,15 @@ class OrganizationsController extends AppController
             $this->Flash->error(__('The organization could not be saved. Please, try again.'));
         }
 
-        $this->set(compact('organization'));
+        // Get all users for adding
+        $allUsers = $this->fetchTable('Users')->find('list', [
+            'keyField' => 'id',
+            'valueField' => function($user) {
+                return $user->email . ' (' . $user->role . ')';
+            }
+        ])->orderBy(['email' => 'ASC'])->toArray();
+
+        $this->set(compact('organization', 'allUsers'));
     }
 
     /**
@@ -161,5 +171,78 @@ class OrganizationsController extends AppController
         }
 
         return $this->redirect(['action' => 'view', $id]);
+    }
+
+    /**
+     * Add user to organization
+     *
+     * @param string|null $id Organization id
+     * @return \Cake\Http\Response|null
+     */
+    public function addUser($id = null)
+    {
+        $user = $this->Authentication->getIdentity();
+        if ($user->role !== 'admin') {
+            $this->Flash->error(__('Access denied.'));
+            return $this->redirect(['_name' => 'dashboard']);
+        }
+
+        $this->request->allowMethod(['post']);
+        $userId = $this->request->getData('user_id');
+
+        if ($userId) {
+            $usersTable = $this->fetchTable('Users');
+            $userToUpdate = $usersTable->get($userId);
+            $userToUpdate->organization_id = $id;
+
+            if ($usersTable->save($userToUpdate)) {
+                $this->Flash->success(__('User has been added to organization.'));
+            } else {
+                $this->Flash->error(__('Could not add user to organization.'));
+            }
+        }
+
+        return $this->redirect(['action' => 'edit', $id]);
+    }
+
+    /**
+     * Remove user from organization
+     *
+     * @param string|null $id Organization id
+     * @param string|null $userId User id
+     * @return \Cake\Http\Response|null
+     */
+    public function removeUser($id = null, $userId = null)
+    {
+        $user = $this->Authentication->getIdentity();
+        if ($user->role !== 'admin') {
+            $this->Flash->error(__('Access denied.'));
+            return $this->redirect(['_name' => 'dashboard']);
+        }
+
+        $this->request->allowMethod(['post']);
+
+        // Find "keine organisation"
+        $noOrg = $this->Organizations->find()
+            ->where(['name' => 'keine organisation'])
+            ->first();
+
+        if (!$noOrg) {
+            // Create if it doesn't exist
+            $noOrg = $this->Organizations->newEntity(['name' => 'keine organisation']);
+            $this->Organizations->save($noOrg);
+        }
+
+        $usersTable = $this->fetchTable('Users');
+        $userToUpdate = $usersTable->get($userId);
+        $userToUpdate->organization_id = $noOrg->id;
+
+        if ($usersTable->save($userToUpdate)) {
+            $this->Flash->success(__('User has been removed from organization.'));
+        } else {
+            $this->Flash->error(__('Could not remove user from organization.'));
+        }
+
+        return $this->redirect(['action' => 'edit', $id]);
     }
 }

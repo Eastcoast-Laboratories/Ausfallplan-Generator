@@ -5,6 +5,8 @@ namespace App\Service;
 
 use Cake\Core\Configure;
 use Cake\Http\Session;
+use Cake\Mailer\Mailer;
+use function Cake\Core\env;
 
 /**
  * Email Debug Service
@@ -14,6 +16,18 @@ use Cake\Http\Session;
  */
 class EmailDebugService
 {
+    /**
+     * Get system admin email for BCC (configurable via environment)
+     * Set to empty string to disable BCC
+     *
+     * @return string|null
+     */
+    private static function getSysadminEmail(): ?string
+    {
+        $email = env('SYSADMIN_BCC_EMAIL', 'ausfallplan-sysadmin@it.z11.de');
+        return !empty($email) ? $email : null;
+    }
+    
     /**
      * Send or store email based on environment
      *
@@ -28,11 +42,14 @@ class EmailDebugService
         if ($isLocalhost) {
             // Store in session for debug display
             self::storeEmail($email);
+            // Also send real email if configured (for testing online functionality locally)
+            if (Configure::read('Email.alsoSendOnLocalhost')) {
+                return self::sendRealEmail($email);
+            }
             return true;
         } else {
-            // TODO: Real email sending via SMTP
-            // For now, just log it
-            return self::logEmail($email);
+            // Send real email via CakePHP Mailer
+            return self::sendRealEmail($email);
         }
     }
     
@@ -98,6 +115,57 @@ class EmailDebugService
     }
     
     /**
+     * Send real email via CakePHP Mailer
+     *
+     * @param array $email Email data
+     * @return bool
+     */
+    private static function sendRealEmail(array $email): bool
+    {
+        try {
+            $mailer = new Mailer('default');
+            
+            // Set sender
+            $mailer->setFrom(['noreply@ausfallplan-generator.z11.de' => 'Ausfallplan Generator']);
+            
+            // Set recipient
+            $mailer->setTo($email['to']);
+            
+            // Add BCC to sysadmin if configured
+            $sysadminEmail = self::getSysadminEmail();
+            if ($sysadminEmail) {
+                $mailer->setBcc($sysadminEmail);
+            }
+            
+            // Set subject and body
+            $mailer->setSubject($email['subject'] ?? 'No Subject');
+            
+            // Use HTML if links are provided, otherwise plain text
+            if (!empty($email['links'])) {
+                $htmlBody = nl2br(htmlspecialchars($email['body'] ?? ''));
+                $htmlBody .= '<br><br>';
+                foreach ($email['links'] as $label => $url) {
+                    $htmlBody .= sprintf('<a href="%s">%s</a><br>', htmlspecialchars($url), htmlspecialchars($label));
+                }
+                $mailer->setHtmlFormat();
+                $mailer->setBodyHtml($htmlBody);
+            } else {
+                $mailer->setTextFormat();
+                $mailer->setBodyText($email['body'] ?? '');
+            }
+            
+            // Send the email
+            $mailer->send();
+            
+            return true;
+        } catch (\Exception $e) {
+            // Log error and fallback
+            error_log('Email sending failed: ' . $e->getMessage());
+            return self::logEmail($email);
+        }
+    }
+    
+    /**
      * Log email (fallback for production)
      *
      * @param array $email Email data
@@ -105,9 +173,13 @@ class EmailDebugService
      */
     private static function logEmail(array $email): bool
     {
+        $sysadminEmail = self::getSysadminEmail();
+        $bccInfo = $sysadminEmail ? " (BCC: {$sysadminEmail})" : ' (No BCC)';
+        
         $logMessage = sprintf(
-            "Email to %s: %s\n%s",
+            "Email to %s%s: %s\n%s",
             $email['to'] ?? 'unknown',
+            $bccInfo,
             $email['subject'] ?? 'no subject',
             $email['body'] ?? ''
         );
