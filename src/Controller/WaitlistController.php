@@ -75,6 +75,14 @@ class WaitlistController extends AppController
                 ->all();
         }
         
+        // Build sibling groups map for JavaScript
+        $siblingGroupsMap = [];
+        foreach ($waitlistEntries as $entry) {
+            if ($entry->child->sibling_group_id) {
+                $siblingGroupsMap[$entry->id] = $entry->child->sibling_group_id;
+            }
+        }
+        
         // Get children already on waitlist
         $childrenOnWaitlist = [];
         foreach ($waitlistEntries as $entry) {
@@ -129,7 +137,7 @@ class WaitlistController extends AppController
         
         $countNotOnWaitlist = $childrenNotOnWaitlist->count();
         
-        $this->set(compact('schedules', 'selectedSchedule', 'waitlistEntries', 'availableChildren', 'countNotOnWaitlist'));
+        $this->set(compact(schedules, selectedSchedule, waitlistEntries, availableChildren, countNotOnWaitlist, siblingGroupsMap));
     }
 
     /**
