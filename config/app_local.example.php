@@ -80,12 +80,19 @@ return [
     /*
      * Email configuration.
      *
-     * Host and credential configuration in case you are using SmtpTransport
+     * For PRODUCTION: Use MailTransport to send real emails via PHP mail()
+     * For DEVELOPMENT: Use DebugTransport to prevent sending real emails
      *
      * See app.php for more configuration options.
      */
     'EmailTransport' => [
         'default' => [
+            // PRODUCTION: Uncomment this to send real emails
+            'className' => \Cake\Mailer\Transport\MailTransport::class,
+            
+            // DEVELOPMENT: Uncomment this to prevent sending real emails (stores in tmp/debug_emails.json)
+            // 'className' => \Cake\Mailer\Transport\DebugTransport::class,
+            
             'host' => 'localhost',
             'port' => 25,
             'username' => null,
