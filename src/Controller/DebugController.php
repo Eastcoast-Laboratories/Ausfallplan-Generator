@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Service\EmailDebugService;
+use Cake\Core\Configure;
+use Cake\Http\Exception\NotFoundException;
 
 /**
  * Debug Controller
@@ -16,17 +18,28 @@ class DebugController extends AppController
     /**
      * Only allow on localhost
      */
+    public function initialize(): void
+    {
+        parent::initialize();
+        
+        // Allow in development OR if explicitly enabled via config
+        if (!Configure::read('debug') && !Configure::read('allowDebugRoutes')) {
+            throw new NotFoundException('Debug controller only available in development mode');
+        }
+    }
+    
     public function beforeFilter(\Cake\Event\EventInterface $event)
     {
         parent::beforeFilter($event);
         
-        // Allow unauthenticated access on localhost only
-        if ($this->isLocalhost()) {
+        // Allow unauthenticated access on localhost OR if config is set
+        $allowDebug = $this->isLocalhost() || Configure::read('allowDebugRoutes');
+        
+        if ($allowDebug) {
             $this->Authentication->addUnauthenticatedActions(['emails', 'clearEmails']);
         } else {
-            // Not localhost - deny access
-            $this->Flash->error('Debug functions only available on localhost');
-            return $this->redirect(['controller' => 'Dashboard', 'action' => 'index']);
+            $this->Flash->error(__('Debug routes are only available on localhost.'));
+            return $this->redirect(['controller' => 'Pages', 'action' => 'display', 'home']);
         }
     }
     
