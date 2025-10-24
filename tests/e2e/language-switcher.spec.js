@@ -1,6 +1,18 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
+/**
+ * TEST DESCRIPTION:
+ * Tests language switching functionality between German and English.
+ * 
+ * ORGANIZATION IMPACT: ❌ NONE
+ * 
+ * WHAT IT TESTS:
+ * 1. German flag displayed by default
+ * 2. Can switch to English and flag changes
+ * 3. Can switch back to German
+ * 4. Language persists across page navigation
+ */
 test.describe('Language Switcher Tests', () => {
   
   // Helper function to login

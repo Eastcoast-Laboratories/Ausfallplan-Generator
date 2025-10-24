@@ -1,6 +1,18 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
+/**
+ * TEST DESCRIPTION:
+ * Tests German translation display in the application.
+ * 
+ * ORGANIZATION IMPACT: ❌ NONE
+ * 
+ * WHAT IT TESTS:
+ * 1. German flag displayed by default
+ * 2. German texts visible in sidebar (Kinder, Ausfallpläne, etc.)
+ * 3. German words present on main pages
+ * 4. No untranslated English text
+ */
 test.describe('German Translation Tests', () => {
   
   async function login(page) {

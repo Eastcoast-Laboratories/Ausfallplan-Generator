@@ -1,6 +1,22 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
+/**
+ * TEST DESCRIPTION:
+ * Tests schedule CRUD operations.
+ * 
+ * ORGANIZATION IMPACT: ✅ LOW
+ * - Schedules linked to organizations (schedules.organization_id)
+ * - Tests work as-is because organization_id set from user's membership
+ * 
+ * WHAT IT TESTS:
+ * 1. Create new schedule with title and dates
+ * 2. View schedule details
+ * 3. Edit existing schedule
+ * 4. Delete schedule
+ * 5. Assign children to schedule
+ * 6. Form validation
+ */
 test.describe('Schedule Creation Tests', () => {
   
   // Helper function to login

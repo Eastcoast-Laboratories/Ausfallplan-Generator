@@ -1,6 +1,22 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
+/**
+ * TEST DESCRIPTION:
+ * Tests the complete user registration and login flow.
+ * 
+ * ORGANIZATION IMPACT: ✅ HIGH
+ * - Registration now creates entry in organization_users table (not just users.organization_id)
+ * - New users are automatically org_admin of their new organization
+ * - Tests organization field (text input for new org) instead of dropdown
+ * 
+ * WHAT IT TESTS:
+ * 1. User can register with new organization name
+ * 2. Registration creates user + organization + organization_user entry
+ * 3. User can login with registered credentials
+ * 4. Invalid credentials show error
+ * 5. Required field validation works
+ */
 test.describe('Registration and Login Flow', () => {
   
   test('should register a new user and then login successfully', async ({ page }) => {
@@ -14,15 +30,16 @@ test.describe('Registration and Login Flow', () => {
     // Step 2: Fill in registration form
     await page.waitForSelector('form');
     
-    // Select organization (first option after empty)
-    await page.selectOption('select[name="organization_id"]', { index: 1 });
+    // NEW: Organization is now a text input for new org name (with autocomplete)
+    const orgName = `Test-Org-${timestamp}`;
+    await page.fill('input[name="organization"]', orgName);
     
     // Fill in email and password
     await page.fill('input[name="email"]', testEmail);
     await page.fill('input[name="password"]', testPassword);
+    await page.fill('input[name="password_confirm"]', testPassword);
     
-    // Select role (viewer is default, but let's explicitly select it)
-    await page.selectOption('select[name="role"]', 'viewer');
+    // NOTE: Role is no longer in registration form - automatically org_admin for new org
     
     // Take screenshot before submission
     await page.screenshot({ 

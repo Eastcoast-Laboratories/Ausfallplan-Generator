@@ -1,5 +1,20 @@
 const { test, expect } = require('@playwright/test');
 
+/**
+ * TEST DESCRIPTION:
+ * Tests admin login and permission checks.
+ * 
+ * ORGANIZATION IMPACT: ✅ MEDIUM
+ * - Admin now identified by is_system_admin flag (not role='admin')
+ * - Admin can see all organizations' data
+ * - Tests still work but rely on system_admin permissions
+ * 
+ * WHAT IT TESTS:
+ * 1. Admin can successfully login
+ * 2. Admin sees admin-only navigation (Organizations link)
+ * 3. Admin can view all schedules from all organizations
+ * 4. Normal users don't see admin features
+ */
 test.describe('Admin Login and Permissions', () => {
     test.beforeEach(async ({ page }) => {
         await page.goto('http://localhost:8080');

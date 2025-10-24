@@ -1,5 +1,17 @@
 const { test, expect } = require('@playwright/test');
 
+/**
+ * TEST DESCRIPTION:
+ * Tests that the active schedule is remembered in session when navigating to waitlist.
+ * 
+ * ORGANIZATION IMPACT: ❌ NONE
+ * - This test is not affected by organization_users changes
+ * - Tests session management only
+ * 
+ * WHAT IT TESTS:
+ * 1. When user edits a schedule, it's stored as activeScheduleId in session
+ * 2. When navigating to waitlist, the active schedule is preselected
+ */
 test.describe('Active Schedule in Session', () => {
     test.beforeEach(async ({ page }) => {
         // Login

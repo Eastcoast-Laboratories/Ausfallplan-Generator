@@ -1,5 +1,16 @@
 const { test, expect } = require('@playwright/test');
 
+/**
+ * TEST DESCRIPTION:
+ * Tests the dashboard redirect flow after login.
+ * 
+ * ORGANIZATION IMPACT: ❌ NONE
+ * 
+ * WHAT IT TESTS:
+ * 1. Root URL redirects to login with redirect parameter
+ * 2. After login, user is redirected to dashboard
+ * 3. Authenticated users can access dashboard directly
+ */
 test.describe('Dashboard Redirect Flow', () => {
     test('should redirect / to login, then to dashboard after login', async ({ page }) => {
         console.log('🧪 Testing dashboard redirect flow...');

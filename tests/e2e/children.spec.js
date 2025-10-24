@@ -1,6 +1,23 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
+/**
+ * TEST DESCRIPTION:
+ * Tests all CRUD operations for children (Create, Read, Update, Delete).
+ * 
+ * ORGANIZATION IMPACT: LOW
+ * - Children are still linked to organizations (children.organization_id remains)
+ * - Tests work as-is because organization_id is set from user's organization membership
+ * 
+ * WHAT IT TESTS:
+ * 1. Create new child (normal and integrative)
+ * 2. View child details
+ * 3. Edit existing child
+ * 4. Delete child
+ * 5. Form validation
+ * 6. Navigation from sidebar
+ * 7. Active/inactive child states
+ */
 test.describe('Children CRUD Tests', () => {
   
   // Helper function to login
