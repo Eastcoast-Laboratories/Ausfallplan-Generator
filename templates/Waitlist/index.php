@@ -194,8 +194,6 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
-</script>
-<?php endif; ?>
 
 // Create warning div for sibling order check
 const warningDiv = document.createElement('div');
@@ -212,8 +210,8 @@ function checkSiblingOrder() {
     // Build sibling groups
     items.forEach((item, index) => {
         const groupId = item.dataset.siblingGroup;
-        if (groupId && groupId \!== '') {
-            if (\!siblingGroups[groupId]) {
+        if (groupId && groupId !== '') {
+            if (!siblingGroups[groupId]) {
                 siblingGroups[groupId] = [];
             }
             siblingGroups[groupId].push(index);
@@ -228,7 +226,7 @@ function checkSiblingOrder() {
         
         // Check if positions are consecutive
         for (let i = 1; i < positions.length; i++) {
-            if (positions[i] \!== positions[i-1] + 1) {
+            if (positions[i] !== positions[i-1] + 1) {
                 hasSeparatedSiblings = true;
                 break;
             }
@@ -249,3 +247,5 @@ sortable.option('onEnd', function(evt) {
     if (originalOnEnd) originalOnEnd.call(this, evt);
     setTimeout(checkSiblingOrder, 100);
 });
+</script>
+<?php endif; ?>
