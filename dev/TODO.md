@@ -48,3 +48,5 @@
 **Email Notifications:**
 - Admin bekommt Email bei neuer Organisation-Registrierung
 - Admin bekommt Email bei neuem User in bestehender Org
+
+mach du und löse alle probleme online, checke am ende mit einem playwright test, ob man sich online registrieren kann als neuere dmin mit test-daten, und einen scedule anlegen und kinder und waitlist und report. alles in dem lokalen playwright test von hier aus und erst aufhren wenn alles geht
