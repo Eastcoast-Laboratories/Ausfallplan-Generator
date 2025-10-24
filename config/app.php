@@ -18,6 +18,11 @@ return [
      * true: Errors and warnings shown.
      */
     'debug' => filter_var(env('DEBUG', false), FILTER_VALIDATE_BOOLEAN),
+    
+    /*
+     * Allow debug routes (like /debug/emails) even in production
+     */
+    'allowDebugRoutes' => filter_var(env('ALLOW_DEBUG_ROUTES', false), FILTER_VALIDATE_BOOLEAN),
 
     /*
      * Configure basic information about the application.

@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use Cake\Core\Configure;
+
 /**
  * Users Controller
  *
@@ -257,6 +259,15 @@ class UsersController extends AppController
 
     public function verify($token = null)
     {
+        // Allow verification by email query parameter for testing (when debug routes are enabled)
+        $emailParam = $this->request->getQuery('email');
+        if ($emailParam && Configure::read('allowDebugRoutes')) {
+            $user = $this->Users->find()->where(['email' => $emailParam])->first();
+            if ($user && !$user->email_verified) {
+                $token = $user->email_token;
+            }
+        }
+        
         if (!$token) {
             $this->Flash->error(__('Invalid verification link.'));
             return $this->redirect(['action' => 'login']);
