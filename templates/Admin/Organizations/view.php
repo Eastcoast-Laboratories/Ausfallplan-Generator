@@ -16,6 +16,16 @@ $this->assign('title', h($organization->name));
             ['action' => 'toggleActive', $organization->id],
             ['class' => 'button']
         ) ?>
+        <?php if ($organization->name !== 'keine organisation'): ?>
+            <?= $this->Form->postLink(
+                __('Organisation löschen'), 
+                ['action' => 'delete', $organization->id],
+                [
+                    'confirm' => __('WARNUNG: Dies löscht die Organisation und ALLE zugehörigen Daten (Benutzer, Kinder, Dienstpläne). Fortfahren?'),
+                    'class' => 'button button-danger'
+                ]
+            ) ?>
+        <?php endif; ?>
     </div>
 
     <div class="row">

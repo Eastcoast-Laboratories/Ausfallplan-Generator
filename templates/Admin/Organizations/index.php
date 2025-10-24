@@ -41,8 +41,15 @@ $this->assign('title', __('Organisationsverwaltung'));
                     <td class="actions">
                         <?= $this->Html->link(__('Ansehen'), ['action' => 'view', $organization->id]) ?>
                         <?= $this->Html->link(__('Bearbeiten'), ['action' => 'edit', $organization->id]) ?>
-                        <?php if (($organization->user_count ?? 0) == 0): ?>
-                            <?= $this->Form->postLink(__('Löschen'), ['action' => 'delete', $organization->id], ['confirm' => __('Sind Sie sicher?')]) ?>
+                        <?php if ($organization->name !== 'keine organisation'): ?>
+                            <?= $this->Form->postLink(
+                                __('Löschen'), 
+                                ['action' => 'delete', $organization->id], 
+                                [
+                                    'confirm' => __('WARNUNG: Dies löscht die Organisation und ALLE zugehörigen Daten (Benutzer, Kinder, Dienstpläne). Fortfahren?'),
+                                    'class' => 'button-danger'
+                                ]
+                            ) ?>
                         <?php endif; ?>
                     </td>
                 </tr>
