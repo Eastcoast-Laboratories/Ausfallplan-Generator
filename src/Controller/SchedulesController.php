@@ -75,10 +75,13 @@ class SchedulesController extends AppController
             $schedule = $this->Schedules->patchEntity($schedule, $data);
             
             if ($this->Schedules->save($schedule)) {
+                // Generate schedule days based on dates or days_count
+                $this->generateScheduleDays($schedule);
+                
                 // Set this as the active schedule in session
                 $this->request->getSession()->write('activeScheduleId', $schedule->id);
                 
-                $this->Flash->success(__('The schedule has been created.'));
+                $this->Flash->success(__('Der Dienstplan und die Tage wurden erstellt.'));
                 return $this->redirect(['action' => 'index']);
             }
             
@@ -102,10 +105,13 @@ class SchedulesController extends AppController
             $schedule = $this->Schedules->patchEntity($schedule, $this->request->getData());
             
             if ($this->Schedules->save($schedule)) {
+                // Regenerate schedule days if dates changed
+                $this->generateScheduleDays($schedule);
+                
                 // Set this as the active schedule in session
                 $this->request->getSession()->write('activeScheduleId', $schedule->id);
                 
-                $this->Flash->success(__('The schedule has been updated.'));
+                $this->Flash->success(__('Der Dienstplan wurde aktualisiert.'));
                 return $this->redirect(['action' => 'view', $schedule->id]);
             }
             
@@ -387,5 +393,48 @@ class SchedulesController extends AppController
         return $this->response
             ->withType("application/json")
             ->withStringBody(json_encode(["success" => $success]));
+    }
+
+    /**
+     * Generate schedule days for a schedule based on start/end dates or days_count
+     *
+     * @param \App\Model\Entity\Schedule $schedule
+     * @return void
+     */
+    private function generateScheduleDays($schedule): void
+    {
+        $scheduleDaysTable = $this->fetchTable('ScheduleDays');
+        
+        // Delete existing schedule days for this schedule
+        $scheduleDaysTable->deleteAll(['schedule_id' => $schedule->id]);
+        
+        // Calculate number of days
+        $daysCount = 0;
+        if ($schedule->ends_on) {
+            // Calculate days between start and end date
+            $start = new \DateTime($schedule->starts_on->format('Y-m-d'));
+            $end = new \DateTime($schedule->ends_on->format('Y-m-d'));
+            $daysCount = $start->diff($end)->days + 1; // +1 to include both start and end
+        } elseif ($schedule->days_count && $schedule->days_count > 0) {
+            // Use specified days_count
+            $daysCount = $schedule->days_count;
+        } else {
+            // Default: 1 day
+            $daysCount = 1;
+        }
+        
+        // Create schedule days
+        for ($i = 0; $i < $daysCount; $i++) {
+            $date = (new \DateTime($schedule->starts_on->format('Y-m-d')))->modify("+{$i} days");
+            
+            $scheduleDay = $scheduleDaysTable->newEntity([
+                'schedule_id' => $schedule->id,
+                'title' => 'Tag ' . ($i + 1) . ' (' . $date->format('d.m.Y') . ')',
+                'position' => $i + 1,
+                'capacity' => $schedule->capacity_per_day ?? 9,
+            ]);
+            
+            $scheduleDaysTable->save($scheduleDay);
+        }
     }
 }
