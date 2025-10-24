@@ -48,7 +48,7 @@ test.describe('Admin Organizations Management', () => {
 
     test('admin can view organization details', async ({ page }) => {
         console.log('📍 Step 1: Navigate to organizations');
-        await page.goto('http://localhost:8080/admin/organizations');
+        await page.goto('https://ausfallplan-generator.z11.de/admin/organizations');
         
         console.log('📍 Step 2: Click on first View link');
         const viewLink = page.locator('a:has-text("View"), a:has-text("Ansehen")').first();
@@ -63,7 +63,7 @@ test.describe('Admin Organizations Management', () => {
 
     test('admin can edit organization', async ({ page }) => {
         console.log('📍 Step 1: Navigate to organizations');
-        await page.goto('http://localhost:8080/admin/organizations');
+        await page.goto('https://ausfallplan-generator.z11.de/admin/organizations');
         
         console.log('📍 Step 2: Click first Edit link');
         const editLink = page.locator('a:has-text("Edit"), a:has-text("Bearbeiten")').first();
@@ -88,7 +88,7 @@ test.describe('Admin Organizations Management', () => {
 
     test('organizations table shows stats', async ({ page }) => {
         console.log('📍 Step 1: Navigate to organizations');
-        await page.goto('http://localhost:8080/admin/organizations');
+        await page.goto('https://ausfallplan-generator.z11.de/admin/organizations');
         
         console.log('📍 Step 2: Check for stats columns');
         const pageContent = await page.content();
