@@ -26,10 +26,11 @@ class UsersController extends AppController
             
             // Handle organization: create new or use "keine organisation"
             $organizationName = trim($data['organization_name'] ?? '');
+            $organizationsTable = $this->fetchTable('Organizations');
+            $isNewOrganization = false;
             
             if (!empty($organizationName)) {
                 // Check if organization already exists, otherwise create new one
-                $organizationsTable = $this->fetchTable('Organizations');
                 $organization = $organizationsTable->find()
                     ->where(['name' => $organizationName])
                     ->first();
@@ -46,12 +47,12 @@ class UsersController extends AppController
                         $this->set(compact('user'));
                         return;
                     }
+                    $isNewOrganization = true;
                 }
                 
                 $data['organization_id'] = $organization->id;
             } else {
                 // Use "keine organisation"
-                $organizationsTable = $this->fetchTable('Organizations');
                 $noOrg = $organizationsTable->find()
                     ->where(['name' => 'keine organisation'])
                     ->first();
@@ -62,17 +63,16 @@ class UsersController extends AppController
                     $organizationsTable->save($noOrg);
                 }
                 
+                $organization = $noOrg;
                 $data['organization_id'] = $noOrg->id;
             }
             
+            $requestedRole = $data['requested_role'] ?? 'editor';
+            
             unset($data['organization_name']); // Remove the text field, we use organization_id
+            unset($data['requested_role']); // Don't save to users table
             
             $user = $this->Users->patchEntity($user, $data);
-            
-            // Set default role to 'viewer' if not specified
-            if (empty($user->role)) {
-                $user->role = 'viewer';
-            }
             
             // Set initial status and email verification
             $user->status = 'pending';
@@ -82,16 +82,21 @@ class UsersController extends AppController
             if ($this->Users->save($user)) {
                 // Create organization_users entry
                 $orgUsersTable = $this->fetchTable('OrganizationUsers');
+                
+                // If new organization, user becomes org_admin automatically
+                // If existing organization, use requested role
+                $roleInOrg = $isNewOrganization ? 'org_admin' : $requestedRole;
+                
                 $orgUser = $orgUsersTable->newEntity([
-                    'organization_id' => $user->organization_id,
+                    'organization_id' => $organization->id,
                     'user_id' => $user->id,
-                    'role' => 'org_admin', // First user of new org becomes org_admin
+                    'role' => $roleInOrg,
                     'is_primary' => true,
                     'joined_at' => new \DateTime(),
                 ]);
                 $orgUsersTable->save($orgUser);
                 
-                // Send verification email (or store for debug on localhost)
+                // Send verification email to user
                 $verifyUrl = \Cake\Routing\Router::url([
                     'controller' => 'Users',
                     'action' => 'verify',
@@ -112,10 +117,23 @@ class UsersController extends AppController
                     ]
                 ]);
                 
+                // If joining existing organization, notify org-admins
+                if (!$isNewOrganization && $organization->name !== 'keine organisation') {
+                    $this->notifyOrgAdminsAboutNewUser($user, $organization, $roleInOrg);
+                }
+                
                 $debugLink = \Cake\Routing\Router::url(['controller' => 'Debug', 'action' => 'emails'], true);
+                
+                if ($isNewOrganization) {
+                    $message = __('Registration successful! You are the admin of your new organization. Please check your email to verify your account.');
+                } else if ($organization->name === 'keine organisation') {
+                    $message = __('Registration successful. Please check your email to verify your account.');
+                } else {
+                    $message = __('Registration successful! Organization admins have been notified and will review your request. Please check your email to verify your account.');
+                }
+                
                 $this->Flash->success(
-                    __('Registration successful. Please check your email to verify your account.') . 
-                    " (Dev: <a href='{$debugLink}' style='color: white; text-decoration: underline;'>View Emails</a>)",
+                    $message . " (Dev: <a href='{$debugLink}' style='color: white; text-decoration: underline;'>View Emails</a>)",
                     ['escape' => false]
                 );
                 return $this->redirect(['action' => 'login']);
@@ -124,6 +142,64 @@ class UsersController extends AppController
         }
         
         $this->set(compact('user'));
+    }
+    
+    /**
+     * Notify organization admins about new user registration
+     */
+    private function notifyOrgAdminsAboutNewUser($user, $organization, $requestedRole): void
+    {
+        // Get all org-admins of the organization
+        $orgAdmins = $this->fetchTable('OrganizationUsers')
+            ->find()
+            ->where([
+                'organization_id' => $organization->id,
+                'role' => 'org_admin'
+            ])
+            ->contain(['Users'])
+            ->all();
+        
+        if ($orgAdmins->isEmpty()) {
+            return;
+        }
+        
+        // Create approval URL
+        $approvalUrl = \Cake\Routing\Router::url([
+            'controller' => 'Admin/Users',
+            'action' => 'approve',
+            $user->id
+        ], true);
+        
+        $roleLabels = [
+            'org_admin' => 'Organization Admin',
+            'editor' => 'Editor',
+            'viewer' => 'Viewer'
+        ];
+        $roleLabel = $roleLabels[$requestedRole] ?? $requestedRole;
+        
+        // Send email to each org-admin
+        foreach ($orgAdmins as $orgAdmin) {
+            if (!$orgAdmin->user) {
+                continue;
+            }
+            
+            \App\Service\EmailDebugService::send([
+                'to' => $orgAdmin->user->email,
+                'subject' => "New user registration for {$organization->name}",
+                'body' => "Hello,\n\nA new user has registered to join your organization '{$organization->name}'.\n\nUser Details:\n- Email: {$user->email}\n- Requested Role: {$roleLabel}\n\nPlease review and approve this user:\n{$approvalUrl}\n\nIf you did not expect this registration, please contact support.",
+                'links' => [
+                    'Approve User' => $approvalUrl
+                ],
+                'data' => [
+                    'new_user_id' => $user->id,
+                    'new_user_email' => $user->email,
+                    'organization_id' => $organization->id,
+                    'organization_name' => $organization->name,
+                    'requested_role' => $requestedRole,
+                    'admin_email' => $orgAdmin->user->email
+                ]
+            ]);
+        }
     }
 
     /**
