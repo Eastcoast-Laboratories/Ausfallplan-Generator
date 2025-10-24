@@ -18,8 +18,8 @@ const { test, expect } = require('@playwright/test');
  */
 test.describe('Admin Organizations Management', () => {
     test.beforeEach(async ({ page }) => {
-        // Login as admin
-        await page.goto('http://localhost:8080/login');
+        // Login as admin (system admin with is_system_admin = true)
+        await page.goto('https://ausfallplan-generator.z11.de/users/login');
         await page.fill('input[name="email"]', 'admin@example.com');
         await page.fill('input[name="password"]', 'password123');
         await page.click('button[type="submit"]');

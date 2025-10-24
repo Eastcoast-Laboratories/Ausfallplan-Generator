@@ -58,25 +58,45 @@ class CreateAdminCommand extends Command
         if ($existingUser) {
             $io->warning('Admin user already exists!');
             $io->out('Email: admin@demo.kita');
+            $io->out('is_system_admin: ' . ($existingUser->is_system_admin ? 'Yes' : 'No'));
+            
+            // Update to system admin if not already
+            if (!$existingUser->is_system_admin) {
+                $existingUser->is_system_admin = true;
+                $usersTable->save($existingUser);
+                $io->info('Updated to system admin!');
+            }
             return self::CODE_SUCCESS;
         }
 
         // Erstelle Admin User
         $io->info('Creating admin user...');
         $user = $usersTable->newEntity([
-            'organization_id' => $org->id,
             'email' => 'admin@demo.kita',
             'password' => 'asbdasdaddd',
-            'role' => 'admin'
+            'is_system_admin' => true, // System-wide admin access
+            'status' => 'active',
+            'email_verified' => true
         ]);
 
         if ($usersTable->save($user)) {
-            $io->success('Admin User created successfully!');
+            // Create organization_users entry for primary organization
+            $orgUsersTable = $this->fetchTable('OrganizationUsers');
+            $orgUser = $orgUsersTable->newEntity([
+                'organization_id' => $org->id,
+                'user_id' => $user->id,
+                'role' => 'org_admin',
+                'is_primary' => true,
+                'joined_at' => new \DateTime()
+            ]);
+            $orgUsersTable->save($orgUser);
+            
+            $io->success('System Admin User created successfully!');
             $io->out('');
             $io->out('Login credentials:');
             $io->out('  Email:    admin@demo.kita');
             $io->out('  Password: asbdasdaddd');
-            $io->out('  Role:     admin');
+            $io->out('  Type:     System Admin (is_system_admin = true)');
             $io->out('');
             return self::CODE_SUCCESS;
         } else {
