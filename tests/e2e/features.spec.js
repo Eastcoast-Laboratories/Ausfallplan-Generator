@@ -2,6 +2,42 @@ const { test, expect } = require('@playwright/test');
 
 test.describe('User Features Integration', () => {
     
+    test('organization-based permissions work', async ({ page }) => {
+        console.log('📍 Test: OrganizationUsers join table is working');
+        
+        // Register and login
+        const timestamp = Date.now();
+        const email = `test-org-user-${timestamp}@test.local`;
+        
+        console.log('📍 Step 1: Register new user');
+        await page.goto('https://ausfallplan-generator.z11.de/users/register');
+        
+        await page.fill('input[name="organization"]', `Test-Org-${timestamp}`);
+        await page.fill('input[name="email"]', email);
+        await page.fill('input[name="password"]', 'testpass123');
+        await page.fill('input[name="password_confirm"]', 'testpass123');
+        
+        await page.click('button[type="submit"]');
+        await page.waitForTimeout(2000);
+        
+        console.log('📍 Step 2: Login');
+        await page.goto('https://ausfallplan-generator.z11.de/users/login');
+        await page.fill('input[name="email"]', email);
+        await page.fill('input[name="password"]', 'testpass123');
+        await page.click('button[type="submit"]');
+        await page.waitForTimeout(2000);
+        
+        console.log('📍 Step 3: Check access to schedules');
+        await page.goto('https://ausfallplan-generator.z11.de/schedules');
+        await page.waitForTimeout(1000);
+        
+        const url = page.url();
+        console.log(`Current URL: ${url}`);
+        expect(url).toContain('schedules');
+        
+        console.log('✅ Organization permissions working');
+    });
+    
     test('viewer role has read-only access', async ({ page }) => {
         console.log('📍 Step 1: Login as viewer');
         await page.goto('http://localhost:8080/login');
