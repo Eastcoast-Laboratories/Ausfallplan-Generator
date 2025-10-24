@@ -33,15 +33,9 @@ class DebugController extends AppController
         if ($this->isLocalhost()) {
             // Localhost: Allow unauthenticated access
             $this->Authentication->addUnauthenticatedActions(['emails', 'clearEmails']);
-            return $event;
         }
         
-        // Production: Require admin authentication
-        $user = $this->Authentication->getIdentity();
-        if (!$user || $user->role !== 'admin') {
-            $this->Flash->error(__('Debug routes are only available for administrators.'));
-            return $this->redirect(['controller' => 'Users', 'action' => 'login']);
-        }
+        return $event;
     }
     
     /**
