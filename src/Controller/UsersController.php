@@ -80,6 +80,17 @@ class UsersController extends AppController
             $user->email_token = bin2hex(random_bytes(16));
             
             if ($this->Users->save($user)) {
+                // Create organization_users entry
+                $orgUsersTable = $this->fetchTable('OrganizationUsers');
+                $orgUser = $orgUsersTable->newEntity([
+                    'organization_id' => $user->organization_id,
+                    'user_id' => $user->id,
+                    'role' => 'org_admin', // First user of new org becomes org_admin
+                    'is_primary' => true,
+                    'joined_at' => new \DateTime(),
+                ]);
+                $orgUsersTable->save($orgUser);
+                
                 // Send verification email (or store for debug on localhost)
                 $verifyUrl = \Cake\Routing\Router::url([
                     'controller' => 'Users',
