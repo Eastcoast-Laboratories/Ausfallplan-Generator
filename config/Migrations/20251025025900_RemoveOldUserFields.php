@@ -24,6 +24,9 @@ class RemoveOldUserFields extends BaseMigration
         // Remove old role column (now in organization_users)
         $table->removeColumn('role');
         
+        // Drop foreign key constraint before removing organization_id column
+        $table->dropForeignKey('organization_id');
+        
         // Remove old organization_id column (now in organization_users)
         $table->removeColumn('organization_id');
         
