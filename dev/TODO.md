@@ -14,17 +14,18 @@
 ## Backlog
 
 - Erstelle mir eine möglichkeit die db mit phpmyadmin zugreifen
-- children/add soll auch das geschlecht und Geburtsdatum festgelegt werden können (neues Feld in der DB beide optional)
-- eine Organisation kann mehrere Admins haben
-- der Admin einer Organisation hat folgende Featres:
+
+1. children/add soll auch das geschlecht und Geburtsdatum festgelegt werden können (neues Feld in der DB beide optional)
+2. http://localhost:8080/sibling-groups/delete/1 geht noch nicht (loeschen)
+3. eine Organisation kann mehrere Admins haben
+4. der Admin einer Organisation hat folgende Featres:
     - [ ] Email-Bestätigung: Admin einer Organisation bekommt Mail wen sich ein neuer User in seiner Organisation registriert
         - [ ] Admin einer Organisation kann Users seiner Organisation freischalten über den link in der mail
     - [ ] der Admin der Organisation kann den Namen der eigenen Organisation bearbeiten
-- [ ] Editor kann nur eigene Organisations-Daten bearbeiten (filter implementieren für Kinder, Schedules, Waitlist)
+5. Editor kann nur eigene Organisations-Daten bearbeiten (filter implementieren für Kinder, Schedules, Waitlist)
+6. 
 
 # Geschwisterkinder
-- http://localhost:8080/sibling-groups/delete/1 geht noch nicht (loeschen)
-- in der nachrückliste, müssen die Geschwister auch als einheit verschoben werden, wie bei den waitlist kindern (DRY: benutze das selbe JS)
 - [ ] die kinder in einem scedule müssen noch extra sortiert werden können analog zu den waitlists. diese sortierung muss im report benutzt werden für die verteilung auf die tage (nicht mehr die sortierung der waitlist)
 - [ ] Wenn kinder geschwisterkinder sind beim report extra berücksichtigen: die müssen immer an einem tag zusammen oder gar nicht. auch in der nachrückliste muessen die immer hintereinander stehen
 
