@@ -137,7 +137,7 @@ class WaitlistController extends AppController
         
         $countNotOnWaitlist = $childrenNotOnWaitlist->count();
         
-        $this->set(compact(schedules, selectedSchedule, waitlistEntries, availableChildren, countNotOnWaitlist, siblingGroupsMap));
+        $this->set(compact('schedules', 'selectedSchedule', 'waitlistEntries', 'availableChildren', 'countNotOnWaitlist', 'siblingGroupsMap'));
     }
 
     /**
