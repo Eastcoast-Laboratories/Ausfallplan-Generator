@@ -24,7 +24,7 @@ test.describe('Active Schedule in Session', () => {
         
         // Get schedule ID from URL
         const scheduleUrl = page.url();
-        const scheduleId = scheduleUrl.match(/\/schedules\/view\/(\d+)/)?.[1];
+        const scheduleId = scheduleUrl.match(/\/schedules\/view\/(d+)/)?.[1];
         console.log('  Schedule ID:', scheduleId);
         expect(scheduleId).toBeTruthy();
         
