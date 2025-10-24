@@ -39,12 +39,19 @@ test.describe('Production E2E Test', () => {
     // Use the verify endpoint directly with the user's email to bypass email sending
     // This simulates clicking the verification link
     await page.goto(`${BASE_URL}/users/verify?email=${encodeURIComponent(TEST_EMAIL)}`);
-    await page.waitForTimeout(2000);
+    
+    // Wait for redirect to login page after verification
+    await page.waitForURL(/login/, { timeout: 10000 });
+    
+    // Wait a bit longer to ensure database transaction is committed
+    await page.waitForTimeout(1000);
     
     console.log('✅ Step 2 completed: Email verified');
 
     // 3. LOGIN
     console.log('Step 3: Login');
+    
+    // Refresh to ensure no cache issues
     await page.goto(`${BASE_URL}/users/login`);
     await page.fill('input[name="email"]', TEST_EMAIL);
     await page.fill('input[name="password"]', TEST_PASSWORD);

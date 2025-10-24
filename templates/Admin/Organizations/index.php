@@ -37,7 +37,7 @@ $this->assign('title', __('Organisationsverwaltung'));
                     <td><?= h($organization->children_count ?? 0) ?></td>
                     <td><?= h($organization->contact_email ?? '-') ?></td>
                     <td><?= h($organization->contact_phone ?? '-') ?></td>
-                    <td><?= h($organization->created->format('Y-m-d')) ?></td>
+                    <td><?= h($organization->created->format('Y-m-d H:i')) ?></td>
                     <td class="actions">
                         <?= $this->Html->link(__('Ansehen'), ['action' => 'view', $organization->id]) ?>
                         <?= $this->Html->link(__('Bearbeiten'), ['action' => 'edit', $organization->id]) ?>

@@ -28,20 +28,27 @@ class UsersController extends AppController
             $organizationName = trim($data['organization_name'] ?? '');
             
             if (!empty($organizationName)) {
-                // Create new organization with creator's email as contact
+                // Check if organization already exists, otherwise create new one
                 $organizationsTable = $this->fetchTable('Organizations');
-                $organization = $organizationsTable->newEntity([
-                    'name' => $organizationName,
-                    'contact_email' => $data['email']
-                ]);
+                $organization = $organizationsTable->find()
+                    ->where(['name' => $organizationName])
+                    ->first();
                 
-                if ($organizationsTable->save($organization)) {
-                    $data['organization_id'] = $organization->id;
-                } else {
-                    $this->Flash->error(__('Could not create organization.'));
-                    $this->set(compact('user'));
-                    return;
+                if (!$organization) {
+                    // Create new organization with creator's email as contact
+                    $organization = $organizationsTable->newEntity([
+                        'name' => $organizationName,
+                        'contact_email' => $data['email']
+                    ]);
+                    
+                    if (!$organizationsTable->save($organization)) {
+                        $this->Flash->error(__('Could not create organization.'));
+                        $this->set(compact('user'));
+                        return;
+                    }
                 }
+                
+                $data['organization_id'] = $organization->id;
             } else {
                 // Use "keine organisation"
                 $organizationsTable = $this->fetchTable('Organizations');
