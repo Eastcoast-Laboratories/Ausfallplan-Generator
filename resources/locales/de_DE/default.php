@@ -207,4 +207,10 @@ return [
     'This field is required' => 'Dieses Feld ist erforderlich',
     'Invalid email address' => 'Ungültige E-Mail-Adresse',
     'Password must be at least 8 characters' => 'Das Passwort muss mindestens 8 Zeichen lang sein',
+    
+    // Waitlist sibling warnings
+    'Warning' => 'Warnung',
+    'The following siblings are not assigned to this schedule' => 'Die folgenden Geschwister sind diesem Ausfallplan nicht zugewiesen',
+    'Sibling of' => 'Geschwister von',
+    'Add them in' => 'Füge sie hinzu in',
 ];
