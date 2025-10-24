@@ -113,7 +113,7 @@ class OrganizationsController extends AppController
     }
 
     /**
-     * Delete method - Delete organization (only if no users)
+     * Delete method - Delete organization with all associated data
      *
      * @param string|null $id Organization id
      * @return \Cake\Http\Response|null
@@ -122,23 +122,75 @@ class OrganizationsController extends AppController
     {
         $user = $this->Authentication->getIdentity();
         if ($user->role !== 'admin') {
-            $this->Flash->error(__('Access denied.'));
+            $this->Flash->error(__('Zugriff verweigert.'));
             return $this->redirect(['_name' => 'dashboard']);
         }
 
         $this->request->allowMethod(['post', 'delete']);
-        $organization = $this->Organizations->get($id, ['contain' => ['Users']]);
+        $organization = $this->Organizations->get($id);
 
-        // Check if organization has users
-        if (count($organization->users) > 0) {
-            $this->Flash->error(__('Cannot delete organization with active users.'));
+        // Prevent deletion of "keine organisation"
+        if ($organization->name === 'keine organisation') {
+            $this->Flash->error(__('Die Standard-Organisation "keine organisation" kann nicht gelöscht werden.'));
             return $this->redirect(['action' => 'index']);
         }
 
-        if ($this->Organizations->delete($organization)) {
-            $this->Flash->success(__('The organization has been deleted.'));
-        } else {
-            $this->Flash->error(__('The organization could not be deleted. Please, try again.'));
+        // Start transaction
+        $connection = $this->Organizations->getConnection();
+        $connection->begin();
+
+        try {
+            // Delete in correct order due to foreign key constraints
+            
+            // 1. Delete schedules (depends on users)
+            $schedulesTable = $this->fetchTable('Schedules');
+            $schedules = $schedulesTable->find()
+                ->innerJoinWith('Users')
+                ->where(['Users.organization_id' => $id])
+                ->all();
+            foreach ($schedules as $schedule) {
+                $schedulesTable->delete($schedule);
+            }
+
+            // 2. Delete children (depends on organization)
+            $childrenTable = $this->fetchTable('Children');
+            $children = $childrenTable->find()
+                ->where(['organization_id' => $id])
+                ->all();
+            foreach ($children as $child) {
+                $childrenTable->delete($child);
+            }
+
+            // 3. Delete sibling groups (depends on organization)
+            $siblingGroupsTable = $this->fetchTable('SiblingGroups');
+            $siblingGroups = $siblingGroupsTable->find()
+                ->where(['organization_id' => $id])
+                ->all();
+            foreach ($siblingGroups as $group) {
+                $siblingGroupsTable->delete($group);
+            }
+
+            // 4. Delete users (depends on organization)
+            $usersTable = $this->fetchTable('Users');
+            $users = $usersTable->find()
+                ->where(['organization_id' => $id])
+                ->all();
+            foreach ($users as $userToDelete) {
+                $usersTable->delete($userToDelete);
+            }
+
+            // 5. Finally delete the organization
+            if ($this->Organizations->delete($organization)) {
+                $connection->commit();
+                $this->Flash->success(__('Die Organisation und alle zugehörigen Daten wurden gelöscht.'));
+            } else {
+                $connection->rollback();
+                $this->Flash->error(__('Die Organisation konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.'));
+            }
+
+        } catch (\Exception $e) {
+            $connection->rollback();
+            $this->Flash->error(__('Fehler beim Löschen: {0}', $e->getMessage()));
         }
 
         return $this->redirect(['action' => 'index']);
