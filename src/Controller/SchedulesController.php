@@ -199,8 +199,14 @@ class SchedulesController extends AppController
     {
         $this->request->allowMethod(["post"]);
         
-        $scheduleId = $this->request->getQuery("schedule_id");
-        $childId = $this->request->getQuery("child_id");
+        $queryParams = $this->request->getQueryParams();
+        $scheduleId = $queryParams["schedule_id"] ?? null;
+        $childId = $queryParams["child_id"] ?? null;
+        
+        if (!$scheduleId || !$childId) {
+            $this->Flash->error(__("Ungültige Parameter."));
+            return $this->redirect(["action" => "index"]);
+        }
         
         // Get schedule days for this schedule
         $scheduleDaysTable = $this->fetchTable("ScheduleDays");
@@ -256,8 +262,14 @@ class SchedulesController extends AppController
     {
         $this->request->allowMethod(['post']);
         
-        $scheduleId = $this->request->getQuery('schedule_id');
-        $childId = $this->request->getQuery('child_id');
+        $queryParams = $this->request->getQueryParams();
+        $scheduleId = $queryParams['schedule_id'] ?? null;
+        $childId = $queryParams['child_id'] ?? null;
+        
+        if (!$scheduleId || !$childId) {
+            $this->Flash->error(__('Ungültige Parameter.'));
+            return $this->redirect(['action' => 'index']);
+        }
         
         // Find and delete assignment
         $assignment = $this->fetchTable('Assignments')->find()
