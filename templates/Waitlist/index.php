@@ -57,7 +57,6 @@ $this->assign('title', __('Waitlist'));
                                         <?= __('Integrative') ?>
                                     </span>
                                 <?php endif; ?>
---- Insert after line 59 (after Integrative span) ---
                                 <?php if ($child->sibling_group_id): ?>
                                     <span style="background: #fff3cd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
                                         👨‍👩‍👧 <?= __("Geschwister") ?>
