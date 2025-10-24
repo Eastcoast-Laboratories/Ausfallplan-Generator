@@ -31,6 +31,7 @@ class Assignment extends Entity
         'child_id' => true,
         'weight' => true,
         'source' => true,
+        'sort_order' => true,
         'created' => true,
         'modified' => true,
         'schedule_day' => true,
