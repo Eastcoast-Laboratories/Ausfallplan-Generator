@@ -52,7 +52,7 @@
                                 </div>
                                 <?php if (!empty($email['timestamp'])): ?>
                                     <div style="font-size: 12px; color: #9ca3af; margin-top: 4px;">
-                                        <?= $email['timestamp']->format('Y-m-d H:i:s') ?>
+                                        <?= is_string($email['timestamp']) ? h($email['timestamp']) : $email['timestamp']->format('Y-m-d H:i:s') ?>
                                     </div>
                                 <?php endif; ?>
                             </div>
