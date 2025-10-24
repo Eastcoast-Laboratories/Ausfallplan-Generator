@@ -1,5 +1,19 @@
 import { test, expect } from '@playwright/test';
 
+/**
+ * TEST DESCRIPTION:
+ * Tests report generation from schedules.
+ * 
+ * ORGANIZATION IMPACT: ❌ NONE
+ * - Reports are generated per schedule
+ * - Not affected by organization_users changes
+ * 
+ * WHAT IT TESTS:
+ * 1. Generate Report button visible on schedules
+ * 2. Can generate report from schedule
+ * 3. Report shows correct sections (Anwesenheitsliste, Nachrückliste)
+ * 4. Report contains children data
+ */
 test.describe('Report Generation', () => {
     test.beforeEach(async ({ page }) => {
         // Login first

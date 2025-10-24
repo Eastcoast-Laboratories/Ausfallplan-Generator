@@ -1,5 +1,18 @@
 const { test, expect } = require('@playwright/test');
 
+/**
+ * TEST DESCRIPTION:
+ * Tests user profile management features.
+ * 
+ * ORGANIZATION IMPACT: ✅ LOW
+ * - Profile shows user's organization membership
+ * - With organization_users, user may belong to multiple orgs
+ * 
+ * WHAT IT TESTS:
+ * 1. User can access profile page
+ * 2. User can change password
+ * 3. Email and organization info displayed
+ */
 test.describe('User Profile Management', () => {
     test.beforeEach(async ({ page }) => {
         // Login as editor user

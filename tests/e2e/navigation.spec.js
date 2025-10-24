@@ -1,6 +1,18 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
+/**
+ * TEST DESCRIPTION:
+ * Tests navigation visibility and responsive behavior.
+ * 
+ * ORGANIZATION IMPACT: ❌ NONE
+ * 
+ * WHAT IT TESTS:
+ * 1. Sidebar navigation visible after login on desktop
+ * 2. User avatar and nav items visible
+ * 3. Mobile hamburger menu functionality
+ * 4. Navigation hidden before login
+ */
 test.describe('Navigation Visibility Tests', () => {
   
   test('should show navigation after login - Desktop', async ({ page }) => {

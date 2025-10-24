@@ -1,5 +1,20 @@
 const { test, expect } = require('@playwright/test');
 
+/**
+ * TEST DESCRIPTION:
+ * Tests that report statistics columns (Z, D, ⬇️) are displayed correctly.
+ * 
+ * ORGANIZATION IMPACT: ❌ NONE
+ * - Statistics calculated per schedule
+ * - Not affected by organization_users changes
+ * 
+ * WHAT IT TESTS:
+ * 1. Report shows Nachrückliste box
+ * 2. Stats grid has correct columns (Name, Z, D, ⬇️)
+ * 3. Zählkinder (Z) calculated correctly (1 for normal, 2 for integrative)
+ * 4. Days present (D) column works
+ * 5. Nachrückposition (⬇️) shows correct sort order
+ */
 test.describe('Report - Child Statistics Columns', () => {
     test('should display correct statistics in D and ⬇️ columns', async ({ page }) => {
         console.log('🚀 Testing report statistics columns...');

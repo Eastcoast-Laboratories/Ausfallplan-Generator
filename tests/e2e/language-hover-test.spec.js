@@ -1,6 +1,17 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
+/**
+ * TEST DESCRIPTION:
+ * Tests language dropdown hover behavior and mouse movement.
+ * 
+ * ORGANIZATION IMPACT: ❌ NONE
+ * 
+ * WHAT IT TESTS:
+ * 1. Dropdown stays open while moving mouse to option
+ * 2. No gap between flag and dropdown that causes closing
+ * 3. Can click language options with realistic mouse movement
+ */
 test.describe('Language Dropdown Hover Tests', () => {
   
   async function login(page) {

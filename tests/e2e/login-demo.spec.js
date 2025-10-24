@@ -2,8 +2,16 @@
 const { test, expect } = require('@playwright/test');
 
 /**
- * Demo Login Test - Slow motion with visible browser
- * This test runs slowly so you can see what's happening
+ * TEST DESCRIPTION:
+ * Demo Login Test - Slow motion with visible browser.
+ * This test runs slowly so you can see what's happening.
+ * 
+ * ORGANIZATION IMPACT: ❌ NONE
+ * 
+ * WHAT IT TESTS:
+ * 1. Step-by-step login process visualization
+ * 2. Form element visibility
+ * 3. Slow character-by-character form filling for demo purposes
  */
 test.describe('Login Demo with Visible GUI', () => {
   

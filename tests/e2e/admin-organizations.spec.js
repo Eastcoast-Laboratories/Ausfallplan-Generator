@@ -1,5 +1,21 @@
 const { test, expect } = require('@playwright/test');
 
+/**
+ * TEST DESCRIPTION:
+ * Tests admin organization management features.
+ * 
+ * ORGANIZATION IMPACT: ✅ HIGH
+ * - Organizations now have organization_users for membership management
+ * - Admin can view/edit organization details and user memberships
+ * - Tests organization user management (add/remove users from organizations)
+ * 
+ * WHAT IT TESTS:
+ * 1. Admin can access organizations page
+ * 2. Admin can view organization details (including members)
+ * 3. Admin can edit organization info (name, contact details)
+ * 4. Organizations table shows stats (users, children count)
+ * 5. Normal users cannot access admin organizations
+ */
 test.describe('Admin Organizations Management', () => {
     test.beforeEach(async ({ page }) => {
         // Login as admin

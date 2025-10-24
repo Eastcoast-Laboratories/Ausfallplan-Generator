@@ -1,6 +1,18 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
+/**
+ * TEST DESCRIPTION:
+ * Comprehensive language switching verification test.
+ * 
+ * ORGANIZATION IMPACT: ❌ NONE
+ * 
+ * WHAT IT TESTS:
+ * 1. Default language on login page
+ * 2. Language switching from German to English and back
+ * 3. Language persists after login
+ * 4. Page content changes to selected language
+ */
 test.describe('Language Switching Verification', () => {
   
   test('should verify default language and language switching', async ({ page }) => {

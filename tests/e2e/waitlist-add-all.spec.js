@@ -1,5 +1,21 @@
 const { test, expect } = require('@playwright/test');
 
+/**
+ * TEST DESCRIPTION:
+ * Tests the 'Add All' button functionality in waitlist.
+ * 
+ * ORGANIZATION IMPACT: ❌ NONE
+ * - Waitlist filtered by organization automatically
+ * - Not affected by organization_users changes
+ * 
+ * WHAT IT TESTS:
+ * 1. Create multiple test children
+ * 2. Create a schedule
+ * 3. Navigate to waitlist
+ * 4. Click 'Add All' button
+ * 5. Verify all children added to waitlist
+ * 6. Verify order can be changed
+ */
 test.describe('Waitlist - Add All Children', () => {
     test('should add all children to waitlist with Add All button', async ({ page }) => {
         console.log('🚀 Starting Add All Children test...');
