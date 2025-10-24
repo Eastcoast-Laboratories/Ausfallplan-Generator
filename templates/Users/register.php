@@ -44,15 +44,21 @@
                 'minlength' => 8,
                 'placeholder' => __('Minimum 8 characters')
             ]);
-            echo $this->Form->control('role', [
+            echo $this->Form->control('password_confirm', [
+                'type' => 'password',
+                'label' => __('Confirm Password'),
+                'required' => true,
+                'minlength' => 8
+            ]);
+            echo $this->Form->control('requested_role', [
                 'options' => [
-                    'viewer' => __('Viewer (Read-only)'),
-                    'editor' => __('Editor (Create & Edit)'),
-                    'admin' => __('Administrator (Full Access)')
+                    'viewer' => __('Viewer - Read-only access'),
+                    'editor' => __('Editor - Create and edit schedules'),
+                    'org_admin' => __('Organization Admin - Full access (requires approval)')
                 ],
-                'label' => __('Role'),
-                'default' => 'viewer',
-                'help' => __('Your role can be changed later by an administrator')
+                'label' => __('Requested Role in Organization'),
+                'default' => 'editor',
+                'help' => __('If joining an existing organization, admins will review your request')
             ]);
         ?>
     </fieldset>
