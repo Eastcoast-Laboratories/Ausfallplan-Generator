@@ -117,7 +117,7 @@ test.describe('Admin Organizations Management', () => {
         await page.waitForURL('**/dashboard');
         
         console.log('📍 Step 3: Try to access organizations');
-        await page.goto('http://localhost:8080/admin/organizations');
+        await page.goto('https://ausfallplan-generator.z11.de/admin/organizations');
         
         console.log('📍 Step 4: Should be redirected or see error');
         await page.waitForTimeout(1000);
