@@ -98,16 +98,6 @@ $this->assign('title', __('Waitlist'));
                                 </span>
                                 <div>
                                     <strong><?= h($entry->child->name) ?></strong>
-                                    <?php if ($entry->child->sibling_group_id): ?>
-                                        <span style="background: #fff3cd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem; cursor: help;" title="Geschwister: <?php
-                                            $siblings = $this->fetchTable('Children')->find()->where(['sibling_group_id' => $entry->child->sibling_group_id, 'id !=' => $entry->child->id])->all();
-                                            $siblingNames = [];
-                                            foreach ($siblings as $sib) { $siblingNames[] = h($sib->name); }
-                                            echo implode(', ', $siblingNames);
-                                        ?>">
-                                            👨‍👩‍👧 <?= __("Geschwister") ?>
-                                        </span>
-                                    <?php endif; ?>
                                     <?php if ($entry->child->is_integrative): ?>
                                         <span style="background: #e3f2fd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
                                             <?= __('Integrative') ?>
