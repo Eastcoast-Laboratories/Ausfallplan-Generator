@@ -42,7 +42,7 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                                 <?php endif; ?>
                                 <?php if ($child->sibling_group_id): ?>
                                     <span style="background: #fff3cd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
-                                        👨‍👩‍👧 <?= __("Sibling") ?>
+                                        👨‍👩‍👧 <?= __("Geschwister") ?>
                                     </span>
                                 <?php endif; ?>
                             </div>
