@@ -43,13 +43,7 @@ class UsersTable extends Table
 
         $this->addBehavior('Timestamp');
 
-        $this->belongsTo('Organizations', [
-            'foreignKey' => 'organization_id',
-            'joinType' => 'LEFT',  // Changed to LEFT as org_id will be optional
-            'className' => 'Organizations',
-        ]);
-
-        // Many-to-Many through OrganizationUsers
+        // Many-to-Many through OrganizationUsers (primary relationship now)
         $this->belongsToMany('Organizations', [
             'through' => 'OrganizationUsers',
             'foreignKey' => 'user_id',

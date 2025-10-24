@@ -46,12 +46,7 @@ class OrganizationsTable extends Table
 
         $this->addBehavior('Timestamp');
 
-        $this->hasMany('Users', [
-            'foreignKey' => 'organization_id',
-            'className' => 'Users',
-        ]);
-        
-        // Many-to-Many through OrganizationUsers
+        // Many-to-Many through OrganizationUsers (primary relationship now)
         $this->belongsToMany('Users', [
             'through' => 'OrganizationUsers',
             'foreignKey' => 'organization_id',
