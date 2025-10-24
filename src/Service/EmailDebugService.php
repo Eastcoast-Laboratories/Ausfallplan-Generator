@@ -72,25 +72,46 @@ class EmailDebugService
     }
     
     /**
-     * Store email in session for debug display
+     * Get email debug log file path
+     *
+     * @return string
+     */
+    private static function getEmailLogFile(): string
+    {
+        return TMP . 'debug_emails.json';
+    }
+    
+    /**
+     * Store email in file for debug display (works in both CLI and web context)
      *
      * @param array $email Email data
      * @return void
      */
     private static function storeEmail(array $email): void
     {
-        $session = new Session();
-        $emails = $session->read('Debug.emails') ?? [];
+        $logFile = self::getEmailLogFile();
         
-        $email['timestamp'] = new \DateTime();
-        $emails[] = $email;
-        
-        // Keep only last 20 emails
-        if (count($emails) > 20) {
-            $emails = array_slice($emails, -20);
+        // Read existing emails
+        $emails = [];
+        if (file_exists($logFile)) {
+            $content = file_get_contents($logFile);
+            if ($content) {
+                $emails = json_decode($content, true) ?? [];
+            }
         }
         
-        $session->write('Debug.emails', $emails);
+        // Add timestamp
+        $email['timestamp'] = date('Y-m-d H:i:s');
+        $emails[] = $email;
+        
+        // Keep only last 50 emails
+        if (count($emails) > 50) {
+            $emails = array_slice($emails, -50);
+        }
+        
+        // Write back to file
+        file_put_contents($logFile, json_encode($emails, JSON_PRETTY_PRINT));
+        chmod($logFile, 0666); // Make sure it's writable
     }
     
     /**
@@ -100,8 +121,18 @@ class EmailDebugService
      */
     public static function getEmails(): array
     {
-        $session = new Session();
-        return $session->read('Debug.emails') ?? [];
+        $logFile = self::getEmailLogFile();
+        
+        if (!file_exists($logFile)) {
+            return [];
+        }
+        
+        $content = file_get_contents($logFile);
+        if (!$content) {
+            return [];
+        }
+        
+        return json_decode($content, true) ?? [];
     }
     
     /**
@@ -111,8 +142,10 @@ class EmailDebugService
      */
     public static function clearEmails(): void
     {
-        $session = new Session();
-        $session->delete('Debug.emails');
+        $logFile = self::getEmailLogFile();
+        if (file_exists($logFile)) {
+            unlink($logFile);
+        }
     }
     
     /**
