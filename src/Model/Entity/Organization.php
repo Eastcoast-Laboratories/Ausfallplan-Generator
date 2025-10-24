@@ -29,6 +29,9 @@ class Organization extends Entity
     protected array $_accessible = [
         'name' => true,
         'locale' => true,
+        'is_active' => true,
+        'contact_email' => true,
+        'contact_phone' => true,
         'created' => true,
         'modified' => true,
         'users' => true,
