@@ -54,18 +54,42 @@ $this->assign('title', h($organization->name));
     </div>
 
     <div class="related">
-        <h4><?= __('Benutzer') ?> (<?= count($organization->users) ?>)</h4>
-        <?php if (!empty($organization->users)): ?>
+        <h4><?= __('Mitglieder') ?> (<?= count($organization->organization_users ?? []) ?>)</h4>
+        <?php if (!empty($organization->organization_users)): ?>
         <div class="table-responsive">
             <table>
                 <tr>
                     <th><?= __('E-Mail') ?></th>
-                    <th><?= __('Rolle') ?></th>
+                    <th><?= __('Rolle in Organisation') ?></th>
+                    <th><?= __('Hauptorganisation') ?></th>
+                    <th><?= __('Beigetreten') ?></th>
+                    <th><?= __('Aktionen') ?></th>
                 </tr>
-                <?php foreach ($organization->users as $user): ?>
+                <?php foreach ($organization->organization_users as $orgUser): ?>
                 <tr>
-                    <td><?= h($user->email) ?></td>
-                    <td><?= h($user->role) ?></td>
+                    <td><?= h($orgUser->user->email ?? '-') ?></td>
+                    <td>
+                        <?php
+                        $roleLabels = [
+                            'org_admin' => __('Organisations-Admin'),
+                            'editor' => __('Bearbeiter'),
+                            'viewer' => __('Betrachter')
+                        ];
+                        echo h($roleLabels[$orgUser->role] ?? $orgUser->role);
+                        ?>
+                    </td>
+                    <td><?= $orgUser->is_primary ? '⭐' : '-' ?></td>
+                    <td><?= $orgUser->joined_at ? $orgUser->joined_at->format('d.m.Y') : '-' ?></td>
+                    <td>
+                        <?= $this->Form->postLink(
+                            __('Entfernen'),
+                            ['action' => 'removeUser', $organization->id, $orgUser->user_id],
+                            [
+                                'confirm' => __('Benutzer aus Organisation entfernen?'),
+                                'class' => 'button button-small button-danger'
+                            ]
+                        ) ?>
+                    </td>
                 </tr>
                 <?php endforeach; ?>
             </table>

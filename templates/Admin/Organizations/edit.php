@@ -27,30 +27,41 @@ $this->assign('title', __('Organisation bearbeiten'));
 
     <div class="row" style="margin-top: 2rem;">
         <div class="column">
-            <h4><?= __('Benutzer verwalten') ?> (<?= count($organization->users) ?>)</h4>
+            <h4><?= __('Mitglieder verwalten') ?> (<?= count($organization->organization_users ?? []) ?>)</h4>
             
-            <?php if (!empty($organization->users)): ?>
+            <?php if (!empty($organization->organization_users)): ?>
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
                             <th><?= __('E-Mail') ?></th>
-                            <th><?= __('Rolle') ?></th>
-                            <th><?= __('Status') ?></th>
+                            <th><?= __('Rolle in Organisation') ?></th>
+                            <th><?= __('Hauptorganisation') ?></th>
+                            <th><?= __('Beigetreten') ?></th>
                             <th class="actions"><?= __('Aktionen') ?></th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($organization->users as $user): ?>
+                        <?php foreach ($organization->organization_users as $orgUser): ?>
                         <tr>
-                            <td><?= h($user->email) ?></td>
-                            <td><?= h($user->role) ?></td>
-                            <td><?= h($user->status) ?></td>
+                            <td><?= h($orgUser->user->email ?? '-') ?></td>
+                            <td>
+                                <?php
+                                $roleLabels = [
+                                    'org_admin' => __('Organisations-Admin'),
+                                    'editor' => __('Bearbeiter'),
+                                    'viewer' => __('Betrachter')
+                                ];
+                                echo h($roleLabels[$orgUser->role] ?? $orgUser->role);
+                                ?>
+                            </td>
+                            <td><?= $orgUser->is_primary ? '⭐' : '-' ?></td>
+                            <td><?= $orgUser->joined_at ? $orgUser->joined_at->format('d.m.Y') : '-' ?></td>
                             <td class="actions">
                                 <?= $this->Form->postLink(
                                     __('Entfernen'),
-                                    ['action' => 'removeUser', $organization->id, $user->id],
-                                    ['confirm' => __('User aus dieser Organisation entfernen?'), 'class' => 'button button-small']
+                                    ['action' => 'removeUser', $organization->id, $orgUser->user_id],
+                                    ['confirm' => __('Mitglied aus Organisation entfernen?'), 'class' => 'button button-small button-danger']
                                 ) ?>
                             </td>
                         </tr>
@@ -59,17 +70,26 @@ $this->assign('title', __('Organisation bearbeiten'));
                 </table>
             </div>
             <?php else: ?>
-                <p><?= __('Keine Benutzer in dieser Organisation.') ?></p>
+                <p><?= __('Keine Mitglieder in dieser Organisation.') ?></p>
             <?php endif; ?>
             
             <div style="margin-top: 2rem;">
-                <h5><?= __('Benutzer hinzufügen') ?></h5>
+                <h5><?= __('Mitglied hinzufügen') ?></h5>
                 <?= $this->Form->create(null, ['url' => ['action' => 'addUser', $organization->id]]) ?>
                 <div class="input">
                     <?= $this->Form->control('user_id', [
                         'options' => $allUsers,
                         'empty' => __('-- Benutzer wählen --'),
                         'label' => __('Benutzer')
+                    ]) ?>
+                    <?= $this->Form->control('role', [
+                        'options' => [
+                            'org_admin' => __('Organisations-Admin'),
+                            'editor' => __('Bearbeiter'),
+                            'viewer' => __('Betrachter')
+                        ],
+                        'default' => 'viewer',
+                        'label' => __('Rolle')
                     ]) ?>
                 </div>
                 <?= $this->Form->button(__('Hinzufügen'), ['class' => 'button']) ?>
