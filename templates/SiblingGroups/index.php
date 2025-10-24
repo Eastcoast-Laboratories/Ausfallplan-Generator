@@ -29,7 +29,11 @@ $this->assign('title', __('Sibling Groups'));
                     <td class="actions">
                         <?= $this->Html->link(__('View'), ['action' => 'view', $siblingGroup->id]) ?>
                         <?= $this->Html->link(__('Edit'), ['action' => 'edit', $siblingGroup->id]) ?>
-                        <?= $this->Form->postLink(__('Delete'), ['action' => 'delete', $siblingGroup->id], ['confirm' => __('Are you sure you want to delete # {0}?', $siblingGroup->id)]) ?>
+                        <?php if (count($siblingGroup->children) == 0): ?>
+                            <?= $this->Form->postLink(__('Delete'), ['action' => 'delete', $siblingGroup->id], ['confirm' => __('Are you sure you want to delete this sibling group?'), 'class' => 'button-delete']) ?>
+                        <?php else: ?>
+                            <span style="color: #999;" title="<?= __('Cannot delete group with children') ?>"><?= __('Delete') ?></span>
+                        <?php endif; ?>
                     </td>
                 </tr>
                 <?php endforeach; ?>
