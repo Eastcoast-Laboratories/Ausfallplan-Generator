@@ -67,4 +67,148 @@ class AppController extends Controller
             $this->viewBuilder()->setLayout('authenticated');
         }
     }
+
+    /**
+     * Check if user has role in organization
+     *
+     * @param int $organizationId Organization ID
+     * @param string|null $role Required role (viewer, editor, org_admin) or null for membership check
+     * @return bool True if user has permission
+     */
+    protected function hasOrgRole(int $organizationId, ?string $role = null): bool
+    {
+        $user = $this->Authentication->getIdentity();
+        
+        if (!$user) {
+            return false;
+        }
+        
+        // System admin has access to everything
+        if ($user->is_system_admin) {
+            return true;
+        }
+        
+        $orgUser = $this->fetchTable('OrganizationUsers')->find()
+            ->where([
+                'user_id' => $user->id,
+                'organization_id' => $organizationId
+            ])
+            ->first();
+        
+        if (!$orgUser) {
+            return false;
+        }
+        
+        if ($role === null) {
+            return true; // Just check membership
+        }
+        
+        // Role hierarchy: org_admin > editor > viewer
+        $hierarchy = ['viewer' => 1, 'editor' => 2, 'org_admin' => 3];
+        return isset($hierarchy[$orgUser->role]) && 
+               isset($hierarchy[$role]) && 
+               $hierarchy[$orgUser->role] >= $hierarchy[$role];
+    }
+
+    /**
+     * Get user's organizations
+     *
+     * @return array List of organizations the user is a member of
+     */
+    protected function getUserOrganizations(): array
+    {
+        $user = $this->Authentication->getIdentity();
+        
+        if (!$user) {
+            return [];
+        }
+        
+        // System admin sees all organizations
+        if ($user->is_system_admin) {
+            return $this->fetchTable('Organizations')->find()->all()->toArray();
+        }
+        
+        // Get organizations through join table
+        $orgUsers = $this->fetchTable('OrganizationUsers')
+            ->find()
+            ->where(['user_id' => $user->id])
+            ->contain(['Organizations'])
+            ->all();
+        
+        return collection($orgUsers)
+            ->extract('organization')
+            ->toArray();
+    }
+
+    /**
+     * Get user's primary organization
+     *
+     * @return \App\Model\Entity\Organization|null Primary organization or first organization
+     */
+    protected function getPrimaryOrganization(): ?\App\Model\Entity\Organization
+    {
+        $user = $this->Authentication->getIdentity();
+        
+        if (!$user) {
+            return null;
+        }
+        
+        // System admin: no primary org
+        if ($user->is_system_admin) {
+            return null;
+        }
+        
+        // Try to find primary organization
+        $orgUser = $this->fetchTable('OrganizationUsers')
+            ->find()
+            ->where([
+                'user_id' => $user->id,
+                'is_primary' => true
+            ])
+            ->contain(['Organizations'])
+            ->first();
+        
+        if ($orgUser && $orgUser->organization) {
+            return $orgUser->organization;
+        }
+        
+        // Fallback: return first organization
+        $orgUser = $this->fetchTable('OrganizationUsers')
+            ->find()
+            ->where(['user_id' => $user->id])
+            ->contain(['Organizations'])
+            ->first();
+        
+        return $orgUser ? $orgUser->organization : null;
+    }
+
+    /**
+     * Get user's role in organization
+     *
+     * @param int $organizationId Organization ID
+     * @return string|null Role name (org_admin, editor, viewer) or null if not a member
+     */
+    protected function getUserRoleInOrg(int $organizationId): ?string
+    {
+        $user = $this->Authentication->getIdentity();
+        
+        if (!$user) {
+            return null;
+        }
+        
+        // System admin is like org_admin everywhere
+        if ($user->is_system_admin) {
+            return 'org_admin';
+        }
+        
+        $orgUser = $this->fetchTable('OrganizationUsers')
+            ->find()
+            ->where([
+                'user_id' => $user->id,
+                'organization_id' => $organizationId
+            ])
+            ->first();
+        
+        return $orgUser ? $orgUser->role : null;
+    }
 }

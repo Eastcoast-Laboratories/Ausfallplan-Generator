@@ -47,9 +47,8 @@ class SchedulesController extends AppController
     {
         $schedule = $this->Schedules->get($id, contain: ['Organizations', 'ScheduleDays']);
         
-        // Permission check: Only admin or users from same organization
-        $user = $this->Authentication->getIdentity();
-        if ($user->role !== 'admin' && $schedule->organization_id !== $user->organization_id) {
+        // Permission check: User must be member of schedule's organization
+        if (!$this->hasOrgRole($schedule->organization_id)) {
             $this->Flash->error(__('Zugriff verweigert.'));
             return $this->redirect(['action' => 'index']);
         }
@@ -71,7 +70,15 @@ class SchedulesController extends AppController
             
             // Set organization and user from current user
             $user = $this->Authentication->getIdentity();
-            $data['organization_id'] = $user->organization_id;
+            
+            // Get organization from user's primary organization or first organization
+            $primaryOrg = $this->getPrimaryOrganization();
+            if (!$primaryOrg) {
+                $this->Flash->error(__('Sie müssen einer Organisation angehören, um Dienstpläne zu erstellen.'));
+                return $this->redirect(['action' => 'index']);
+            }
+            
+            $data['organization_id'] = $primaryOrg->id;
             $data['user_id'] = $user->id;
             
             // Set default state to 'draft'
@@ -108,18 +115,9 @@ class SchedulesController extends AppController
     {
         $schedule = $this->Schedules->get($id, contain: []);
         
-        // Permission check
-        $user = $this->Authentication->getIdentity();
-        
-        // Viewer cannot edit
-        if ($user->role === 'viewer') {
+        // Permission check - requires editor role in schedule's organization
+        if (!$this->hasOrgRole($schedule->organization_id, 'editor')) {
             $this->Flash->error(__('Sie haben keine Berechtigung Dienstpläne zu bearbeiten.'));
-            return $this->redirect(['action' => 'index']);
-        }
-        
-        // Editor can only edit own organization's schedules
-        if ($user->role !== 'admin' && $schedule->organization_id !== $user->organization_id) {
-            $this->Flash->error(__('Zugriff verweigert.'));
             return $this->redirect(['action' => 'index']);
         }
 
@@ -154,18 +152,9 @@ class SchedulesController extends AppController
         $this->request->allowMethod(['post', 'delete']);
         $schedule = $this->Schedules->get($id);
         
-        // Permission check
-        $user = $this->Authentication->getIdentity();
-        
-        // Viewer cannot delete
-        if ($user->role === 'viewer') {
+        // Permission check - requires editor role in schedule's organization
+        if (!$this->hasOrgRole($schedule->organization_id, 'editor')) {
             $this->Flash->error(__('Sie haben keine Berechtigung Dienstpläne zu löschen.'));
-            return $this->redirect(['action' => 'index']);
-        }
-        
-        // Editor can only delete own organization's schedules
-        if ($user->role !== 'admin' && $schedule->organization_id !== $user->organization_id) {
-            $this->Flash->error(__('Zugriff verweigert.'));
             return $this->redirect(['action' => 'index']);
         }
 
@@ -213,11 +202,10 @@ class SchedulesController extends AppController
                 ->all();
         }
         
-        // Get available children (not yet assigned)
-        $user = $this->Authentication->getIdentity();
+        // Get available children (not yet assigned) from schedule's organization
         $availableChildrenQuery = $this->fetchTable("Children")->find()
             ->where([
-                "Children.organization_id" => $user->organization_id,
+                "Children.organization_id" => $schedule->organization_id,
                 "Children.is_active" => true,
             ])
             ->orderBy(["Children.name" => "ASC"]);
