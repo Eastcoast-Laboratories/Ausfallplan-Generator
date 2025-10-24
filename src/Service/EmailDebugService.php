@@ -36,19 +36,20 @@ class EmailDebugService
      */
     public static function send(array $email): bool
     {
+        // ALWAYS store in session for debug display (both localhost and production)
+        self::storeEmail($email);
+        
         // Check if we're in localhost/development
         $isLocalhost = self::isLocalhost();
         
         if ($isLocalhost) {
-            // Store in session for debug display
-            self::storeEmail($email);
-            // Also send real email if configured (for testing online functionality locally)
+            // On localhost: Only send if configured
             if (Configure::read('Email.alsoSendOnLocalhost')) {
                 return self::sendRealEmail($email);
             }
             return true;
         } else {
-            // Send real email via CakePHP Mailer
+            // On production: Try to send real email, fallback to log
             return self::sendRealEmail($email);
         }
     }

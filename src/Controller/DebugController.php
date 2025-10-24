@@ -16,30 +16,31 @@ use Cake\Http\Exception\NotFoundException;
 class DebugController extends AppController
 {
     /**
-     * Only allow on localhost
+     * Allow on localhost OR for authenticated admin users
      */
     public function initialize(): void
     {
         parent::initialize();
         
-        // Allow in development OR if explicitly enabled via config
-        if (!Configure::read('debug') && !Configure::read('allowDebugRoutes')) {
-            throw new NotFoundException('Debug controller only available in development mode');
-        }
+        // Skip auth check - we handle it manually in beforeFilter
     }
     
     public function beforeFilter(\Cake\Event\EventInterface $event)
     {
         parent::beforeFilter($event);
         
-        // Allow unauthenticated access on localhost OR if config is set
-        $allowDebug = $this->isLocalhost() || Configure::read('allowDebugRoutes');
-        
-        if ($allowDebug) {
+        // Check if localhost
+        if ($this->isLocalhost()) {
+            // Localhost: Allow unauthenticated access
             $this->Authentication->addUnauthenticatedActions(['emails', 'clearEmails']);
-        } else {
-            $this->Flash->error(__('Debug routes are only available on localhost.'));
-            return $this->redirect(['controller' => 'Pages', 'action' => 'display', 'home']);
+            return $event;
+        }
+        
+        // Production: Require admin authentication
+        $user = $this->Authentication->getIdentity();
+        if (!$user || $user->role !== 'admin') {
+            $this->Flash->error(__('Debug routes are only available for administrators.'));
+            return $this->redirect(['controller' => 'Users', 'action' => 'login']);
         }
     }
     
