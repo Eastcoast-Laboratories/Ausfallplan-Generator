@@ -1,5 +1,21 @@
 const { test, expect } = require('@playwright/test');
 
+/**
+ * TEST DESCRIPTION:
+ * Tests user features and organization-based permissions.
+ * 
+ * ORGANIZATION IMPACT: ✅ HIGH
+ * - Tests new organization_users permission system
+ * - Verifies org_admin, editor, viewer roles work correctly
+ * - Tests that users can be members of multiple organizations
+ * 
+ * WHAT IT TESTS:
+ * 1. Organization-based permissions work correctly
+ * 2. Org_admin can manage users in their organization
+ * 3. Editor can edit schedules/children in their organization
+ * 4. Viewer has read-only access
+ * 5. Users can belong to multiple organizations
+ */
 test.describe('User Features Integration', () => {
     
     test('organization-based permissions work', async ({ page }) => {
