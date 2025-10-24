@@ -8,10 +8,15 @@ const { test, expect } = require('@playwright/test');
  * - Organizations now have organization_users for membership management
  * - Admin can view/edit organization details and user memberships
  * - Tests organization user management (add/remove users from organizations)
+ * - Requires system admin (is_system_admin = true)
+ * 
+ * SETUP REQUIRED:
+ * Run: `bin/cake create_admin` to create system admin user
+ * Credentials: admin@demo.kita / asbdasdaddd
  * 
  * WHAT IT TESTS:
  * 1. Admin can access organizations page
- * 2. Admin can view organization details (including members)
+ * 2. Admin can view organization details (including members with roles)
  * 3. Admin can edit organization info (name, contact details)
  * 4. Organizations table shows stats (users, children count)
  * 5. Normal users cannot access admin organizations
@@ -102,10 +107,10 @@ test.describe('Admin Organizations Management', () => {
 
     test('normal user cannot access admin organizations', async ({ page }) => {
         console.log('📍 Step 1: Logout admin');
-        await page.goto('http://localhost:8080/logout');
+        await page.goto('https://ausfallplan-generator.z11.de/logout');
         
         console.log('📍 Step 2: Login as normal user');
-        await page.goto('http://localhost:8080/login');
+        await page.goto('https://ausfallplan-generator.z11.de/login');
         await page.fill('input[name="email"]', 'editor@example.com');
         await page.fill('input[name="password"]', 'password123');
         await page.click('button[type="submit"]');
