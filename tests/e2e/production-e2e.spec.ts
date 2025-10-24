@@ -57,8 +57,10 @@ test.describe('Production E2E Test', () => {
     await page.fill('input[name="password"]', TEST_PASSWORD);
     await page.click('button[type="submit"]');
     
-    await page.waitForURL(/\/(dashboard|schedules|children)/, { timeout: 10000 });
-    await expect(page.locator('body')).toContainText(/Dashboard|Ausfallpläne|Schedules|Übersicht/, { timeout: 5000 });
+    // Wait for login success - could redirect to /, /dashboard, /schedules, or /children
+    await page.waitForURL(/\/(dashboard|schedules|children|$)/, { timeout: 10000 });
+    await page.waitForTimeout(1000); // Wait for page to fully load
+    await expect(page.locator('body')).toContainText(/Willkommen|Dashboard|Ausfallpläne|Schedules|Übersicht/, { timeout: 5000 });
     
     console.log('✅ Step 3 completed: Login successful');
 
@@ -78,13 +80,14 @@ test.describe('Production E2E Test', () => {
     const scheduleListUrl = `${BASE_URL}/schedules`;
     await page.goto(scheduleListUrl);
     
-    // Find our schedule
-    const scheduleLink = page.locator(`a:has-text("Test Schedule ${TEST_TIMESTAMP}")`).first();
-    await expect(scheduleLink).toBeVisible({ timeout: 5000 });
+    // Find our schedule in the table (title is in cell, not a link)
+    const scheduleRow = page.locator(`tr:has-text("Test Schedule ${TEST_TIMESTAMP}")`).first();
+    await expect(scheduleRow).toBeVisible({ timeout: 5000 });
     
-    // Extract schedule ID
-    const href = await scheduleLink.getAttribute('href');
-    const scheduleId = href?.match(/\/schedules\/(\d+)/)?.[1];
+    // Extract schedule ID from the "Bearbeiten" (edit) link
+    const editLink = scheduleRow.locator('a[href*="/schedules/edit/"]');
+    const href = await editLink.getAttribute('href');
+    const scheduleId = href?.match(/\/schedules\/edit\/(\d+)/)?.[1];
     
     if (!scheduleId) {
       throw new Error('Could not find schedule ID');
@@ -151,22 +154,12 @@ test.describe('Production E2E Test', () => {
     console.log('Step 8: Generating report');
     await page.goto(`${BASE_URL}/schedules/generate-report/${scheduleId}`);
     
-    // Fill number of days
-    await page.fill('input[name="days_count"]', '5');
-    await page.click('button[type="submit"]');
-    
-    // Wait for report page
-    await page.waitForSelector('h1, h2, h3', { timeout: 10000 });
+    // Wait for report page to load (no form - report is generated directly)
+    await page.waitForLoadState('networkidle', { timeout: 15000 });
     
     // Verify report content
-    const bodyText = await page.textContent('body');
-    const hasReportContent = 
-      bodyText.includes('Tag') || 
-      bodyText.includes('Day') || 
-      bodyText.includes('Nachrückliste') ||
-      bodyText.includes('Waitlist');
-    
-    expect(hasReportContent).toBe(true);
+    await expect(page.locator('body')).toContainText(/Nachrückliste|Waitlist/, { timeout: 5000 });
+    await expect(page.locator('body')).toContainText(/Summe aller Zählkinder|Total/, { timeout: 5000 });
     
     console.log('✅ Step 8 completed: Report generated');
 
