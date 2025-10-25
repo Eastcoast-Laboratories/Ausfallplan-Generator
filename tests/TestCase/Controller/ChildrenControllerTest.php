@@ -52,15 +52,7 @@ class ChildrenControllerTest extends TestCase
     public function testIndex(): void
     {
         // Create and log in user
-        $users = $this->getTableLocator()->get('Users');
-        $user = $users->newEntity([
-            'organization_id' => 1,
-            'email' => 'children@test.com',
-            'password' => 'password123',
-            'role' => 'admin',
-        ]);
-        $users->save($user);
-        $this->session(['Auth' => $user]);
+        $this->createAndLoginUser('children@test.com');
 
         // Access children index
         $this->get('/children');
@@ -78,15 +70,7 @@ class ChildrenControllerTest extends TestCase
     public function testAddGet(): void
     {
         // Create and log in user
-        $users = $this->getTableLocator()->get('Users');
-        $user = $users->newEntity([
-            'organization_id' => 1,
-            'email' => 'childadd@test.com',
-            'password' => 'password123',
-            'role' => 'admin',
-        ]);
-        $users->save($user);
-        $this->session(['Auth' => $user]);
+        $this->createAndLoginUser('childadd@test.com');
 
         // Access add form
         $this->get('/children/add');
@@ -106,15 +90,7 @@ class ChildrenControllerTest extends TestCase
     public function testAddPostSuccess(): void
     {
         // Create and log in user
-        $users = $this->getTableLocator()->get('Users');
-        $user = $users->newEntity([
-            'organization_id' => 1,
-            'email' => 'childpost@test.com',
-            'password' => 'password123',
-            'role' => 'admin',
-        ]);
-        $users->save($user);
-        $this->session(['Auth' => $user]);
+        $this->createAndLoginUser('childpost@test.com');
 
         // Submit child creation
         $this->post('/children/add', [
@@ -148,15 +124,7 @@ class ChildrenControllerTest extends TestCase
     public function testAddIntegrativeChild(): void
     {
         // Create and log in user
-        $users = $this->getTableLocator()->get('Users');
-        $user = $users->newEntity([
-            'organization_id' => 1,
-            'email' => 'integrative@test.com',
-            'password' => 'password123',
-            'role' => 'admin',
-        ]);
-        $users->save($user);
-        $this->session(['Auth' => $user]);
+        $this->createAndLoginUser('integrative@test.com');
 
         // Submit integrative child
         $this->post('/children/add', [
@@ -186,15 +154,7 @@ class ChildrenControllerTest extends TestCase
     public function testAddPostValidationFailure(): void
     {
         // Create and log in user
-        $users = $this->getTableLocator()->get('Users');
-        $user = $users->newEntity([
-            'organization_id' => 1,
-            'email' => 'childvalid@test.com',
-            'password' => 'password123',
-            'role' => 'admin',
-        ]);
-        $users->save($user);
-        $this->session(['Auth' => $user]);
+        $this->createAndLoginUser('childvalid@test.com');
 
         // Submit incomplete child (missing name)
         $this->post('/children/add', [
@@ -221,15 +181,7 @@ class ChildrenControllerTest extends TestCase
     public function testView(): void
     {
         // Create and log in user
-        $users = $this->getTableLocator()->get('Users');
-        $user = $users->newEntity([
-            'organization_id' => 1,
-            'email' => 'childview@test.com',
-            'password' => 'password123',
-            'role' => 'admin',
-        ]);
-        $users->save($user);
-        $this->session(['Auth' => $user]);
+        $this->createAndLoginUser('childview@test.com');
 
         // Create a child
         $children = $this->getTableLocator()->get('Children');
@@ -257,15 +209,7 @@ class ChildrenControllerTest extends TestCase
     public function testEdit(): void
     {
         // Create and log in user
-        $users = $this->getTableLocator()->get('Users');
-        $user = $users->newEntity([
-            'organization_id' => 1,
-            'email' => 'childedit@test.com',
-            'password' => 'password123',
-            'role' => 'admin',
-        ]);
-        $users->save($user);
-        $this->session(['Auth' => $user]);
+        $this->createAndLoginUser('childedit@test.com');
 
         // Create a child
         $children = $this->getTableLocator()->get('Children');
@@ -298,15 +242,7 @@ class ChildrenControllerTest extends TestCase
     public function testDelete(): void
     {
         // Create and log in user
-        $users = $this->getTableLocator()->get('Users');
-        $user = $users->newEntity([
-            'organization_id' => 1,
-            'email' => 'childdelete@test.com',
-            'password' => 'password123',
-            'role' => 'admin',
-        ]);
-        $users->save($user);
-        $this->session(['Auth' => $user]);
+        $this->createAndLoginUser('childdelete@test.com');
 
         // Create a child
         $children = $this->getTableLocator()->get('Children');
@@ -337,15 +273,7 @@ class ChildrenControllerTest extends TestCase
     public function testAddInactiveChild(): void
     {
         // Create and log in user
-        $users = $this->getTableLocator()->get('Users');
-        $user = $users->newEntity([
-            'organization_id' => 1,
-            'email' => 'inactive@test.com',
-            'password' => 'password123',
-            'role' => 'admin',
-        ]);
-        $users->save($user);
-        $this->session(['Auth' => $user]);
+        $this->createAndLoginUser('inactive@test.com');
 
         // Submit inactive child
         $this->post('/children/add', [
@@ -364,5 +292,35 @@ class ChildrenControllerTest extends TestCase
 
         $this->assertNotNull($child);
         $this->assertFalse($child->is_active);
+    }
+
+    /**
+     * Helper: Create user with organization membership and log in
+     */
+    private function createAndLoginUser(string $email, string $role = 'org_admin', int $orgId = 1): void
+    {
+        $users = $this->getTableLocator()->get('Users');
+        $user = $users->newEntity([
+            'email' => $email,
+            'password' => 'password123',
+            'is_system_admin' => false,
+            'status' => 'active',
+            'email_verified' => 1,
+            'email_token' => null,
+            'approved_at' => new \DateTime(),
+            'approved_by' => null,
+        ]);
+        $users->save($user);
+        
+        $orgUsers = $this->getTableLocator()->get('OrganizationUsers');
+        $orgUsers->save($orgUsers->newEntity([
+            'organization_id' => $orgId,
+            'user_id' => $user->id,
+            'role' => $role,
+            'is_primary' => true,
+            'joined_at' => new \DateTime(),
+        ]));
+        
+        $this->session(['Auth' => ['User' => $user]]);
     }
 }
