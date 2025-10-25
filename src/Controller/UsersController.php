@@ -464,7 +464,11 @@ class UsersController extends AppController
             $newPassword = $this->request->getData('new_password');
             
             $reset = $this->fetchTable('PasswordResets')->find()
-                ->where(['reset_code' => $code, 'expires_at >' => new \DateTime(), 'used_at IS' => null])
+                ->where([
+                    'reset_code' => $code,
+                    'expires_at >' => new \DateTime(),
+                ])
+                ->whereNull('used_at')
                 ->contain(['Users'])
                 ->first();
             
