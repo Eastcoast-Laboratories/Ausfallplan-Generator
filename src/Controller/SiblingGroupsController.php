@@ -20,11 +20,16 @@ class SiblingGroupsController extends AppController
         // Get current user's organization
         $user = $this->Authentication->getIdentity();
         
+        // System admins should use admin interface
+        if ($user && $user->is_system_admin) {
+            return $this->redirect(['controller' => 'Admin/Organizations', 'action' => 'index']);
+        }
+        
         // Get user's primary organization
         $primaryOrg = $this->getPrimaryOrganization();
         if (!$primaryOrg) {
             $this->Flash->error(__('Sie sind keiner Organisation zugeordnet.'));
-            return $this->redirect(['controller' => 'Dashboard', 'action' => 'index']);
+            return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
         }
         
         $siblingGroups = $this->SiblingGroups->find()
