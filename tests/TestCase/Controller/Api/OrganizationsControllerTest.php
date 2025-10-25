@@ -39,10 +39,11 @@ class OrganizationsControllerTest extends TestCase
 
         $result = json_decode((string)$this->_response->getBody(), true);
         $this->assertArrayHasKey('organizations', $result);
-        $this->assertCount(3, $result['organizations']); // Excludes "keine organisation"
+        $this->assertCount(5, $result['organizations']); // 2 from fixture + 3 from test data (excludes "keine organisation")
 
         $names = array_column($result['organizations'], 'name');
         $this->assertContains('Kita Sonnenschein', $names);
+        $this->assertContains('Test Kita', $names); // From fixture
         $this->assertNotContains('keine organisation', $names);
     }
 
