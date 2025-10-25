@@ -23,6 +23,7 @@ class SiblingGroupsControllerTest extends TestCase
     protected array $fixtures = [
         'app.Organizations',
         'app.Users',
+        'app.OrganizationUsers',
         'app.SiblingGroups',
         'app.Children',
     ];
@@ -52,15 +53,7 @@ class SiblingGroupsControllerTest extends TestCase
     public function testIndex(): void
     {
         // Create and log in user
-        $users = $this->getTableLocator()->get('Users');
-        $user = $users->newEntity([
-            'organization_id' => 1,
-            'email' => 'siblinggroups@test.com',
-            'password' => 'password123',
-            'role' => 'admin',
-        ]);
-        $users->save($user);
-        $this->session(['Auth' => $user]);
+        $this->createAndLoginUser('siblings@test.com');
 
         // Access sibling groups index
         $this->get('/sibling-groups');
@@ -241,5 +234,35 @@ class SiblingGroupsControllerTest extends TestCase
         // Verify deletion
         $exists = $siblingGroups->exists(['id' => $group->id]);
         $this->assertFalse($exists);
+    }
+
+    /**
+     * Helper: Create user with organization membership and log in
+     */
+    private function createAndLoginUser(string $email, string $role = 'org_admin', int $orgId = 1): void
+    {
+        $users = $this->getTableLocator()->get('Users');
+        $user = $users->newEntity([
+            'email' => $email,
+            'password' => 'password123',
+            'is_system_admin' => false,
+            'status' => 'active',
+            'email_verified' => 1,
+            'email_token' => null,
+            'approved_at' => new \DateTime(),
+            'approved_by' => null,
+        ]);
+        $users->save($user);
+        
+        $orgUsers = $this->getTableLocator()->get('OrganizationUsers');
+        $orgUsers->save($orgUsers->newEntity([
+            'organization_id' => $orgId,
+            'user_id' => $user->id,
+            'role' => $role,
+            'is_primary' => true,
+            'joined_at' => new \DateTime(),
+        ]));
+        
+        $this->session(['Auth' => ['User' => $user]]);
     }
 }
