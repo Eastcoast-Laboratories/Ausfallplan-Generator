@@ -20,8 +20,14 @@ class OrganizationsController extends AppController
     public function index()
     {
         // Only system admin can access
-        $user = $this->Authentication->getIdentity();
-        if (!$user || !$user->isSystemAdmin()) {
+        $identity = $this->Authentication->getIdentity();
+        if (!$identity) {
+            $this->Flash->error(__('Access denied. Please login.'));
+            return $this->redirect(['_name' => 'login']);
+        }
+        
+        $user = $identity->getOriginalData(); // Get User entity from Identity
+        if (!$user->isSystemAdmin()) {
             $this->Flash->error(__('Access denied. System admin privileges required.'));
             return $this->redirect(['_name' => 'dashboard']);
         }
@@ -54,8 +60,13 @@ class OrganizationsController extends AppController
      */
     public function view($id = null)
     {
-        $user = $this->Authentication->getIdentity();
-        if (!$user || !$user->isSystemAdmin()) {
+        $identity = $this->Authentication->getIdentity();
+        if (!$identity) {
+            return $this->redirect(['_name' => 'login']);
+        }
+        
+        $user = $identity->getOriginalData();
+        if (!$user->isSystemAdmin()) {
             $this->Flash->error(__('Access denied. System admin privileges required.'));
             return $this->redirect(['_name' => 'dashboard']);
         }
@@ -81,8 +92,13 @@ class OrganizationsController extends AppController
      */
     public function edit($id = null)
     {
-        $user = $this->Authentication->getIdentity();
-        if (!$user || !$user->isSystemAdmin()) {
+        $identity = $this->Authentication->getIdentity();
+        if (!$identity) {
+            return $this->redirect(['_name' => 'login']);
+        }
+        
+        $user = $identity->getOriginalData();
+        if (!$user->isSystemAdmin()) {
             $this->Flash->error(__('Access denied. System admin privileges required.'));
             return $this->redirect(['_name' => 'dashboard']);
         }
@@ -120,8 +136,13 @@ class OrganizationsController extends AppController
      */
     public function delete($id = null)
     {
-        $user = $this->Authentication->getIdentity();
-        if (!$user || !$user->isSystemAdmin()) {
+        $identity = $this->Authentication->getIdentity();
+        if (!$identity) {
+            return $this->redirect(['_name' => 'login']);
+        }
+        
+        $user = $identity->getOriginalData();
+        if (!$user->isSystemAdmin()) {
             $this->Flash->error(__('Zugriff verweigert.'));
             return $this->redirect(['_name' => 'dashboard']);
         }
@@ -204,8 +225,13 @@ class OrganizationsController extends AppController
      */
     public function toggleActive($id = null)
     {
-        $user = $this->Authentication->getIdentity();
-        if (!$user || !$user->isSystemAdmin()) {
+        $identity = $this->Authentication->getIdentity();
+        if (!$identity) {
+            return $this->redirect(['_name' => 'login']);
+        }
+        
+        $user = $identity->getOriginalData();
+        if (!$user->isSystemAdmin()) {
             $this->Flash->error(__('Access denied. System admin privileges required.'));
             return $this->redirect(['_name' => 'dashboard']);
         }
@@ -233,8 +259,13 @@ class OrganizationsController extends AppController
      */
     public function addUser($id = null)
     {
-        $user = $this->Authentication->getIdentity();
-        if (!$user || !$user->isSystemAdmin()) {
+        $identity = $this->Authentication->getIdentity();
+        if (!$identity) {
+            return $this->redirect(['_name' => 'login']);
+        }
+        
+        $user = $identity->getOriginalData();
+        if (!$user->isSystemAdmin()) {
             $this->Flash->error(__('Access denied. System admin privileges required.'));
             return $this->redirect(['_name' => 'dashboard']);
         }
@@ -286,8 +317,13 @@ class OrganizationsController extends AppController
      */
     public function removeUser($id = null, $userId = null)
     {
-        $user = $this->Authentication->getIdentity();
-        if (!$user || !$user->isSystemAdmin()) {
+        $identity = $this->Authentication->getIdentity();
+        if (!$identity) {
+            return $this->redirect(['_name' => 'login']);
+        }
+        
+        $user = $identity->getOriginalData();
+        if (!$user->isSystemAdmin()) {
             $this->Flash->error(__('Access denied. System admin privileges required.'));
             return $this->redirect(['_name' => 'dashboard']);
         }
