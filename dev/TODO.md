@@ -32,7 +32,7 @@
 ----
 
 
-
+auf whitelist gab es einen button "@index.php#L33-34  der nicht mehr auftaucht, repariere das
 
 
 # weitere TODOs
