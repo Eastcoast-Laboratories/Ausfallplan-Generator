@@ -16,6 +16,7 @@ class AuthenticationFlowTest extends TestCase
     protected array $fixtures = [
         'app.Users',
         'app.Organizations',
+        'app.OrganizationUsers',
         'app.PasswordResets',
     ];
 
@@ -31,7 +32,8 @@ class AuthenticationFlowTest extends TestCase
             'organization_name' => 'Test Kita',
             'email' => 'newuser@example.com',
             'password' => 'password123',
-            'role' => 'viewer',
+            'password_confirm' => 'password123',
+            'requested_role' => 'viewer',
         ];
 
         $this->post('/users/register', $data);
@@ -57,15 +59,24 @@ class AuthenticationFlowTest extends TestCase
         // Create a user with email token
         $usersTable = $this->getTableLocator()->get('Users');
         $user = $usersTable->newEntity([
-            'organization_id' => 1,
             'email' => 'firstuser@test.com',
             'password' => 'password123',
-            'role' => 'admin',
             'status' => 'pending',
             'email_verified' => false,
             'email_token' => 'test-token-123',
         ]);
         $usersTable->save($user);
+        
+        // Create organization membership
+        $orgUsersTable = $this->getTableLocator()->get('OrganizationUsers');
+        $orgUser = $orgUsersTable->newEntity([
+            'organization_id' => 1,
+            'user_id' => $user->id,
+            'role' => 'org_admin',
+            'is_primary' => true,
+            'joined_at' => new \DateTime(),
+        ]);
+        $orgUsersTable->save($orgUser);
 
         // Verify email
         $this->get('/users/verify/test-token-123');
@@ -89,26 +100,39 @@ class AuthenticationFlowTest extends TestCase
         // Create first user (already active)
         $usersTable = $this->getTableLocator()->get('Users');
         $firstUser = $usersTable->newEntity([
-            'organization_id' => 1,
             'email' => 'admin@test.com',
             'password' => 'password123',
-            'role' => 'admin',
             'status' => 'active',
             'email_verified' => true,
         ]);
         $usersTable->save($firstUser);
+        
+        $orgUsersTable = $this->getTableLocator()->get('OrganizationUsers');
+        $orgUsersTable->save($orgUsersTable->newEntity([
+            'organization_id' => 1,
+            'user_id' => $firstUser->id,
+            'role' => 'org_admin',
+            'is_primary' => true,
+            'joined_at' => new \DateTime(),
+        ]));
 
         // Create second user
         $secondUser = $usersTable->newEntity([
-            'organization_id' => 1,
             'email' => 'seconduser@test.com',
             'password' => 'password123',
-            'role' => 'viewer',
             'status' => 'pending',
             'email_verified' => false,
             'email_token' => 'test-token-456',
         ]);
         $usersTable->save($secondUser);
+        
+        $orgUsersTable->save($orgUsersTable->newEntity([
+            'organization_id' => 1,
+            'user_id' => $secondUser->id,
+            'role' => 'viewer',
+            'is_primary' => true,
+            'joined_at' => new \DateTime(),
+        ]));
 
         // Verify email
         $this->get('/users/verify/test-token-456');
@@ -129,14 +153,21 @@ class AuthenticationFlowTest extends TestCase
     {
         $usersTable = $this->getTableLocator()->get('Users');
         $user = $usersTable->newEntity([
-            'organization_id' => 1,
             'email' => 'unverified@test.com',
             'password' => 'password123',
-            'role' => 'viewer',
             'status' => 'pending',
             'email_verified' => false,
         ]);
         $usersTable->save($user);
+        
+        $orgUsersTable = $this->getTableLocator()->get('OrganizationUsers');
+        $orgUsersTable->save($orgUsersTable->newEntity([
+            'organization_id' => 1,
+            'user_id' => $user->id,
+            'role' => 'viewer',
+            'is_primary' => true,
+            'joined_at' => new \DateTime(),
+        ]));
 
         $this->enableCsrfToken();
         $this->post('/users/login', [
@@ -154,14 +185,21 @@ class AuthenticationFlowTest extends TestCase
     {
         $usersTable = $this->getTableLocator()->get('Users');
         $user = $usersTable->newEntity([
-            'organization_id' => 1,
             'email' => 'pending@test.com',
             'password' => 'password123',
-            'role' => 'viewer',
             'status' => 'pending',
             'email_verified' => true,
         ]);
         $usersTable->save($user);
+        
+        $orgUsersTable = $this->getTableLocator()->get('OrganizationUsers');
+        $orgUsersTable->save($orgUsersTable->newEntity([
+            'organization_id' => 1,
+            'user_id' => $user->id,
+            'role' => 'viewer',
+            'is_primary' => true,
+            'joined_at' => new \DateTime(),
+        ]));
 
         $this->enableCsrfToken();
         $this->post('/users/login', [
@@ -179,14 +217,21 @@ class AuthenticationFlowTest extends TestCase
     {
         $usersTable = $this->getTableLocator()->get('Users');
         $user = $usersTable->newEntity([
-            'organization_id' => 1,
             'email' => 'resetme@test.com',
             'password' => 'oldpassword',
-            'role' => 'viewer',
             'status' => 'active',
             'email_verified' => true,
         ]);
         $usersTable->save($user);
+        
+        $orgUsersTable = $this->getTableLocator()->get('OrganizationUsers');
+        $orgUsersTable->save($orgUsersTable->newEntity([
+            'organization_id' => 1,
+            'user_id' => $user->id,
+            'role' => 'viewer',
+            'is_primary' => true,
+            'joined_at' => new \DateTime(),
+        ]));
 
         $this->enableCsrfToken();
         $this->post('/users/forgot-password', [
@@ -213,14 +258,21 @@ class AuthenticationFlowTest extends TestCase
         // Create user
         $usersTable = $this->getTableLocator()->get('Users');
         $user = $usersTable->newEntity([
-            'organization_id' => 1,
             'email' => 'resetme2@test.com',
             'password' => 'oldpassword',
-            'role' => 'viewer',
             'status' => 'active',
             'email_verified' => true,
         ]);
         $usersTable->save($user);
+        
+        $orgUsersTable = $this->getTableLocator()->get('OrganizationUsers');
+        $orgUsersTable->save($orgUsersTable->newEntity([
+            'organization_id' => 1,
+            'user_id' => $user->id,
+            'role' => 'viewer',
+            'is_primary' => true,
+            'joined_at' => new \DateTime(),
+        ]));
 
         // Create reset entry
         $resetsTable = $this->getTableLocator()->get('PasswordResets');
