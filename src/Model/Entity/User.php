@@ -59,7 +59,18 @@ class User extends Entity
      */
     protected array $_hidden = [
         'password',
+        'email_token',
     ];
+
+    /**
+     * Virtual field for checking if user is system admin
+     *
+     * @return bool
+     */
+    protected function _getIsSystemAdmin(): bool
+    {
+        return (bool)($this->_fields['is_system_admin'] ?? false);
+    }
 
     /**
      * Hash password before saving
