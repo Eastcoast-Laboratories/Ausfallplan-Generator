@@ -19,9 +19,15 @@ class ChildrenController extends AppController
     {
         $user = $this->Authentication->getIdentity();
         
-        // System admins should use admin interface
+        // System admins have no organization - show empty list or redirect
         if ($user && $user->is_system_admin) {
-            return $this->redirect(['controller' => 'Admin/Organizations', 'action' => 'index']);
+            // Admins can see all children across all organizations
+            $children = $this->Children->find()
+                ->contain(['Organizations', 'SiblingGroups'])
+                ->orderBy(['Children.is_active' => 'DESC', 'Children.name' => 'ASC'])
+                ->all();
+            $this->set(compact('children'));
+            return;
         }
         
         // Get user's primary organization

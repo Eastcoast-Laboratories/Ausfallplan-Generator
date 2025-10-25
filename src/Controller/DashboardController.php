@@ -19,9 +19,28 @@ class DashboardController extends AppController
     {
         $user = $this->Authentication->getIdentity();
         
-        // System admins should be redirected to admin area
+        // Load actual stats from database
+        $childrenTable = $this->fetchTable('Children');
+        $schedulesTable = $this->fetchTable('Schedules');
+        
+        // System admins see global stats across all organizations
         if ($user && $user->is_system_admin) {
-            return $this->redirect(['controller' => 'Admin/Organizations', 'action' => 'index']);
+            $stats = [
+                'children' => $childrenTable->find()->count(),
+                'schedules' => $schedulesTable->find()->count(),
+                'active_schedules' => $schedulesTable->find()
+                    ->where([
+                        'OR' => [
+                            ['ends_on IS' => null],
+                            ['ends_on >=' => date('Y-m-d')]
+                        ]
+                    ])
+                    ->count(),
+                'waitlist_entries' => 0, // TODO: Implement when waitlist is added
+            ];
+            
+            $this->set(compact('stats', 'user'));
+            return;
         }
         
         // Get user's primary organization
@@ -31,10 +50,7 @@ class DashboardController extends AppController
             return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
         }
         
-        // Load actual stats from database
-        $childrenTable = $this->fetchTable('Children');
-        $schedulesTable = $this->fetchTable('Schedules');
-        
+        // Regular users see their organization stats
         $stats = [
             'children' => $childrenTable->find()
                 ->where(['Children.organization_id' => $primaryOrg->id])

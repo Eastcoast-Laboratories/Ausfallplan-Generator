@@ -22,9 +22,34 @@ class WaitlistController extends AppController
         // Get current user's organization
         $user = $this->Authentication->getIdentity();
         
-        // System admins should use admin interface
+        // System admins can see all schedules
         if ($user && $user->is_system_admin) {
-            return $this->redirect(['controller' => 'Admin/Organizations', 'action' => 'index']);
+            $schedulesTable = $this->fetchTable('Schedules');
+            $schedules = $schedulesTable->find()
+                ->orderBy(['Schedules.created' => 'DESC'])
+                ->all();
+            
+            // Use first schedule as default for admins
+            $selectedSchedule = $schedules->first();
+            
+            // Load waitlist entries for selected schedule if one exists
+            $waitlistEntries = [];
+            $availableChildren = [];
+            $countNotOnWaitlist = 0;
+            $siblingGroupsMap = [];
+            $siblingNames = [];
+            $missingSiblings = [];
+            
+            if ($selectedSchedule) {
+                $waitlistEntries = $this->fetchTable('WaitlistEntries')->find()
+                    ->where(['WaitlistEntries.schedule_id' => $selectedSchedule->id])
+                    ->contain(['Children', 'Schedules'])
+                    ->orderBy(['WaitlistEntries.priority' => 'ASC'])
+                    ->all();
+            }
+            
+            $this->set(compact('schedules', 'selectedSchedule', 'waitlistEntries', 'availableChildren', 'countNotOnWaitlist', 'siblingGroupsMap', 'siblingNames', 'missingSiblings', 'user'));
+            return;
         }
         
         // Get user's primary organization

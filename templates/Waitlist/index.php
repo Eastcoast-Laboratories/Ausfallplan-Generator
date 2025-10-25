@@ -157,7 +157,7 @@ $this->assign('title', __('Waitlist'));
     <?php endif; ?>
 </div>
 
-<?php if ($selectedSchedule && $waitlistEntries->count() > 0): ?>
+<?php if ($selectedSchedule && $waitlistEntries && $waitlistEntries->count() > 0): ?>
 <script>
 // Initialize Sortable.js for drag & drop
 const el = document.getElementById('waitlist-sortable');
