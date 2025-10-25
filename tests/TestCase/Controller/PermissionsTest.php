@@ -14,8 +14,8 @@ class PermissionsTest extends TestCase
     use IntegrationTestTrait;
 
     protected array $fixtures = [
-        'app.Users',
         'app.Organizations',
+        'app.Users',
         'app.OrganizationUsers',
         'app.Children',
     ];
@@ -70,7 +70,6 @@ class PermissionsTest extends TestCase
         $this->enableCsrfToken();
         $this->post('/children/add', [
             'name' => 'Test Child',
-            'organization_id' => 1,
             'is_active' => true,
             'is_integrative' => false,
         ]);
@@ -109,7 +108,6 @@ class PermissionsTest extends TestCase
         $this->enableCsrfToken();
         $this->post('/children/add', [
             'name' => 'Test Child',
-            'organization_id' => 1,
             'is_active' => true,
             'is_integrative' => false,
         ]);
