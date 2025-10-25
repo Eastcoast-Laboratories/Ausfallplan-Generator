@@ -23,6 +23,7 @@ class ChildrenControllerTest extends TestCase
     protected array $fixtures = [
         'app.Organizations',
         'app.Users',
+        'app.OrganizationUsers',
         'app.Children',
         'app.SiblingGroups',
     ];
