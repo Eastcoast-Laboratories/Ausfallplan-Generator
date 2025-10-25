@@ -38,7 +38,7 @@ class SchedulesControllerPermissionsTest extends TestCase
                     'email' => 'editor@example.com',
                     'is_system_admin' => false,
                     'status' => 'active',
-                    'email_verified' => true,
+                    'email_verified' => 1,
                 ]
             ]
         ]);
@@ -61,7 +61,7 @@ class SchedulesControllerPermissionsTest extends TestCase
                     'email' => 'editor@example.com',
                     'is_system_admin' => false,
                     'status' => 'active',
-                    'email_verified' => true,
+                    'email_verified' => 1,
                 ]
             ]
         ]);
@@ -138,7 +138,7 @@ class SchedulesControllerPermissionsTest extends TestCase
                     'email' => 'admin@example.com',
                     'is_system_admin' => true,
                     'status' => 'active',
-                    'email_verified' => true,
+                    'email_verified' => 1,
                 ]
             ]
         ]);
@@ -161,7 +161,7 @@ class SchedulesControllerPermissionsTest extends TestCase
                     'email' => 'viewer@example.com',
                     'is_system_admin' => false,
                     'status' => 'active',
-                    'email_verified' => true,
+                    'email_verified' => 1,
                 ]
             ]
         ]);

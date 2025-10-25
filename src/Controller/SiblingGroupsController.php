@@ -124,7 +124,7 @@ class SiblingGroupsController extends AppController
     public function delete($id = null)
     {
         $this->request->allowMethod(['post', 'delete']);
-        $siblingGroup = $this->SiblingGroups->get($id, ['contain' => ['Children']]);
+        $siblingGroup = $this->SiblingGroups->get($id, contain: ['Children']);
 
         // Check if group has children
         if (count($siblingGroup->children) > 0) {
