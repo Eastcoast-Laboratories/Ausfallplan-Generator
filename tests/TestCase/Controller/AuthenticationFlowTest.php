@@ -179,7 +179,7 @@ class AuthenticationFlowTest extends TestCase
             'password' => 'password123',
         ]);
 
-        $this->assertSession('Please verify your email', 'Flash.flash.0.message');
+        $this->assertSession('Please verify your email before logging in.', 'Flash.flash.0.message');
     }
 
     /**
@@ -212,7 +212,7 @@ class AuthenticationFlowTest extends TestCase
             'password' => 'password123',
         ]);
 
-        $this->assertSession('pending approval', 'Flash.flash.0.message');
+        $this->assertSession('Your account is pending approval by an administrator.', 'Flash.flash.0.message');
     }
 
     /**
