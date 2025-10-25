@@ -34,25 +34,27 @@ class OrganizationsController extends AppController
         $this->request->allowMethod(['get']);
         $query = $this->request->getQuery('q', '');
         
-        $organizationsTable = $this->fetchTable('Organizations');
-        $finder = $organizationsTable->find()
-            ->where(['name !=' => 'keine organisation'])
-            ->select(['id', 'name'])
-            ->orderBy(['name' => 'ASC']);
-        
-        // If query provided, filter by it
-        if (strlen($query) >= 1) {
-            $finder->where(['name LIKE' => '%' . $query . '%']);
-        }
-        
-        $results = $finder->limit(50)->all();
-        
         $organizations = [];
-        foreach ($results as $org) {
-            $organizations[] = [
-                'id' => $org->id,
-                'name' => $org->name
-            ];
+        
+        // Minimum 2 characters required
+        if (strlen($query) >= 2) {
+            $organizationsTable = $this->fetchTable('Organizations');
+            $results = $organizationsTable->find()
+                ->where([
+                    'name !=' => 'keine organisation',
+                    'name LIKE' => '%' . $query . '%'
+                ])
+                ->select(['id', 'name'])
+                ->orderBy(['name' => 'ASC'])
+                ->limit(50)
+                ->all();
+            
+            foreach ($results as $org) {
+                $organizations[] = [
+                    'id' => $org->id,
+                    'name' => $org->name
+                ];
+            }
         }
         
         // Return JSON directly
