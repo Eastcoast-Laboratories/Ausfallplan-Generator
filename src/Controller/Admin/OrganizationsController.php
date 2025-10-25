@@ -40,10 +40,10 @@ class OrganizationsController extends AppController
                 'Organizations.contact_email',
                 'Organizations.contact_phone',
                 'Organizations.created',
-                'user_count' => $this->Organizations->find()->func()->count('DISTINCT OrganizationUsers.user_id'),
+                'user_count' => $this->Organizations->find()->func()->count('DISTINCT organization_users.user_id'),
                 'children_count' => $this->Organizations->find()->func()->count('DISTINCT Children.id'),
             ])
-            ->leftJoin('OrganizationUsers', ['OrganizationUsers.organization_id = Organizations.id'])
+            ->leftJoin('organization_users', ['organization_users.organization_id = Organizations.id'])
             ->leftJoinWith('Children')
             ->group(['Organizations.id'])
             ->orderBy(['Organizations.name' => 'ASC'])
