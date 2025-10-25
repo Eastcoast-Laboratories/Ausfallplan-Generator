@@ -41,6 +41,37 @@ class SchedulesController extends AppController
     }
 
     /**
+     * Set active schedule in session via AJAX
+     *
+     * @return \Cake\Http\Response JSON response
+     */
+    public function setActive()
+    {
+        $this->request->allowMethod(['post']);
+        $this->viewBuilder()->setClassName('Json');
+        
+        $scheduleId = $this->request->getData('schedule_id');
+        
+        if ($scheduleId) {
+            $this->request->getSession()->write('activeScheduleId', (int)$scheduleId);
+            
+            $this->set([
+                'success' => true,
+                'message' => __('Active schedule set.'),
+                '_serialize' => ['success', 'message']
+            ]);
+        } else {
+            $this->set([
+                'success' => false,
+                'error' => __('Invalid schedule ID.'),
+                '_serialize' => ['success', 'error']
+            ]);
+        }
+        
+        return $this->response->withType('application/json');
+    }
+
+    /**
      * View method - Display a single schedule
      *
      * @param string|null $id Schedule id.
