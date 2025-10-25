@@ -174,7 +174,7 @@ class RegistrationNavigationTest extends TestCase
             'password' => 'password123',
             'is_system_admin' => false,
             'status' => 'active',
-            'email_verified' => true,
+            'email_verified' => 1,
         ]);
         $users->save($user);
         

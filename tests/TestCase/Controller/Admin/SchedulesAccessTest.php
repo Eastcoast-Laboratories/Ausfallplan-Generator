@@ -38,7 +38,7 @@ class SchedulesAccessTest extends TestCase
             'password' => 'password123',
             'role' => 'admin',
             'status' => 'active',
-            'email_verified' => true,
+            'email_verified' => 1,
         ]);
         
         $editor1 = $usersTable->newEntity([
@@ -47,7 +47,7 @@ class SchedulesAccessTest extends TestCase
             'password' => 'password123',
             'role' => 'editor',
             'status' => 'active',
-            'email_verified' => true,
+            'email_verified' => 1,
         ]);
         
         $editor2 = $usersTable->newEntity([
@@ -56,7 +56,7 @@ class SchedulesAccessTest extends TestCase
             'password' => 'password123',
             'role' => 'editor',
             'status' => 'active',
-            'email_verified' => true,
+            'email_verified' => 1,
         ]);
         
         $usersTable->saveMany([$admin, $editor1, $editor2]);
@@ -130,7 +130,7 @@ class SchedulesAccessTest extends TestCase
             'password' => 'password123',
             'role' => 'editor',
             'status' => 'active',
-            'email_verified' => true,
+            'email_verified' => 1,
         ]);
         
         $editor2 = $usersTable->newEntity([
@@ -139,7 +139,7 @@ class SchedulesAccessTest extends TestCase
             'password' => 'password123',
             'role' => 'editor',
             'status' => 'active',
-            'email_verified' => true,
+            'email_verified' => 1,
         ]);
         
         $usersTable->saveMany([$editor1, $editor2]);
