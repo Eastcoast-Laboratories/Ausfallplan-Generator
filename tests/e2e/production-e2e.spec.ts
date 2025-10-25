@@ -1,3 +1,30 @@
+/**
+ * Production End-to-End Test for Ausfallplan Generator
+ * 
+ * This test verifies the complete workflow on the live production server.
+ * It performs a full user journey from registration to report generation:
+ * 
+ * Test Flow:
+ * 1. Register new user with organization
+ * 2. Verify email (workaround using direct verify endpoint)
+ * 3. Login with credentials
+ * 4. Create a schedule with capacity
+ * 5. Add multiple children to the system
+ * 6. Assign children to the created schedule
+ * 7. Manage waitlist (add children to waitlist)
+ * 8. Generate PDF report for the schedule
+ * 9. Verify all pages are accessible post-creation
+ * 
+ * Purpose:
+ * - Smoke test for production deployment
+ * - Validates critical user workflows
+ * - Ensures database schema and migrations work correctly
+ * - Tests authentication and authorization
+ * - Verifies report generation functionality
+ * 
+ * Usage: npx playwright test tests/e2e/production-e2e.spec.ts
+ */
+
 import { test, expect } from '@playwright/test';
 
 const BASE_URL = 'https://ausfallplan-generator.z11.de';
@@ -17,14 +44,14 @@ test.describe('Production E2E Test', () => {
     // Fill password field(s)
     await page.fill('input[name="password"]', TEST_PASSWORD);
     
-    // Fill organization
+    // Fill organization - new structure: user creates or joins organization
     const orgField = page.locator('input[name="organization_name"], input[list="organizations"]');
     if (await orgField.count() > 0) {
       await orgField.first().fill(TEST_ORG);
     }
     
-    // Select admin role
-    await page.selectOption('select[name="role"]', 'admin');
+    // Note: No role selection anymore - user is automatically assigned as org_admin
+    // for new organizations in the OrganizationUsers table
     
     await page.click('button[type="submit"]');
     
