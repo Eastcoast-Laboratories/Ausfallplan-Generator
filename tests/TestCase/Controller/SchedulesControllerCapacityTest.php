@@ -23,6 +23,7 @@ class SchedulesControllerCapacityTest extends TestCase
     protected array $fixtures = [
         'app.Organizations',
         'app.Users',
+        'app.OrganizationUsers',
         'app.Schedules',
     ];
 
