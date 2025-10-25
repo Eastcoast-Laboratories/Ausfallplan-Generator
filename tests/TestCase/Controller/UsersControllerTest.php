@@ -23,6 +23,8 @@ class UsersControllerTest extends TestCase
     protected array $fixtures = [
         'app.Organizations',
         'app.Users',
+        'app.OrganizationUsers',
+        'app.PasswordResets',
     ];
 
     /**
@@ -67,10 +69,11 @@ class UsersControllerTest extends TestCase
     public function testRegisterPostSuccess(): void
     {
         $data = [
-            'organization_id' => 1,
+            'organization_name' => 'Test Kita',
             'email' => 'newuser@test.com',
             'password' => 'SecurePassword123!',
-            'role' => 'editor',
+            'password_confirm' => 'SecurePassword123!',
+            'requested_role' => 'editor',
         ];
 
         $this->post('/users/register', $data);
@@ -102,9 +105,10 @@ class UsersControllerTest extends TestCase
     public function testRegisterPostDefaultRole(): void
     {
         $data = [
-            'organization_id' => 1,
+            'organization_name' => 'Test Kita',
             'email' => 'viewer@test.com',
             'password' => 'SecurePassword123!',
+            'password_confirm' => 'SecurePassword123!',
         ];
 
         $this->post('/users/register', $data);
@@ -128,9 +132,10 @@ class UsersControllerTest extends TestCase
     public function testRegisterPostInvalidData(): void
     {
         $data = [
-            'organization_id' => 1,
+            'organization_name' => 'Test Kita',
             'email' => '', // Empty email
             'password' => '', // Empty password
+            'password_confirm' => '',
         ];
 
         $this->post('/users/register', $data);
@@ -155,18 +160,20 @@ class UsersControllerTest extends TestCase
     {
         // Create first user
         $data1 = [
-            'organization_id' => 1,
+            'organization_name' => 'Test Kita',
             'email' => 'duplicate@test.com',
             'password' => 'SecurePassword123!',
+            'password_confirm' => 'SecurePassword123!',
         ];
         $this->post('/users/register', $data1);
         $this->assertResponseSuccess();
 
         // Try to create second user with same email in same organization
         $data2 = [
-            'organization_id' => 1,
+            'organization_name' => 'Test Kita',
             'email' => 'duplicate@test.com',
             'password' => 'AnotherPassword456!',
+            'password_confirm' => 'AnotherPassword456!',
         ];
         $this->post('/users/register', $data2);
         
@@ -191,9 +198,10 @@ class UsersControllerTest extends TestCase
         $plainPassword = 'MySecretPassword123!';
         
         $data = [
-            'organization_id' => 1,
+            'organization_name' => 'Test Kita',
             'email' => 'hashtest@test.com',
             'password' => $plainPassword,
+            'password_confirm' => $plainPassword,
         ];
 
         $this->post('/users/register', $data);
@@ -225,9 +233,10 @@ class UsersControllerTest extends TestCase
     public function testPasswordNotExposedInResponse(): void
     {
         $data = [
-            'organization_id' => 1,
+            'organization_name' => 'Test Kita',
             'email' => 'security@test.com',
             'password' => 'SecurePassword123!',
+            'password_confirm' => 'SecurePassword123!',
         ];
 
         $this->post('/users/register', $data);
@@ -262,15 +271,28 @@ class UsersControllerTest extends TestCase
         // Create and login as test user
         $users = $this->getTableLocator()->get('Users');
         $user = $users->newEntity([
-            'organization_id' => 1,
             'email' => 'profile@test.com',
             'password' => 'password123',
-            'role' => 'viewer',
+            'is_system_admin' => false,
+            'status' => 'active',
+            'email_verified' => 1,
+            'email_token' => null,
+            'approved_at' => new \DateTime(),
+            'approved_by' => null,
         ]);
         $users->save($user);
+        
+        $orgUsers = $this->getTableLocator()->get('OrganizationUsers');
+        $orgUsers->save($orgUsers->newEntity([
+            'organization_id' => 1,
+            'user_id' => $user->id,
+            'role' => 'viewer',
+            'is_primary' => true,
+            'joined_at' => new \DateTime(),
+        ]));
 
         // Simulate logged in user
-        $this->session(['Auth' => $user]);
+        $this->session(['Auth' => ['User' => $user]]);
 
         // Update email
         $this->post('/users/profile', [
@@ -296,16 +318,29 @@ class UsersControllerTest extends TestCase
         // Create and login as test user
         $users = $this->getTableLocator()->get('Users');
         $user = $users->newEntity([
-            'organization_id' => 1,
             'email' => 'changepass@test.com',
             'password' => 'oldpassword123',
-            'role' => 'viewer',
+            'is_system_admin' => false,
+            'status' => 'active',
+            'email_verified' => 1,
+            'email_token' => null,
+            'approved_at' => new \DateTime(),
+            'approved_by' => null,
         ]);
         $users->save($user);
+        
+        $orgUsers = $this->getTableLocator()->get('OrganizationUsers');
+        $orgUsers->save($orgUsers->newEntity([
+            'organization_id' => 1,
+            'user_id' => $user->id,
+            'role' => 'viewer',
+            'is_primary' => true,
+            'joined_at' => new \DateTime(),
+        ]));
         $oldPasswordHash = $user->password;
 
         // Simulate logged in user
-        $this->session(['Auth' => $user]);
+        $this->session(['Auth' => ['User' => $user]]);
 
         // Change password
         $this->post('/users/profile', [
@@ -337,16 +372,29 @@ class UsersControllerTest extends TestCase
         // Create and login as test user
         $users = $this->getTableLocator()->get('Users');
         $user = $users->newEntity([
-            'organization_id' => 1,
             'email' => 'mismatch@test.com',
             'password' => 'oldpassword123',
-            'role' => 'viewer',
+            'is_system_admin' => false,
+            'status' => 'active',
+            'email_verified' => 1,
+            'email_token' => null,
+            'approved_at' => new \DateTime(),
+            'approved_by' => null,
         ]);
         $users->save($user);
+        
+        $orgUsers = $this->getTableLocator()->get('OrganizationUsers');
+        $orgUsers->save($orgUsers->newEntity([
+            'organization_id' => 1,
+            'user_id' => $user->id,
+            'role' => 'viewer',
+            'is_primary' => true,
+            'joined_at' => new \DateTime(),
+        ]));
         $oldPasswordHash = $user->password;
 
         // Simulate logged in user
-        $this->session(['Auth' => $user]);
+        $this->session(['Auth' => ['User' => $user]]);
 
         // Try to change password with mismatch
         $this->post('/users/profile', [
@@ -373,15 +421,28 @@ class UsersControllerTest extends TestCase
         // Create and login as test user
         $users = $this->getTableLocator()->get('Users');
         $user = $users->newEntity([
-            'organization_id' => 1,
             'email' => 'norole@test.com',
             'password' => 'password123',
-            'role' => 'viewer',
+            'is_system_admin' => false,
+            'status' => 'active',
+            'email_verified' => 1,
+            'email_token' => null,
+            'approved_at' => new \DateTime(),
+            'approved_by' => null,
         ]);
         $users->save($user);
+        
+        $orgUsers = $this->getTableLocator()->get('OrganizationUsers');
+        $orgUsers->save($orgUsers->newEntity([
+            'organization_id' => 1,
+            'user_id' => $user->id,
+            'role' => 'viewer',
+            'is_primary' => true,
+            'joined_at' => new \DateTime(),
+        ]));
 
         // Simulate logged in user
-        $this->session(['Auth' => $user]);
+        $this->session(['Auth' => ['User' => $user]]);
 
         // Try to change role
         $this->post('/users/profile', [
