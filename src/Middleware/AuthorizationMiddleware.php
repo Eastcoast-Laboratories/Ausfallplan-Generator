@@ -32,18 +32,32 @@ class AuthorizationMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
         
-        $role = $identity->role ?? 'viewer';
         $controller = $request->getParam('controller');
         $action = $request->getParam('action');
         
-        // Admin can do everything
+        // Always allow these safe actions for all authenticated users
+        $alwaysAllowed = ['logout', 'login', 'register', 'display'];
+        if (in_array($action, $alwaysAllowed)) {
+            return $handler->handle($request);
+        }
+        
+        // System admin can do everything
+        if ($identity->is_system_admin ?? false) {
+            return $handler->handle($request);
+        }
+        
+        // Get user's role from organization_users (this is set by getPrimaryOrganization in controllers)
+        // For now, use old role field as fallback
+        $role = $identity->role ?? 'viewer';
+        
+        // Legacy admin check
         if ($role === 'admin') {
             return $handler->handle($request);
         }
         
         // Viewer: Only read actions allowed
         if ($role === 'viewer') {
-            $allowedActions = ['index', 'view', 'display'];
+            $allowedActions = ['index', 'view'];
             
             if (!in_array($action, $allowedActions)) {
                 // Redirect with flash message
