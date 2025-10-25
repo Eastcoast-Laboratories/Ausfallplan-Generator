@@ -373,19 +373,40 @@ class UsersController extends AppController
             return $this->redirect(['action' => 'login']);
         }
         
-        $user->email_verified = true;
+        $user->email_verified = 1;
         $user->email_token = null;
         
-        $org = $this->fetchTable('Organizations')->get($user->organization_id);
-        $userCount = $this->Users->find()->where(['organization_id' => $user->organization_id])->count();
+        // Check if user has an organization
+        $orgUsersTable = $this->fetchTable('OrganizationUsers');
+        $orgUser = $orgUsersTable->find()
+            ->where(['user_id' => $user->id, 'is_primary' => true])
+            ->contain(['Organizations'])
+            ->first();
         
-        if ($userCount === 1 || $org->name === 'keine organisation') {
+        if ($orgUser && $orgUser->organization) {
+            // Count ACTIVE users in this organization (excluding current pending user)
+            $activeUserCount = $orgUsersTable->find()
+                ->where(['organization_id' => $orgUser->organization_id])
+                ->matching('Users', function ($q) {
+                    return $q->where(['Users.status' => 'active']);
+                })
+                ->count();
+            
+            if ($activeUserCount === 0 || $orgUser->organization->name === 'keine organisation') {
+                // First user or "keine organisation" → auto-approve
+                $user->status = 'active';
+                $user->approved_at = new \DateTime();
+                $this->Flash->success(__('E-Mail verifiziert! Sie können sich jetzt anmelden.'));
+            } else {
+                // Not first user → needs approval
+                $user->status = 'pending';
+                $this->Flash->info(__('E-Mail verifiziert! Admin-Freigabe erforderlich.'));
+            }
+        } else {
+            // No organization → auto-approve
             $user->status = 'active';
             $user->approved_at = new \DateTime();
             $this->Flash->success(__('E-Mail verifiziert! Sie können sich jetzt anmelden.'));
-        } else {
-            $user->status = 'pending';
-            $this->Flash->info(__('E-Mail verifiziert! Admin-Freigabe erforderlich.'));
         }
         
         $this->Users->save($user);

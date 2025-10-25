@@ -47,7 +47,7 @@ class AuthenticationFlowTest extends TestCase
 
         $this->assertNotNull($user);
         $this->assertEquals('pending', $user->status);
-        $this->assertFalse($user->email_verified);
+        $this->assertEquals(0, $user->email_verified);
         $this->assertNotNull($user->email_token);
     }
 
@@ -87,7 +87,7 @@ class AuthenticationFlowTest extends TestCase
 
         // Check user is now active
         $user = $usersTable->get($user->id);
-        $this->assertTrue($user->email_verified);
+        $this->assertEquals(1, $user->email_verified);
         $this->assertNull($user->email_token);
         $this->assertEquals('active', $user->status);
         $this->assertNotNull($user->approved_at);
@@ -144,7 +144,7 @@ class AuthenticationFlowTest extends TestCase
 
         // Check user is verified but still pending
         $user = $usersTable->get($secondUser->id);
-        $this->assertTrue($user->email_verified);
+        $this->assertEquals(1, $user->email_verified);
         $this->assertEquals('pending', $user->status);
         $this->assertNull($user->approved_at);
     }
