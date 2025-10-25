@@ -15,7 +15,7 @@ $this->assign('title', __('Schedules'));
             <thead>
                 <tr>
                     <th><?= __('Title') ?></th>
-                    <?php if (isset($user) && $user->role === 'admin'): ?>
+                    <?php if (isset($user) && $user->is_system_admin): ?>
                         <th><?= __('User') ?></th>
                         <th><?= __('Organization') ?></th>
                     <?php endif; ?>
@@ -26,10 +26,20 @@ $this->assign('title', __('Schedules'));
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($schedules as $schedule): ?>
-                <tr>
-                    <td><?= h($schedule->title) ?></td>
-                    <?php if (isset($user) && $user->role === 'admin'): ?>
+                <?php foreach ($schedules as $schedule): 
+                    $isActive = isset($activeScheduleId) && $activeScheduleId == $schedule->id;
+                    $rowStyle = $isActive ? 'background: #e8f5e9; border-left: 4px solid #4caf50;' : '';
+                ?>
+                <tr style="<?= $rowStyle ?>">
+                    <td>
+                        <?= h($schedule->title) ?>
+                        <?php if ($isActive): ?>
+                            <span style="background: #4caf50; color: white; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.75rem; margin-left: 0.5rem;">
+                                ⭐ <?= __('Active') ?>
+                            </span>
+                        <?php endif; ?>
+                    </td>
+                    <?php if (isset($user) && $user->is_system_admin): ?>
                         <td><?= h($schedule->user->email ?? $schedule->organization->name ?? '-') ?></td>
                         <td>
                             <?php if ($schedule->has('organization') && isset($schedule->organization->id)): ?>
