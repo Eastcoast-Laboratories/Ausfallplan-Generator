@@ -163,6 +163,7 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
             'resolver' => [
                 'className' => 'Authentication.Orm',
                 'userModel' => 'Users',
+                'finder' => 'all', // Ensure all fields are loaded including is_system_admin
             ],
         ]);
 

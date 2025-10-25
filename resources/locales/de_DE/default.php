@@ -213,4 +213,8 @@ return [
     'The following siblings are not assigned to this schedule' => 'Die folgenden Geschwister sind diesem Ausfallplan nicht zugewiesen',
     'Sibling of' => 'Geschwister von',
     'Add them in' => 'Füge sie hinzu in',
+    
+    // Admin & Permissions
+    'Access denied. System admin privileges required.' => 'Zugriff verweigert. Systemadministrator-Rechte erforderlich.',
+    'Access denied. Please login.' => 'Zugriff verweigert. Bitte melden Sie sich an.',
 ];
