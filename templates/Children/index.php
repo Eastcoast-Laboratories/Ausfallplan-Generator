@@ -7,8 +7,9 @@ $this->assign('title', __('Children'));
 ?>
 <div class="children index content">
     <h3><?= __('Children') ?></h3>
-    <div class="actions">
-        <?= $this->Html->link(__('New Child'), ['action' => 'add'], ['class' => 'button float-right', 'id' => 'new-child-button']) ?>
+    <div class="actions" style="display: flex; gap: 1rem; justify-content: flex-end;">
+        <?= $this->Html->link('📥 ' . __('CSV Import'), ['action' => 'import'], ['class' => 'button', 'style' => 'background: #2196f3; color: white;']) ?>
+        <?= $this->Html->link(__('New Child'), ['action' => 'add'], ['class' => 'button', 'id' => 'new-child-button']) ?>
     </div>
     <div class="table-responsive">
         <table>
