@@ -29,19 +29,36 @@ class WaitlistController extends AppController
                 ->orderBy(['Schedules.created' => 'DESC'])
                 ->all();
             
-            // Try to get schedule from query parameter first
+            // Priority: Query param > Session > Schedule with assignments > First schedule
             $scheduleId = $this->request->getQuery('schedule_id');
             $selectedSchedule = null;
             
+            // 1. Try query parameter first
             if ($scheduleId) {
                 try {
                     $selectedSchedule = $schedulesTable->get($scheduleId);
+                    // Update session when user manually selects a schedule
+                    $this->request->getSession()->write('activeScheduleId', (int)$scheduleId);
                 } catch (\Exception $e) {
                     $scheduleId = null;
                 }
             }
             
-            // If no schedule selected, find one with assignments (prefer schedules with children)
+            // 2. Try active schedule from session
+            if (!$selectedSchedule) {
+                $activeScheduleId = $this->request->getSession()->read('activeScheduleId');
+                if ($activeScheduleId) {
+                    try {
+                        $selectedSchedule = $schedulesTable->get($activeScheduleId);
+                        $scheduleId = $selectedSchedule->id;
+                    } catch (\Exception $e) {
+                        // Schedule doesn't exist anymore, clear from session
+                        $this->request->getSession()->delete('activeScheduleId');
+                    }
+                }
+            }
+            
+            // 3. Find schedule with assignments (prefer schedules with children)
             if (!$selectedSchedule) {
                 foreach ($schedules as $schedule) {
                     // Check if this schedule has assignments
@@ -53,15 +70,21 @@ class WaitlistController extends AppController
                     if ($hasAssignments > 0) {
                         $selectedSchedule = $schedule;
                         $scheduleId = $schedule->id;
+                        // Set as active in session
+                        $this->request->getSession()->write('activeScheduleId', (int)$scheduleId);
                         break;
                     }
                 }
             }
             
-            // Fallback to first schedule if no schedule has assignments
+            // 4. Fallback to first schedule if no schedule has assignments
             if (!$selectedSchedule) {
                 $selectedSchedule = $schedules->first();
                 $scheduleId = $selectedSchedule ? $selectedSchedule->id : null;
+                if ($scheduleId) {
+                    // Set as active in session
+                    $this->request->getSession()->write('activeScheduleId', (int)$scheduleId);
+                }
             }
             
             // Load waitlist entries and available children (same logic as for regular users)
