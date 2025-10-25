@@ -88,7 +88,7 @@ class ReportService
             ->select(['child_id' => 'DISTINCT Assignments.child_id', 'sort_order' => 'MIN(Assignments.sort_order)'])
             ->innerJoinWith('ScheduleDays')
             ->where(['ScheduleDays.schedule_id' => $scheduleId])
-            ->group(['Assignments.child_id'])
+            ->groupBy(['Assignments.child_id'])
             ->orderBy(['sort_order' => 'ASC'])
             ->all()
             ->toArray();
