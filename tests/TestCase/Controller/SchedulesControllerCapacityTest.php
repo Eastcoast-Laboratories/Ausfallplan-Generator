@@ -53,13 +53,25 @@ class SchedulesControllerCapacityTest extends TestCase
         // Create test user
         $users = $this->getTableLocator()->get('Users');
         $user = $users->newEntity([
-            'organization_id' => 1,
             'email' => 'capacity@test.com',
             'password' => 'password123',
-            'role' => 'admin',
+            'is_system_admin' => false,
+            'email_verified' => 1,
+            'status' => 'active',
         ]);
         $users->save($user);
-        $this->session(['Auth' => $user]);
+        
+        // Add to organization
+        $orgUsers = $this->getTableLocator()->get('OrganizationUsers');
+        $orgUsers->save($orgUsers->newEntity([
+            'user_id' => $user->id,
+            'organization_id' => 1,
+            'role' => 'org_admin',
+            'is_primary' => true,
+            'joined_at' => new \DateTime(),
+        ]));
+        
+        $this->session(['Auth' => ['id' => $user->id, 'email' => $user->email]]);
 
         // Create schedule with capacity_per_day
         $this->post('/schedules/add', [
@@ -127,7 +139,7 @@ class SchedulesControllerCapacityTest extends TestCase
         ]);
         $schedules->save($schedule);
 
-        $this->session(['Auth' => ['id' => 1, 'organization_id' => 1]]);
+        $this->session(['Auth' => ['id' => 1, 'email' => 'test@test.com']]);
 
         // Edit without providing capacity
         $this->post('/schedules/edit/' . $schedule->id, [
