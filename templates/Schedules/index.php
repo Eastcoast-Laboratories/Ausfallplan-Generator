@@ -30,7 +30,7 @@ $this->assign('title', __('Schedules'));
                     $isActive = isset($activeScheduleId) && $activeScheduleId == $schedule->id;
                     $rowStyle = $isActive ? 'background: #e8f5e9; border-left: 4px solid #4caf50;' : '';
                 ?>
-                <tr style="<?= $rowStyle ?>">
+                <tr class="schedule-row" data-schedule-id="<?= $schedule->id ?>" style="<?= $rowStyle ?> cursor: pointer;">
                     <td>
                         <?= h($schedule->title) ?>
                         <?php if ($isActive): ?>
@@ -67,3 +67,61 @@ $this->assign('title', __('Schedules'));
         </table>
     </div>
 </div>
+
+<style>
+.schedule-row {
+    transition: background-color 0.2s ease;
+}
+
+.schedule-row:hover {
+    background-color: #f5f5f5 !important;
+}
+
+.schedule-row:hover td {
+    font-weight: 500;
+}
+
+/* Don't override active schedule hover */
+.schedule-row[style*="background: #e8f5e9"]:hover {
+    background-color: #c8e6c9 !important;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const scheduleRows = document.querySelectorAll('.schedule-row');
+    
+    scheduleRows.forEach(row => {
+        row.addEventListener('click', function(e) {
+            // Don't trigger if clicking on action buttons
+            if (e.target.closest('.actions') || e.target.closest('a') || e.target.closest('form')) {
+                return;
+            }
+            
+            const scheduleId = this.dataset.scheduleId;
+            
+            // Send AJAX request to set active schedule
+            fetch('<?= $this->Url->build(['action' => 'setActive']) ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': '<?= $this->request->getAttribute('csrfToken') ?>'
+                },
+                body: JSON.stringify({
+                    schedule_id: scheduleId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Reload page to show updated highlighting
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error setting active schedule:', error);
+            });
+        });
+    });
+});
+</script>
