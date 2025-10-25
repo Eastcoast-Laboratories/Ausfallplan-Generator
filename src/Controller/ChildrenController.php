@@ -236,4 +236,135 @@ class ChildrenController extends AppController
             }
         }
     }
+
+    /**
+     * Import method - Import children from CSV file
+     *
+     * @return \Cake\Http\Response|null|void
+     */
+    public function import()
+    {
+        $user = $this->Authentication->getIdentity();
+        
+        // Get user's primary organization
+        $primaryOrg = $this->getPrimaryOrganization();
+        if (!$primaryOrg && !$user->is_system_admin) {
+            $this->Flash->error(__('Sie müssen einer Organisation angehören, um Kinder zu importieren.'));
+            return $this->redirect(['action' => 'index']);
+        }
+        
+        if ($this->request->is('post')) {
+            $file = $this->request->getData('csv_file');
+            
+            if (!$file || $file->getError() !== UPLOAD_ERR_OK) {
+                $this->Flash->error(__('Bitte wählen Sie eine gültige CSV-Datei aus.'));
+                return;
+            }
+            
+            // Read CSV file
+            $filePath = $file->getStream()->getMetadata('uri');
+            $handle = fopen($filePath, 'r');
+            
+            if (!$handle) {
+                $this->Flash->error(__('Fehler beim Lesen der Datei.'));
+                return;
+            }
+            
+            $genderService = new \App\Service\GenderDetectionService();
+            $imported = 0;
+            $skipped = 0;
+            $errors = [];
+            
+            // Skip header row
+            fgetcsv($handle, 0, ';');
+            
+            while (($data = fgetcsv($handle, 0, ';')) !== false) {
+                // Skip empty rows
+                if (empty($data[0])) {
+                    continue;
+                }
+                
+                $firstName = trim($data[0] ?? '');
+                $lastName = trim($data[1] ?? '');
+                $birthDateStr = trim($data[8] ?? '');
+                $integrative = (int)trim($data[14] ?? '0'); // Last column 'i'
+                
+                // Skip if no name
+                if (empty($firstName)) {
+                    $skipped++;
+                    continue;
+                }
+                
+                // Parse birth date (format: DD.MM.YY)
+                $birthDate = null;
+                if (!empty($birthDateStr)) {
+                    $parts = explode('.', $birthDateStr);
+                    if (count($parts) === 3) {
+                        $day = (int)$parts[0];
+                        $month = (int)$parts[1];
+                        $year = (int)$parts[2];
+                        
+                        // Convert 2-digit year to 4-digit
+                        if ($year < 100) {
+                            $year += ($year > 50) ? 1900 : 2000;
+                        }
+                        
+                        $birthDate = new \DateTime(sprintf('%04d-%02d-%02d', $year, $month, $day));
+                    }
+                }
+                
+                // Detect gender
+                $gender = $genderService->detectGender($firstName);
+                
+                // Check if child already exists
+                $existingChild = $this->Children->find()
+                    ->where([
+                        'name' => $firstName . ' ' . $lastName,
+                        'organization_id' => $primaryOrg->id ?? 1,
+                    ])
+                    ->first();
+                
+                if ($existingChild) {
+                    $skipped++;
+                    continue;
+                }
+                
+                // Create child
+                $child = $this->Children->newEntity([
+                    'organization_id' => $primaryOrg->id ?? 1,
+                    'name' => $firstName . ' ' . $lastName,
+                    'birth_date' => $birthDate,
+                    'gender' => $gender,
+                    'is_integrative' => $integrative > 1, // 2 = integrative
+                    'is_active' => true,
+                ]);
+                
+                if ($this->Children->save($child)) {
+                    $imported++;
+                } else {
+                    $errors[] = $firstName . ' ' . $lastName . ': ' . implode(', ', $child->getErrors());
+                    $skipped++;
+                }
+            }
+            
+            fclose($handle);
+            
+            // Show results
+            if ($imported > 0) {
+                $this->Flash->success(__('Erfolgreich {0} Kinder importiert.', $imported));
+            }
+            if ($skipped > 0) {
+                $this->Flash->warning(__('{0} Einträge übersprungen (bereits vorhanden oder ungültig).', $skipped));
+            }
+            if (!empty($errors)) {
+                foreach ($errors as $error) {
+                    $this->Flash->error($error);
+                }
+            }
+            
+            return $this->redirect(['action' => 'index']);
+        }
+        
+        $this->set(compact('primaryOrg'));
+    }
 }

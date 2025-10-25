@@ -9,6 +9,10 @@
 # CakePHP Migrations schema dumps (auto-generated, should not be in git)
 /config/Migrations/schema-dump-*.lock
 
+# Dev files with sensitive data
+/dev/*.csv
+/dev/*.xlsx
+
 # Playwright
 /test-results/
 /playwright-report/
