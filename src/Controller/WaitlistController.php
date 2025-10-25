@@ -136,7 +136,7 @@ class WaitlistController extends AppController
                 }
             }
             
-            $countNotOnWaitlist = 0;
+            $countNotOnWaitlist = count($availableChildren);
             $siblingGroupsMap = [];
             $siblingNames = [];
             $missingSiblings = [];
