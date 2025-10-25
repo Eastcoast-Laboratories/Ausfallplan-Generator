@@ -16,6 +16,7 @@ class SchedulesAccessTest extends TestCase
     protected array $fixtures = [
         'app.Users',
         'app.Organizations',
+        'app.OrganizationUsers',
         'app.Schedules',
     ];
 
