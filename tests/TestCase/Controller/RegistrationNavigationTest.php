@@ -24,6 +24,7 @@ class RegistrationNavigationTest extends TestCase
     protected array $fixtures = [
         'app.Organizations',
         'app.Users',
+        'app.OrganizationUsers',
     ];
 
     /**
@@ -64,10 +65,11 @@ class RegistrationNavigationTest extends TestCase
         
         // 3. Submit registration form with new user data
         $this->post('/users/register', [
-            'organization_id' => 1,
+            'organization_name' => 'Test Organization',
             'email' => $email,
             'password' => 'NewPassword123!',
-            'role' => 'viewer',
+            'password_confirm' => 'NewPassword123!',
+            'requested_role' => 'viewer',
         ]);
         
         // 4. Should redirect after successful registration
@@ -95,7 +97,8 @@ class RegistrationNavigationTest extends TestCase
         
         $this->assertNotNull($user, 'User should be created in database');
         $this->assertEquals($email, $user->email);
-        $this->assertEquals('viewer', $user->role);
+        // Role is now in organization_users, not directly on user
+        // $this->assertEquals('viewer', $user->role);
         
         // 9. Verify password was hashed (not stored as plain text)
         $this->assertNotEquals('NewPassword123!', $user->password);
@@ -115,10 +118,11 @@ class RegistrationNavigationTest extends TestCase
         $password = 'TestPassword123!';
         
         $this->post('/users/register', [
-            'organization_id' => 1,
+            'organization_name' => 'Test Organization',
             'email' => $email,
             'password' => $password,
-            'role' => 'viewer',
+            'password_confirm' => $password,
+            'requested_role' => 'viewer',
         ]);
         
         $this->assertRedirect();
@@ -166,12 +170,23 @@ class RegistrationNavigationTest extends TestCase
         // Now login
         $users = $this->getTableLocator()->get('Users');
         $user = $users->newEntity([
-            'organization_id' => 1,
             'email' => 'visibility@test.com',
             'password' => 'password123',
-            'role' => 'admin',
+            'is_system_admin' => false,
+            'status' => 'active',
+            'email_verified' => true,
         ]);
         $users->save($user);
+        
+        // Create organization membership
+        $orgUsers = $this->getTableLocator()->get('OrganizationUsers');
+        $orgUsers->save($orgUsers->newEntity([
+            'organization_id' => 1,
+            'user_id' => $user->id,
+            'role' => 'org_admin',
+            'is_primary' => true,
+            'joined_at' => new \DateTime(),
+        ]));
         
         $this->session(['Auth' => $user]);
         
@@ -202,10 +217,11 @@ class RegistrationNavigationTest extends TestCase
             $email = "multiuser{$i}_" . time() . "@test.com";
             
             $this->post('/users/register', [
-                'organization_id' => 1,
+                'organization_name' => "Test Org {$i}",
                 'email' => $email,
                 'password' => "Password{$i}23!",
-                'role' => 'viewer',
+                'password_confirm' => "Password{$i}23!",
+                'requested_role' => 'viewer',
             ]);
             
             $this->assertRedirect();
