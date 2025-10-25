@@ -238,7 +238,7 @@ class ChildrenController extends AppController
     }
 
     /**
-     * Import method - Import children from CSV file
+     * Import method - Upload CSV and show preview
      *
      * @return \Cake\Http\Response|null|void
      */
@@ -261,110 +261,151 @@ class ChildrenController extends AppController
                 return;
             }
             
-            // Read CSV file
-            $filePath = $file->getStream()->getMetadata('uri');
-            $handle = fopen($filePath, 'r');
-            
-            if (!$handle) {
-                $this->Flash->error(__('Fehler beim Lesen der Datei.'));
+            try {
+                // Parse CSV
+                $filePath = $file->getStream()->getMetadata('uri');
+                $importService = new \App\Service\CsvImportService();
+                $parsedChildren = $importService->parseCsv($filePath);
+                
+                if (empty($parsedChildren)) {
+                    $this->Flash->warning(__('Keine gültigen Einträge in der CSV-Datei gefunden.'));
+                    return;
+                }
+                
+                // Store parsed data in session for confirmation step
+                $this->request->getSession()->write('import_data', $parsedChildren);
+                $this->request->getSession()->write('import_org_id', $primaryOrg->id ?? 1);
+                
+                // Redirect to preview
+                return $this->redirect(['action' => 'importPreview']);
+                
+            } catch (\Exception $e) {
+                $this->Flash->error(__('Fehler beim Lesen der Datei: {0}', $e->getMessage()));
                 return;
             }
-            
-            $genderService = new \App\Service\GenderDetectionService();
-            $imported = 0;
-            $skipped = 0;
-            $errors = [];
-            
-            // Skip header row
-            fgetcsv($handle, 0, ';');
-            
-            while (($data = fgetcsv($handle, 0, ';')) !== false) {
-                // Skip empty rows
-                if (empty($data[0])) {
-                    continue;
-                }
-                
-                $firstName = trim($data[0] ?? '');
-                $lastName = trim($data[1] ?? '');
-                $birthDateStr = trim($data[8] ?? '');
-                $integrative = (int)trim($data[14] ?? '0'); // Last column 'i'
-                
-                // Skip if no name
-                if (empty($firstName)) {
-                    $skipped++;
-                    continue;
-                }
-                
-                // Parse birth date (format: DD.MM.YY)
-                $birthDate = null;
-                if (!empty($birthDateStr)) {
-                    $parts = explode('.', $birthDateStr);
-                    if (count($parts) === 3) {
-                        $day = (int)$parts[0];
-                        $month = (int)$parts[1];
-                        $year = (int)$parts[2];
-                        
-                        // Convert 2-digit year to 4-digit
-                        if ($year < 100) {
-                            $year += ($year > 50) ? 1900 : 2000;
-                        }
-                        
-                        $birthDate = new \DateTime(sprintf('%04d-%02d-%02d', $year, $month, $day));
-                    }
-                }
-                
-                // Detect gender
-                $gender = $genderService->detectGender($firstName);
-                
-                // Check if child already exists
-                $existingChild = $this->Children->find()
-                    ->where([
-                        'name' => $firstName . ' ' . $lastName,
-                        'organization_id' => $primaryOrg->id ?? 1,
-                    ])
-                    ->first();
-                
-                if ($existingChild) {
-                    $skipped++;
-                    continue;
-                }
-                
-                // Create child
-                $child = $this->Children->newEntity([
-                    'organization_id' => $primaryOrg->id ?? 1,
-                    'name' => $firstName . ' ' . $lastName,
-                    'birth_date' => $birthDate,
-                    'gender' => $gender,
-                    'is_integrative' => $integrative > 1, // 2 = integrative
-                    'is_active' => true,
-                ]);
-                
-                if ($this->Children->save($child)) {
-                    $imported++;
-                } else {
-                    $errors[] = $firstName . ' ' . $lastName . ': ' . implode(', ', $child->getErrors());
-                    $skipped++;
-                }
-            }
-            
-            fclose($handle);
-            
-            // Show results
-            if ($imported > 0) {
-                $this->Flash->success(__('Erfolgreich {0} Kinder importiert.', $imported));
-            }
-            if ($skipped > 0) {
-                $this->Flash->warning(__('{0} Einträge übersprungen (bereits vorhanden oder ungültig).', $skipped));
-            }
-            if (!empty($errors)) {
-                foreach ($errors as $error) {
-                    $this->Flash->error($error);
-                }
-            }
-            
-            return $this->redirect(['action' => 'index']);
         }
         
         $this->set(compact('primaryOrg'));
+    }
+
+    /**
+     * Import Preview - Show parsed data and anonymization options
+     *
+     * @return \Cake\Http\Response|null|void
+     */
+    public function importPreview()
+    {
+        $parsedChildren = $this->request->getSession()->read('import_data');
+        
+        if (empty($parsedChildren)) {
+            $this->Flash->error(__('Keine Import-Daten gefunden. Bitte laden Sie zuerst eine CSV-Datei hoch.'));
+            return $this->redirect(['action' => 'import']);
+        }
+        
+        // Group by siblings for display
+        $siblingGroups = [];
+        foreach ($parsedChildren as $child) {
+            if ($child['sibling_group_id']) {
+                $siblingGroups[$child['sibling_group_id']][] = $child;
+            }
+        }
+        
+        $this->set(compact('parsedChildren', 'siblingGroups'));
+    }
+
+    /**
+     * Import Confirm - Save children to database
+     *
+     * @return \Cake\Http\Response|null|void
+     */
+    public function importConfirm()
+    {
+        $this->request->allowMethod(['post']);
+        
+        $parsedChildren = $this->request->getSession()->read('import_data');
+        $orgId = $this->request->getSession()->read('import_org_id');
+        
+        if (empty($parsedChildren)) {
+            $this->Flash->error(__('Keine Import-Daten gefunden.'));
+            return $this->redirect(['action' => 'import']);
+        }
+        
+        $anonymizationMode = $this->request->getData('anonymization_mode', 'full');
+        $importService = new \App\Service\CsvImportService();
+        $siblingGroupsTable = $this->fetchTable('SiblingGroups');
+        
+        $imported = 0;
+        $skipped = 0;
+        $errors = [];
+        $siblingGroupMap = []; // Map import sibling_group_id to real DB id
+        
+        foreach ($parsedChildren as $childData) {
+            // Apply anonymization
+            $displayName = $importService->anonymizeName($childData, $anonymizationMode);
+            
+            // Check if child already exists
+            $existingChild = $this->Children->find()
+                ->where([
+                    'name' => $displayName,
+                    'organization_id' => $orgId,
+                ])
+                ->first();
+            
+            if ($existingChild) {
+                $skipped++;
+                continue;
+            }
+            
+            // Handle sibling groups
+            $dbSiblingGroupId = null;
+            if ($childData['sibling_group_id']) {
+                if (!isset($siblingGroupMap[$childData['sibling_group_id']])) {
+                    // Create new sibling group
+                    $siblingGroup = $siblingGroupsTable->newEntity(['organization_id' => $orgId]);
+                    $siblingGroupsTable->save($siblingGroup);
+                    $siblingGroupMap[$childData['sibling_group_id']] = $siblingGroup->id;
+                }
+                $dbSiblingGroupId = $siblingGroupMap[$childData['sibling_group_id']];
+            }
+            
+            // Create child
+            $child = $this->Children->newEntity([
+                'organization_id' => $orgId,
+                'name' => $displayName,
+                'last_name' => $anonymizationMode === 'full' ? $childData['last_name'] : null,
+                'birth_date' => $childData['birth_date'],
+                'gender' => $childData['gender'],
+                'is_integrative' => $childData['is_integrative'],
+                'postal_code' => $childData['postal_code'],
+                'sibling_group_id' => $dbSiblingGroupId,
+                'is_active' => true,
+            ]);
+            
+            if ($this->Children->save($child)) {
+                $imported++;
+            } else {
+                $errors[] = $displayName . ': ' . implode(', ', $child->getErrors());
+                $skipped++;
+            }
+        }
+        
+        // Clear session data
+        $this->request->getSession()->delete('import_data');
+        $this->request->getSession()->delete('import_org_id');
+        
+        // Show results
+        if ($imported > 0) {
+            $this->Flash->success(__('Erfolgreich {0} Kinder importiert.', $imported));
+        }
+        if ($skipped > 0) {
+            $this->Flash->warning(__('{0} Einträge übersprungen (bereits vorhanden oder ungültig).', $skipped));
+        }
+        if (!empty($errors)) {
+            foreach ($errors as $error) {
+                $this->Flash->error($error);
+            }
+        }
+        
+        return $this->redirect(['action' => 'index']);
     }
 }
