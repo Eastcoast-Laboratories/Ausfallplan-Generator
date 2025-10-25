@@ -29,9 +29,40 @@ class WaitlistController extends AppController
                 ->orderBy(['Schedules.created' => 'DESC'])
                 ->all();
             
-            // Use first schedule as default for admins
-            $selectedSchedule = $schedules->first();
-            $scheduleId = $selectedSchedule ? $selectedSchedule->id : null;
+            // Try to get schedule from query parameter first
+            $scheduleId = $this->request->getQuery('schedule_id');
+            $selectedSchedule = null;
+            
+            if ($scheduleId) {
+                try {
+                    $selectedSchedule = $schedulesTable->get($scheduleId);
+                } catch (\Exception $e) {
+                    $scheduleId = null;
+                }
+            }
+            
+            // If no schedule selected, find one with assignments (prefer schedules with children)
+            if (!$selectedSchedule) {
+                foreach ($schedules as $schedule) {
+                    // Check if this schedule has assignments
+                    $hasAssignments = $this->fetchTable('Assignments')->find()
+                        ->innerJoinWith('ScheduleDays')
+                        ->where(['ScheduleDays.schedule_id' => $schedule->id])
+                        ->count();
+                    
+                    if ($hasAssignments > 0) {
+                        $selectedSchedule = $schedule;
+                        $scheduleId = $schedule->id;
+                        break;
+                    }
+                }
+            }
+            
+            // Fallback to first schedule if no schedule has assignments
+            if (!$selectedSchedule) {
+                $selectedSchedule = $schedules->first();
+                $scheduleId = $selectedSchedule ? $selectedSchedule->id : null;
+            }
             
             // Load waitlist entries and available children (same logic as for regular users)
             $waitlistEntries = [];
