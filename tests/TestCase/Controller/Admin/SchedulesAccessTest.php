@@ -34,33 +34,56 @@ class SchedulesAccessTest extends TestCase
         // Create users in different organizations
         $usersTable = $this->getTableLocator()->get('Users');
         $admin = $usersTable->newEntity([
-            'organization_id' => $org1->id,
             'email' => 'admin@test.com',
             'password' => 'password123',
-            'role' => 'admin',
+            'is_system_admin' => true,
             'status' => 'active',
             'email_verified' => 1,
         ]);
         
         $editor1 = $usersTable->newEntity([
-            'organization_id' => $org1->id,
             'email' => 'editor1@test.com',
             'password' => 'password123',
-            'role' => 'editor',
+            'is_system_admin' => false,
             'status' => 'active',
             'email_verified' => 1,
         ]);
         
         $editor2 = $usersTable->newEntity([
-            'organization_id' => $org2->id,
             'email' => 'editor2@test.com',
             'password' => 'password123',
-            'role' => 'editor',
+            'is_system_admin' => false,
             'status' => 'active',
             'email_verified' => 1,
         ]);
         
         $usersTable->saveMany([$admin, $editor1, $editor2]);
+        
+        // Add users to organizations
+        $orgUsersTable = $this->getTableLocator()->get('OrganizationUsers');
+        $orgUsersTable->saveMany([
+            $orgUsersTable->newEntity([
+                'user_id' => $admin->id,
+                'organization_id' => $org1->id,
+                'role' => 'org_admin',
+                'is_primary' => true,
+                'joined_at' => new \DateTime(),
+            ]),
+            $orgUsersTable->newEntity([
+                'user_id' => $editor1->id,
+                'organization_id' => $org1->id,
+                'role' => 'editor',
+                'is_primary' => true,
+                'joined_at' => new \DateTime(),
+            ]),
+            $orgUsersTable->newEntity([
+                'user_id' => $editor2->id,
+                'organization_id' => $org2->id,
+                'role' => 'editor',
+                'is_primary' => true,
+                'joined_at' => new \DateTime(),
+            ]),
+        ]);
 
         // Create schedules for each editor
         $schedulesTable = $this->getTableLocator()->get('Schedules');
@@ -89,8 +112,7 @@ class SchedulesAccessTest extends TestCase
             'Auth' => [
                 'id' => $admin->id,
                 'email' => $admin->email,
-                'role' => 'admin',
-                'organization_id' => $admin->organization_id,
+                'is_system_admin' => true,
             ]
         ]);
 
@@ -126,24 +148,41 @@ class SchedulesAccessTest extends TestCase
 
         $usersTable = $this->getTableLocator()->get('Users');
         $editor1 = $usersTable->newEntity([
-            'organization_id' => $org->id,
             'email' => 'editor1@test.com',
             'password' => 'password123',
-            'role' => 'editor',
+            'is_system_admin' => false,
             'status' => 'active',
             'email_verified' => 1,
         ]);
         
         $editor2 = $usersTable->newEntity([
-            'organization_id' => $org->id,
             'email' => 'editor2@test.com',
             'password' => 'password123',
-            'role' => 'editor',
+            'is_system_admin' => false,
             'status' => 'active',
             'email_verified' => 1,
         ]);
         
         $usersTable->saveMany([$editor1, $editor2]);
+        
+        // Add users to organization
+        $orgUsersTable = $this->getTableLocator()->get('OrganizationUsers');
+        $orgUsersTable->saveMany([
+            $orgUsersTable->newEntity([
+                'user_id' => $editor1->id,
+                'organization_id' => $org->id,
+                'role' => 'editor',
+                'is_primary' => true,
+                'joined_at' => new \DateTime(),
+            ]),
+            $orgUsersTable->newEntity([
+                'user_id' => $editor2->id,
+                'organization_id' => $org->id,
+                'role' => 'editor',
+                'is_primary' => true,
+                'joined_at' => new \DateTime(),
+            ]),
+        ]);
 
         // Create schedules
         $schedulesTable = $this->getTableLocator()->get('Schedules');
@@ -172,8 +211,7 @@ class SchedulesAccessTest extends TestCase
             'Auth' => [
                 'id' => $editor1->id,
                 'email' => $editor1->email,
-                'role' => 'editor',
-                'organization_id' => $editor1->organization_id,
+                'is_system_admin' => false,
             ]
         ]);
 
