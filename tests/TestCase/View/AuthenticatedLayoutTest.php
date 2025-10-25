@@ -23,6 +23,7 @@ class AuthenticatedLayoutTest extends TestCase
     protected array $fixtures = [
         'app.Organizations',
         'app.Users',
+        'app.OrganizationUsers',
     ];
 
     /**
@@ -51,15 +52,28 @@ class AuthenticatedLayoutTest extends TestCase
         // Create and simulate logged in user
         $users = $this->getTableLocator()->get('Users');
         $user = $users->newEntity([
-            'organization_id' => 1,
             'email' => 'navtest@test.com',
             'password' => 'password123',
-            'role' => 'viewer',
+            'is_system_admin' => false,
+            'email_verified' => 1,
+            'status' => 'active',
         ]);
         $users->save($user);
+        
+        // Add to organization
+        $orgUsers = $this->getTableLocator()->get('OrganizationUsers');
+        $orgUsers->save($orgUsers->newEntity([
+            
+            'user_id' => $user->id,
+            'is_system_admin' => false,
+            'email_verified' => 1,
+            'status' => 'active',
+            'is_primary' => true,
+            'joined_at' => new \DateTime(),
+        ]));
 
         // Simulate logged in user
-        $this->session(['Auth' => $user]);
+        $this->session(['Auth' => ['id' => $user->id, 'email' => $user->email]]);
 
         // Visit dashboard (requires authentication)
         $this->get('/dashboard/index');
@@ -92,10 +106,12 @@ class AuthenticatedLayoutTest extends TestCase
         // Create and simulate logged in user
         $users = $this->getTableLocator()->get('Users');
         $user = $users->newEntity([
-            'organization_id' => 1,
+            
             'email' => 'mobile@test.com',
             'password' => 'password123',
-            'role' => 'viewer',
+            'is_system_admin' => false,
+            'email_verified' => 1,
+            'status' => 'active',
         ]);
         $users->save($user);
 
@@ -125,7 +141,7 @@ class AuthenticatedLayoutTest extends TestCase
         // Create and simulate logged in user
         $users = $this->getTableLocator()->get('Users');
         $user = $users->newEntity([
-            'organization_id' => 1,
+            
             'email' => 'avatar@test.com',
             'password' => 'password123',
             'role' => 'admin',
@@ -157,10 +173,12 @@ class AuthenticatedLayoutTest extends TestCase
         // Create and simulate logged in user
         $users = $this->getTableLocator()->get('Users');
         $user = $users->newEntity([
-            'organization_id' => 1,
+            
             'email' => 'lang@test.com',
             'password' => 'password123',
-            'role' => 'viewer',
+            'is_system_admin' => false,
+            'email_verified' => 1,
+            'status' => 'active',
         ]);
         $users->save($user);
 
