@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     sqlite3 \
+    cron \
     && rm -rf /var/lib/apt/lists/*
 
 # Enable Apache mod_rewrite
@@ -64,8 +65,18 @@ RUN if [ ! -f config/app_local.php ]; then \
     sed -i "s/'url' => env('DATABASE_URL', null)/'url' => 'sqlite:\/\/\/var\/www\/html\/tmp\/app.sqlite'/" config/app_local.php; \
     fi
 
+# Setup cron job for cache clearing
+COPY docker/cron/cache-clear /etc/cron.d/cache-clear
+RUN chmod 0644 /etc/cron.d/cache-clear && \
+    crontab /etc/cron.d/cache-clear && \
+    touch /var/log/cron.log
+
 # Expose port 80
 EXPOSE 80
 
-# Start Apache in foreground
-CMD ["apachectl", "-D", "FOREGROUND"]
+# Create startup script to run both cron and apache
+RUN echo '#!/bin/bash\nservice cron start\napachectl -D FOREGROUND' > /start.sh && \
+    chmod +x /start.sh
+
+# Start cron and Apache
+CMD ["/start.sh"]
