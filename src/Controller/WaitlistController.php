@@ -280,7 +280,7 @@ class WaitlistController extends AppController
         // Count total children not yet on waitlist (for "Add All" button visibility)
         $childrenNotOnWaitlist = $this->fetchTable('Children')->find()
             ->where([
-                'Children.organization_id' => $user->organization_id,
+                'Children.organization_id' => $primaryOrg->id,
                 'Children.is_active' => true
             ]);
         
@@ -460,13 +460,24 @@ class WaitlistController extends AppController
         $childrenTable = $this->fetchTable('Children');
         $waitlistTable = $this->fetchTable('WaitlistEntries');
         
+        // Get user's primary organization (or all orgs for system admins)
+        $primaryOrg = $this->getPrimaryOrganization();
+        
+        if (!$primaryOrg && !$user->is_system_admin) {
+            $this->Flash->error(__('You must belong to an organization.'));
+            return $this->redirect(['action' => 'index']);
+        }
+        
         // Get all active children for this organization
-        $allChildren = $childrenTable->find()
-            ->where([
-                'Children.organization_id' => $user->organization_id,
-                'Children.is_active' => true
-            ])
-            ->all();
+        $allChildrenQuery = $childrenTable->find()
+            ->where(['Children.is_active' => true]);
+        
+        // System admins see all children, regular users only their org
+        if (!$user->is_system_admin && $primaryOrg) {
+            $allChildrenQuery->where(['Children.organization_id' => $primaryOrg->id]);
+        }
+        
+        $allChildren = $allChildrenQuery->all();
         
         // Get existing waitlist entries - build array of child IDs
         $existingEntries = $waitlistTable->find()
