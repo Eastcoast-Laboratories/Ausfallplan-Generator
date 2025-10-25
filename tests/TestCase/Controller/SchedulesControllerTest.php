@@ -23,6 +23,7 @@ class SchedulesControllerTest extends TestCase
     protected array $fixtures = [
         'app.Organizations',
         'app.Users',
+        'app.OrganizationUsers',
         'app.Schedules',
         'app.ScheduleDays',
     ];
@@ -52,15 +53,7 @@ class SchedulesControllerTest extends TestCase
     public function testIndex(): void
     {
         // Create and log in user
-        $users = $this->getTableLocator()->get('Users');
-        $user = $users->newEntity([
-            'organization_id' => 1,
-            'email' => 'schedule@test.com',
-            'password' => 'password123',
-            'role' => 'admin',
-        ]);
-        $users->save($user);
-        $this->session(['Auth' => $user]);
+        $this->createAndLoginUser('schedule@test.com');
 
         // Access schedules index
         $this->get('/schedules');
@@ -78,15 +71,7 @@ class SchedulesControllerTest extends TestCase
     public function testAddGet(): void
     {
         // Create and log in user
-        $users = $this->getTableLocator()->get('Users');
-        $user = $users->newEntity([
-            'organization_id' => 1,
-            'email' => 'scheduleadd@test.com',
-            'password' => 'password123',
-            'role' => 'admin',
-        ]);
-        $users->save($user);
-        $this->session(['Auth' => $user]);
+        $this->createAndLoginUser('scheduleadd@test.com');
 
         // Access add form
         $this->get('/schedules/add');
@@ -106,15 +91,7 @@ class SchedulesControllerTest extends TestCase
     public function testAddPostSuccess(): void
     {
         // Create and log in user
-        $users = $this->getTableLocator()->get('Users');
-        $user = $users->newEntity([
-            'organization_id' => 1,
-            'email' => 'schedulepost@test.com',
-            'password' => 'password123',
-            'role' => 'admin',
-        ]);
-        $users->save($user);
-        $this->session(['Auth' => $user]);
+        $this->createAndLoginUser('schedulepost@test.com');
 
         // Submit schedule creation
         $this->post('/schedules/add', [
@@ -150,15 +127,7 @@ class SchedulesControllerTest extends TestCase
     public function testAddPostValidationFailure(): void
     {
         // Create and log in user
-        $users = $this->getTableLocator()->get('Users');
-        $user = $users->newEntity([
-            'organization_id' => 1,
-            'email' => 'schedulevalid@test.com',
-            'password' => 'password123',
-            'role' => 'admin',
-        ]);
-        $users->save($user);
-        $this->session(['Auth' => $user]);
+        $this->createAndLoginUser('schedulevalid@test.com');
 
         // Submit incomplete schedule (missing title)
         $this->post('/schedules/add', [
@@ -186,15 +155,7 @@ class SchedulesControllerTest extends TestCase
     public function testView(): void
     {
         // Create and log in user
-        $users = $this->getTableLocator()->get('Users');
-        $user = $users->newEntity([
-            'organization_id' => 1,
-            'email' => 'scheduleview@test.com',
-            'password' => 'password123',
-            'role' => 'admin',
-        ]);
-        $users->save($user);
-        $this->session(['Auth' => $user]);
+        $this->createAndLoginUser('scheduleview@test.com');
 
         // Create a schedule
         $schedules = $this->getTableLocator()->get('Schedules');
@@ -223,15 +184,7 @@ class SchedulesControllerTest extends TestCase
     public function testEdit(): void
     {
         // Create and log in user
-        $users = $this->getTableLocator()->get('Users');
-        $user = $users->newEntity([
-            'organization_id' => 1,
-            'email' => 'scheduleedit@test.com',
-            'password' => 'password123',
-            'role' => 'admin',
-        ]);
-        $users->save($user);
-        $this->session(['Auth' => $user]);
+        $this->createAndLoginUser('scheduleedit@test.com');
 
         // Create a schedule
         $schedules = $this->getTableLocator()->get('Schedules');
@@ -265,15 +218,7 @@ class SchedulesControllerTest extends TestCase
     public function testDelete(): void
     {
         // Create and log in user
-        $users = $this->getTableLocator()->get('Users');
-        $user = $users->newEntity([
-            'organization_id' => 1,
-            'email' => 'scheduledelete@test.com',
-            'password' => 'password123',
-            'role' => 'admin',
-        ]);
-        $users->save($user);
-        $this->session(['Auth' => $user]);
+        $this->createAndLoginUser('scheduledelete@test.com');
 
         // Create a schedule
         $schedules = $this->getTableLocator()->get('Schedules');
@@ -294,5 +239,35 @@ class SchedulesControllerTest extends TestCase
         // Verify deletion
         $exists = $schedules->exists(['id' => $schedule->id]);
         $this->assertFalse($exists);
+    }
+
+    /**
+     * Helper: Create user with organization membership and log in
+     */
+    private function createAndLoginUser(string $email, string $role = 'org_admin', int $orgId = 1): void
+    {
+        $users = $this->getTableLocator()->get('Users');
+        $user = $users->newEntity([
+            'email' => $email,
+            'password' => 'password123',
+            'is_system_admin' => false,
+            'status' => 'active',
+            'email_verified' => 1,
+            'email_token' => null,
+            'approved_at' => new \DateTime(),
+            'approved_by' => null,
+        ]);
+        $users->save($user);
+        
+        $orgUsers = $this->getTableLocator()->get('OrganizationUsers');
+        $orgUsers->save($orgUsers->newEntity([
+            'organization_id' => $orgId,
+            'user_id' => $user->id,
+            'role' => $role,
+            'is_primary' => true,
+            'joined_at' => new \DateTime(),
+        ]));
+        
+        $this->session(['Auth' => ['User' => $user]]);
     }
 }
