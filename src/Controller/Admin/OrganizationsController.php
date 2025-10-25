@@ -21,8 +21,8 @@ class OrganizationsController extends AppController
     {
         // Only system admin can access
         $user = $this->Authentication->getIdentity();
-        if (!$user || !$user->is_system_admin) {
-            $this->Flash->error(__('Access denied.'));
+        if (!$user || !$user->isSystemAdmin()) {
+            $this->Flash->error(__('Access denied. System admin privileges required.'));
             return $this->redirect(['_name' => 'dashboard']);
         }
 
@@ -55,8 +55,8 @@ class OrganizationsController extends AppController
     public function view($id = null)
     {
         $user = $this->Authentication->getIdentity();
-        if (!$user || !$user->is_system_admin) {
-            $this->Flash->error(__('Access denied.'));
+        if (!$user || !$user->isSystemAdmin()) {
+            $this->Flash->error(__('Access denied. System admin privileges required.'));
             return $this->redirect(['_name' => 'dashboard']);
         }
 
@@ -82,8 +82,8 @@ class OrganizationsController extends AppController
     public function edit($id = null)
     {
         $user = $this->Authentication->getIdentity();
-        if (!$user || !$user->is_system_admin) {
-            $this->Flash->error(__('Access denied.'));
+        if (!$user || !$user->isSystemAdmin()) {
+            $this->Flash->error(__('Access denied. System admin privileges required.'));
             return $this->redirect(['_name' => 'dashboard']);
         }
 
@@ -121,7 +121,7 @@ class OrganizationsController extends AppController
     public function delete($id = null)
     {
         $user = $this->Authentication->getIdentity();
-        if (!$user || !$user->is_system_admin) {
+        if (!$user || !$user->isSystemAdmin()) {
             $this->Flash->error(__('Zugriff verweigert.'));
             return $this->redirect(['_name' => 'dashboard']);
         }
@@ -205,8 +205,8 @@ class OrganizationsController extends AppController
     public function toggleActive($id = null)
     {
         $user = $this->Authentication->getIdentity();
-        if (!$user || !$user->is_system_admin) {
-            $this->Flash->error(__('Access denied.'));
+        if (!$user || !$user->isSystemAdmin()) {
+            $this->Flash->error(__('Access denied. System admin privileges required.'));
             return $this->redirect(['_name' => 'dashboard']);
         }
 
@@ -234,8 +234,8 @@ class OrganizationsController extends AppController
     public function addUser($id = null)
     {
         $user = $this->Authentication->getIdentity();
-        if (!$user || !$user->is_system_admin) {
-            $this->Flash->error(__('Access denied.'));
+        if (!$user || !$user->isSystemAdmin()) {
+            $this->Flash->error(__('Access denied. System admin privileges required.'));
             return $this->redirect(['_name' => 'dashboard']);
         }
 
@@ -287,8 +287,8 @@ class OrganizationsController extends AppController
     public function removeUser($id = null, $userId = null)
     {
         $user = $this->Authentication->getIdentity();
-        if (!$user || !$user->is_system_admin) {
-            $this->Flash->error(__('Access denied.'));
+        if (!$user || !$user->isSystemAdmin()) {
+            $this->Flash->error(__('Access denied. System admin privileges required.'));
             return $this->redirect(['_name' => 'dashboard']);
         }
 
