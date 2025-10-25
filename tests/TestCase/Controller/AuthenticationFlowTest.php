@@ -62,6 +62,7 @@ class AuthenticationFlowTest extends TestCase
             'email' => 'firstuser@test.com',
             'password' => 'password123',
             'status' => 'pending',
+            'is_system_admin' => false,
             'email_verified' => false,
             'email_token' => 'test-token-123',
         ]);
@@ -103,6 +104,7 @@ class AuthenticationFlowTest extends TestCase
             'email' => 'admin@test.com',
             'password' => 'password123',
             'status' => 'active',
+            'is_system_admin' => false,
             'email_verified' => true,
         ]);
         $usersTable->save($firstUser);
@@ -121,6 +123,7 @@ class AuthenticationFlowTest extends TestCase
             'email' => 'seconduser@test.com',
             'password' => 'password123',
             'status' => 'pending',
+            'is_system_admin' => false,
             'email_verified' => false,
             'email_token' => 'test-token-456',
         ]);
@@ -156,6 +159,7 @@ class AuthenticationFlowTest extends TestCase
             'email' => 'unverified@test.com',
             'password' => 'password123',
             'status' => 'pending',
+            'is_system_admin' => false,
             'email_verified' => false,
         ]);
         $usersTable->save($user);
@@ -188,6 +192,7 @@ class AuthenticationFlowTest extends TestCase
             'email' => 'pending@test.com',
             'password' => 'password123',
             'status' => 'pending',
+            'is_system_admin' => false,
             'email_verified' => true,
         ]);
         $usersTable->save($user);
@@ -220,6 +225,7 @@ class AuthenticationFlowTest extends TestCase
             'email' => 'resetme@test.com',
             'password' => 'oldpassword',
             'status' => 'active',
+            'is_system_admin' => false,
             'email_verified' => true,
         ]);
         $usersTable->save($user);
@@ -261,6 +267,7 @@ class AuthenticationFlowTest extends TestCase
             'email' => 'resetme2@test.com',
             'password' => 'oldpassword',
             'status' => 'active',
+            'is_system_admin' => false,
             'email_verified' => true,
         ]);
         $usersTable->save($user);
