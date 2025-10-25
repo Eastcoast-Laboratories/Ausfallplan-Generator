@@ -86,6 +86,34 @@ test.describe('Debug Admin Access to Organizations', () => {
         console.log('');
         console.log('🔍 Step 5: Analyze response');
         
+        // Check for PHP errors FIRST (most important!)
+        if (orgPageText.includes('Call to undefined method') || 
+            orgPageText.includes('Fatal error') || 
+            orgPageText.includes('Parse error') ||
+            orgPageText.includes('Error in:')) {
+            console.error('');
+            console.error('❌❌❌ PHP ERROR DETECTED! ❌❌❌');
+            console.error('');
+            
+            // Extract the error message
+            const errorLines = orgPageText.split('\n')
+                .filter(line => line.includes('Error') || line.includes('Call to') || line.includes('line'))
+                .slice(0, 10);
+            
+            errorLines.forEach(line => console.error('  ', line.trim()));
+            
+            // Find the specific error type
+            if (orgPageText.includes('Call to undefined method')) {
+                const methodMatch = orgPageText.match(/Call to undefined method ([^\n]+)/);
+                if (methodMatch) {
+                    console.error('');
+                    console.error('🔴 METHOD ERROR:', methodMatch[1]);
+                }
+            }
+            
+            throw new Error('PHP Error on admin/organizations page! See console output above.');
+        }
+        
         if (orgUrl.includes('/admin/organizations') && !orgUrl.includes('login')) {
             console.log('✅ URL is /admin/organizations (not redirected)');
             
