@@ -8,7 +8,7 @@ ALL 20 PHPUnit tests broken after organization_users migration:
 - New `organization_users` join table
 - New `is_system_admin` flag
 
-## ✅ COMPLETED
+## ✅ COMPLETED (5/20 Tests = 25%)
 
 ### 1. Fixtures Fixed
 - ✅ **UsersFixture.php** - Removed old fields, added new fields
@@ -23,7 +23,7 @@ ALL 20 PHPUnit tests broken after organization_users migration:
   - User 3: viewer in org 1
   - User 4: editor in org 2
 
-### 2. Tests Fixed
+### 2. Tests Fixed (4 test files, ~22 individual tests)
 
 #### ✅ AuthenticationFlowTest.php (8 tests)
 - **Status:** COMPLETE ✅
@@ -42,20 +42,42 @@ ALL 20 PHPUnit tests broken after organization_users migration:
   7. ✅ testPasswordResetWithValidCode
   8. ✅ (last password test)
 
-## 🔄 REMAINING (19 tests)
+#### ✅ PermissionsTest.php (3 tests)
+- **Status:** COMPLETE ✅
+- Updated session structure (no role/organization_id)
+- **Tests:**
+  1. ✅ testViewerCanOnlyRead
+  2. ✅ testEditorCanEditOwnOrg
+  3. ✅ testAdminCanDoEverything
+
+#### ✅ SchedulesControllerPermissionsTest.php (7 tests)
+- **Status:** COMPLETE ✅
+- Updated session structure
+- Added OrganizationUsers fixture
+- **Tests:**
+  1. ✅ testEditorCanViewOwnSchedule
+  2. ✅ testEditorCannotViewOtherOrgSchedule
+  3. ✅ testEditorCanEditOwnSchedule
+  4. ✅ testEditorCannotEditOtherOrgSchedule
+  5. ✅ testEditorCannotDeleteOtherOrgSchedule
+  6. ✅ testAdminCanViewAllSchedules
+  7. ✅ testViewerCannotEdit
+  8. ✅ testIndexFiltersByOrganization
+
+#### ✅ RegistrationNavigationTest.php (4 tests)
+- **Status:** COMPLETE ✅
+- Updated registration: organization_name, requested_role, password_confirm
+- Added OrganizationUsers fixture
+- **Tests:**
+  1. ✅ testNavigationNotVisibleAfterRegistration
+  2. ✅ testNavigationVisibleOnlyAfterLogin
+  3. ✅ testNavigationVisibilityOnDifferentPages
+  4. ✅ testMultipleRegistrationsCreateSeparateUsers
+
+## 🔄 REMAINING (16 tests)
 
 ### Priority 1 - CRITICAL
 These tests access user roles/permissions:
-
-#### 📋 PermissionsTest.php
-- **Issue:** Checks `$user->role` directly
-- **Fix:** Use `$user->isSystemAdmin()` or `organization_users.role`
-- **Status:** TODO
-
-#### 📋 SchedulesControllerPermissionsTest.php
-- **Issue:** Role-based access control
-- **Fix:** Check organization_users roles
-- **Status:** TODO
 
 #### 📋 Admin/SchedulesAccessTest.php
 - **Issue:** Admin role checks
@@ -64,11 +86,6 @@ These tests access user roles/permissions:
 
 ### Priority 2 - IMPORTANT
 Tests that create users:
-
-#### 📋 RegistrationNavigationTest.php
-- **Issue:** Uses old registration with `role`
-- **Fix:** Use `requested_role`, test organization_users creation
-- **Status:** TODO
 
 #### 📋 UsersControllerTest.php
 - **Issue:** User CRUD with old structure
