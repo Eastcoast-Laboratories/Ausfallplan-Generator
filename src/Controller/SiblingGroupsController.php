@@ -20,9 +20,14 @@ class SiblingGroupsController extends AppController
         // Get current user's organization
         $user = $this->Authentication->getIdentity();
         
-        // System admins should use admin interface
+        // System admins can see all sibling groups
         if ($user && $user->is_system_admin) {
-            return $this->redirect(['controller' => 'Admin/Organizations', 'action' => 'index']);
+            $siblingGroups = $this->SiblingGroups->find()
+                ->contain(['Organizations', 'Children'])
+                ->orderBy(['SiblingGroups.label' => 'ASC'])
+                ->all();
+            $this->set(compact('siblingGroups'));
+            return;
         }
         
         // Get user's primary organization

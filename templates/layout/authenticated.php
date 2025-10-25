@@ -421,7 +421,26 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
                 <span><?= __('Waitlist') ?></span>
             </a>
             
-            <?php if ($user && $user->role === 'admin'): ?>
+            <?php 
+            // Show Organizations link for system admins OR users in multiple organizations
+            $showOrganizationsLink = false;
+            if ($user) {
+                // System admin can always see it
+                if ($user->is_system_admin ?? false) {
+                    $showOrganizationsLink = true;
+                } else {
+                    // Check if user belongs to multiple organizations
+                    $orgUsersTable = \Cake\Datasource\FactoryLocator::get('Table')->get('OrganizationUsers');
+                    $orgCount = $orgUsersTable->find()
+                        ->where(['user_id' => $user->id])
+                        ->count();
+                    if ($orgCount > 1) {
+                        $showOrganizationsLink = true;
+                    }
+                }
+            }
+            ?>
+            <?php if ($showOrganizationsLink): ?>
             <a href="/admin/organizations" class="sidebar-nav-item <?= $this->request->getParam('controller') === 'Organizations' && $this->request->getParam('prefix') === 'Admin' ? 'active' : '' ?>">
                 <span>🏢</span>
                 <span><?= __('Organisationen') ?></span>
