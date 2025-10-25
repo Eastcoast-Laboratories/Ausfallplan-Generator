@@ -19,20 +19,32 @@ class DashboardController extends AppController
     {
         $user = $this->Authentication->getIdentity();
         
+        // System admins should be redirected to admin area
+        if ($user && $user->is_system_admin) {
+            return $this->redirect(['controller' => 'Admin/Organizations', 'action' => 'index']);
+        }
+        
+        // Get user's primary organization
+        $primaryOrg = $this->getPrimaryOrganization();
+        if (!$primaryOrg) {
+            $this->Flash->error(__('Sie sind keiner Organisation zugeordnet. Bitte kontaktieren Sie den Administrator.'));
+            return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
+        }
+        
         // Load actual stats from database
         $childrenTable = $this->fetchTable('Children');
         $schedulesTable = $this->fetchTable('Schedules');
         
         $stats = [
             'children' => $childrenTable->find()
-                ->where(['organization_id' => $user->organization_id])
+                ->where(['Children.organization_id' => $primaryOrg->id])
                 ->count(),
             'schedules' => $schedulesTable->find()
-                ->where(['organization_id' => $user->organization_id])
+                ->where(['Schedules.organization_id' => $primaryOrg->id])
                 ->count(),
             'active_schedules' => $schedulesTable->find()
                 ->where([
-                    'organization_id' => $user->organization_id,
+                    'Schedules.organization_id' => $primaryOrg->id,
                     'OR' => [
                         ['ends_on IS' => null],
                         ['ends_on >=' => date('Y-m-d')]

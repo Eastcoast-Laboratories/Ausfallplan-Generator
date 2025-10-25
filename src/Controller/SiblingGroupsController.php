@@ -20,8 +20,15 @@ class SiblingGroupsController extends AppController
         // Get current user's organization
         $user = $this->Authentication->getIdentity();
         
+        // Get user's primary organization
+        $primaryOrg = $this->getPrimaryOrganization();
+        if (!$primaryOrg) {
+            $this->Flash->error(__('Sie sind keiner Organisation zugeordnet.'));
+            return $this->redirect(['controller' => 'Dashboard', 'action' => 'index']);
+        }
+        
         $siblingGroups = $this->SiblingGroups->find()
-            ->where(['SiblingGroups.organization_id' => $user->organization_id])
+            ->where(['SiblingGroups.organization_id' => $primaryOrg->id])
             ->contain(['Organizations', 'Children'])
             ->orderBy(['SiblingGroups.label' => 'ASC'])
             ->all();

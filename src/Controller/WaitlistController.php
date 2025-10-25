@@ -22,10 +22,17 @@ class WaitlistController extends AppController
         // Get current user's organization
         $user = $this->Authentication->getIdentity();
         
+        // Get user's primary organization
+        $primaryOrg = $this->getPrimaryOrganization();
+        if (!$primaryOrg) {
+            $this->Flash->error(__('Sie sind keiner Organisation zugeordnet.'));
+            return $this->redirect(['controller' => 'Dashboard', 'action' => 'index']);
+        }
+        
         // Get schedules for this organization
         $schedulesTable = $this->fetchTable('Schedules');
         $schedules = $schedulesTable->find()
-            ->where(['Schedules.organization_id' => $user->organization_id])
+            ->where(['Schedules.organization_id' => $primaryOrg->id])
             ->orderBy(['Schedules.created' => 'DESC'])
             ->all();
         

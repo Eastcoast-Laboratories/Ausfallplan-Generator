@@ -17,12 +17,15 @@ class ChildrenController extends AppController
      */
     public function index()
     {
-        // Get all organizations user is member of
-        $organizations = $this->getUserOrganizations();
-        $orgIds = collection($organizations)->extract('id')->toList();
+        // Get user's primary organization
+        $primaryOrg = $this->getPrimaryOrganization();
+        if (!$primaryOrg) {
+            $this->Flash->error(__('Sie sind keiner Organisation zugeordnet.'));
+            return $this->redirect(['controller' => 'Dashboard', 'action' => 'index']);
+        }
         
         $children = $this->Children->find()
-            ->where(['Children.organization_id IN' => $orgIds])
+            ->where(['Children.organization_id' => $primaryOrg->id])
             ->contain(['Organizations', 'SiblingGroups'])
             ->orderBy(['Children.is_active' => 'DESC', 'Children.name' => 'ASC'])
             ->all();
@@ -141,7 +144,7 @@ class ChildrenController extends AppController
         
         // Get sibling groups from child's organization
         $siblingGroups = $this->Children->SiblingGroups->find('list')
-            ->where(['SiblingGroups.organization_id' => $child->organization_id])
+            ->where(['SiblingGroups.organization_id' => $child->organization_id ?? 0])
             ->all();
         
         $this->set(compact('child', 'siblingGroups'));
