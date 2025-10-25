@@ -18,6 +18,7 @@ class SchedulesControllerPermissionsTest extends TestCase
     protected array $fixtures = [
         'app.Organizations',
         'app.Users',
+        'app.OrganizationUsers',
         'app.Schedules',
         'app.ScheduleDays',
         'app.Children',
@@ -29,13 +30,16 @@ class SchedulesControllerPermissionsTest extends TestCase
      */
     public function testEditorCanViewOwnSchedule(): void
     {
-        // Login as editor from organization 1
+        // Login as editor from organization 1 (User ID 2)
         $this->session([
             'Auth' => [
-                'id' => 2, // editor user
-                'email' => 'editor@org1.com',
-                'role' => 'editor',
-                'organization_id' => 1,
+                'User' => [
+                    'id' => 2,
+                    'email' => 'editor@example.com',
+                    'is_system_admin' => false,
+                    'status' => 'active',
+                    'email_verified' => true,
+                ]
             ]
         ]);
 
@@ -49,13 +53,16 @@ class SchedulesControllerPermissionsTest extends TestCase
      */
     public function testEditorCannotViewOtherOrgSchedule(): void
     {
-        // Login as editor from organization 1
+        // Login as editor from organization 1 (User ID 2)
         $this->session([
             'Auth' => [
-                'id' => 2,
-                'email' => 'editor@org1.com',
-                'role' => 'editor',
-                'organization_id' => 1,
+                'User' => [
+                    'id' => 2,
+                    'email' => 'editor@example.com',
+                    'is_system_admin' => false,
+                    'status' => 'active',
+                    'email_verified' => true,
+                ]
             ]
         ]);
 
@@ -123,12 +130,16 @@ class SchedulesControllerPermissionsTest extends TestCase
      */
     public function testAdminCanViewAllSchedules(): void
     {
+        // Login as system admin (User ID 1)
         $this->session([
             'Auth' => [
-                'id' => 1,
-                'email' => 'admin@system.com',
-                'role' => 'admin',
-                'organization_id' => 1,
+                'User' => [
+                    'id' => 1,
+                    'email' => 'admin@example.com',
+                    'is_system_admin' => true,
+                    'status' => 'active',
+                    'email_verified' => true,
+                ]
             ]
         ]);
 
@@ -142,12 +153,16 @@ class SchedulesControllerPermissionsTest extends TestCase
      */
     public function testViewerCannotEdit(): void
     {
+        // Login as viewer from organization 1 (User ID 3)
         $this->session([
             'Auth' => [
-                'id' => 3,
-                'email' => 'viewer@org1.com',
-                'role' => 'viewer',
-                'organization_id' => 1,
+                'User' => [
+                    'id' => 3,
+                    'email' => 'viewer@example.com',
+                    'is_system_admin' => false,
+                    'status' => 'active',
+                    'email_verified' => true,
+                ]
             ]
         ]);
 

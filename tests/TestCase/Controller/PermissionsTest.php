@@ -16,6 +16,7 @@ class PermissionsTest extends TestCase
     protected array $fixtures = [
         'app.Users',
         'app.Organizations',
+        'app.OrganizationUsers',
         'app.Children',
     ];
 
@@ -24,14 +25,13 @@ class PermissionsTest extends TestCase
      */
     public function testViewerCanOnlyRead()
     {
-        // Login as viewer
+        // Login as viewer (User ID 3 from fixture)
         $this->session([
             'Auth' => [
                 'User' => [
-                    'id' => 1,
-                    'email' => 'viewer@test.com',
-                    'role' => 'viewer',
-                    'organization_id' => 1,
+                    'id' => 3,
+                    'email' => 'viewer@example.com',
+                    'is_system_admin' => false,
                     'status' => 'active',
                     'email_verified' => true,
                 ]
@@ -53,13 +53,13 @@ class PermissionsTest extends TestCase
      */
     public function testEditorCanEditOwnOrg()
     {
+        // Login as editor (User ID 2 from fixture)
         $this->session([
             'Auth' => [
                 'User' => [
                     'id' => 2,
-                    'email' => 'editor@test.com',
-                    'role' => 'editor',
-                    'organization_id' => 1,
+                    'email' => 'editor@example.com',
+                    'is_system_admin' => false,
                     'status' => 'active',
                     'email_verified' => true,
                 ]
@@ -86,13 +86,13 @@ class PermissionsTest extends TestCase
      */
     public function testAdminCanDoEverything()
     {
+        // Login as system admin (User ID 1 from fixture)
         $this->session([
             'Auth' => [
                 'User' => [
-                    'id' => 3,
-                    'email' => 'admin@test.com',
-                    'role' => 'admin',
-                    'organization_id' => 1,
+                    'id' => 1,
+                    'email' => 'admin@example.com',
+                    'is_system_admin' => true,
                     'status' => 'active',
                     'email_verified' => true,
                 ]
