@@ -339,6 +339,30 @@ class ChildrenController extends AppController
         $errors = [];
         $siblingGroupMap = []; // Map import sibling_group_id to real DB id
         
+        // First pass: Determine sibling group names
+        $siblingGroupNames = [];
+        foreach ($parsedChildren as $childData) {
+            if ($childData['sibling_group_id']) {
+                $groupId = $childData['sibling_group_id'];
+                if (!isset($siblingGroupNames[$groupId])) {
+                    $siblingGroupNames[$groupId] = [];
+                }
+                $siblingGroupNames[$groupId][] = $childData['last_name'];
+            }
+        }
+        
+        // Generate group names
+        foreach ($siblingGroupNames as $groupId => $lastNames) {
+            $uniqueLastNames = array_unique($lastNames);
+            if (count($uniqueLastNames) === 1) {
+                // Same last name for all siblings
+                $siblingGroupNames[$groupId] = $uniqueLastNames[0];
+            } else {
+                // Different last names: combine with hyphen
+                $siblingGroupNames[$groupId] = implode('-', $uniqueLastNames);
+            }
+        }
+        
         foreach ($parsedChildren as $childData) {
             // Apply anonymization
             $displayName = $importService->anonymizeName($childData, $anonymizationMode);
@@ -360,8 +384,12 @@ class ChildrenController extends AppController
             $dbSiblingGroupId = null;
             if ($childData['sibling_group_id']) {
                 if (!isset($siblingGroupMap[$childData['sibling_group_id']])) {
-                    // Create new sibling group
-                    $siblingGroup = $siblingGroupsTable->newEntity(['organization_id' => $orgId]);
+                    // Create new sibling group with name
+                    $groupName = $siblingGroupNames[$childData['sibling_group_id']] ?? 'Geschwistergruppe';
+                    $siblingGroup = $siblingGroupsTable->newEntity([
+                        'organization_id' => $orgId,
+                        'label' => $groupName,
+                    ]);
                     $siblingGroupsTable->save($siblingGroup);
                     $siblingGroupMap[$childData['sibling_group_id']] = $siblingGroup->id;
                 }
