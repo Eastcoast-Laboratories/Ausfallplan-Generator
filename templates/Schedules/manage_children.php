@@ -75,18 +75,39 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                 <?php if (!empty($assignedChildren) && (is_countable($assignedChildren) ? count($assignedChildren) : $assignedChildren->count()) > 0): ?>
                     <?php 
                     // Group children by sibling_group_id
-                    $groups = [];
-                    $singles = [];
+                    $siblingGroups = [];
                     foreach ($assignedChildren as $child) {
                         if ($child->sibling_group_id) {
-                            $groups[$child->sibling_group_id][] = $child;
-                        } else {
-                            $singles[] = $child;
+                            if (!isset($siblingGroups[$child->sibling_group_id])) {
+                                $siblingGroups[$child->sibling_group_id] = [];
+                            }
+                            $siblingGroups[$child->sibling_group_id][] = $child;
                         }
                     }
                     
-                    // Display singles first, then groups
-                    foreach ($singles as $child): ?>
+                    // Build ordered list - iterate through assignedChildren (already sorted by sort_order)
+                    $processedGroups = [];
+                    $orderedItems = [];
+                    
+                    foreach ($assignedChildren as $child) {
+                        if ($child->sibling_group_id) {
+                            // If first sibling in group, add whole group
+                            if (!in_array($child->sibling_group_id, $processedGroups)) {
+                                $orderedItems[] = ['type' => 'group', 'group_id' => $child->sibling_group_id, 'siblings' => $siblingGroups[$child->sibling_group_id]];
+                                $processedGroups[] = $child->sibling_group_id;
+                            }
+                            // Skip other siblings (already added in group)
+                        } else {
+                            // Single child (no siblings)
+                            $orderedItems[] = ['type' => 'single', 'child' => $child];
+                        }
+                    }
+                    
+                    // Display in order
+                    foreach ($orderedItems as $item):
+                        if ($item['type'] === 'single'):
+                            $child = $item['child'];
+                    ?>
                         <div class="child-item" data-child-id="<?= $child->id ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #4caf50; cursor: move;">
                             <div>
                                 <strong><?= h($child->name) ?></strong>
@@ -105,9 +126,10 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                                 ]
                             ) ?>
                         </div>
-                    <?php endforeach; ?>
-                    
-                    <?php foreach ($groups as $groupId => $siblings): ?>
+                    <?php 
+                        else: // group
+                            $siblings = $item['siblings'];
+                    ?>
                         <div class="sibling-group" data-child-ids="<?= implode(",", array_map(fn($c) => $c->id, $siblings)) ?>" style="background: #fff9c4; padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 4px; border-left: 4px solid #ffc107; cursor: move;">
                             <div style="font-size: 0.85rem; color: #f57c00; font-weight: bold; margin-bottom: 0.5rem;">
                                 👨‍👩‍👧 <?= __("Sibling Group") ?>
@@ -133,7 +155,10 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                                 </div>
                             <?php endforeach; ?>
                         </div>
-                    <?php endforeach; ?>
+                    <?php 
+                        endif; 
+                    endforeach; 
+                    ?>
                 <?php else: ?>
                     <p style="color: #666; text-align: center; padding: 2rem;">
                         <?= __("No children assigned to this schedule.") ?>
