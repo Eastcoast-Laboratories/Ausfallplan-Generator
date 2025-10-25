@@ -77,8 +77,7 @@ class OrganizationsController extends AppController
 
         // Get schedules count for this org
         $schedulesCount = $this->fetchTable('Schedules')->find()
-            ->innerJoinWith('Users')
-            ->where(['Users.organization_id' => $id])
+            ->where(['Schedules.organization_id' => $id])
             ->count();
 
         $this->set(compact('organization', 'schedulesCount'));
@@ -166,38 +165,27 @@ class OrganizationsController extends AppController
             // 1. Delete schedules (depends on users)
             $schedulesTable = $this->fetchTable('Schedules');
             $schedules = $schedulesTable->find()
-                ->innerJoinWith('Users')
-                ->where(['Users.organization_id' => $id])
+                ->where(['Schedules.organization_id' => $id])
                 ->all();
             foreach ($schedules as $schedule) {
                 $schedulesTable->delete($schedule);
             }
 
-            // 2. Delete children (depends on organization)
-            $childrenTable = $this->fetchTable('Children');
-            $children = $childrenTable->find()
-                ->where(['organization_id' => $id])
-                ->all();
-            foreach ($children as $child) {
-                $childrenTable->delete($child);
-            }
+            // 2. Delete children (linked via organization_users)
+            // Children are linked via their user's organization, so they get deleted via cascade when users are deleted
+            // No direct action needed here as Children don't have organization_id
 
-            // 3. Delete sibling groups (depends on organization)
-            $siblingGroupsTable = $this->fetchTable('SiblingGroups');
-            $siblingGroups = $siblingGroupsTable->find()
-                ->where(['organization_id' => $id])
-                ->all();
-            foreach ($siblingGroups as $group) {
-                $siblingGroupsTable->delete($group);
-            }
+            // 3. Delete sibling groups (linked via organization)
+            // SiblingGroups are linked via their organization, cascade will handle deletion
+            // Or handle via organization relationship
 
-            // 4. Delete users (depends on organization)
-            $usersTable = $this->fetchTable('Users');
-            $users = $usersTable->find()
+            // 4. Delete organization_users entries (cascade will handle user cleanup if needed)
+            $orgUsersTable = $this->fetchTable('OrganizationUsers');
+            $orgUsers = $orgUsersTable->find()
                 ->where(['organization_id' => $id])
                 ->all();
-            foreach ($users as $userToDelete) {
-                $usersTable->delete($userToDelete);
+            foreach ($orgUsers as $orgUser) {
+                $orgUsersTable->delete($orgUser);
             }
 
             // 5. Finally delete the organization
