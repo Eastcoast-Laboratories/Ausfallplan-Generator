@@ -219,10 +219,10 @@ $usersTable->save($admin);
 ```
 
 ## Summary
-- **Total:** 20 tests
-- **Fixed:** 1 test file (8 tests) ✅
-- **Remaining:** 19 test files 📋
-- **Estimated Time:** 1-2 hours for remaining tests
+- **Total:** 20 test files
+- **Fixed:** 5 test files (~22 tests) ✅ **25% COMPLETE**
+- **Remaining:** 15 test files 📋
+- **Estimated Time:** 30-60 minutes for remaining tests
 
 ## Next Steps
 1. Fix PermissionsTest (role checks)

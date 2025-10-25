@@ -9,7 +9,7 @@
 
 ## Tech Stack
 - **Backend:** CakePHP 5.x (PHP)
-- **Database:** MySQL/MariaDB (Hinweis: Alte Migrations für SQLite, aber aktuell MySQL)
+- **Database:** MySQL/MariaDB (Hinweis: Alte Migrations für SQLite, wurden umgestellt auf aktuell MySQL)
 - **Frontend:** HTML/PHP Templates mit modernem CSS
 - **Testing:** Playwright (E2E Tests in tests/e2e/)
 - **Server:** Apache in Docker Container
