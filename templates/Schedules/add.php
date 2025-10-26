@@ -10,6 +10,17 @@ $this->assign('title', __('Create Schedule'));
     <fieldset>
         <legend><?= __('Add Schedule') ?></legend>
         <?php
+            // Organization selector (only for system admins or users with multiple orgs)
+            if ($canSelectOrganization) {
+                echo $this->Form->control('organization_id', [
+                    'label' => __('Organization'),
+                    'options' => $organizations,
+                    'required' => true,
+                    'empty' => false,
+                    'class' => 'organization-selector'
+                ]);
+            }
+            
             echo $this->Form->control('title', [
                 'label' => __('Title'),
                 'required' => true,
