@@ -31,17 +31,11 @@ class SchedulesControllerPermissionsTest extends TestCase
     public function testEditorCanViewOwnSchedule(): void
     {
         // Login as editor from organization 1 (User ID 2)
-        $this->session([
-            'Auth' => [
-                'User' => [
-                    'id' => 2,
-                    'email' => 'editor@example.com',
-                    'is_system_admin' => false,
-                    'status' => 'active',
-                    'email_verified' => 1,
-                ]
-            ]
-        ]);
+        $usersTable = $this->getTableLocator()->get('Users');
+        $editor = $usersTable->get(2);
+        
+        $this->session(['Auth' => $editor]);
+        $this->session(['Config.language' => 'en']);
 
         // Try to view schedule from own organization
         $this->get('/schedules/view/1'); // Schedule 1 belongs to org 1
