@@ -463,6 +463,108 @@ class SchedulesController extends AppController
     }
 
     /**
+     * Export schedule as CSV
+     *
+     * @param string|null $id Schedule id.
+     * @return \Cake\Http\Response|null
+     */
+    public function exportCsv($id = null)
+    {
+        $schedule = $this->Schedules->get($id, [
+            'contain' => ['Organizations'],
+        ]);
+        
+        $this->Authorization->authorize($schedule);
+        
+        // Get same data as report
+        $assignedChildrenCount = $this->Schedules->ScheduleChildren
+            ->find()
+            ->where(['ScheduleChildren.schedule_id' => $schedule->id])
+            ->count();
+        
+        $daysCount = $schedule->days_count ?? $assignedChildrenCount;
+        
+        $reportService = new \App\Service\ReportService();
+        $reportData = $reportService->generateReportData((int)$id, $daysCount);
+        
+        // Build CSV content
+        $csv = [];
+        
+        // Header
+        $csv[] = ['Ausfallplan', $schedule->name];
+        $csv[] = ['Datum', $schedule->start_date->format('d.m.Y')];
+        $csv[] = ['Organisation', $schedule->organization->name];
+        $csv[] = [];
+        
+        // Waitlist
+        $csv[] = ['Nachrückliste'];
+        $csv[] = ['Name', 'Priorität', 'Integrativ'];
+        foreach ($reportData['waitlist'] as $entry) {
+            $csv[] = [
+                $entry->child->name,
+                $entry->priority,
+                $entry->child->is_integrative ? 'Ja' : 'Nein'
+            ];
+        }
+        $csv[] = [];
+        
+        // Always at end
+        if (!empty($reportData['alwaysAtEnd'])) {
+            $csv[] = ['Immer am Ende'];
+            $csv[] = ['Name', 'Gewichtung', 'Integrativ'];
+            foreach ($reportData['alwaysAtEnd'] as $childData) {
+                $csv[] = [
+                    $childData['child']->name,
+                    $childData['weight'],
+                    $childData['child']->is_integrative ? 'Ja' : 'Nein'
+                ];
+            }
+            $csv[] = [];
+        }
+        
+        // Days
+        $csv[] = ['Tage'];
+        $dayHeaders = ['Tag'];
+        foreach ($reportData['days'] as $day) {
+            $dayHeaders[] = 'Tag ' . $day['day_number'];
+        }
+        $csv[] = $dayHeaders;
+        
+        // Get max children per day
+        $maxChildren = 0;
+        foreach ($reportData['days'] as $day) {
+            $maxChildren = max($maxChildren, count($day['children']));
+        }
+        
+        // Add children rows
+        for ($i = 0; $i < $maxChildren; $i++) {
+            $row = ['Kind ' . ($i + 1)];
+            foreach ($reportData['days'] as $day) {
+                $row[] = isset($day['children'][$i]) ? $day['children'][$i]->name : '';
+            }
+            $csv[] = $row;
+        }
+        
+        // Convert to CSV string
+        $output = fopen('php://temp', 'w');
+        foreach ($csv as $row) {
+            fputcsv($output, $row, ';'); // Use semicolon for German Excel
+        }
+        rewind($output);
+        $csvContent = stream_get_contents($output);
+        fclose($output);
+        
+        // Return as download
+        $filename = 'ausfallplan_' . $schedule->name . '_' . date('Y-m-d') . '.csv';
+        
+        $this->response = $this->response->withStringBody($csvContent);
+        $this->response = $this->response->withType('text/csv');
+        $this->response = $this->response->withDownload($filename);
+        
+        return $this->response;
+    }
+
+    /**
      * Reorder assigned children via AJAX
      *
      * @return \Cake\Http\Response
