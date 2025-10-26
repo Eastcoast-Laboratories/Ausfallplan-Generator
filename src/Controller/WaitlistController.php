@@ -232,6 +232,18 @@ class WaitlistController extends AppController
         
         foreach ($waitlistEntries as $entry) {
             if ($entry->child && $entry->child->sibling_group_id) {
+                // CRITICAL: Check total count in group FIRST
+                $totalInGroup = $this->fetchTable('Children')->find()
+                    ->where(['sibling_group_id' => $entry->child->sibling_group_id])
+                    ->count();
+                
+                // ERROR: A sibling group with only 1 child is a DATA ERROR!
+                if ($totalInGroup <= 1) {
+                    error_log("ERROR: Child '{$entry->child->name}' (ID: {$entry->child->id}) has sibling_group_id {$entry->child->sibling_group_id} but is ALONE in that group! This is a data integrity error.");
+                    // SKIP this child - do NOT show sibling badge
+                    continue;
+                }
+                
                 $siblingGroupsMap[$entry->id] = $entry->child->sibling_group_id;
                 
                 // Load ALL siblings for this group (from entire Children table, not just schedule/waitlist)
@@ -256,8 +268,8 @@ class WaitlistController extends AppController
                     }
                 }
                 
-                // Set sibling names - show all siblings found in database
-                $siblingNames[$entry->child->id] = !empty($names) ? implode(', ', $names) : __('keine anderen Geschwister gefunden');
+                // Set sibling names - should never be empty now due to count check above
+                $siblingNames[$entry->child->id] = implode(', ', $names);
             }
         }
         
@@ -282,6 +294,18 @@ class WaitlistController extends AppController
             // Load sibling names for available children too
             foreach ($availableChildren as $child) {
                 if ($child->sibling_group_id && !isset($siblingNames[$child->id])) {
+                    // CRITICAL: Check total count in group FIRST
+                    $totalInGroup = $this->fetchTable('Children')->find()
+                        ->where(['sibling_group_id' => $child->sibling_group_id])
+                        ->count();
+                    
+                    // ERROR: A sibling group with only 1 child is a DATA ERROR!
+                    if ($totalInGroup <= 1) {
+                        error_log("ERROR: Child '{$child->name}' (ID: {$child->id}) has sibling_group_id {$child->sibling_group_id} but is ALONE in that group! This is a data integrity error.");
+                        // SKIP this child - do NOT show sibling badge
+                        continue;
+                    }
+                    
                     $siblings = $this->fetchTable('Children')->find()
                         ->where([
                             'sibling_group_id' => $child->sibling_group_id,
@@ -295,7 +319,8 @@ class WaitlistController extends AppController
                         $names[] = $sib->name;
                     }
                     
-                    $siblingNames[$child->id] = !empty($names) ? implode(', ', $names) : __('keine anderen Geschwister gefunden');
+                    // Should never be empty due to count check
+                    $siblingNames[$child->id] = implode(', ', $names);
                 }
             }
         }

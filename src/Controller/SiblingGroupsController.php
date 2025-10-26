@@ -26,7 +26,16 @@ class SiblingGroupsController extends AppController
                 ->contain(['Organizations', 'Children'])
                 ->orderBy(['SiblingGroups.label' => 'ASC'])
                 ->all();
-            $this->set(compact('siblingGroups'));
+            
+            // Mark groups with only 1 child as errors
+            $errorGroups = [];
+            foreach ($siblingGroups as $group) {
+                if (count($group->children) <= 1) {
+                    $errorGroups[] = $group->id;
+                }
+            }
+            
+            $this->set(compact('siblingGroups', 'errorGroups'));
             return;
         }
         
@@ -42,8 +51,16 @@ class SiblingGroupsController extends AppController
             ->contain(['Organizations', 'Children'])
             ->orderBy(['SiblingGroups.label' => 'ASC'])
             ->all();
+        
+        // Mark groups with only 1 child as errors
+        $errorGroups = [];
+        foreach ($siblingGroups as $group) {
+            if (count($group->children) <= 1) {
+                $errorGroups[] = $group->id;
+            }
+        }
 
-        $this->set(compact('siblingGroups'));
+        $this->set(compact('siblingGroups', 'errorGroups'));
     }
 
     /**
@@ -58,8 +75,14 @@ class SiblingGroupsController extends AppController
             'Organizations',
             'Children',
         ]);
+        
+        // CRITICAL: Check if this is an invalid group (only 1 child)
+        $isErrorGroup = count($siblingGroup->children) <= 1;
+        if ($isErrorGroup) {
+            $this->Flash->warning(__('⚠️ WARNUNG: Diese Geschwistergruppe hat nur ein Kind! Eine Geschwistergruppe muss mindestens 2 Kinder enthalten. Bitte fügen Sie ein weiteres Kind hinzu oder löschen Sie die Gruppe.'));
+        }
 
-        $this->set(compact('siblingGroup'));
+        $this->set(compact('siblingGroup', 'isErrorGroup'));
     }
 
     /**
