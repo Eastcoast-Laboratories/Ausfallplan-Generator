@@ -49,11 +49,22 @@ class OrganizationUsersTableTest extends TestCase
      */
     public function testAddUserToOrganization(): void
     {
+        // Create a new user first (fixtures have users 1-4)
+        $usersTable = $this->getTableLocator()->get('Users');
+        $newUser = $usersTable->newEntity([
+            'email' => 'newuser@test.com',
+            'password' => 'password123',
+            'status' => 'active',
+            'email_verified' => 1,
+            'is_system_admin' => false,
+        ]);
+        $usersTable->save($newUser);
+        
         $data = [
             'organization_id' => 1,
-            'user_id' => 1,
+            'user_id' => $newUser->id,
             'role' => 'editor',
-            'is_primary' => true,
+            'is_primary' => false,
             'joined_at' => new DateTime(),
         ];
 
@@ -118,11 +129,22 @@ class OrganizationUsersTableTest extends TestCase
     public function testValidRolesAreAccepted(): void
     {
         $roles = ['org_admin', 'editor', 'viewer'];
+        $usersTable = $this->getTableLocator()->get('Users');
 
         foreach ($roles as $index => $role) {
+            // Create a new user for each role test
+            $newUser = $usersTable->newEntity([
+                'email' => "role_{$role}@test.com",
+                'password' => 'password123',
+                'status' => 'active',
+                'email_verified' => 1,
+                'is_system_admin' => false,
+            ]);
+            $usersTable->save($newUser);
+            
             $data = [
-                'organization_id' => 1,
-                'user_id' => $index + 2, // Different user each time
+                'organization_id' => 2, // Use org 2 to avoid conflicts
+                'user_id' => $newUser->id,
                 'role' => $role,
                 'is_primary' => false,
                 'joined_at' => new DateTime(),
