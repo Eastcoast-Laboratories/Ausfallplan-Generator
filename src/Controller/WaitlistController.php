@@ -278,6 +278,26 @@ class WaitlistController extends AppController
             }
             
             $availableChildren = $availableChildrenQuery->all();
+            
+            // Load sibling names for available children too
+            foreach ($availableChildren as $child) {
+                if ($child->sibling_group_id && !isset($siblingNames[$child->id])) {
+                    $siblings = $this->fetchTable('Children')->find()
+                        ->where([
+                            'sibling_group_id' => $child->sibling_group_id,
+                            'id !=' => $child->id
+                        ])
+                        ->orderBy(['name' => 'ASC'])
+                        ->all();
+                    
+                    $names = [];
+                    foreach ($siblings as $sib) {
+                        $names[] = $sib->name;
+                    }
+                    
+                    $siblingNames[$child->id] = !empty($names) ? implode(', ', $names) : __('keine anderen Geschwister gefunden');
+                }
+            }
         }
         
         // Count total children not yet on waitlist (for "Add All" button visibility)
