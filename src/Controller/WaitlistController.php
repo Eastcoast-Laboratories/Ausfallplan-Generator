@@ -256,8 +256,13 @@ class WaitlistController extends AppController
                     }
                 }
                 
-                // Set sibling names - show all siblings, or "nur dieses Kind" if none exist
-                $siblingNames[$entry->child->id] = !empty($names) ? implode(', ', $names) : __('nur dieses Kind in Geschwistergruppe');
+                // DEBUG: Log if no siblings found but sibling_group_id exists
+                if (empty($names)) {
+                    error_log("WARNING: Child '{$entry->child->name}' (ID: {$entry->child->id}) has sibling_group_id {$entry->child->sibling_group_id} but no other siblings found in database!");
+                }
+                
+                // Set sibling names - show all siblings found in database
+                $siblingNames[$entry->child->id] = !empty($names) ? implode(', ', $names) : __('keine anderen Geschwister gefunden');
             }
         }
         
