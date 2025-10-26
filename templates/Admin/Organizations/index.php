@@ -29,7 +29,7 @@ $this->assign('title', __('Organisationsverwaltung'));
                 <?php foreach ($organizations as $organization): ?>
                 <tr>
                     <td><?= h($organization->name) ?></td>
-                    <td>
+                    <td style="white-space: nowrap;">
                         <?php if ($organization->is_active): ?>
                             <span style="color: green;">● <?= __('Aktiv') ?></span>
                         <?php else: ?>
