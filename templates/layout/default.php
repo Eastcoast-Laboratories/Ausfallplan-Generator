@@ -101,6 +101,16 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
         </div>
     </main>
     <footer>
+        <div style="text-align: center; padding: 2rem 0; border-top: 1px solid #e0e0e0; margin-top: 3rem;">
+            <p style="margin: 0; font-size: 0.9rem; color: #666;">
+                <?= $this->Html->link(__('Impressum'), ['controller' => 'Pages', 'action' => 'display', 'impressum'], ['style' => 'color: #666; margin: 0 1rem;']) ?>
+                |
+                <?= $this->Html->link(__('Datenschutzerklärung'), ['controller' => 'Pages', 'action' => 'display', 'datenschutz'], ['style' => 'color: #666; margin: 0 1rem;']) ?>
+            </p>
+            <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #999;">
+                &copy; <?= date('Y') ?> Eastcoast Laboratories
+            </p>
+        </div>
     </footer>
 </body>
 </html>

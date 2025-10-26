@@ -8,8 +8,8 @@
 $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
 ?>
 
-<!-- Include Sortable.js for drag & drop -->
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<!-- Include Sortable.js for drag & drop (local copy) -->
+<script src="<?= $this->Url->build('/js/Sortable.min.js') ?>"></script>
 
 <div class="manage-children content">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">

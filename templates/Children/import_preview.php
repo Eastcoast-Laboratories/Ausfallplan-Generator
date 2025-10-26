@@ -41,7 +41,7 @@ $this->assign('title', __('Import-Vorschau'));
                 <div>
                     <strong><?= __('Nur Vorname') ?></strong>
                     <div style="color: #666; font-size: 0.9rem; margin-top: 0.25rem;">
-                        <?= __('Beispiel: Valentina, Amadeus, Noah') ?>
+                        <?= __('Beispiel: Hans, Andi, Noah') ?>
                     </div>
                 </div>
             </label>
@@ -131,7 +131,7 @@ $this->assign('title', __('Import-Vorschau'));
                 echo implode(', ', $names);
                 ?>
                 <span style="color: #666; font-size: 0.9rem;">
-                    (<?= h($siblings[0]['address']) ?>)
+                    (<?= h($siblings[0]['last_name']) ?>)
                 </span>
             </div>
         <?php endforeach; ?>

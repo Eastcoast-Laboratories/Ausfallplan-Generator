@@ -32,14 +32,18 @@
 ----
 
 
-auf whitelist gab es einen button "@index.php#L33-34  der nicht mehr auftaucht, repariere das
+- @production-e2e.spec.ts#L211-212 wann kommt diese meldung? abhängig von erfolg der tests? oder immer, auch wenn die tests teileweise fehlschlagen?
+
+bei http://localhost:8080/sibling-groups/view/5  bei jedem Kind einnen "Kind löschen" link mit confirm
+
+- alle externen scripts, wie z.b. https://cdn.jsdelivr.net lokal vorhalten
+
+- datenschutzerklärung und Impressum generieren und in der navigation ganz unten verlinken: Eastcoast Laboratories, Ruben Barkow-Kuder, Knickweg 16, 24114 Kiel, Telefon: Kiel-5368723, Kontakt: ausfallplan-generator-kontakt@it.z11.de
 
 
 # weitere TODOs
 
- erstelle in jedem vorhandenen playwright test im head eine Beschreibung, was der test genau tut. wenn sich dabei herausstellt , dass der test etwas testet, was die neue organisation betrifft, dann aktualisiere diese tests bis sie erfolgreich durchlaufen
-
-höre nicht auf, bevor nicht alle spec.js aktualisiert sind im repository
+- erstelle in jedem vorhandenen playwright test im head eine Beschreibung, was der test genau tut, wenn der noch nicht da ist. wenn sich dabei herausstellt , dass der test etwas testet, was die neue organisation betrifft, dann aktualisiere diese tests bis sie erfolgreich durchlaufen. ergänze auch in jedem test die git commit id und die commit message als einzeiler, wobei der erstellt wurde höre nicht auf, bevor nicht alle spec.js aktualisiert sind im repository
 
 ## Checkliste: Admin-Features
 
