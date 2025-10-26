@@ -180,4 +180,66 @@ test.describe('Language Switcher Tests', () => {
     
     console.log('✅ Language switcher works on mobile');
   });
+
+  test('should correctly switch navigation text DE↔EN multiple times', async ({ page }) => {
+    // 1. Login (starts in German)
+    await login(page);
+    
+    // 2. Verify German navigation texts
+    await expect(page.locator('.sidebar-nav-item', { hasText: 'Dashboard' })).toBeVisible();
+    await expect(page.locator('.sidebar-nav-item', { hasText: 'Kinder' })).toBeVisible();
+    await expect(page.locator('.sidebar-nav-item', { hasText: 'Ausfallpläne' })).toBeVisible();
+    console.log('✅ German navigation confirmed');
+    
+    // 3. Switch to English (1st switch)
+    await page.hover('.language-switcher');
+    await page.waitForSelector('.language-dropdown', { state: 'visible' });
+    await page.click('.language-option:has-text("English")');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500); // Wait for DOM update
+    
+    // 4. Verify English navigation texts
+    await expect(page.locator('.sidebar-nav-item', { hasText: 'Dashboard' })).toBeVisible();
+    await expect(page.locator('.sidebar-nav-item', { hasText: 'Children' })).toBeVisible();
+    await expect(page.locator('.sidebar-nav-item', { hasText: 'Schedules' })).toBeVisible();
+    console.log('✅ English navigation confirmed (1st switch)');
+    
+    // 5. Switch back to German (2nd switch)
+    await page.hover('.language-switcher');
+    await page.waitForSelector('.language-dropdown', { state: 'visible' });
+    await page.click('.language-option:has-text("Deutsch")');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500);
+    
+    // 6. Verify German navigation is back
+    await expect(page.locator('.sidebar-nav-item', { hasText: 'Kinder' })).toBeVisible();
+    await expect(page.locator('.sidebar-nav-item', { hasText: 'Ausfallpläne' })).toBeVisible();
+    console.log('✅ German navigation confirmed (2nd switch)');
+    
+    // 7. Switch to English again (3rd switch)
+    await page.hover('.language-switcher');
+    await page.waitForSelector('.language-dropdown', { state: 'visible' });
+    await page.click('.language-option:has-text("English")');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500);
+    
+    // 8. Verify English navigation still works
+    await expect(page.locator('.sidebar-nav-item', { hasText: 'Children' })).toBeVisible();
+    await expect(page.locator('.sidebar-nav-item', { hasText: 'Schedules' })).toBeVisible();
+    console.log('✅ English navigation confirmed (3rd switch)');
+    
+    // 9. Final switch back to German (4th switch)
+    await page.hover('.language-switcher');
+    await page.waitForSelector('.language-dropdown', { state: 'visible' });
+    await page.click('.language-option:has-text("Deutsch")');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500);
+    
+    // 10. Final verification
+    await expect(page.locator('.sidebar-nav-item', { hasText: 'Kinder' })).toBeVisible();
+    await expect(page.locator('.sidebar-nav-item', { hasText: 'Ausfallpläne' })).toBeVisible();
+    await expect(page.locator('.language-flag')).toContainText('🇩🇪');
+    
+    console.log('✅ Multiple language switches successful - navigation text correct!');
+  });
 });

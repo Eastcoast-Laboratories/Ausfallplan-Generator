@@ -52,9 +52,11 @@ bei http://localhost:8080/schedules/add muss eine selectbox, die nur sichtbar is
  - die sprachauswahl oben rechts muss auch im register form funktionieren, (im moment ist immer deutsch)
 - phpunittests alle noch mal reparieren @phpunit_remaining_work.md#L1-312 
 
-- wenn ein kind nicht auf der nachrückliste ist, dann muss es im report rechts unterhalb der nachrückliste angezeigt werden unter "immer am Ende" und auch nicht an den tagen unten als kind für den start der nachrückliste mit auftauchen
+- [ ] wenn ein kind nicht auf der nachrückliste ist, dann muss es im report rechts unterhalb der nachrückliste angezeigt werden unter "immer am Ende" und auch nicht an den tagen unten als kind für den start der nachrückliste mit auftauchen
 
-- der ausfallplan muss exportierbar sein als csv
+- [ ] der ausfallplan muss exportierbar sein als csv
+
+- [ ] die sprachwechslung von englisch zurück zu deutsch funktioniert nicht immer, mache einen playwright test, der sich einloggt, dann die sprache ein paar mal wechselt und die navigation überprüft ob das in der richtigen sprache ist
 
 
 
