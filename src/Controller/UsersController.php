@@ -356,7 +356,7 @@ class UsersController extends AppController
         parent::beforeFilter($event);
         
         // Allow public access to register, login, and password recovery
-        $this->Authentication->addUnauthenticatedActions(['login', 'register', 'setLanguage', 'verify', 'forgotPassword', 'resetPassword']);
+        $this->Authentication->addUnauthenticatedActions(['login', 'register', 'changeLanguage', 'verify', 'forgotPassword', 'resetPassword']);
     }
 
     public function verify($token = null)
