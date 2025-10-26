@@ -26,7 +26,7 @@ test.describe('Admin Login and Permissions', () => {
         
         console.log('📍 Step 2: Fill in admin credentials');
         // Use the admin account created in fixtures
-        await page.fill('input[name="email"]', 'admin@example.com');
+        await page.fill('input[name="email"]', 'ausfallplan-sysadmin@it.z11.de');
         await page.fill('input[name="password"]', 'password123');
         
         console.log('📍 Step 3: Submit login form');
@@ -37,7 +37,7 @@ test.describe('Admin Login and Permissions', () => {
         await expect(page).toHaveURL(/dashboard/);
         
         console.log('📍 Step 5: Verify admin is logged in');
-        const userGreeting = page.locator('text=admin@example.com').or(page.locator('text=Admin'));
+        const userGreeting = page.locator('text=ausfallplan-sysadmin@it.z11.de').or(page.locator('text=Admin'));
         await expect(userGreeting.first()).toBeVisible({ timeout: 3000 });
         
         console.log('✅ Admin login successful');
@@ -46,7 +46,7 @@ test.describe('Admin Login and Permissions', () => {
     test('should show admin navigation links', async ({ page }) => {
         console.log('📍 Step 1: Login as admin');
         await page.goto('http://localhost:8080/login');
-        await page.fill('input[name="email"]', 'admin@example.com');
+        await page.fill('input[name="email"]', 'ausfallplan-sysadmin@it.z11.de');
         await page.fill('input[name="password"]', 'password123');
         await page.click('button[type="submit"]');
         await page.waitForURL('**/dashboard');
@@ -64,7 +64,7 @@ test.describe('Admin Login and Permissions', () => {
     test('should see all schedules from all users', async ({ page }) => {
         console.log('📍 Step 1: Login as admin');
         await page.goto('http://localhost:8080/login');
-        await page.fill('input[name="email"]', 'admin@example.com');
+        await page.fill('input[name="email"]', 'ausfallplan-sysadmin@it.z11.de');
         await page.fill('input[name="password"]', 'password123');
         await page.click('button[type="submit"]');
         await page.waitForURL('**/dashboard');

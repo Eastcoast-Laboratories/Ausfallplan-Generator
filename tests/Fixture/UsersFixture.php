@@ -20,7 +20,7 @@ class UsersFixture extends TestFixture
         $this->records = [
             [
                 'id' => 1,
-                'email' => 'admin@example.com',
+                'email' => 'ausfallplan-sysadmin@it.z11.de',
                 'password' => '$2y$10$u05j8FjsvLBNdfhBhc21LOuVMpzpabVXQ9OpC2wO3pSO0q6t7HHMO', // password123
                 'is_system_admin' => true,
                 'status' => 'active',

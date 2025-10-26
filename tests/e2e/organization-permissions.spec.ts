@@ -144,7 +144,7 @@ test.describe('Organization-based Permissions', () => {
     test.beforeEach(async ({ page }) => {
       // Login as admin
       await page.goto('/users/login');
-      await page.fill('input[name="email"]', 'admin@example.com');
+      await page.fill('input[name="email"]', 'ausfallplan-sysadmin@it.z11.de');
       await page.fill('input[name="password"]', 'password123');
       await page.click('button[type="submit"]');
       await expect(page).toHaveURL(/dashboard/);

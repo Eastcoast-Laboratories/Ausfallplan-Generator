@@ -143,7 +143,7 @@ npm run test:debug
 Screenshots are saved to `screenshots/` directory (gitignored).
 
 **Test User Credentials:**
-- Email: `admin@example.com`
+- Email: `ausfallplan-sysadmin@it.z11.de`
 - Password: `password123`
 
 ## Tech Stack

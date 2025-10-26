@@ -20,7 +20,7 @@ test.describe('Navigation Visibility Tests', () => {
     await page.goto('/users/login');
     
     // 2. Login with test user
-    await page.fill('input[name="email"]', 'admin@example.com');
+    await page.fill('input[name="email"]', 'ausfallplan-sysadmin@it.z11.de');
     await page.fill('input[name="password"]', 'password123');
     await page.click('button[type="submit"]');
     
@@ -52,7 +52,7 @@ test.describe('Navigation Visibility Tests', () => {
     
     // Login
     await page.goto('/users/login');
-    await page.fill('input[name="email"]', 'admin@example.com');
+    await page.fill('input[name="email"]', 'ausfallplan-sysadmin@it.z11.de');
     await page.fill('input[name="password"]', 'password123');
     await page.click('button[type="submit"]');
     await page.waitForURL(/dashboard/);
@@ -89,7 +89,7 @@ test.describe('Navigation Visibility Tests', () => {
   test('should show user dropdown menu', async ({ page }) => {
     // Login
     await page.goto('/users/login');
-    await page.fill('input[name="email"]', 'admin@example.com');
+    await page.fill('input[name="email"]', 'ausfallplan-sysadmin@it.z11.de');
     await page.fill('input[name="password"]', 'password123');
     await page.click('button[type="submit"]');
     await page.waitForURL(/dashboard/);
@@ -142,7 +142,7 @@ test.describe('Navigation Visibility Tests', () => {
   test('should show language switcher', async ({ page }) => {
     // Login
     await page.goto('/users/login');
-    await page.fill('input[name="email"]', 'admin@example.com');
+    await page.fill('input[name="email"]', 'ausfallplan-sysadmin@it.z11.de');
     await page.fill('input[name="password"]', 'password123');
     await page.click('button[type="submit"]');
     await page.waitForURL(/dashboard/);

@@ -208,7 +208,7 @@ $orgUsersTable->save($orgUser);
 ### System Admin Pattern:
 ```php
 $admin = $usersTable->newEntity([
-    'email' => 'admin@example.com',
+    'email' => 'ausfallplan-sysadmin@it.z11.de',
     'password' => 'password123',
     'is_system_admin' => true,  // ← System-wide admin
     'status' => 'active',

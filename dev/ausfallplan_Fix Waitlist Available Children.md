@@ -5539,7 +5539,7 @@ SYSADMIN_BCC_EMAIL=ausfallplan-sysadmin@it.z11.de
 SYSADMIN_BCC_EMAIL=
 
 # Andere E-Mail
-SYSADMIN_BCC_EMAIL=admin@example.com
+SYSADMIN_BCC_EMAIL=ausfallplan-sysadmin@it.z11.de
 ```
 
 ### 🔧 Technische Details:
@@ -10468,7 +10468,7 @@ COOKIE_FILE="/tmp/admin-test-$(date +%s).txt"
 # Login
 LOGIN_RESULT=$(curl -s -c "$COOKIE_FILE" -X POST \
   "https://ausfallplan-generator.z11.de/users/login" \
-  -d "email=admin@example.com" \
+  -d "email=ausfallplan-sysadmin@it.z11.de" \
   -d "password=password123" \
   -L 2>&1 | grep -i "dashboard\|error\|ungültig" | head -5)
 
@@ -12410,7 +12410,7 @@ Changes to AuthenticationFlowTest:
 - Registration: role → requested_role, added password_confirm
 - All user creation: Removed organization_id and role
 - After each user save: Create organization_users entry separately
-- User 1 (admin@example.com): is_system_admin = true, org_admin role
+- User 1 (ausfallplan-sysadmin@it.z11.de): is_system_admin = true, org_admin role
 - User 2-4: Regular users with org roles in organization_users table
 
 Migration from:
@@ -13291,7 +13291,7 @@ Playwright-Browser fehlen, aber der Test ist aktualisiert. Ich committe jetzt:
 *User accepted the command `timeout 5 bash -c 'git add tests/e2e/admin-organizations.spec.js && git commit -m "test: Complete admin organizations E2E test with admin@demo.kita
 
 Updated test/e2e/admin-organizations.spec.js:
-- Changed credentials from admin@example.com to admin@demo.kita / asbdasdaddd
+- Changed credentials from ausfallplan-sysadmin@it.z11.de to admin@demo.kita / asbdasdaddd
 - Changed URLs from remote (z11.de) to localhost:8080
 - Enhanced main test to explicitly check NO access denied messages
 - Added comprehensive checks:
@@ -13320,7 +13320,7 @@ Related to: Fix for is_system_admin field loading in authentication"'`*
 #### **1. Credentials aktualisiert**
 ```javascript
 // ALT:
-await page.fill('input[name="email"]', 'admin@example.com');
+await page.fill('input[name="email"]', 'ausfallplan-sysadmin@it.z11.de');
 await page.fill('input[name="password"]', 'password123');
 
 // NEU:
