@@ -21,6 +21,17 @@ class AuthenticationFlowTest extends TestCase
     ];
 
     /**
+     * Set up test environment
+     */
+    public function setUp(): void
+    {
+        parent::setUp();
+        
+        // Set English locale for tests
+        \Cake\I18n\I18n::setLocale('en_US');
+    }
+
+    /**
      * Test registration creates user with pending status
      */
     public function testRegistrationCreatesPendingUser()
