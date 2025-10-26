@@ -26,7 +26,11 @@ class ChildrenController extends AppController
                 ->contain(['Organizations', 'SiblingGroups'])
                 ->orderBy(['Children.is_active' => 'DESC', 'Children.name' => 'ASC'])
                 ->all();
-            $this->set(compact('children'));
+            
+            // Load sibling names for children with siblings
+            $siblingNames = $this->loadSiblingNames($children);
+            
+            $this->set(compact('children', 'siblingNames'));
             return;
         }
         
@@ -42,8 +46,11 @@ class ChildrenController extends AppController
             ->contain(['Organizations', 'SiblingGroups'])
             ->orderBy(['Children.is_active' => 'DESC', 'Children.name' => 'ASC'])
             ->all();
+        
+        // Load sibling names for children with siblings
+        $siblingNames = $this->loadSiblingNames($children);
 
-        $this->set(compact('children'));
+        $this->set(compact('children', 'siblingNames'));
     }
 
     /**
@@ -66,8 +73,11 @@ class ChildrenController extends AppController
             $this->Flash->error(__('Zugriff verweigert.'));
             return $this->redirect(['action' => 'index']);
         }
+        
+        // Load sibling names if child has siblings
+        $siblingNames = $this->loadSiblingNames([$child]);
 
-        $this->set(compact('child'));
+        $this->set(compact('child', 'siblingNames'));
     }
 
     /**
@@ -160,7 +170,10 @@ class ChildrenController extends AppController
             ->where(['SiblingGroups.organization_id' => $child->organization_id ?? 0])
             ->all();
         
-        $this->set(compact('child', 'siblingGroups'));
+        // Load sibling names if child has siblings
+        $siblingNames = $this->loadSiblingNames([$child]);
+        
+        $this->set(compact('child', 'siblingGroups', 'siblingNames'));
     }
 
     /**
@@ -435,5 +448,50 @@ class ChildrenController extends AppController
         }
         
         return $this->redirect(['action' => 'index']);
+    }
+    
+    /**
+     * Load sibling names for a collection of children
+     *
+     * @param iterable $children Children to load sibling names for
+     * @return array Map of child_id => comma-separated sibling names
+     */
+    private function loadSiblingNames(iterable $children): array
+    {
+        $siblingNames = [];
+        
+        foreach ($children as $child) {
+            if ($child->sibling_group_id && !isset($siblingNames[$child->id])) {
+                // CRITICAL: Check total count in group FIRST
+                $totalInGroup = $this->fetchTable('Children')->find()
+                    ->where(['sibling_group_id' => $child->sibling_group_id])
+                    ->count();
+                
+                // ERROR: A sibling group with only 1 child is a DATA ERROR!
+                if ($totalInGroup <= 1) {
+                    error_log("ERROR: Child '{$child->name}' (ID: {$child->id}) has sibling_group_id {$child->sibling_group_id} but is ALONE in that group! This is a data integrity error.");
+                    // SKIP this child - do NOT show sibling badge
+                    continue;
+                }
+                
+                $siblings = $this->fetchTable('Children')->find()
+                    ->where([
+                        'sibling_group_id' => $child->sibling_group_id,
+                        'id !=' => $child->id
+                    ])
+                    ->orderBy(['name' => 'ASC'])
+                    ->all();
+                
+                $names = [];
+                foreach ($siblings as $sib) {
+                    $names[] = $sib->name;
+                }
+                
+                // Should never be empty due to count check
+                $siblingNames[$child->id] = implode(', ', $names);
+            }
+        }
+        
+        return $siblingNames;
     }
 }
