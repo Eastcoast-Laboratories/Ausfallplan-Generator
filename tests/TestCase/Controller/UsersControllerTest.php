@@ -292,7 +292,7 @@ class UsersControllerTest extends TestCase
         ]));
 
         // Simulate logged in user
-        $this->session(['Auth' => ['User' => $user]]);
+        $this->session(['Auth' => $user]);
 
         // Update email
         $this->post('/users/profile', [
@@ -340,7 +340,7 @@ class UsersControllerTest extends TestCase
         $oldPasswordHash = $user->password;
 
         // Simulate logged in user
-        $this->session(['Auth' => ['User' => $user]]);
+        $this->session(['Auth' => $user]);
 
         // Change password
         $this->post('/users/profile', [
@@ -394,7 +394,7 @@ class UsersControllerTest extends TestCase
         $oldPasswordHash = $user->password;
 
         // Simulate logged in user
-        $this->session(['Auth' => ['User' => $user]]);
+        $this->session(['Auth' => $user]);
 
         // Try to change password with mismatch
         $this->post('/users/profile', [
@@ -442,7 +442,7 @@ class UsersControllerTest extends TestCase
         ]));
 
         // Simulate logged in user
-        $this->session(['Auth' => ['User' => $user]]);
+        $this->session(['Auth' => $user]);
 
         // Try to change role
         $this->post('/users/profile', [
