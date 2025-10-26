@@ -45,7 +45,35 @@ class SchedulesController extends AppController
         // Get active schedule from session for highlighting
         $activeScheduleId = $this->request->getSession()->read('activeScheduleId');
 
-        $this->set(compact('schedules', 'user', 'activeScheduleId'));
+        // Count children per schedule
+        $assignmentsTable = $this->fetchTable('Assignments');
+        $scheduleDaysTable = $this->fetchTable('ScheduleDays');
+        
+        $childrenCounts = [];
+        foreach ($schedules as $schedule) {
+            // Get schedule_day_ids for this schedule
+            $scheduleDayIds = $scheduleDaysTable->find()
+                ->where(['schedule_id' => $schedule->id])
+                ->select(['id'])
+                ->all()
+                ->extract('id')
+                ->toArray();
+            
+            if (!empty($scheduleDayIds)) {
+                // Count unique children assigned to these schedule days
+                $count = $assignmentsTable->find()
+                    ->where(['schedule_day_id IN' => $scheduleDayIds])
+                    ->select(['child_id'])
+                    ->distinct(['child_id'])
+                    ->count();
+                
+                $childrenCounts[$schedule->id] = $count;
+            } else {
+                $childrenCounts[$schedule->id] = 0;
+            }
+        }
+
+        $this->set(compact('schedules', 'user', 'activeScheduleId', 'childrenCounts'));
     }
 
     /**
@@ -56,27 +84,26 @@ class SchedulesController extends AppController
     public function setActive()
     {
         $this->request->allowMethod(['post']);
-        $this->viewBuilder()->setClassName('Json');
         
         $scheduleId = $this->request->getData('schedule_id');
         
         if ($scheduleId) {
             $this->request->getSession()->write('activeScheduleId', (int)$scheduleId);
             
-            $this->set([
-                'success' => true,
-                'message' => __('Active schedule set.'),
-                '_serialize' => ['success', 'message']
-            ]);
+            return $this->response
+                ->withType('application/json')
+                ->withStringBody(json_encode([
+                    'success' => true,
+                    'message' => __('Active schedule set.')
+                ]));
         } else {
-            $this->set([
-                'success' => false,
-                'error' => __('Invalid schedule ID.'),
-                '_serialize' => ['success', 'error']
-            ]);
+            return $this->response
+                ->withType('application/json')
+                ->withStringBody(json_encode([
+                    'success' => false,
+                    'error' => __('Invalid schedule ID.')
+                ]));
         }
-        
-        return $this->response->withType('application/json');
     }
 
     /**
