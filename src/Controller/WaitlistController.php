@@ -268,8 +268,12 @@ class WaitlistController extends AppController
                     }
                 }
                 
-                // Set sibling names - should never be empty now due to count check above
-                $siblingNames[$entry->child->id] = implode(', ', $names);
+                // CRITICAL: Only set if names found (safety check)
+                if (!empty($names)) {
+                    $siblingNames[$entry->child->id] = implode(', ', $names);
+                } else {
+                    error_log("WARNING: Child '{$entry->child->name}' (ID: {$entry->child->id}) passed count check but siblings query returned empty! Database inconsistency!");
+                }
             }
         }
         
@@ -319,8 +323,12 @@ class WaitlistController extends AppController
                         $names[] = $sib->name;
                     }
                     
-                    // Should never be empty due to count check
-                    $siblingNames[$child->id] = implode(', ', $names);
+                    // CRITICAL: Only set if names found (safety check)
+                    if (!empty($names)) {
+                        $siblingNames[$child->id] = implode(', ', $names);
+                    } else {
+                        error_log("WARNING: Child '{$child->name}' (ID: {$child->id}) passed count check but siblings query returned empty! Database inconsistency!");
+                    }
                 }
             }
         }

@@ -487,8 +487,12 @@ class ChildrenController extends AppController
                     $names[] = $sib->name;
                 }
                 
-                // Should never be empty due to count check
-                $siblingNames[$child->id] = implode(', ', $names);
+                // CRITICAL: Only set if names found (safety check)
+                if (!empty($names)) {
+                    $siblingNames[$child->id] = implode(', ', $names);
+                } else {
+                    error_log("WARNING: Child '{$child->name}' (ID: {$child->id}) passed count check but siblings query returned empty! Database inconsistency!");
+                }
             }
         }
         
