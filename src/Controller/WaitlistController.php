@@ -137,9 +137,81 @@ class WaitlistController extends AppController
             }
             
             $countNotOnWaitlist = count($availableChildren);
+            
+            // Build sibling groups map and load sibling names (SAME LOGIC AS BELOW)
             $siblingGroupsMap = [];
             $siblingNames = [];
             $missingSiblings = [];
+            
+            foreach ($waitlistEntries as $entry) {
+                if ($entry->child && $entry->child->sibling_group_id) {
+                    // Check total count in group FIRST
+                    $totalInGroup = $this->fetchTable('Children')->find()
+                        ->where(['sibling_group_id' => $entry->child->sibling_group_id])
+                        ->count();
+                    
+                    if ($totalInGroup <= 1) {
+                        continue; // Skip single-child groups
+                    }
+                    
+                    $siblingGroupsMap[$entry->id] = $entry->child->sibling_group_id;
+                    
+                    // Load ALL siblings
+                    $siblings = $this->fetchTable('Children')->find()
+                        ->where([
+                            'sibling_group_id' => $entry->child->sibling_group_id,
+                            'id !=' => $entry->child->id
+                        ])
+                        ->orderBy(['name' => 'ASC'])
+                        ->all();
+                    
+                    $names = [];
+                    foreach ($siblings as $sib) {
+                        $names[] = $sib->name;
+                        
+                        if (!in_array($sib->id, $childrenInSchedule)) {
+                            $missingSiblings[] = [
+                                'name' => $sib->name,
+                                'sibling_of' => $entry->child->name,
+                            ];
+                        }
+                    }
+                    
+                    if (!empty($names)) {
+                        $siblingNames[$entry->child->id] = implode(', ', $names);
+                    }
+                }
+            }
+            
+            // Load sibling names for available children too
+            foreach ($availableChildren as $child) {
+                if ($child->sibling_group_id && !isset($siblingNames[$child->id])) {
+                    $totalInGroup = $this->fetchTable('Children')->find()
+                        ->where(['sibling_group_id' => $child->sibling_group_id])
+                        ->count();
+                    
+                    if ($totalInGroup <= 1) {
+                        continue;
+                    }
+                    
+                    $siblings = $this->fetchTable('Children')->find()
+                        ->where([
+                            'sibling_group_id' => $child->sibling_group_id,
+                            'id !=' => $child->id
+                        ])
+                        ->orderBy(['name' => 'ASC'])
+                        ->all();
+                    
+                    $names = [];
+                    foreach ($siblings as $sib) {
+                        $names[] = $sib->name;
+                    }
+                    
+                    if (!empty($names)) {
+                        $siblingNames[$child->id] = implode(', ', $names);
+                    }
+                }
+            }
             
             $this->set(compact('schedules', 'selectedSchedule', 'waitlistEntries', 'availableChildren', 'countNotOnWaitlist', 'siblingGroupsMap', 'siblingNames', 'missingSiblings', 'user'));
             return;
