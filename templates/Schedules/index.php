@@ -20,6 +20,7 @@ $this->assign('title', __('Schedules'));
                         <th><?= __('Organization') ?></th>
                     <?php endif; ?>
                     <th><?= __('Days') ?></th>
+                    <th><?= __('Children') ?></th>
                     <th><?= __('Max Children per Day') ?></th>
                     <th><?= __('Created') ?></th>
                     <th class="actions"><?= __('Actions') ?></th>
@@ -53,6 +54,12 @@ $this->assign('title', __('Schedules'));
                         </td>
                     <?php endif; ?>
                     <td><?= h($schedule->days_count) ?></td>
+                    <td>
+                        <strong><?= isset($childrenCounts[$schedule->id]) ? h($childrenCounts[$schedule->id]) : 0 ?></strong>
+                        <?php if (isset($childrenCounts[$schedule->id]) && $childrenCounts[$schedule->id] > 0): ?>
+                            <span style="color: #4caf50;">✓</span>
+                        <?php endif; ?>
+                    </td>
                     <td><?= h($schedule->capacity_per_day) ?></td>
                     <td><?= h($schedule->created->format('Y-m-d H:i')) ?></td>
                     <td class="actions">
