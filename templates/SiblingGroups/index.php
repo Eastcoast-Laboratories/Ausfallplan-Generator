@@ -22,9 +22,27 @@ $this->assign('title', __('Sibling Groups'));
             </thead>
             <tbody>
                 <?php foreach ($siblingGroups as $siblingGroup): ?>
-                <tr>
-                    <td><?= h($siblingGroup->label) ?></td>
-                    <td><?= count($siblingGroup->children) ?> <?= __('Children') ?></td>
+                <?php 
+                    $isError = isset($errorGroups) && in_array($siblingGroup->id, $errorGroups);
+                    $rowStyle = $isError ? 'background: #ffe5e5; border-left: 4px solid #d32f2f;' : '';
+                ?>
+                <tr style="<?= $rowStyle ?>">
+                    <td>
+                        <?= h($siblingGroup->label) ?>
+                        <?php if ($isError): ?>
+                            <span style="color: #d32f2f; font-weight: bold; margin-left: 0.5rem;" title="<?= __('Diese Gruppe hat nur 1 Kind - das ist ein Datenfehler!') ?>">
+                                ⚠️ FEHLER
+                            </span>
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <?= count($siblingGroup->children) ?> <?= __('Children') ?>
+                        <?php if ($isError): ?>
+                            <span style="color: #d32f2f; font-weight: bold;">
+                                (zu wenig!)
+                            </span>
+                        <?php endif; ?>
+                    </td>
                     <td><?= h($siblingGroup->created) ?></td>
                     <td class="actions">
                         <?= $this->Html->link(__('View'), ['action' => 'view', $siblingGroup->id]) ?>
