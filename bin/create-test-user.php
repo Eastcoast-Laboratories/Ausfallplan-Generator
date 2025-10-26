@@ -23,7 +23,7 @@ if (!$org) {
 }
 
 // Check if user exists
-$user = $connection->execute('SELECT id FROM users WHERE email = ?', ['admin@example.com'])->fetch();
+$user = $connection->execute('SELECT id FROM users WHERE email = ?', ['ausfallplan-sysadmin@it.z11.de'])->fetch();
 
 if (!$user) {
     echo "Creating test user...\n";
@@ -32,7 +32,7 @@ if (!$user) {
     
     $connection->execute(
         'INSERT INTO users (organization_id, email, password, role, created, modified) VALUES (?, ?, ?, ?, NOW(), NOW())',
-        [$orgId, 'admin@example.com', $hashedPassword, 'admin']
+        [$orgId, 'ausfallplan-sysadmin@it.z11.de', $hashedPassword, 'admin']
     );
     
     echo "✅ Test user created successfully!\n";

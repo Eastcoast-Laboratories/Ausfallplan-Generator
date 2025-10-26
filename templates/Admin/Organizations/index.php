@@ -6,7 +6,10 @@
 $this->assign('title', __('Organisationsverwaltung'));
 ?>
 <div class="organizations index content">
-    <h3><?= __('Organisationen') ?></h3>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="margin: 0;"><?= __('Organisationen') ?></h3>
+        <?= $this->Html->link('+ ' . __('Add Organization'), ['action' => 'add'], ['class' => 'button']) ?>
+    </div>
     
     <div class="table-responsive">
         <table>
