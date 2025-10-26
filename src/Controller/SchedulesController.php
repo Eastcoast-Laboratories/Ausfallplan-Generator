@@ -362,26 +362,42 @@ class SchedulesController extends AppController
     {
         $this->request->allowMethod(['post']);
         
+        // Try both query params and post data
         $queryParams = $this->request->getQueryParams();
-        $scheduleId = $queryParams['schedule_id'] ?? null;
-        $childId = $queryParams['child_id'] ?? null;
+        $postData = $this->request->getData();
+        
+        $scheduleId = $queryParams['schedule_id'] ?? $postData['schedule_id'] ?? null;
+        $childId = $queryParams['child_id'] ?? $postData['child_id'] ?? null;
         
         if (!$scheduleId || !$childId) {
             $this->Flash->error(__('Ungültige Parameter.'));
             return $this->redirect(['action' => 'index']);
         }
         
-        // Find and delete assignment
-        $assignment = $this->fetchTable('Assignments')->find()
-            ->innerJoinWith('ScheduleDays')
-            ->where([
-                'ScheduleDays.schedule_id' => $scheduleId,
-                'Assignments.child_id' => $childId,
-            ])
-            ->first();
+        // Find and delete ALL assignments for this child in this schedule
+        $assignmentsTable = $this->fetchTable('Assignments');
+        $scheduleDaysTable = $this->fetchTable('ScheduleDays');
         
-        if ($assignment && $this->fetchTable('Assignments')->delete($assignment)) {
-            $this->Flash->success(__('Child removed from schedule.'));
+        // Get all schedule_day_ids for this schedule
+        $scheduleDayIds = $scheduleDaysTable->find()
+            ->where(['schedule_id' => $scheduleId])
+            ->select(['id'])
+            ->all()
+            ->extract('id')
+            ->toArray();
+        
+        if (!empty($scheduleDayIds)) {
+            // Delete all assignments for this child in these days
+            $deleted = $assignmentsTable->deleteAll([
+                'schedule_day_id IN' => $scheduleDayIds,
+                'child_id' => $childId
+            ]);
+            
+            if ($deleted > 0) {
+                $this->Flash->success(__('Child removed from schedule.'));
+            } else {
+                $this->Flash->error(__('Could not remove child from schedule.'));
+            }
         } else {
             $this->Flash->error(__('Could not remove child from schedule.'));
         }

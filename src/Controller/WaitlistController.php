@@ -234,11 +234,11 @@ class WaitlistController extends AppController
             if ($entry->child->sibling_group_id) {
                 $siblingGroupsMap[$entry->id] = $entry->child->sibling_group_id;
                 
-                // Load all siblings for this group
+                // Load all siblings for this group (including current child)
                 $siblings = $this->fetchTable('Children')->find()
                     ->where([
                         'sibling_group_id' => $entry->child->sibling_group_id,
-                        'id !=' => $entry->child->id
+                        'id !=' => $entry->child->id // Exclude current child from list
                     ])
                     ->all();
                 
@@ -254,7 +254,9 @@ class WaitlistController extends AppController
                         ];
                     }
                 }
-                $siblingNames[$entry->child->id] = implode(', ', $names);
+                
+                // Set sibling names - show "keine" if empty
+                $siblingNames[$entry->child->id] = !empty($names) ? implode(', ', $names) : __('keine weiteren');
             }
         }
         
