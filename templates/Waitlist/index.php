@@ -124,6 +124,13 @@ $this->assign('title', __('Waitlist'));
                     <strong>ERROR: $siblingNames not set!</strong>
                 </div>
             <?php endif; ?>
+            <!-- DEBUG: Controller Debug Info -->
+            <?php if (isset($debugInfo)): ?>
+                <div style="background: #ffeb3b; padding: 10px; margin: 10px 0; border: 2px solid #f57f17;">
+                    <strong>DEBUG: Controller Debug Info</strong><br>
+                    <pre style="margin: 0; white-space: pre-wrap; font-size: 0.9em;"><?php foreach ($debugInfo as $info): echo $info . "\n"; endforeach; ?></pre>
+                </div>
+            <?php endif; ?>
             <div id="waitlist-sortable" style="background: #fff3e0; padding: 1rem; border-radius: 8px; min-height: 300px;">
                 <?php if (!empty($waitlistEntries) && (is_countable($waitlistEntries) ? count($waitlistEntries) : $waitlistEntries->count()) > 0): ?>
                     <?php foreach ($waitlistEntries as $entry): ?>

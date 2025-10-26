@@ -229,9 +229,15 @@ class WaitlistController extends AppController
         $siblingGroupsMap = [];
         $siblingNames = [];
         $missingSiblings = []; // Track siblings not in schedule
+        $debugInfo = []; // NEW: Debug info for view
+        
+        $debugInfo[] = "Starting sibling loop, waitlistEntries count: " . count($waitlistEntries);
         
         foreach ($waitlistEntries as $entry) {
-            if ($entry->child->sibling_group_id) {
+            $debugInfo[] = "Entry ID {$entry->id}, child_id: {$entry->child_id}";
+            
+            if ($entry->child && $entry->child->sibling_group_id) {
+                $debugInfo[] = "Child {$entry->child->name} HAS sibling_group_id: {$entry->child->sibling_group_id}";
                 $siblingGroupsMap[$entry->id] = $entry->child->sibling_group_id;
                 
                 // Load ALL siblings for this group (from entire Children table, not just schedule/waitlist)
@@ -247,9 +253,11 @@ class WaitlistController extends AppController
                 error_log("DEBUG: Looking for siblings of '{$entry->child->name}' (ID: {$entry->child->id}, sibling_group_id: {$entry->child->sibling_group_id})");
                 error_log("DEBUG: Found " . $siblings->count() . " siblings");
                 
+                $debugInfo[] = "Found {$siblings->count()} siblings for sibling_group_id {$entry->child->sibling_group_id}";
+                
                 $names = [];
                 foreach ($siblings as $sib) {
-                    error_log("DEBUG: Sibling found: '{$sib->name}' (ID: {$sib->id})");
+                    $debugInfo[] = "  - Sibling: {$sib->name} (ID: {$sib->id})";
                     $names[] = $sib->name;
                     
                     // Check if sibling is in schedule
@@ -261,12 +269,15 @@ class WaitlistController extends AppController
                     }
                 }
                 
-                error_log("DEBUG: Final sibling names array: " . json_encode($names));
+                $debugInfo[] = "Names array: " . json_encode($names);
                 
                 // Set sibling names - show all siblings found in database
                 $siblingNames[$entry->child->id] = !empty($names) ? implode(', ', $names) : __('keine anderen Geschwister gefunden');
+                $debugInfo[] = "Set siblingNames[{$entry->child->id}] = " . $siblingNames[$entry->child->id];
             }
         }
+        
+        $debugInfo[] = "Loop complete. siblingNames count: " . count($siblingNames);
         
         // Available children: In schedule BUT NOT on waitlist
         $availableChildren = [];
@@ -302,7 +313,7 @@ class WaitlistController extends AppController
         
         $countNotOnWaitlist = $childrenNotOnWaitlist->count();
         
-        $this->set(compact('schedules', 'selectedSchedule', 'waitlistEntries', 'availableChildren', 'countNotOnWaitlist', 'siblingGroupsMap', 'siblingNames', 'missingSiblings'));
+        $this->set(compact('schedules', 'selectedSchedule', 'waitlistEntries', 'availableChildren', 'countNotOnWaitlist', 'siblingGroupsMap', 'siblingNames', 'missingSiblings', 'debugInfo'));
     }
 
     /**
