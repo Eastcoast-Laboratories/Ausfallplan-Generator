@@ -192,10 +192,13 @@ class AuthenticationFlowTest extends TestCase
     {
         $this->session(['Config.language' => 'en']);
         $usersTable = $this->getTableLocator()->get('Users');
+        
+        // Password will be auto-hashed by Entity
+        $plainPassword = 'password123';
         $user = $usersTable->newEntity([
             'email' => 'unverified@test.com',
-            'password' => 'password123',
-            'status' => 'pending',
+            'password' => $plainPassword,
+            'status' => 'active', // Active but email not verified
             'is_system_admin' => false,
             'email_verified' => 0,
         ]);
