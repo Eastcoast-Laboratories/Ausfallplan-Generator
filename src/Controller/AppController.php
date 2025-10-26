@@ -153,12 +153,7 @@ class AppController extends Controller
             return null;
         }
         
-        // System admin: no primary org
-        if ($user->is_system_admin) {
-            return null;
-        }
-        
-        // Try to find primary organization
+        // Try to find primary organization (works for both system admins and regular users)
         $orgUser = $this->fetchTable('OrganizationUsers')
             ->find()
             ->where([
