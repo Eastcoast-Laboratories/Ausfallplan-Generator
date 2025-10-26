@@ -7,7 +7,16 @@ use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 
 /**
- * Test authentication flow including email verification and password recovery
+ * 🔧 Test authentication flow including email verification and password recovery
+ * 
+ * WHAT IT TESTS:
+ * - User registration creates pending users with email verification
+ * - Email verification flow (first user auto-approved, second needs approval)
+ * - Login blocks for unverified emails and pending accounts  
+ * - Password reset flow with tokens and codes
+ * 
+ * STATUS: 🔧 Needs session-based locale fix (LocaleMiddleware overwrites I18n::setLocale)
+ * FIX: Add $this->session(['Config.language' => 'en']) to each test
  */
 class AuthenticationFlowTest extends TestCase
 {
@@ -27,15 +36,17 @@ class AuthenticationFlowTest extends TestCase
     {
         parent::setUp();
         
-        // Set English locale for tests
-        \Cake\I18n\I18n::setLocale('en_US');
+        // Note: Cannot set locale here - LocaleMiddleware will override it
+        // Each test must set: $this->session(['Config.language' => 'en'])
     }
 
     /**
-     * Test registration creates user with pending status
+     * 🔧 Test registration creates user with pending status
+     * TESTS: User registration → pending status, email_verified=0, email_token set
      */
     public function testRegistrationCreatesPendingUser()
     {
+        $this->session(['Config.language' => 'en']); // Set locale via session
         $this->enableCsrfToken();
         $this->enableSecurityToken();
 
@@ -63,10 +74,12 @@ class AuthenticationFlowTest extends TestCase
     }
 
     /**
-     * Test email verification activates first user
+     * 🔧 Test email verification activates first user
+     * TESTS: First user in org → auto-approved to active after email verification
      */
     public function testEmailVerificationActivatesFirstUser()
     {
+        $this->session(['Config.language' => 'en']);
         // Create a user with email token
         $usersTable = $this->getTableLocator()->get('Users');
         $user = $usersTable->newEntity([
@@ -105,10 +118,12 @@ class AuthenticationFlowTest extends TestCase
     }
 
     /**
-     * Test email verification sets pending for second user
+     * 🔧 Test email verification sets pending for second user
+     * TESTS: Second+ user in org → stays pending after email verification (needs admin approval)
      */
     public function testEmailVerificationSetsPendingForSecondUser()
     {
+        $this->session(['Config.language' => 'en']);
         // Create first user (already active)
         $usersTable = $this->getTableLocator()->get('Users');
         $firstUser = $usersTable->newEntity([
@@ -161,10 +176,12 @@ class AuthenticationFlowTest extends TestCase
     }
 
     /**
-     * Test login blocks unverified email
+     * 🔧 Test login blocks unverified email  
+     * TESTS: Login attempt with email_verified=0 → blocked with flash message
      */
     public function testLoginBlocksUnverifiedEmail()
     {
+        $this->session(['Config.language' => 'en']);
         $usersTable = $this->getTableLocator()->get('Users');
         $user = $usersTable->newEntity([
             'email' => 'unverified@test.com',
@@ -194,10 +211,12 @@ class AuthenticationFlowTest extends TestCase
     }
 
     /**
-     * Test login blocks pending status
+     * 🔧 Test login blocks pending status
+     * TESTS: Login attempt with status='pending' → blocked with flash message
      */
     public function testLoginBlocksPendingStatus()
     {
+        $this->session(['Config.language' => 'en']);
         $usersTable = $this->getTableLocator()->get('Users');
         $user = $usersTable->newEntity([
             'email' => 'pending@test.com',
@@ -227,10 +246,12 @@ class AuthenticationFlowTest extends TestCase
     }
 
     /**
-     * Test password reset creates reset entry
+     * 🔧 Test password reset creates reset entry
+     * TESTS: Forgot password → creates PasswordResets entry with 6-digit code
      */
     public function testPasswordResetCreatesEntry()
     {
+        $this->session(['Config.language' => 'en']);
         $usersTable = $this->getTableLocator()->get('Users');
         $user = $usersTable->newEntity([
             'email' => 'resetme@test.com',
@@ -268,10 +289,12 @@ class AuthenticationFlowTest extends TestCase
     }
 
     /**
-     * Test password reset with valid code
+     * 🔧 Test password reset with valid code
+     * TESTS: Password reset with valid code → password changed, reset marked as used
      */
     public function testPasswordResetWithValidCode()
     {
+        $this->session(['Config.language' => 'en']);
         // Create user
         $usersTable = $this->getTableLocator()->get('Users');
         $user = $usersTable->newEntity([

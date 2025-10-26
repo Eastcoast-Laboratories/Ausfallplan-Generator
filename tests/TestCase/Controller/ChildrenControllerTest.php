@@ -7,7 +7,16 @@ use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 
 /**
- * App\Controller\ChildrenController Test Case
+ * 🔧 App\Controller\ChildrenController Test Case
+ *
+ * WHAT IT TESTS:
+ * - Children CRUD operations (index, add, edit, delete)
+ * - Permission checks for children management
+ * - Organization-scoped child records
+ * - Active/inactive child status handling
+ * 
+ * STATUS: 🔧 Needs session-based locale fix (LocaleMiddleware overwrites I18n::setLocale)
+ * FIX: Add $this->session(['Config.language' => 'en']) before each GET request
  *
  * @uses \App\Controller\ChildrenController
  */
@@ -40,12 +49,13 @@ class ChildrenControllerTest extends TestCase
         $this->enableCsrfToken();
         $this->enableSecurityToken();
         
-        // Set English locale for tests
-        \Cake\I18n\I18n::setLocale('en_US');
+        // Note: Cannot set locale here - LocaleMiddleware will override it
+        // Each test must set: $this->session(['Config.language' => 'en']) before GET requests
     }
 
     /**
-     * Test index method
+     * 🔧 Test index method
+     * TESTS: Children list page displays for logged-in user
      *
      * @return void
      * @uses \App\Controller\ChildrenController::index()
@@ -56,6 +66,7 @@ class ChildrenControllerTest extends TestCase
         $this->createAndLoginUser('children@test.com');
 
         // Access children index
+        $this->session(['Config.language' => 'en']); // Must be AFTER createAndLoginUser
         $this->get('/children');
         
         $this->assertResponseOk();
@@ -63,7 +74,8 @@ class ChildrenControllerTest extends TestCase
     }
 
     /**
-     * Test add method (GET)
+     * 🔧 Test add method (GET)
+     * TESTS: Add child form displays with name, is_active, is_integrative fields
      *
      * @return void
      * @uses \App\Controller\ChildrenController::add()
@@ -74,6 +86,7 @@ class ChildrenControllerTest extends TestCase
         $this->createAndLoginUser('childadd@test.com');
 
         // Access add form
+        $this->session(['Config.language' => 'en']);
         $this->get('/children/add');
         
         $this->assertResponseOk();
@@ -83,7 +96,8 @@ class ChildrenControllerTest extends TestCase
     }
 
     /**
-     * Test add method (POST) - Successful creation
+     * 🔧 Test add method (POST) - Successful creation
+     * TESTS: Child creation with valid data → redirects, saves to DB
      *
      * @return void
      * @uses \App\Controller\ChildrenController::add()
@@ -297,6 +311,7 @@ class ChildrenControllerTest extends TestCase
 
     /**
      * Helper: Create user with organization membership and log in
+     * NOTE: Call $this->session(['Config.language' => 'en']) AFTER this method and BEFORE GET requests
      */
     private function createAndLoginUser(string $email, string $role = 'org_admin', int $orgId = 1): void
     {
