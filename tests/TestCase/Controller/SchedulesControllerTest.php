@@ -268,6 +268,7 @@ class SchedulesControllerTest extends TestCase
             'joined_at' => new \DateTime(),
         ]));
         
-        $this->session(['Auth' => ['User' => $user]]);
+        // Set session with correct format (just the user entity)
+        $this->session(['Auth' => $user]);
     }
 }
