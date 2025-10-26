@@ -40,7 +40,23 @@ bei http://localhost:8080/sibling-groups/view/5  bei jedem Kind einnen "Kind lö
 
 - datenschutzerklärung und Impressum generieren und in der navigation ganz unten verlinken: Eastcoast Laboratories, Ruben Barkow-Kuder, Knickweg 16, 24114 Kiel, Telefon: Kiel-5368723, Kontakt: ausfallplan-generator-kontakt@it.z11.de
 
-- es kommt immer " Sie müssen einer Organisation angehören, um Dienstpläne zu erstellen." wenn man als admin eine neuen ausfallplan anlegenwill
+- npx playwright test test_import_gender_birthdate.spec.js --project=chromium 2>&1 | tail -50
+
+
+bei http://localhost:8080/schedules/add muss eine selectbox, die nur sichtbar ist, wenn man mehreren organisationen angehört oder sysadmin ist um die organisation auszuwählen für die der neue plan sein soll
+
+- registrierung:
+ - beim eingeben der organisation soll das ayax weg, stattdessen eine selectbox mit der auswahl der organisationen die existieren bei denen man sich anmelden kann und als errste option in der selectbox: "neu organisation anlegen". wenn man eine existierende organisation auswählt, dann wird die selectbox unten mit den rollen "Viewer" und "Editor" und "Organization adminn" angezeigt
+ - wenn man bei der registrierung eine neue organisation errstellt, dann müssen die anderen optionen "Viewer" und "Editor" in der selectbox untenversteckt werden und automatisch  "Orga-admin" ausgewählt werden
+ - "Viewer" und "Editor" und "Organization adminn" und "Requested Role in Organization" muss noch auf deutsch
+ - die sprachauswahl oben rechts muss auch im register form funktionieren, (im moment ist immer deutsch)
+- phpunittests alle noch mal reparieren @phpunit_remaining_work.md#L1-312 
+
+- wenn ein kind nicht auf der nachrückliste ist, dann muss es im report rechts unterhalb der nachrückliste angezeigt werden unter "immer am Ende" und auch nicht an den tagen unten als kind für den start der nachrückliste mit auftauchen
+
+- der ausfallplan muss exportierbar sein als csv
+
+
 
 # weitere TODOs
 
