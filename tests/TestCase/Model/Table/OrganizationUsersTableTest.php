@@ -7,7 +7,16 @@ use Cake\TestSuite\TestCase;
 use Cake\I18n\DateTime;
 
 /**
- * App\Model\Table\OrganizationUsersTable Test Case
+ * 🔧 App\Model\Table\OrganizationUsersTable Test Case
+ *
+ * WHAT IT TESTS:
+ * - Adding users to organizations
+ * - Preventing duplicate user-org relationships
+ * - Role validation (org_admin, editor, viewer)
+ * - Valid roles are accepted
+ * 
+ * STATUS: 🔧 Needs fixture data fixes (user IDs may not exist)
+ * NOTE: Model tests don't need session-locale (no HTTP requests)
  */
 class OrganizationUsersTableTest extends TestCase
 {
@@ -35,7 +44,8 @@ class OrganizationUsersTableTest extends TestCase
     }
 
     /**
-     * Test that user can be added to organization
+     * 🔧 Test that user can be added to organization
+     * TESTS: Create organization_users entry with valid data
      */
     public function testAddUserToOrganization(): void
     {
@@ -55,7 +65,8 @@ class OrganizationUsersTableTest extends TestCase
     }
 
     /**
-     * Test that user cannot be added twice to same organization
+     * 🔧 Test that user cannot be added twice to same organization
+     * TESTS: Unique constraint on (organization_id, user_id)
      */
     public function testCannotAddUserTwiceToSameOrganization(): void
     {
@@ -80,7 +91,8 @@ class OrganizationUsersTableTest extends TestCase
     }
 
     /**
-     * Test role validation
+     * 🔧 Test role validation
+     * TESTS: Invalid role names are rejected
      */
     public function testInvalidRoleIsRejected(): void
     {
@@ -100,7 +112,8 @@ class OrganizationUsersTableTest extends TestCase
     }
 
     /**
-     * Test that valid roles are accepted
+     * 🔧 Test that valid roles are accepted  
+     * TESTS: org_admin, editor, viewer roles all work
      */
     public function testValidRolesAreAccepted(): void
     {
