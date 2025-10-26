@@ -61,7 +61,7 @@ $this->assign('title', h($organization->name));
                 <tr>
                     <th><?= __('E-Mail') ?></th>
                     <th><?= __('Rolle in Organisation') ?></th>
-                    <th><?= __('Hauptorganisation') ?></th>
+                    <th style="white-space: nowrap;">Haupt&nbsp;organisation</th>
                     <th><?= __('Beigetreten') ?></th>
                     <th><?= __('Aktionen') ?></th>
                 </tr>
@@ -78,7 +78,7 @@ $this->assign('title', h($organization->name));
                         echo h($roleLabels[$orgUser->role] ?? $orgUser->role);
                         ?>
                     </td>
-                    <td><?= $orgUser->is_primary ? '⭐' : '-' ?></td>
+                    <td style="white-space: nowrap;"><?= $orgUser->is_primary ? '⭐' : '-' ?></td>
                     <td><?= $orgUser->joined_at ? $orgUser->joined_at->format('d.m.Y') : '-' ?></td>
                     <td>
                         <?= $this->Form->postLink(
