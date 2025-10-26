@@ -7,7 +7,15 @@ use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 
 /**
- * Navigation Visibility Integration Test
+ * 🔧 Navigation Visibility Integration Test
+ *
+ * WHAT IT TESTS:
+ * - Complete login flow (visit login → create user → login → access dashboard)
+ * - Navigation sidebar visibility (hidden when logged out, shown when logged in)
+ * - Navigation contains correct menu items (Dashboard, Children, Schedules)
+ * 
+ * STATUS: 🔧 Needs session-based locale fix
+ * FIX: Add $this->session(['Config.language' => 'en']) before GET requests
  *
  * Tests the complete login flow and navigation visibility
  */
@@ -26,18 +34,20 @@ class NavigationVisibilityTest extends TestCase
         $this->enableCsrfToken();
         $this->enableSecurityToken();
         
-        // Set English locale for tests
-        \Cake\I18n\I18n::setLocale('en_US');
+        // Note: Cannot set locale here - LocaleMiddleware will override it
+        // Each test must set: $this->session(['Config.language' => 'en']) before GET requests
     }
 
     /**
-     * Test complete login flow and navigation visibility
+     * 🔧 Test complete login flow and navigation visibility
+     * TESTS: Login page → create user → login → dashboard shows navigation
      *
      * @return void
      */
     public function testCompleteLoginFlowShowsNavigation(): void
     {
         // 1. Visit login page (not logged in)
+        $this->session(['Config.language' => 'en']);
         $this->get('/users/login');
         $this->assertResponseOk();
         $this->assertResponseContains('Login');
@@ -59,6 +69,7 @@ class NavigationVisibilityTest extends TestCase
         $this->session(['Auth' => $user]);
 
         // 4. Access dashboard with session
+        $this->session(['Config.language' => 'en']); // Reset locale for new request
         $this->get('/dashboard/index');
         $this->assertResponseOk();
         
