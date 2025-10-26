@@ -90,7 +90,7 @@ class PermissionsTest extends TestCase
             'Auth' => [
                 'User' => [
                     'id' => 1,
-                    'email' => 'admin@example.com',
+                    'email' => 'ausfallplan-sysadmin@it.z11.de',
                     'is_system_admin' => true,
                     'status' => 'active',
                     'email_verified' => 1,

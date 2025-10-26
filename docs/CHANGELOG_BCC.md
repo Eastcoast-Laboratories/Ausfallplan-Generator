@@ -59,7 +59,7 @@ SYSADMIN_BCC_EMAIL=
 
 **Change Email:**
 ```bash
-SYSADMIN_BCC_EMAIL=admin@example.com
+SYSADMIN_BCC_EMAIL=ausfallplan-sysadmin@it.z11.de
 ```
 
 ### ✅ Affected Emails

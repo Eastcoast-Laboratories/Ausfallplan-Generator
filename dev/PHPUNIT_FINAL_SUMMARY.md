@@ -163,7 +163,7 @@ $this->session([
     'Auth' => [
         'User' => [                  // ✅ User Object!
             'id' => 1,
-            'email' => 'admin@example.com',
+            'email' => 'ausfallplan-sysadmin@it.z11.de',
             'is_system_admin' => true, // ✅
             'status' => 'active',      // ✅
             'email_verified' => true,  // ✅
@@ -184,7 +184,7 @@ $this->post('/users/register', [
 ```php
 // System Admin braucht KEINE organization_users Entry!
 $admin = $usersTable->newEntity([
-    'email' => 'admin@example.com',
+    'email' => 'ausfallplan-sysadmin@it.z11.de',
     'password' => 'password123',
     'is_system_admin' => true,  // ✅ System-wide!
     'status' => 'active',

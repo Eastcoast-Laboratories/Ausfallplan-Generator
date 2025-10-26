@@ -17,7 +17,7 @@ test.describe('German Translation Tests', () => {
   
   async function login(page) {
     await page.goto('/users/login');
-    await page.fill('input[name="email"]', 'admin@example.com');
+    await page.fill('input[name="email"]', 'ausfallplan-sysadmin@it.z11.de');
     await page.fill('input[name="password"]', 'password123');
     await page.click('button[type="submit"]');
     await page.waitForURL(/dashboard/);

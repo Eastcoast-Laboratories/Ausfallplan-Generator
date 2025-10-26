@@ -41,5 +41,5 @@ if (!$user) {
 }
 
 echo "\nLogin credentials:\n";
-echo "  Email: admin@example.com\n";
+echo "  Email: ausfallplan-sysadmin@it.z11.de\n";
 echo "  Password: password123\n";
