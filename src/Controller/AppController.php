@@ -61,6 +61,19 @@ class AppController extends Controller
     {
         parent::beforeFilter($event);
         
+        // Handle language query parameter (for unauthenticated pages)
+        $langParam = $this->request->getQuery('lang');
+        if ($langParam && in_array($langParam, ['de', 'en'])) {
+            $session = $this->request->getSession();
+            $session->write('Config.language', $langParam === 'de' ? 'de_DE' : 'en_US');
+            \Cake\I18n\I18n::setLocale($langParam === 'de' ? 'de_DE' : 'en_US');
+        } else {
+            // Load language from session
+            $session = $this->request->getSession();
+            $lang = $session->read('Config.language', 'de_DE');
+            \Cake\I18n\I18n::setLocale($lang);
+        }
+        
         // Use authenticated layout for logged-in users
         $result = $this->Authentication->getResult();
         if ($result && $result->isValid()) {
