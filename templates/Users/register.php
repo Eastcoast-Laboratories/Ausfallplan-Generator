@@ -2,7 +2,7 @@
 /**
  * @var \App\View\AppView $this
  * @var \App\Model\Entity\User $user
- * @var \Cake\Collection\CollectionInterface|string[] $organizations
+ * @var array $organizationsList
  */
 ?>
 <div class="users form content">
@@ -11,32 +11,36 @@
         <legend><?= __('Register New Account') ?></legend>
         <p><?= __('Create your account to start managing your Kita schedules.') ?></p>
         
-        <div class="form-group">
-            <?= $this->Form->control('organization_name', [
-                'type' => 'text',
-                'label' => __('Organization (optional)'),
-                'placeholder' => __('Start typing to search...'),
-                'required' => false,
-                'autofocus' => true,
-                'id' => 'organization-input',
-                'autocomplete' => 'off',
-                'list' => 'organization-list'
-            ]) ?>
-            <datalist id="organization-list"></datalist>
-            <small id="org-hint" style="display:none; color: #27ae60; margin-top: 0.5rem;">
-                ✓ <?= __('Existing organization selected') ?>
-            </small>
-            <small id="org-new" style="display:none; color: #f39c12; margin-top: 0.5rem;">
-                ⚠ <?= __('New organization will be created') ?>
-            </small>
-        </div>
         <?php
+            // Organization selector
+            echo $this->Form->control('organization_choice', [
+                'type' => 'select',
+                'options' => [
+                    'new' => '➕ ' . __('Neue Organisation anlegen'),
+                    'divider' => '─────────────────────',
+                ] + $organizationsList,
+                'empty' => false,
+                'label' => __('Organization'),
+                'id' => 'organization-choice',
+                'required' => true
+            ]);
+            
+            // Organization name input (only for new orgs)
+            echo $this->Form->control('organization_name', [
+                'type' => 'text',
+                'label' => __('Name der neuen Organisation'),
+                'id' => 'organization-name-input',
+                'required' => false,
+                'style' => 'display:none;'
+            ]);
+            
             echo $this->Form->control('email', [
                 'type' => 'email',
                 'label' => __('Email'),
                 'required' => true,
                 'placeholder' => 'email@example.com'
             ]);
+            
             echo $this->Form->control('password', [
                 'type' => 'password',
                 'label' => __('Password'),
@@ -44,21 +48,25 @@
                 'minlength' => 8,
                 'placeholder' => __('Minimum 8 characters')
             ]);
+            
             echo $this->Form->control('password_confirm', [
                 'type' => 'password',
                 'label' => __('Confirm Password'),
                 'required' => true,
                 'minlength' => 8
             ]);
+            
+            // Role selector (only for existing orgs)
             echo $this->Form->control('requested_role', [
                 'options' => [
-                    'viewer' => __('Viewer - Read-only access'),
-                    'editor' => __('Editor - Create and edit schedules'),
-                    'org_admin' => __('Organization Admin - Full access (requires approval)')
+                    'viewer' => __('Betrachter') . ' - ' . __('Nur Lesezugriff'),
+                    'editor' => __('Redakteur') . ' - ' . __('Pläne erstellen und bearbeiten'),
+                    'org_admin' => __('Organisations-Admin') . ' - ' . __('Voller Zugriff (Genehmigung erforderlich)')
                 ],
-                'label' => __('Requested Role in Organization'),
+                'label' => __('Gewünschte Rolle in der Organisation'),
                 'default' => 'editor',
-                'help' => __('If joining an existing organization, admins will review your request')
+                'id' => 'role-selector',
+                'help' => __('Bei einer existierenden Organisation prüfen Administratoren Ihre Anfrage')
             ]);
         ?>
     </fieldset>
@@ -71,60 +79,52 @@
 </div>
 
 <script>
-// Organization autocomplete
 document.addEventListener('DOMContentLoaded', function() {
-    const orgInput = document.getElementById('organization-input');
-    const orgList = document.getElementById('organization-list');
-    const hintExisting = document.getElementById('org-hint');
-    const hintNew = document.getElementById('org-new');
-    let organizations = [];
+    const orgChoice = document.getElementById('organization-choice');
+    const orgNameInput = document.getElementById('organization-name-input');
+    const roleSelector = document.getElementById('role-selector');
+    const roleContainer = roleSelector.closest('.input');
     
-    // Fetch organizations from API
-    fetch('/api/organizations/search.json')
-        .then(res => res.json())
-        .then(data => {
-            organizations = data.organizations || [];
-            console.log('Loaded organizations:', organizations);
-            updateDatalist();
-        })
-        .catch(err => console.error('Failed to load organizations:', err));
-    
-    function updateDatalist() {
-        orgList.innerHTML = '';
-        organizations.forEach(org => {
-            const option = document.createElement('option');
-            option.value = org.name;
-            orgList.appendChild(option);
-        });
-    }
-    
-    // Check if input matches existing organization
-    function checkOrganization() {
-        const value = orgInput.value.trim();
-        hintExisting.style.display = 'none';
-        hintNew.style.display = 'none';
-        orgInput.style.borderColor = '';
+    function updateFormBasedOnChoice() {
+        const choice = orgChoice.value;
         
-        if (!value) return;
-        
-        const exists = organizations.some(org => 
-            org.name.toLowerCase() === value.toLowerCase()
-        );
-        
-        console.log('Check:', value, 'exists:', exists, 'orgs:', organizations.length);
-        
-        if (exists) {
-            hintExisting.style.display = 'block';
-            orgInput.style.borderColor = '#27ae60';
-        } else if (value.length > 0) {
-            hintNew.style.display = 'block';
-            orgInput.style.borderColor = '#f39c12';
+        if (choice === 'new') {
+            // New organization
+            orgNameInput.style.display = 'block';
+            orgNameInput.required = true;
+            orgNameInput.closest('.input').style.display = 'block';
+            
+            // Hide role selector
+            roleContainer.style.display = 'none';
+            roleSelector.required = false;
+            roleSelector.value = 'org_admin'; // Auto-select org_admin
+            
+        } else if (choice === 'divider') {
+            // Divider selected - reset to "new"
+            orgChoice.value = 'new';
+            updateFormBasedOnChoice();
+            
+        } else {
+            // Existing organization
+            orgNameInput.style.display = 'none';
+            orgNameInput.required = false;
+            orgNameInput.closest('.input').style.display = 'none';
+            orgNameInput.value = ''; // Clear the name input
+            
+            // Show role selector
+            roleContainer.style.display = 'block';
+            roleSelector.required = true;
+            
+            // Set organization_name to the selected org's name for controller
+            orgNameInput.value = orgChoice.options[orgChoice.selectedIndex].text;
         }
     }
     
-    orgInput.addEventListener('input', checkOrganization);
-    orgInput.addEventListener('change', checkOrganization);
-    orgInput.addEventListener('blur', checkOrganization);
+    // Initial setup
+    updateFormBasedOnChoice();
+    
+    // Listen for changes
+    orgChoice.addEventListener('change', updateFormBasedOnChoice);
 });
 </script>
 
@@ -164,169 +164,11 @@ document.addEventListener('DOMContentLoaded', function() {
     flex: 1;
 }
 
-.autocomplete-container {
-    position: relative;
-}
-
-.autocomplete-suggestions {
-    position: absolute;
-    border: 1px solid #ddd;
-    border-top: none;
-    z-index: 99;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: white;
-    max-height: 200px;
-    overflow-y: auto;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.autocomplete-suggestion {
-    padding: 10px;
-    cursor: pointer;
-    border-bottom: 1px solid #eee;
-}
-
-.autocomplete-suggestion:hover {
-    background-color: #f0f0f0;
-}
-
-.autocomplete-suggestion.existing {
-    background-color: #e8f5e9;
-}
-
-.autocomplete-suggestion.new {
-    background-color: #fff3e0;
-}
-
-.autocomplete-suggestion .label {
-    font-size: 0.85em;
-    color: #666;
-    margin-top: 2px;
-}
-
-#organization-input.has-suggestions {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-}
-
-#organization-input.new-org {
-    border-color: #ff9800;
-    background-color: #fff8e1;
+/* Disable divider option */
+#organization-choice option[value="divider"] {
+    color: #999;
+    background: #f5f5f5;
+    font-weight: bold;
+    cursor: default;
 }
 </style>
-
-<script>
-(function() {
-    const input = document.getElementById('organization-input');
-    if (!input) return;
-    
-    let currentFocus = -1;
-    let suggestionsDiv = null;
-    
-    function createSuggestionsDiv() {
-        const container = input.parentElement;
-        if (!suggestionsDiv) {
-            suggestionsDiv = document.createElement('div');
-            suggestionsDiv.className = 'autocomplete-suggestions';
-            suggestionsDiv.style.display = 'none';
-            container.appendChild(container);
-            container.style.position = 'relative';
-            container.appendChild(suggestionsDiv);
-        }
-        return suggestionsDiv;
-    }
-    
-    function closeSuggestions() {
-        if (suggestionsDiv) {
-            suggestionsDiv.style.display = 'none';
-            suggestionsDiv.innerHTML = '';
-        }
-        input.classList.remove('has-suggestions');
-        currentFocus = -1;
-    }
-    
-    function showSuggestions(organizations, query) {
-        closeSuggestions();
-        
-        const div = createSuggestionsDiv();
-        
-        if (organizations.length === 0) {
-            // No existing organizations found
-            div.innerHTML = `
-                <div class="autocomplete-suggestion new">
-                    <strong>${query}</strong>
-                    <div class="label">✨ <?= __('Create new organization') ?></div>
-                </div>
-            `;
-            input.classList.add('new-org');
-        } else {
-            // Show existing organizations
-            organizations.forEach((org, index) => {
-                const item = document.createElement('div');
-                item.className = 'autocomplete-suggestion existing';
-                item.innerHTML = `
-                    <strong>${org.name}</strong>
-                    <div class="label">✓ <?= __('Join existing organization') ?></div>
-                `;
-                item.addEventListener('click', () => {
-                    input.value = org.name;
-                    input.classList.remove('new-org');
-                    closeSuggestions();
-                });
-                div.appendChild(item);
-            });
-            
-            // Add "Create new" option at the end
-            const newItem = document.createElement('div');
-            newItem.className = 'autocomplete-suggestion new';
-            newItem.innerHTML = `
-                <strong>${query}</strong>
-                <div class="label">✨ <?= __('Create new organization') ?></div>
-            `;
-            newItem.addEventListener('click', () => {
-                input.value = query;
-                input.classList.add('new-org');
-                closeSuggestions();
-            });
-            div.appendChild(newItem);
-            
-            input.classList.remove('new-org');
-        }
-        
-        div.style.display = 'block';
-        input.classList.add('has-suggestions');
-    }
-    
-    let debounceTimer = null;
-    input.addEventListener('input', function() {
-        const query = this.value.trim();
-        
-        if (query.length < 2) {
-            closeSuggestions();
-            input.classList.remove('new-org');
-            return;
-        }
-        
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            fetch(`/api/organizations/search?q=${encodeURIComponent(query)}`)
-                .then(response => response.json())
-                .then(data => {
-                    showSuggestions(data.organizations || [], query);
-                })
-                .catch(error => {
-                    console.error('Autocomplete error:', error);
-                });
-        }, 300);
-    });
-    
-    // Close suggestions when clicking outside
-    document.addEventListener('click', function(e) {
-        if (e.target !== input) {
-            closeSuggestions();
-        }
-    });
-})();
-</script>
