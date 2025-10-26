@@ -239,9 +239,9 @@ $this->disableAutoLayout();
         <div class="container">
             <p>&copy; <?= date('Y') ?> Ausfallplan-Generator. Alle Rechte vorbehalten.</p>
             <p>
-                <a href="#">Impressum</a> | 
-                <a href="#">Datenschutz</a> | 
-                <a href="#">AGB</a>
+                <a href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'display', 'imprint']) ?>">Impressum</a> | 
+                <a href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'display', 'privacy']) ?>">Datenschutz</a> | 
+                <a href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'display', 'terms']) ?>">AGB</a>
             </p>
         </div>
     </footer>
