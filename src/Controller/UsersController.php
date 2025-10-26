@@ -61,10 +61,13 @@ class UsersController extends AppController
                     
                     if (!$organizationsTable->save($organization)) {
                         $this->Flash->error(__('Could not create organization.'));
-                        $this->set(compact('user'));
+                        $this->set(compact('user', 'organizationsList'));
                         return;
                     }
                     $isNewOrganization = true;
+                } else {
+                    // Organization with this name already exists
+                    $isNewOrganization = false;
                 }
                 
                 $data['organization_id'] = $organization->id;
@@ -72,6 +75,7 @@ class UsersController extends AppController
                 // Join existing organization (ID from selectbox)
                 $organization = $organizationsTable->get($orgChoice);
                 $data['organization_id'] = $organization->id;
+                $isNewOrganization = false;
             }
             
             $requestedRole = $data['requested_role'] ?? 'editor';
