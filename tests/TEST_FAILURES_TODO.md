@@ -1,13 +1,19 @@
 # TEST FAILURES - TODO & FIXING GUIDE
 
 ## CURRENT STATUS
-- **72/104 tests passing (69.2%)**
-- **28 failures remaining**
+- **83/104 tests passing (79.8%)** ⬆️ +11 tests!
+- **17 failures remaining** ⬇️ from 28
 - **4 tests skipped (by design)**
+
+**PROGRESS THIS SESSION:**
+- ✅ Category 4: COMPLETED (Fixture Data)
+- ✅ Category 3: MOSTLY COMPLETED (4/5)
+- 🔧 Category 2: IN PROGRESS (2/8)
+- ⏳ Category 1: NEXT (6 failures)
 
 ---
 
-## CATEGORY 1: PASSWORD HASHING IN TESTS (6 failures)
+## CATEGORY 1: PASSWORD HASHING IN TESTS (6 failures) ⏳ NEXT
 
 ### Problem
 Tests create users with plain-text passwords, but login expects hashed passwords.
