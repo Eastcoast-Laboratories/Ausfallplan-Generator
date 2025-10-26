@@ -20,18 +20,26 @@ class SchedulesController extends AppController
         // Get current user
         $user = $this->Authentication->getIdentity();
         
-        // System admin sees all schedules with user info, normal users only their own
+        // System admin sees all schedules with user info
         if ($user && $user->is_system_admin) {
             $schedules = $this->Schedules->find()
                 ->contain(['Organizations', 'Users'])
                 ->orderBy(['Schedules.created' => 'DESC'])
                 ->all();
         } else {
-            $schedules = $this->Schedules->find()
-                ->where(['Schedules.user_id' => $user->id])
-                ->contain(['Organizations'])
-                ->orderBy(['Schedules.created' => 'DESC'])
-                ->all();
+            // Regular users see schedules from their organization(s)
+            $userOrgs = $this->getUserOrganizations();
+            $orgIds = array_map(fn($org) => $org->id, $userOrgs);
+            
+            if (!empty($orgIds)) {
+                $schedules = $this->Schedules->find()
+                    ->where(['Schedules.organization_id IN' => $orgIds])
+                    ->contain(['Organizations', 'Users'])
+                    ->orderBy(['Schedules.created' => 'DESC'])
+                    ->all();
+            } else {
+                $schedules = [];
+            }
         }
 
         // Get active schedule from session for highlighting
