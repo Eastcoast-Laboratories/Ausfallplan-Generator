@@ -133,21 +133,38 @@ class SchedulesController extends AppController
     public function add()
     {
         $schedule = $this->Schedules->newEmptyEntity();
+        $user = $this->Authentication->getIdentity();
+        
+        // Get available organizations for this user
+        $orgEntities = $this->getUserOrganizations();
+        $organizations = collection($orgEntities)->combine('id', 'name')->toArray();
+        $canSelectOrganization = $user->is_system_admin || count($organizations) > 1;
         
         if ($this->request->is('post')) {
             $data = $this->request->getData();
             
-            // Set organization and user from current user
-            $user = $this->Authentication->getIdentity();
-            
-            // Get organization from user's primary organization or first organization
-            $primaryOrg = $this->getPrimaryOrganization();
-            if (!$primaryOrg) {
-                $this->Flash->error(__('Sie müssen einer Organisation angehören, um Dienstpläne zu erstellen.'));
-                return $this->redirect(['action' => 'index']);
+            // Determine organization_id
+            if (!empty($data['organization_id']) && $canSelectOrganization) {
+                // User selected an organization (system admin or multiple orgs)
+                $selectedOrgId = $data['organization_id'];
+                
+                // Verify user has access to this organization
+                if (!$user->is_system_admin && !isset($organizations[$selectedOrgId])) {
+                    $this->Flash->error(__('Zugriff auf diese Organisation verweigert.'));
+                    return $this->redirect(['action' => 'add']);
+                }
+                
+                $data['organization_id'] = $selectedOrgId;
+            } else {
+                // Use primary organization (single org user)
+                $primaryOrg = $this->getPrimaryOrganization();
+                if (!$primaryOrg) {
+                    $this->Flash->error(__('Sie müssen einer Organisation angehören, um Dienstpläne zu erstellen.'));
+                    return $this->redirect(['action' => 'index']);
+                }
+                $data['organization_id'] = $primaryOrg->id;
             }
             
-            $data['organization_id'] = $primaryOrg->id;
             $data['user_id'] = $user->id;
             
             // Set default state to 'draft'
@@ -171,7 +188,7 @@ class SchedulesController extends AppController
             $this->Flash->error(__('The schedule could not be saved. Please try again.'));
         }
         
-        $this->set(compact('schedule'));
+        $this->set(compact('schedule', 'organizations', 'canSelectOrganization'));
     }
 
     /**
@@ -204,15 +221,16 @@ class SchedulesController extends AppController
                 return $this->redirect(['action' => 'view', $schedule->id]);
             }
             
-            $this->Flash->error(__('The schedule could not be updated. Please try again.'));
+            $this->Flash->error(__('Der Dienstplan konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.'));
         }
         
-        $this->set(compact('schedule'));
+        $this->set(compact('schedule', 'organizations', 'canSelectOrganization'));
     }
 
     /**
      * Delete method - Remove a schedule
      *
+// ...
      * @param string|null $id Schedule id.
      * @return \Cake\Http\Response|null Redirects to index
      */
