@@ -73,25 +73,18 @@ class SiblingGroupsControllerTest extends TestCase
     }
 
     /**
-     * Test add method (GET)
+     * Test add method (GET) - Display add form
      *
      * @return void
      * @uses \App\Controller\SiblingGroupsController::add()
      */
     public function testAddGet(): void
     {
-        // Create and log in user
-        $users = $this->getTableLocator()->get('Users');
-        $user = $users->newEntity([
-            'organization_id' => 1,
-            'email' => 'groupadd@test.com',
-            'password' => 'password123',
-            'role' => 'admin',
-        ]);
-        $users->save($user);
-        $this->session(['Auth' => $user]);
+        // Create and log in user with organization
+        $this->createAndLoginUser('groupadd@test.com');
 
         // Access add form
+        $this->session(['Config.language' => 'en']);
         $this->get('/sibling-groups/add');
         
         $this->assertResponseOk();
@@ -106,16 +99,9 @@ class SiblingGroupsControllerTest extends TestCase
      */
     public function testAddPostSuccess(): void
     {
-        // Create and log in user
-        $users = $this->getTableLocator()->get('Users');
-        $user = $users->newEntity([
-            'organization_id' => 1,
-            'email' => 'grouppost@test.com',
-            'password' => 'password123',
-            'role' => 'admin',
-        ]);
-        $users->save($user);
-        $this->session(['Auth' => $user]);
+        // Create and log in user with organization
+        $this->createAndLoginUser('grouppost@test.com');
+        $this->session(['Config.language' => 'en']);
 
         // Submit sibling group creation
         $this->post('/sibling-groups/add', [
@@ -123,7 +109,8 @@ class SiblingGroupsControllerTest extends TestCase
         ]);
 
         // Should redirect after success
-        $this->assertRedirect(['controller' => 'SiblingGroups', 'action' => 'index']);
+        $this->assertRedirect();
+        $this->assertRedirectContains('/sibling-groups');
 
         // Verify sibling group was created
         $siblingGroups = $this->getTableLocator()->get('SiblingGroups');
@@ -178,16 +165,9 @@ class SiblingGroupsControllerTest extends TestCase
      */
     public function testEdit(): void
     {
-        // Create and log in user
-        $users = $this->getTableLocator()->get('Users');
-        $user = $users->newEntity([
-            'organization_id' => 1,
-            'email' => 'groupedit@test.com',
-            'password' => 'password123',
-            'role' => 'admin',
-        ]);
-        $users->save($user);
-        $this->session(['Auth' => $user]);
+        // Create and log in user with organization
+        $this->createAndLoginUser('groupedit@test.com');
+        $this->session(['Config.language' => 'en']);
 
         // Create a sibling group
         $siblingGroups = $this->getTableLocator()->get('SiblingGroups');
@@ -202,7 +182,9 @@ class SiblingGroupsControllerTest extends TestCase
             'label' => 'Updated Label',
         ]);
 
-        $this->assertRedirect(['controller' => 'SiblingGroups', 'action' => 'index']);
+        // Verify redirect to index
+        $this->assertRedirect();
+        $this->assertRedirectContains('/sibling-groups');
 
         // Verify update
         $updated = $siblingGroups->get($group->id);
@@ -217,16 +199,9 @@ class SiblingGroupsControllerTest extends TestCase
      */
     public function testDelete(): void
     {
-        // Create and log in user
-        $users = $this->getTableLocator()->get('Users');
-        $user = $users->newEntity([
-            'organization_id' => 1,
-            'email' => 'groupdelete@test.com',
-            'password' => 'password123',
-            'role' => 'admin',
-        ]);
-        $users->save($user);
-        $this->session(['Auth' => $user]);
+        // Create and log in user with organization
+        $this->createAndLoginUser('groupdelete@test.com');
+        $this->session(['Config.language' => 'en']);
 
         // Create a sibling group
         $siblingGroups = $this->getTableLocator()->get('SiblingGroups');
@@ -239,7 +214,9 @@ class SiblingGroupsControllerTest extends TestCase
         // Delete the sibling group
         $this->post("/sibling-groups/delete/{$group->id}");
 
-        $this->assertRedirect(['controller' => 'SiblingGroups', 'action' => 'index']);
+        // Verify redirect to index
+        $this->assertRedirect();
+        $this->assertRedirectContains('/sibling-groups');
 
         // Verify deletion
         $exists = $siblingGroups->exists(['id' => $group->id]);

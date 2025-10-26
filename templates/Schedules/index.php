@@ -35,7 +35,7 @@ $this->assign('title', __('Schedules'));
                     <td>
                         <?= h($schedule->title) ?>
                         <?php if ($isActive): ?>
-                            <span style="background: #4caf50; color: white; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.75rem; margin-left: 0.5rem;">
+                            <span style="background: #4caf50; color: white; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.75rem; margin-left: 0.5rem; word-wrap: nowrap;">
                                 ⭐ <?= __('Active') ?>
                             </span>
                         <?php endif; ?>
