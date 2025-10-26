@@ -144,7 +144,7 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
             'queryParam' => 'redirect',
         ]);
 
-        // Load authenticators with identifier configuration
+        // Load authenticators
         $service->loadAuthenticator('Authentication.Session');
         $service->loadAuthenticator('Authentication.Form', [
             'fields' => [
@@ -154,7 +154,7 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
             'loginUrl' => null, // Allow login from any URL
         ]);
         
-        // Load identifiers
+        // Load identifiers (keep old syntax for now - new syntax causes 500 errors)
         $service->loadIdentifier('Authentication.Password', [
             'fields' => [
                 'username' => 'email',
