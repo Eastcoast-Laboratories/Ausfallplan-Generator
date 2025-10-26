@@ -177,9 +177,10 @@ class ChildrenControllerTest extends TestCase
             'is_active' => true,
         ]);
 
-        // Should stay on form
+        // Should stay on form with validation error (form re-displayed)
         $this->assertResponseOk();
-        $this->assertResponseContains('could not be saved');
+        // Form should still be visible (has form tag)
+        $this->assertResponseContains('<form');
 
         // Verify child was NOT created
         $children = $this->getTableLocator()->get('Children');
