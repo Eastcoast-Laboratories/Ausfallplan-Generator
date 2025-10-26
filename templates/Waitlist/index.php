@@ -77,13 +77,13 @@ $this->assign('title', __('Waitlist'));
                                         <?= __('Integrative') ?>
                                     </span>
                                 <?php endif; ?>
-                                <?php if ($child->sibling_group_id): ?>
+                                <?php if ($child->sibling_group_id && isset($siblingNames[$child->id])): ?>
                                     <?= $this->Html->link(
                                         '👨‍👩‍👧 ' . __("Geschwister"),
                                         ['controller' => 'SiblingGroups', 'action' => 'view', $child->sibling_group_id],
                                         [
                                             'style' => 'background: #fff3cd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem; text-decoration: none; color: #856404; display: inline-block;',
-                                            'title' => 'Geschwister: ' . (isset($siblingNames[$child->id]) ? h($siblingNames[$child->id]) : __('keine anderen Geschwister gefunden')),
+                                            'title' => 'Geschwister: ' . h($siblingNames[$child->id]),
                                             'escape' => false
                                         ]
                                     ) ?>
@@ -124,13 +124,13 @@ $this->assign('title', __('Waitlist'));
                                 </span>
                                 <div>
                                     <strong><?= h($entry->child->name) ?></strong>
-                                    <?php if ($entry->child->sibling_group_id): ?>
+                                    <?php if ($entry->child->sibling_group_id && isset($siblingNames[$entry->child->id])): ?>
                                         <?= $this->Html->link(
                                             '👨‍👩‍👧 ' . __("Geschwister"),
                                             ['controller' => 'SiblingGroups', 'action' => 'view', $entry->child->sibling_group_id],
                                             [
                                                 'style' => 'background: #fff3cd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem; text-decoration: none; color: #856404; display: inline-block;',
-                                                'title' => 'Geschwister: ' . (isset($siblingNames[$entry->child->id]) ? h($siblingNames[$entry->child->id]) : __('keine anderen Geschwister gefunden')),
+                                                'title' => 'Geschwister: ' . h($siblingNames[$entry->child->id]),
                                                 'escape' => false
                                             ]
                                         ) ?>
