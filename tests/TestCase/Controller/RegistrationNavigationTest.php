@@ -7,7 +7,16 @@ use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 
 /**
- * Registration Navigation Test
+ * 🔧 Registration Navigation Test
+ *
+ * WHAT IT TESTS:
+ * - Navigation NOT visible after registration (user must login)
+ * - Navigation ONLY visible after successful login
+ * - Multiple registrations create separate users
+ * - Public pages vs protected pages navigation visibility
+ * 
+ * STATUS: 🔧 Needs session-based locale fix
+ * FIX: Add $this->session(['Config.language' => 'en']) before each GET request
  *
  * Tests that navigation is NOT visible after registration
  * User needs to login first to see navigation
@@ -39,12 +48,13 @@ class RegistrationNavigationTest extends TestCase
         $this->enableCsrfToken();
         $this->enableSecurityToken();
         
-        // Set English locale for tests
-        \Cake\I18n\I18n::setLocale('en_US');
+        // Note: Cannot set locale here - LocaleMiddleware will override it
+        // Each test must set: $this->session(['Config.language' => 'en']) before GET requests
     }
 
     /**
-     * Test that navigation is NOT visible after registration
+     * 🔧 Test that navigation is NOT visible after registration
+     * TESTS: Registration → redirect to login (NOT auto-logged in)
      * User should be redirected to login page, not logged in automatically
      *
      * @return void
@@ -56,6 +66,7 @@ class RegistrationNavigationTest extends TestCase
         $email = "newuser{$timestamp}@test.com";
         
         // 2. Visit registration page
+        $this->session(['Config.language' => 'en']);
         $this->get('/users/register');
         $this->assertResponseOk();
         
@@ -78,6 +89,7 @@ class RegistrationNavigationTest extends TestCase
         // $this->assertFlashMessage('Registration successful! Please login.');
         
         // 5. Follow redirect to login page
+        $this->session(['Config.language' => 'en']);
         $this->get($this->_response->getHeaderLine('Location'));
         
         // 6. Verify we are on login page (not logged in)
@@ -106,7 +118,8 @@ class RegistrationNavigationTest extends TestCase
     }
 
     /**
-     * Test that navigation IS visible ONLY after login
+     * 🔧 Test that navigation IS visible ONLY after login
+     * TESTS: Register → login → navigation appears
      *
      * @return void
      */
@@ -117,6 +130,7 @@ class RegistrationNavigationTest extends TestCase
         $email = "loginuser{$timestamp}@test.com";
         $password = 'TestPassword123!';
         
+        $this->session(['Config.language' => 'en']);
         $this->post('/users/register', [
             'organization_name' => 'Test Organization',
             'email' => $email,
@@ -133,6 +147,7 @@ class RegistrationNavigationTest extends TestCase
         $this->session(['Auth' => $user]);
         
         // 3. Access dashboard
+        $this->session(['Config.language' => 'en']);
         $this->get('/dashboard/index');
         $this->assertResponseOk();
         
@@ -147,7 +162,8 @@ class RegistrationNavigationTest extends TestCase
     }
 
     /**
-     * Test navigation visibility on different pages
+     * 🔧 Test navigation visibility on different pages
+     * TESTS: Public pages = no nav, Protected pages = nav visible
      *
      * @return void
      */
@@ -161,6 +177,7 @@ class RegistrationNavigationTest extends TestCase
         
         // Test public pages - navigation should NOT be visible
         foreach ($publicPages as $url => $name) {
+            $this->session(['Config.language' => 'en']);
             $this->get($url);
             $this->assertResponseOk("{$name} should be accessible");
             $this->assertResponseNotContains('class="sidebar"', "{$name} should NOT have sidebar");
@@ -196,6 +213,7 @@ class RegistrationNavigationTest extends TestCase
         ];
         
         foreach ($protectedPages as $url => $name) {
+            $this->session(['Config.language' => 'en']);
             $this->get($url);
             $this->assertResponseOk("{$name} should be accessible when logged in");
             $this->assertResponseContains('sidebar', "{$name} SHOULD have sidebar");
@@ -204,7 +222,8 @@ class RegistrationNavigationTest extends TestCase
     }
 
     /**
-     * Test that multiple registrations create separate users
+     * 🔧 Test that multiple registrations create separate users
+     * TESTS: Multiple registrations → separate users, none auto-logged in
      *
      * @return void
      */
@@ -216,6 +235,7 @@ class RegistrationNavigationTest extends TestCase
         for ($i = 1; $i <= 3; $i++) {
             $email = "multiuser{$i}_" . time() . "@test.com";
             
+            $this->session(['Config.language' => 'en']);
             $this->post('/users/register', [
                 'organization_name' => "Test Org {$i}",
                 'email' => $email,
@@ -239,6 +259,7 @@ class RegistrationNavigationTest extends TestCase
             
             // None of them should be logged in automatically
             // So navigation should NOT be visible for any
+            $this->session(['Config.language' => 'en']);
             $this->get('/users/login');
             $this->assertResponseNotContains('sidebar');
         }
