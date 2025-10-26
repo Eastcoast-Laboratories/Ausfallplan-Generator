@@ -335,7 +335,7 @@ class ChildrenController extends AppController
         $siblingGroupsTable = $this->fetchTable('SiblingGroups');
         
         $imported = 0;
-        $skipped = 0;
+        $skipped = [];
         $errors = [];
         $siblingGroupMap = []; // Map import sibling_group_id to real DB id
         
@@ -376,7 +376,7 @@ class ChildrenController extends AppController
                 ->first();
             
             if ($existingChild) {
-                $skipped++;
+                $skipped[]=$displayName;
                 continue;
             }
             
@@ -413,7 +413,7 @@ class ChildrenController extends AppController
                 $imported++;
             } else {
                 $errors[] = $displayName . ': ' . implode(', ', $child->getErrors());
-                $skipped++;
+                $skipped[]=$displayName;
             }
         }
         
@@ -425,8 +425,8 @@ class ChildrenController extends AppController
         if ($imported > 0) {
             $this->Flash->success(__('Erfolgreich {0} Kinder importiert.', $imported));
         }
-        if ($skipped > 0) {
-            $this->Flash->warning(__('{0} Einträge übersprungen (bereits vorhanden oder ungültig).', $skipped));
+        if (count($skipped) > 0) {
+            $this->Flash->warning(__('{0} Einträge übersprungen (bereits vorhanden oder ungültig);' . implode(", ", $skipped), count($skipped)));
         }
         if (!empty($errors)) {
             foreach ($errors as $error) {
