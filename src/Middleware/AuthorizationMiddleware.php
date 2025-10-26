@@ -110,9 +110,8 @@ class AuthorizationMiddleware implements MiddlewareInterface
      */
     private function getUserRole($identity): string
     {
-        // Get connection using TableLocator
-        $locator = \Cake\ORM\Locator\LocatorAwareTrait::getTableLocator();
-        $orgUsersTable = $locator->get('OrganizationUsers');
+        // Get table using TableRegistry
+        $orgUsersTable = \Cake\ORM\TableRegistry::getTableLocator()->get('OrganizationUsers');
         
         // Get all organization memberships
         $orgUsers = $orgUsersTable->find()
