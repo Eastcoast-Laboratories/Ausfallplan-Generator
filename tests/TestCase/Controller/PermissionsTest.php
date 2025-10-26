@@ -41,8 +41,9 @@ class PermissionsTest extends TestCase
         $this->session(['Config.language' => 'en']);
         $this->post('/children/add', ['name' => 'Test Child']);
         
-        // Should either get 403 or redirect (depends on authorization setup)
-        $this->assertResponseNotOk();
+        // Should not allow (403 Forbidden or redirect)
+        $statusCode = $this->_response->getStatusCode();
+        $this->assertNotEquals(200, $statusCode, 'Viewer should not be able to add children');
     }
 
     /**
@@ -69,8 +70,9 @@ class PermissionsTest extends TestCase
         // Cannot access user management
         $this->session(['Config.language' => 'en']);
         $this->get('/users/index');
-        // Should not be OK (redirect or 403)
-        $this->assertResponseNotOk();
+        // Should not allow (403 or redirect)
+        $statusCode = $this->_response->getStatusCode();
+        $this->assertNotEquals(200, $statusCode, 'Editor should not access user management');
     }
 
     /**
