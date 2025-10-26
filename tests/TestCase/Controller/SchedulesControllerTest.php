@@ -7,7 +7,16 @@ use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 
 /**
- * App\Controller\SchedulesController Test Case
+ * 🔧 App\Controller\SchedulesController Test Case
+ *
+ * WHAT IT TESTS:
+ * - Schedule CRUD operations (index, add, edit, delete)
+ * - Schedule validation (title, start_date, end_date)
+ * - Organization-scoped schedules
+ * - Schedule permissions and access control
+ * 
+ * STATUS: 🔧 Needs session-based locale fix (LocaleMiddleware overwrites I18n::setLocale)
+ * FIX: Add $this->session(['Config.language' => 'en']) before each GET request
  *
  * @uses \App\Controller\SchedulesController
  */
@@ -40,12 +49,13 @@ class SchedulesControllerTest extends TestCase
         $this->enableCsrfToken();
         $this->enableSecurityToken();
         
-        // Set English locale for tests
-        \Cake\I18n\I18n::setLocale('en_US');
+        // Note: Cannot set locale here - LocaleMiddleware will override it
+        // Each test must set: $this->session(['Config.language' => 'en']) before GET requests
     }
 
     /**
-     * Test index method
+     * 🔧 Test index method
+     * TESTS: Schedules list page displays for logged-in user
      *
      * @return void
      * @uses \App\Controller\SchedulesController::index()
@@ -56,6 +66,7 @@ class SchedulesControllerTest extends TestCase
         $this->createAndLoginUser('schedule@test.com');
 
         // Access schedules index
+        $this->session(['Config.language' => 'en']);
         $this->get('/schedules');
         
         $this->assertResponseOk();
@@ -63,7 +74,8 @@ class SchedulesControllerTest extends TestCase
     }
 
     /**
-     * Test add method (GET)
+     * 🔧 Test add method (GET)
+     * TESTS: Add schedule form displays with title field
      *
      * @return void
      * @uses \App\Controller\SchedulesController::add()
@@ -74,6 +86,7 @@ class SchedulesControllerTest extends TestCase
         $this->createAndLoginUser('scheduleadd@test.com');
 
         // Access add form
+        $this->session(['Config.language' => 'en']);
         $this->get('/schedules/add');
         
         $this->assertResponseOk();

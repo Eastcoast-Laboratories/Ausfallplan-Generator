@@ -7,7 +7,15 @@ use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 
 /**
- * App\Controller\SiblingGroupsController Test Case
+ * 🔧 App\Controller\SiblingGroupsController Test Case
+ *
+ * WHAT IT TESTS:
+ * - Sibling groups CRUD operations (index, add, edit, delete)
+ * - Managing sibling relationships between children
+ * - Organization-scoped sibling groups
+ * 
+ * STATUS: 🔧 Needs session-based locale fix (LocaleMiddleware overwrites I18n::setLocale)
+ * FIX: Add $this->session(['Config.language' => 'en']) before each GET request
  *
  * @uses \App\Controller\SiblingGroupsController
  */
@@ -40,12 +48,13 @@ class SiblingGroupsControllerTest extends TestCase
         $this->enableCsrfToken();
         $this->enableSecurityToken();
         
-        // Set English locale for tests
-        \Cake\I18n\I18n::setLocale('en_US');
+        // Note: Cannot set locale here - LocaleMiddleware will override it
+        // Each test must set: $this->session(['Config.language' => 'en']) before GET requests
     }
 
     /**
-     * Test index method
+     * 🔧 Test index method
+     * TESTS: Sibling groups list page displays for logged-in user
      *
      * @return void
      * @uses \App\Controller\SiblingGroupsController::index()
@@ -56,6 +65,7 @@ class SiblingGroupsControllerTest extends TestCase
         $this->createAndLoginUser('siblings@test.com');
 
         // Access sibling groups index
+        $this->session(['Config.language' => 'en']);
         $this->get('/sibling-groups');
         
         $this->assertResponseOk();
