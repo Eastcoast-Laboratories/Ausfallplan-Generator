@@ -40,6 +40,7 @@ bei http://localhost:8080/sibling-groups/view/5  bei jedem Kind einnen "Kind lö
 
 - datenschutzerklärung und Impressum generieren und in der navigation ganz unten verlinken: Eastcoast Laboratories, Ruben Barkow-Kuder, Knickweg 16, 24114 Kiel, Telefon: Kiel-5368723, Kontakt: ausfallplan-generator-kontakt@it.z11.de
 
+- es kommt immer " Sie müssen einer Organisation angehören, um Dienstpläne zu erstellen." wenn man als admin eine neuen ausfallplan anlegenwill
 
 # weitere TODOs
 
