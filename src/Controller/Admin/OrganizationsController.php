@@ -227,16 +227,17 @@ class OrganizationsController extends AppController
             }
 
             // 5. Finally delete the organization
-            if ($this->Organizations->delete($organization)) {
-                $connection->commit();
-                $this->Flash->success(__('Die Organisation und alle zugehörigen Daten wurden gelöscht.'));
-            } else {
-                $connection->rollback();
-                $this->Flash->error(__('Die Organisation konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.'));
+            if (!$this->Organizations->delete($organization)) {
+                throw new \RuntimeException('Organization could not be deleted');
             }
+            
+            $connection->commit();
+            $this->Flash->success(__('Die Organisation und alle zugehörigen Daten wurden gelöscht.'));
 
         } catch (\Exception $e) {
-            $connection->rollback();
+            if ($connection->inTransaction()) {
+                $connection->rollback();
+            }
             $this->Flash->error(__('Fehler beim Löschen: {0}', $e->getMessage()));
         }
 
