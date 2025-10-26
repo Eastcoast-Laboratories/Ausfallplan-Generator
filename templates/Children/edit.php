@@ -12,6 +12,7 @@ $this->assign('title', __('Edit Child'));
         <legend><?= __('Edit Child') ?></legend>
         <?php
             echo $this->Form->control('name', ['label' => __('Name'), 'required' => true]);
+            echo $this->Form->control('last_name', ['label' => __('Last Name'), 'required' => false]);
             echo $this->Form->control('gender', [
                 'type' => 'select',
                 'options' => [
@@ -22,11 +23,12 @@ $this->assign('title', __('Edit Child'));
                 'empty' => __('(Not specified)'),
                 'label' => __('Gender')
             ]);
-            echo $this->Form->control('birthdate', [
+            echo $this->Form->control('birth_date', [
                 'type' => 'date',
                 'label' => __('Birthdate'),
                 'empty' => true,
             ]);
+            echo $this->Form->control('postal_code', ['label' => __('Postal Code'), 'required' => false]);
             echo $this->Form->control('is_active', ['type' => 'checkbox', 'label' => __('Active')]);
             echo $this->Form->control('is_integrative', ['type' => 'checkbox', 'label' => __('Integrative Child')]);
             echo $this->Form->control('sibling_group_id', [

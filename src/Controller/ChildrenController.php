@@ -364,7 +364,7 @@ class ChildrenController extends AppController
         }
         
         foreach ($parsedChildren as $childData) {
-            // Apply anonymization
+            // Apply anonymization for display name (used for checking duplicates and display)
             $displayName = $importService->anonymizeName($childData, $anonymizationMode);
             
             // Check if child already exists
@@ -399,8 +399,8 @@ class ChildrenController extends AppController
             // Create child
             $child = $this->Children->newEntity([
                 'organization_id' => $orgId,
-                'name' => $displayName,
-                'last_name' => $anonymizationMode === 'full' ? $childData['last_name'] : null,
+                'name' => $displayName, // Anonymized display name
+                'last_name' => $childData['last_name'], // Always save real last name
                 'birth_date' => $childData['birth_date'],
                 'gender' => $childData['gender'],
                 'is_integrative' => $childData['is_integrative'],
