@@ -21,16 +21,33 @@ class UsersController extends AppController
     {
         $user = $this->Users->newEmptyEntity();
         
+        // Load all organizations for selectbox
+        $organizationsTable = $this->fetchTable('Organizations');
+        $organizationsList = $organizationsTable->find()
+            ->where(['name !=' => 'keine organisation'])
+            ->order(['name' => 'ASC'])
+            ->all()
+            ->combine('id', 'name')
+            ->toArray();
+        
         if ($this->request->is('post')) {
             $data = $this->request->getData();
             
-            // Handle organization: create new or use "keine organisation"
-            $organizationName = trim($data['organization_name'] ?? '');
+            // Handle organization choice
+            $orgChoice = $data['organization_choice'] ?? 'new';
             $organizationsTable = $this->fetchTable('Organizations');
             $isNewOrganization = false;
             
-            if (!empty($organizationName)) {
-                // Check if organization already exists, otherwise create new one
+            if ($orgChoice === 'new') {
+                // Create new organization
+                $organizationName = trim($data['organization_name'] ?? '');
+                
+                if (empty($organizationName)) {
+                    $this->Flash->error(__('Bitte geben Sie einen Namen für die neue Organisation ein.'));
+                    $this->set(compact('user', 'organizationsList'));
+                    return;
+                }
+                
                 $organization = $organizationsTable->find()
                     ->where(['name' => $organizationName])
                     ->first();
@@ -52,23 +69,14 @@ class UsersController extends AppController
                 
                 $data['organization_id'] = $organization->id;
             } else {
-                // Use "keine organisation"
-                $noOrg = $organizationsTable->find()
-                    ->where(['name' => 'keine organisation'])
-                    ->first();
-                
-                if (!$noOrg) {
-                    // Create "keine organisation" if it doesn't exist
-                    $noOrg = $organizationsTable->newEntity(['name' => 'keine organisation']);
-                    $organizationsTable->save($noOrg);
-                }
-                
-                $organization = $noOrg;
-                $data['organization_id'] = $noOrg->id;
+                // Join existing organization (ID from selectbox)
+                $organization = $organizationsTable->get($orgChoice);
+                $data['organization_id'] = $organization->id;
             }
             
             $requestedRole = $data['requested_role'] ?? 'editor';
             
+            unset($data['organization_choice']); // Remove the choice field
             unset($data['organization_name']); // Remove the text field, we use organization_id
             unset($data['requested_role']); // Don't save to users table
             
@@ -141,7 +149,7 @@ class UsersController extends AppController
             $this->Flash->error(__('Registration failed. Please try again.'));
         }
         
-        $this->set(compact('user'));
+        $this->set(compact('user', 'organizationsList'));
     }
     
     /**
