@@ -84,6 +84,44 @@ class OrganizationsController extends AppController
     }
 
     /**
+     * Add method - Create new organization
+     *
+     * @return \Cake\Http\Response|null|void
+     */
+    public function add()
+    {
+        $identity = $this->Authentication->getIdentity();
+        if (!$identity) {
+            return $this->redirect(['_name' => 'login']);
+        }
+        
+        $user = $identity->getOriginalData();
+        if (!$user->isSystemAdmin()) {
+            $this->Flash->error(__('Access denied. System admin privileges required.'));
+            return $this->redirect(['_name' => 'dashboard']);
+        }
+
+        $organization = $this->Organizations->newEmptyEntity();
+
+        if ($this->request->is('post')) {
+            $organization = $this->Organizations->patchEntity($organization, $this->request->getData());
+            
+            // Set default values
+            if (!isset($organization->is_active)) {
+                $organization->is_active = true;
+            }
+            
+            if ($this->Organizations->save($organization)) {
+                $this->Flash->success(__('The organization has been created.'));
+                return $this->redirect(['action' => 'view', $organization->id]);
+            }
+            $this->Flash->error(__('The organization could not be saved. Please, try again.'));
+        }
+
+        $this->set(compact('organization'));
+    }
+
+    /**
      * Edit method - Edit organization
      *
      * @param string|null $id Organization id
