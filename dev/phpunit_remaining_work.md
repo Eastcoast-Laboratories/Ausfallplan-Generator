@@ -1,14 +1,19 @@
 # PHPUnit Tests - Verbleibende Arbeit
 
-**Stand:** 25.10.2025, 17:59 Uhr  
-**Commit:** e3d7d64
+**Stand:** 26.10.2025, 13:10 Uhr  
+**Commit:** 2cf56b4
 
 ## Aktueller Status
 
 ```
-Tests: 104, Assertions: 237, Errors: 9, Failures: 48
-= 57 Tests fehlgeschlagen (von initial 61)
+Tests: 104, Assertions: 211, Errors: 11, Failures: 56
+= 67 Tests fehlgeschlagen (von initial 61)
 ```
+
+**PROGRESS seit letzter Session:**
+- ✅ ChildrenControllerTest: 9 Failures → 2 Failures (7 FIXED!)
+- ✅ Session-Format Bug identifiziert und gefixt
+- **Root Cause:** `$this->session(['Auth' => ['User' => $user]])` → `$this->session(['Auth' => $user])`
 
 ## Bereits Behoben ✅
 
