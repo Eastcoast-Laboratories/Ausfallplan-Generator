@@ -113,24 +113,6 @@ $this->assign('title', __('Waitlist'));
         <!-- Waitlist -->
         <div class="waitlist-children">
             <h4><?= __('Children on Waitlist') ?> <span style="font-size: 0.9rem; color: #666;">(<?= __('Drag to reorder') ?>)</span></h4>
-            <!-- DEBUG: Sibling Names -->
-            <?php if (isset($siblingNames)): ?>
-                <div style="background: yellow; padding: 10px; margin: 10px 0; border: 2px solid red;">
-                    <strong>DEBUG: siblingNames Array</strong><br>
-                    <pre><?= print_r($siblingNames, true) ?></pre>
-                </div>
-            <?php else: ?>
-                <div style="background: red; color: white; padding: 10px; margin: 10px 0;">
-                    <strong>ERROR: $siblingNames not set!</strong>
-                </div>
-            <?php endif; ?>
-            <!-- DEBUG: Controller Debug Info -->
-            <?php if (isset($debugInfo)): ?>
-                <div style="background: #ffeb3b; padding: 10px; margin: 10px 0; border: 2px solid #f57f17;">
-                    <strong>DEBUG: Controller Debug Info</strong><br>
-                    <pre style="margin: 0; white-space: pre-wrap; font-size: 0.9em;"><?php foreach ($debugInfo as $info): echo $info . "\n"; endforeach; ?></pre>
-                </div>
-            <?php endif; ?>
             <div id="waitlist-sortable" style="background: #fff3e0; padding: 1rem; border-radius: 8px; min-height: 300px;">
                 <?php if (!empty($waitlistEntries) && (is_countable($waitlistEntries) ? count($waitlistEntries) : $waitlistEntries->count()) > 0): ?>
                     <?php foreach ($waitlistEntries as $entry): ?>
@@ -141,7 +123,6 @@ $this->assign('title', __('Waitlist'));
                                 </span>
                                 <div>
                                     <strong><?= h($entry->child->name) ?></strong>
-                                    <span style="font-size: 0.7rem; color: #999;"> (ID: <?= $entry->child->id ?>, SG: <?= $entry->child->sibling_group_id ?? 'NULL' ?>)</span>
                                     <?php if ($entry->child->sibling_group_id): ?>
                                         <?= $this->Html->link(
                                             '👨‍👩‍👧 ' . __("Geschwister"),
