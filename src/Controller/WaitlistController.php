@@ -234,12 +234,13 @@ class WaitlistController extends AppController
             if ($entry->child->sibling_group_id) {
                 $siblingGroupsMap[$entry->id] = $entry->child->sibling_group_id;
                 
-                // Load all siblings for this group (including current child)
+                // Load ALL siblings for this group (from entire Children table, not just schedule/waitlist)
                 $siblings = $this->fetchTable('Children')->find()
                     ->where([
                         'sibling_group_id' => $entry->child->sibling_group_id,
                         'id !=' => $entry->child->id // Exclude current child from list
                     ])
+                    ->orderBy(['name' => 'ASC'])
                     ->all();
                 
                 $names = [];
@@ -255,8 +256,8 @@ class WaitlistController extends AppController
                     }
                 }
                 
-                // Set sibling names - show "keine" if empty
-                $siblingNames[$entry->child->id] = !empty($names) ? implode(', ', $names) : __('keine weiteren');
+                // Set sibling names - show all siblings, or "nur dieses Kind" if none exist
+                $siblingNames[$entry->child->id] = !empty($names) ? implode(', ', $names) : __('nur dieses Kind in Geschwistergruppe');
             }
         }
         
