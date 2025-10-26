@@ -243,8 +243,13 @@ class WaitlistController extends AppController
                     ->orderBy(['name' => 'ASC'])
                     ->all();
                 
+                // DEBUG: Log query and results
+                error_log("DEBUG: Looking for siblings of '{$entry->child->name}' (ID: {$entry->child->id}, sibling_group_id: {$entry->child->sibling_group_id})");
+                error_log("DEBUG: Found " . $siblings->count() . " siblings");
+                
                 $names = [];
                 foreach ($siblings as $sib) {
+                    error_log("DEBUG: Sibling found: '{$sib->name}' (ID: {$sib->id})");
                     $names[] = $sib->name;
                     
                     // Check if sibling is in schedule
@@ -256,10 +261,7 @@ class WaitlistController extends AppController
                     }
                 }
                 
-                // DEBUG: Log if no siblings found but sibling_group_id exists
-                if (empty($names)) {
-                    error_log("WARNING: Child '{$entry->child->name}' (ID: {$entry->child->id}) has sibling_group_id {$entry->child->sibling_group_id} but no other siblings found in database!");
-                }
+                error_log("DEBUG: Final sibling names array: " . json_encode($names));
                 
                 // Set sibling names - show all siblings found in database
                 $siblingNames[$entry->child->id] = !empty($names) ? implode(', ', $names) : __('keine anderen Geschwister gefunden');
