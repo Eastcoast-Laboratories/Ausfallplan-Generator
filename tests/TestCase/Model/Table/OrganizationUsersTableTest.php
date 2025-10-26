@@ -22,6 +22,9 @@ class OrganizationUsersTableTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
+        
+        // Set English locale for tests
+        \Cake\I18n\I18n::setLocale('en_US');
         $this->OrganizationUsers = $this->getTableLocator()->get('OrganizationUsers');
     }
 
