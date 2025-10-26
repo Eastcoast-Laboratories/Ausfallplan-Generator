@@ -126,8 +126,9 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                                 "✕",
                                 ["action" => "removeChild", "?" => ["schedule_id" => $schedule->id, "child_id" => $child->id]],
                                 [
-                                    "class" => "button button-small",
-                                    "style" => "background: #f44336; color: white; padding: 0.5rem 0.75rem; text-decoration: none; border-radius: 4px;"
+                                    "class" => "button button-small remove-child-btn",
+                                    "style" => "background: #f44336; color: white; padding: 0.5rem 0.75rem; text-decoration: none; border-radius: 4px;",
+                                    "data-child-id" => $child->id
                                 ]
                             ) ?>
                         </div>
@@ -153,8 +154,9 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                                         "✕",
                                         ["action" => "removeChild", "?" => ["schedule_id" => $schedule->id, "child_id" => $child->id]],
                                         [
-                                            "class" => "button button-small",
-                                            "style" => "background: #f44336; color: white; padding: 0.5rem 0.75rem; text-decoration: none; border-radius: 4px;"
+                                            "class" => "button button-small remove-child-btn",
+                                            "style" => "background: #f44336; color: white; padding: 0.5rem 0.75rem; text-decoration: none; border-radius: 4px;",
+                                            "data-child-id" => $child->id
                                         ]
                                     ) ?>
                                 </div>
@@ -177,6 +179,27 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
 
 <?php if (!empty($assignedChildren) && (is_countable($assignedChildren) ? count($assignedChildren) : $assignedChildren->count()) > 0): ?>
 <script>
+// Hide element immediately on click (prevent double-click)
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('remove-child-btn') || e.target.closest('.remove-child-btn')) {
+        const btn = e.target.classList.contains('remove-child-btn') ? e.target : e.target.closest('.remove-child-btn');
+        const item = btn.closest('.child-item');
+        const siblingGroup = btn.closest('.sibling-group');
+        
+        if (item) {
+            item.style.opacity = '0.3';
+            item.style.pointerEvents = 'none';
+        } else if (siblingGroup) {
+            // Find the specific child item within sibling group
+            const childItem = btn.closest('div[style*="background: white"]');
+            if (childItem) {
+                childItem.style.opacity = '0.3';
+                childItem.style.pointerEvents = 'none';
+            }
+        }
+    }
+});
+
 // Initialize Sortable.js for drag & drop
 const el = document.getElementById("children-sortable");
 const sortable = Sortable.create(el, {
