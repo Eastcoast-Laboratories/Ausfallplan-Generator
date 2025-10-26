@@ -216,7 +216,7 @@ class AuthenticationFlowTest extends TestCase
         $this->enableCsrfToken();
         $this->post('/users/login', [
             'email' => 'unverified@test.com',
-            'password' => 'password123',
+            'password' => $plainPassword,
         ]);
 
         // Should stay on login page or redirect with error
@@ -234,9 +234,11 @@ class AuthenticationFlowTest extends TestCase
     {
         $this->session(['Config.language' => 'en']);
         $usersTable = $this->getTableLocator()->get('Users');
+        
+        $plainPassword = 'password123';
         $user = $usersTable->newEntity([
             'email' => 'pending@test.com',
-            'password' => 'password123',
+            'password' => $plainPassword,
             'status' => 'pending',
             'is_system_admin' => false,
             'email_verified' => 1,
@@ -255,7 +257,7 @@ class AuthenticationFlowTest extends TestCase
         $this->enableCsrfToken();
         $this->post('/users/login', [
             'email' => 'pending@test.com',
-            'password' => 'password123',
+            'password' => $plainPassword,
         ]);
 
         // Should block login with pending message
