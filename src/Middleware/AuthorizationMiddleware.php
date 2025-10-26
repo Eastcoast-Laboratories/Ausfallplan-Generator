@@ -46,12 +46,11 @@ class AuthorizationMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
         
-        // Get user's role from organization_users (this is set by getPrimaryOrganization in controllers)
-        // For now, use old role field as fallback
-        $role = $identity->role ?? 'viewer';
+        // Get user's role from organization_users table
+        $role = $this->getUserRole($identity);
         
-        // Legacy admin check
-        if ($role === 'admin') {
+        // org_admin has full access (like old admin role)
+        if ($role === 'org_admin') {
             return $handler->handle($request);
         }
         
@@ -60,11 +59,11 @@ class AuthorizationMiddleware implements MiddlewareInterface
             $allowedActions = ['index', 'view'];
             
             if (!in_array($action, $allowedActions)) {
-                // Redirect with flash message
+                // Redirect with flash message (German)
                 $session = $request->getAttribute('session');
                 $session->write('Flash.flash', [
                     [
-                        'message' => 'You do not have permission to perform this action. (Viewer role is read-only)',
+                        'message' => 'Sie haben keine Berechtigung, diese Aktion auszuführen. (Viewer-Rolle ist nur lesend)',
                         'key' => 'flash',
                         'element' => 'Flash/error',
                         'params' => ['class' => 'error']
@@ -86,7 +85,7 @@ class AuthorizationMiddleware implements MiddlewareInterface
                 $session = $request->getAttribute('session');
                 $session->write('Flash.flash', [
                     [
-                        'message' => 'Editors cannot manage users.',
+                        'message' => 'Editor können keine Benutzer verwalten.',
                         'key' => 'flash',
                         'element' => 'Flash/error',
                         'params' => ['class' => 'error']
@@ -101,5 +100,43 @@ class AuthorizationMiddleware implements MiddlewareInterface
         }
         
         return $handler->handle($request);
+    }
+
+    /**
+     * Get user's highest role from organization_users
+     *
+     * @param object $identity User identity
+     * @return string Role (org_admin, editor, viewer)
+     */
+    private function getUserRole($identity): string
+    {
+        // Get connection using TableLocator
+        $locator = \Cake\ORM\Locator\LocatorAwareTrait::getTableLocator();
+        $orgUsersTable = $locator->get('OrganizationUsers');
+        
+        // Get all organization memberships
+        $orgUsers = $orgUsersTable->find()
+            ->where(['user_id' => $identity->id])
+            ->all();
+        
+        // No organization membership = viewer (most restrictive)
+        if ($orgUsers->isEmpty()) {
+            return 'viewer';
+        }
+        
+        // Check for highest role: org_admin > editor > viewer
+        foreach ($orgUsers as $orgUser) {
+            if ($orgUser->role === 'org_admin') {
+                return 'org_admin';
+            }
+        }
+        
+        foreach ($orgUsers as $orgUser) {
+            if ($orgUser->role === 'editor') {
+                return 'editor';
+            }
+        }
+        
+        return 'viewer';
     }
 }
