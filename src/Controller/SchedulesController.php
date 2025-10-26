@@ -200,12 +200,18 @@ class SchedulesController extends AppController
     public function edit($id = null)
     {
         $schedule = $this->Schedules->get($id, contain: []);
+        $user = $this->Authentication->getIdentity();
         
         // Permission check - requires editor role in schedule's organization
         if (!$this->hasOrgRole($schedule->organization_id, 'editor')) {
             $this->Flash->error(__('Sie haben keine Berechtigung Dienstpläne zu bearbeiten.'));
             return $this->redirect(['action' => 'index']);
         }
+        
+        // Get available organizations for this user
+        $orgEntities = $this->getUserOrganizations();
+        $organizations = collection($orgEntities)->combine('id', 'name')->toArray();
+        $canSelectOrganization = $user->is_system_admin || count($organizations) > 1;
 
         if ($this->request->is(['patch', 'post', 'put'])) {
             $schedule = $this->Schedules->patchEntity($schedule, $this->request->getData());
