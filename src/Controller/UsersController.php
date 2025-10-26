@@ -25,7 +25,7 @@ class UsersController extends AppController
         $organizationsTable = $this->fetchTable('Organizations');
         $organizationsList = $organizationsTable->find()
             ->where(['name !=' => 'keine organisation'])
-            ->order(['name' => 'ASC'])
+            ->orderBy(['name' => 'ASC'])
             ->all()
             ->combine('id', 'name')
             ->toArray();
