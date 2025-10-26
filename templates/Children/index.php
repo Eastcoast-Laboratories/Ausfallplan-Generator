@@ -16,6 +16,8 @@ $this->assign('title', __('Children'));
             <thead>
                 <tr>
                     <th><?= __('Name') ?></th>
+                    <th><?= __('Geschlecht') ?></th>
+                    <th><?= __('Geburtsdatum') ?></th>
                     <th><?= __('Status') ?></th>
                     <th><?= __('Integrative') ?></th>
                     <th><?= __('Sibling Group') ?></th>
@@ -39,6 +41,34 @@ $this->assign('title', __('Children'));
                                 ]
                             ) ?>
                         <?php endif; ?>
+                    </td>
+                    <td style="text-align: center; font-size: 1.2rem;">
+                        <?php
+                        if ($child->gender === 'male') {
+                            echo '<span title="Junge">♂️</span>';
+                        } elseif ($child->gender === 'female') {
+                            echo '<span title="Mädchen">♀️</span>';
+                        } elseif ($child->gender === 'neutral') {
+                            echo '<span title="Neutral">⚪</span>';
+                        } else {
+                            echo '<span title="Unbekannt">❓</span>';
+                        }
+                        ?>
+                    </td>
+                    <td>
+                        <?php
+                        if ($child->birthdate) {
+                            $birthdate = $child->birthdate instanceof \DateTime ? $child->birthdate : new \DateTime($child->birthdate);
+                            echo $birthdate->format('d.m.Y');
+                            
+                            // Calculate age
+                            $now = new \DateTime();
+                            $age = $now->diff($birthdate)->y;
+                            echo ' <span style="color: #666; font-size: 0.9rem;">(' . $age . ')</span>';
+                        } else {
+                            echo '-';
+                        }
+                        ?>
                     </td>
                     <td><?= $child->is_active ? __('Active') : __('Inactive') ?></td>
                     <td><?= $child->is_integrative ? __('Yes') : __('No') ?></td>

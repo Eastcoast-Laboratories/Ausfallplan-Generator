@@ -414,7 +414,7 @@ class ChildrenController extends AppController
                 'organization_id' => $orgId,
                 'name' => $displayName, // Anonymized display name
                 'last_name' => $childData['last_name'], // Always save real last name
-                'birth_date' => $childData['birth_date'],
+                'birthdate' => $childData['birth_date'] ? $childData['birth_date']->format('Y-m-d') : null,
                 'gender' => $childData['gender'],
                 'is_integrative' => $childData['is_integrative'],
                 'postal_code' => $childData['postal_code'],
