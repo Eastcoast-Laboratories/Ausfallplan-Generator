@@ -7,6 +7,20 @@
 $this->assign('title', __('Edit Child'));
 ?>
 <div class="children form content">
+    <h3>
+        <?= h($child->name) ?>
+        <?php if ($child->sibling_group_id): ?>
+            <?= $this->Html->link(
+                '👨‍👩‍👧 ' . __("Geschwister"),
+                ['controller' => 'SiblingGroups', 'action' => 'view', $child->sibling_group_id],
+                [
+                    'style' => 'background: #fff3cd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem; text-decoration: none; color: #856404; display: inline-block;',
+                    'title' => 'Geschwister: ' . (isset($siblingNames[$child->id]) ? h($siblingNames[$child->id]) : ''),
+                    'escape' => false
+                ]
+            ) ?>
+        <?php endif; ?>
+    </h3>
     <?= $this->Form->create($child) ?>
     <fieldset>
         <legend><?= __('Edit Child') ?></legend>

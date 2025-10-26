@@ -26,7 +26,20 @@ $this->assign('title', __('Children'));
             <tbody>
                 <?php foreach ($children as $child): ?>
                 <tr>
-                    <td><?= h($child->name) ?></td>
+                    <td>
+                        <?= h($child->name) ?>
+                        <?php if ($child->sibling_group_id): ?>
+                            <?= $this->Html->link(
+                                '👨‍👩‍👧',
+                                ['controller' => 'SiblingGroups', 'action' => 'view', $child->sibling_group_id],
+                                [
+                                    'style' => 'background: #fff3cd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem; text-decoration: none; color: #856404; display: inline-block;',
+                                    'title' => 'Geschwister: ' . (isset($siblingNames[$child->id]) ? h($siblingNames[$child->id]) : ''),
+                                    'escape' => false
+                                ]
+                            ) ?>
+                        <?php endif; ?>
+                    </td>
                     <td><?= $child->is_active ? __('Active') : __('Inactive') ?></td>
                     <td><?= $child->is_integrative ? __('Yes') : __('No') ?></td>
                     <td><?= $child->has('sibling_group') && $child->sibling_group ? h($child->sibling_group->label) : '' ?></td>
