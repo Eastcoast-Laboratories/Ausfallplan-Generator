@@ -30,13 +30,6 @@ $this->assign('title', __('Add Organization'));
             'required' => false
         ]) ?>
         
-        <?= $this->Form->control('address', [
-            'label' => __('Address'),
-            'type' => 'textarea',
-            'rows' => 3,
-            'required' => false
-        ]) ?>
-        
         <?= $this->Form->control('is_active', [
             'label' => __('Active'),
             'type' => 'checkbox',

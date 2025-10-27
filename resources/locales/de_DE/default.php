@@ -76,6 +76,7 @@ return [
     'Organizations' => 'Organisationen',
     'New Child' => 'Neues Kind',
     'Filter by Organization' => 'Filtern nach Organisation',
+    'CSV Import' => 'CSV importieren',
     
     // Sibling Groups
     'Add Sibling Group' => 'Geschwistergruppe hinzufügen',

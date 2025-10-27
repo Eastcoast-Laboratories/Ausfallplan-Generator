@@ -11,6 +11,10 @@ use Cake\ORM\Entity;
  * @property int $id
  * @property int $organization_id
  * @property string $name
+ * @property string|null $last_name
+ * @property string|null $gender
+ * @property \Cake\I18n\DateTime|null $birthdate
+ * @property string|null $postal_code
  * @property bool $is_integrative
  * @property bool $is_active
  * @property int|null $sibling_group_id
@@ -32,8 +36,10 @@ class Child extends Entity
     protected array $_accessible = [
         'organization_id' => true,
         'name' => true,
+        'last_name' => true,
         'gender' => true,
         'birthdate' => true,
+        'postal_code' => true,
         'is_integrative' => true,
         'is_active' => true,
         'sibling_group_id' => true,

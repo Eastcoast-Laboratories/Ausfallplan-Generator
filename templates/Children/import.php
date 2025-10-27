@@ -64,8 +64,8 @@ $this->assign('title', __('Kinder importieren'));
         <h4><?= __('Beispiel CSV-Struktur') ?>:</h4>
         <pre style="background: #f5f5f5; padding: 1rem; border-radius: 4px; overflow-x: auto;">
 ;;Mama;Mama Handy;Mama E-Mail;Papa;Papa Handy;Papa E-Mail;Geburtstag;Geschwister;WhatsApp;Signal;Straße;Plz;i
-Valentina;Brühl;Vicky;01577 9116456;vicky@example.com;Richard;;;14.02.19;;Malla;x;Straße 1;24143;2
-Amadeus;Kuder;Anna;01590 130 1983;anna@example.com;Ruben;;;05.08.19;Noah;Gruppe;x;Straße 2;24106;1
+Valentina;Schmidt;Vicky;01577 9116456;vicky@example.com;Richard;;;14.02.19;;Malla;x;Straße 1;24143;2
+Amadeus;Mozart;Anna;01590 130 1983;anna@example.com;Ruben;;;05.08.19;Noah;Gruppe;x;Straße 2;24106;1
         </pre>
         
         <h4><?= __('Automatische Geschlechtserkennung') ?>:</h4>

@@ -31,7 +31,7 @@ $this->assign('title', __('Import-Vorschau'));
                 <div>
                     <strong><?= __('Voller Name (Vor- und Nachname)') ?></strong>
                     <div style="color: #666; font-size: 0.9rem; margin-top: 0.25rem;">
-                        <?= __('Beispiel: Valentina Brühl, Amadeus Kuder') ?>
+                        <?= __('Beispiel: Valentina Schmidt, Amadeus Mozart') ?>
                     </div>
                 </div>
             </label>
