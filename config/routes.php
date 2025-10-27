@@ -72,8 +72,9 @@ return function (RouteBuilder $routes): void {
         // Admin Routes - Prefix scope automatically adds /admin/ to URLs
         $builder->prefix('Admin', function (RouteBuilder $routes) {
             $routes->setRouteClass(Route::class);
-            // Default admin route - redirect to organizations
-            $routes->connect('/', ['controller' => 'Organizations', 'action' => 'index']);
+            // Default admin route - dashboard
+            $routes->connect('/', ['controller' => 'Dashboard', 'action' => 'index'], ['_name' => 'admin_dashboard']);
+            $routes->connect('/dashboard', ['controller' => 'Dashboard', 'action' => 'index']);
             // Fallback route for all admin actions
             $routes->fallbacks(DashedRoute::class);
         });

@@ -12,6 +12,7 @@ return [
     'Number of Days' => 'Anzahl Tage',
     'Number of days for the schedule (default: number of assigned children)' => 'Anzahl der Tage für den Ausfallplan (Vorschlag: Anzahl zugeordneter Kinder)',
     'Generate List' => 'Ausfallplan generieren',
+    'Generate Report' => 'Ausfallplan generieren',
     'Report generation for {0} days is not yet implemented.' => 'Report-Generierung für {0} Tage ist noch nicht implementiert.',
     'Nachrückliste' => 'Nachrückliste',
     'Immer am Ende' => 'Immer am Ende',
@@ -72,7 +73,9 @@ return [
     'Gender' => 'Geschlecht',
     'Birthdate' => 'Geburtsdatum',
     'Organization' => 'Organisation',
+    'Organizations' => 'Organisationen',
     'New Child' => 'Neues Kind',
+    'Filter by Organization' => 'Filtern nach Organisation',
     
     // Sibling Groups
     'Add Sibling Group' => 'Geschwistergruppe hinzufügen',
@@ -154,6 +157,9 @@ return [
     'State' => 'Status',
     'Draft' => 'Entwurf',
     'Final' => 'Fertig',
+    'Days' => 'Tage',
+    'User' => 'Benutzer',
+    'Export CSV' => 'CSV exportieren',
     'Max Children per Day' => 'Max. Kinder pro Tag',
     'Maximum number of children that can be assigned per day' => 'Maximale Anzahl der Kinder, die pro Tag zugewiesen werden können',
     'Leave empty for schedules that never end' => 'Leer lassen für Ausfallpläne ohne Enddatum',

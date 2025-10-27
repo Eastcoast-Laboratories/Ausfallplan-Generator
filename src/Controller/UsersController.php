@@ -298,6 +298,14 @@ class UsersController extends AppController
         }
         
         // Redirect back to where we came from to reload page with new language
+        $referer = $this->referer();
+        
+        // If referer contains /admin/, redirect to admin dashboard
+        if ($referer && strpos($referer, '/admin/') !== false) {
+            return $this->redirect(['prefix' => 'Admin', 'controller' => 'Dashboard', 'action' => 'index']);
+        }
+        
+        // Otherwise redirect to regular dashboard
         return $this->redirect($this->referer(['controller' => 'Dashboard', 'action' => 'index']));
     }
 
