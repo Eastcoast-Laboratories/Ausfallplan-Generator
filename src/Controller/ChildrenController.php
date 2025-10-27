@@ -275,15 +275,37 @@ class ChildrenController extends AppController
     {
         $user = $this->Authentication->getIdentity();
         
-        // Get user's primary organization
-        $primaryOrg = $this->getPrimaryOrganization();
-        if (!$primaryOrg && !$user->is_system_admin) {
+        // Get user's organizations
+        $userOrgs = $this->getUserOrganizations();
+        $organizations = collection($userOrgs)->combine('id', 'name')->toArray();
+        
+        // System admins see all organizations
+        if ($user && $user->is_system_admin) {
+            $organizationsTable = $this->fetchTable('Organizations');
+            $allOrgs = $organizationsTable->find()->all();
+            $organizations = collection($allOrgs)->combine('id', 'name')->toArray();
+        }
+        
+        if (empty($organizations) && !$user->is_system_admin) {
             $this->Flash->error(__('Sie müssen einer Organisation angehören, um Kinder zu importieren.'));
             return $this->redirect(['action' => 'index']);
         }
         
+        // Get primary org as default
+        $primaryOrg = $this->getPrimaryOrganization();
+        $selectedOrgId = $primaryOrg ? $primaryOrg->id : null;
+        
+        // Can show selector if user has multiple organizations or is system admin
+        $canSelectOrganization = $user->is_system_admin || count($organizations) > 1;
+        
         if ($this->request->is('post')) {
             $file = $this->request->getData('csv_file');
+            $selectedOrgId = $this->request->getData('organization_id');
+            
+            if (!$selectedOrgId) {
+                $this->Flash->error(__('Bitte wählen Sie eine Organisation aus.'));
+                return;
+            }
             
             if (!$file || $file->getError() !== UPLOAD_ERR_OK) {
                 $this->Flash->error(__('Bitte wählen Sie eine gültige CSV-Datei aus.'));
@@ -303,7 +325,7 @@ class ChildrenController extends AppController
                 
                 // Store parsed data in session for confirmation step
                 $this->request->getSession()->write('import_data', $parsedChildren);
-                $this->request->getSession()->write('import_org_id', $primaryOrg->id ?? 1);
+                $this->request->getSession()->write('import_org_id', $selectedOrgId);
                 
                 // Redirect to preview
                 return $this->redirect(['action' => 'importPreview']);
@@ -314,7 +336,7 @@ class ChildrenController extends AppController
             }
         }
         
-        $this->set(compact('primaryOrg'));
+        $this->set(compact('organizations', 'selectedOrgId', 'canSelectOrganization'));
     }
 
     /**
