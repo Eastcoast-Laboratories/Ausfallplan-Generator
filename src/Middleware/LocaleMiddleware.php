@@ -51,14 +51,7 @@ class LocaleMiddleware implements MiddlewareInterface
                 
                 // Set I18n locale
                 I18n::setLocale($fullLocale);
-                
-                // Debug logging (can be removed later)
-                error_log("LocaleMiddleware: Set locale to {$fullLocale} (from session: {$language})");
-            } else {
-                error_log("LocaleMiddleware: No language in session, using default de_DE");
             }
-        } else {
-            error_log("LocaleMiddleware: No session attribute");
         }
         
         return $handler->handle($request);
