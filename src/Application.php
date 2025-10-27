@@ -154,7 +154,7 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
             'loginUrl' => null, // Allow login from any URL
         ]);
         
-        // Load identifiers (keep old syntax for now - new syntax causes 500 errors)
+        // Load identifier - suppress deprecation in config/app.php instead
         $service->loadIdentifier('Authentication.Password', [
             'fields' => [
                 'username' => 'email',

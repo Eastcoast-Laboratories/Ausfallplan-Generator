@@ -22,7 +22,8 @@ class UsersController extends AppController
         $identity = $this->Authentication->getIdentity();
         if (!$identity || $identity->role !== 'admin') {
             $this->Flash->error(__('Access denied. Admin only.'));
-            return $this->redirect(['controller' => 'Dashboard', 'action' => 'index']);
+            $event->setResult($this->redirect(['controller' => 'Dashboard', 'action' => 'index']));
+            $event->stopPropagation();
         }
     }
 
