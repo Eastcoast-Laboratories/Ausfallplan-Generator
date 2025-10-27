@@ -18,7 +18,7 @@ $this->assign('title', h($organization->name));
         ) ?>
         <?php if ($organization->name !== 'keine organisation'): ?>
             <?= $this->Form->postLink(
-                __('Organisation löschen'), 
+                __('Delete Organization'), 
                 ['action' => 'delete', $organization->id],
                 [
                     'confirm' => __('WARNUNG: Dies löscht die Organisation und ALLE zugehörigen Daten (Benutzer, Kinder, Dienstpläne). Fortfahren?'),
@@ -71,9 +71,9 @@ $this->assign('title', h($organization->name));
                     <td>
                         <?php
                         $roleLabels = [
-                            'org_admin' => __('Organisations-Admin'),
-                            'editor' => __('Bearbeiter'),
-                            'viewer' => __('Betrachter')
+                            'org_admin' => __('Organization Admin'),
+                            'editor' => __('Editor'),
+                            'viewer' => __('Viewer')
                         ];
                         echo h($roleLabels[$orgUser->role] ?? $orgUser->role);
                         ?>
