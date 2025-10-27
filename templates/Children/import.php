@@ -64,14 +64,14 @@ $this->assign('title', __('Kinder importieren'));
         <h4><?= __('Beispiel CSV-Struktur') ?>:</h4>
         <pre style="background: #f5f5f5; padding: 1rem; border-radius: 4px; overflow-x: auto;">
 ;;Mama;Mama Handy;Mama E-Mail;Papa;Papa Handy;Papa E-Mail;Geburtstag;Geschwister;WhatsApp;Signal;Straße;Plz;i
-Valentina;Schmidt;Vicky;01577 9116456;vicky@example.com;Richard;;;14.02.19;;Malla;x;Straße 1;24143;2
-Amadeus;Mozart;Anna;01590 130 1983;anna@example.com;Ruben;;;05.08.19;Noah;Gruppe;x;Straße 2;24106;1
+Valentina;Schmidt;Vicky;;vicky@example.com;Richard;;;14.02.19;;Malla;x;Straße 1;24143;2
+Amadeus;Mozart;Anna;;anna@example.com;Ruben;;;05.08.19;Noah;Gruppe;x;Straße 2;24106;1
         </pre>
         
         <h4><?= __('Automatische Geschlechtserkennung') ?>:</h4>
         <p><?= __('Das System erkennt automatisch das Geschlecht anhand typischer deutscher Vornamen:') ?></p>
         <ul style="columns: 3; -webkit-columns: 3; -moz-columns: 3;">
-            <li><strong><?= __('Männlich') ?>:</strong> Aaron, Amadeus, Bo, Ezra, Jannis, Levin, Nael, Noah, Timotheus, etc.</li>
+            <li><strong><?= __('Männlich') ?>:</strong> Aaron, Amadeus, Bo, Jannis, Levin, Nael, Noah, etc.</li>
             <li><strong><?= __('Weiblich') ?>:</strong> Clara, Johanna, Lene, Tina, Valentina, Zoe, etc.</li>
             <li><?= __('Bei unbekannten Namen: "unknown"') ?></li>
         </ul>
