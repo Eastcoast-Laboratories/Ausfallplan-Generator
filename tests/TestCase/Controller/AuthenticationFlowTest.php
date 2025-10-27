@@ -370,9 +370,9 @@ class AuthenticationFlowTest extends TestCase
         if ($this->_response->getStatusCode() >= 300 && $this->_response->getStatusCode() < 400) {
             $this->assertRedirect();
             
-            // TODO: Controller should mark reset as used (currently not implemented)
-            // $reset = $resetsTable->get($reset->id);
-            // $this->assertNotNull($reset->used_at, 'Reset should be marked as used');
+            // Verify reset is marked as used
+            $reset = $resetsTable->get($reset->id);
+            $this->assertNotNull($reset->used_at, 'Reset should be marked as used');
             
             // Try logging in with new password to verify it was changed
             $this->enableCsrfToken();
