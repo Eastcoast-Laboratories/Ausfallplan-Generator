@@ -12,29 +12,40 @@ use Cake\ORM\TableRegistry;
 
 /**
  * Schedule Builder Service
- * Handles automatic distribution and waitlist application
+ * 
+ * ⚠️  DEPRECATED: This service is obsolete in the new concept
+ * Old: Auto-distributed children to schedule_days/assignments
+ * New: Children are managed via waitlist_entries, report generates dynamically
+ * 
+ * TODO: Either delete or rewrite for waitlist management
+ * 
+ * @deprecated Will be removed or rewritten
  */
 class ScheduleBuilder
 {
     private RulesService $rulesService;
-    private AssignmentsTable $assignmentsTable;
-    private ChildrenTable $childrenTable;
 
     public function __construct()
     {
         $this->rulesService = new RulesService();
-        $this->assignmentsTable = TableRegistry::getTableLocator()->get('Assignments');
-        $this->childrenTable = TableRegistry::getTableLocator()->get('Children');
+        // NOTE: AssignmentsTable and ScheduleDays no longer exist
+        // This service needs complete rewrite or removal
     }
 
     /**
      * Build schedule assignments automatically
+     * 
+     * ⚠️  DEPRECATED: This method is obsolete
      *
+     * @deprecated Use waitlist_entries management instead
      * @param \App\Model\Entity\Schedule $schedule Schedule with days and rules
-     * @return int Number of assignments created
+     * @return int Number of assignments created (always 0 now)
      */
     public function build(Schedule $schedule): int
     {
+        // DEPRECATED: No longer creates assignments
+        // New concept: Children managed via waitlist_entries
+        return 0;
         $integrativeWeight = $this->rulesService->getIntegrativeWeight($schedule->rules);
         $alwaysLast = $this->rulesService->getAlwaysLast($schedule->rules);
         $maxPerChild = $this->rulesService->getMaxPerChild($schedule->rules);
