@@ -119,6 +119,9 @@ class SchedulesController extends AppController
             ->combine('id', 'name')
             ->toArray();
         
+        // Can select organization if system admin or has multiple orgs
+        $canSelectOrganization = $user->is_system_admin || count($organizations) > 1;
+        
         if ($this->request->is('post')) {
             $schedule = $this->Schedules->patchEntity($schedule, $this->request->getData());
             
@@ -128,14 +131,14 @@ class SchedulesController extends AppController
             // Ensure organization_id is set FIRST (before validation)
             if (!$schedule->organization_id) {
                 $this->Flash->error(__('Please select an organization.'));
-                $this->set(compact('schedule', 'organizations'));
+                $this->set(compact('schedule', 'organizations', 'canSelectOrganization'));
                 return;
             }
             
             // Validate organization membership
             if (!$this->hasOrgRole($schedule->organization_id)) {
                 $this->Flash->error(__('You do not have permission to create schedules for this organization.'));
-                $this->set(compact('schedule', 'organizations'));
+                $this->set(compact('schedule', 'organizations', 'canSelectOrganization'));
                 return;
             }
             
@@ -149,7 +152,7 @@ class SchedulesController extends AppController
             $this->Flash->error(__('Could not save schedule. Please try again.'));
         }
         
-        $this->set(compact('schedule', 'organizations'));
+        $this->set(compact('schedule', 'organizations', 'canSelectOrganization'));
     }
 
     /**
