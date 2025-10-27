@@ -58,16 +58,15 @@ class WaitlistController extends AppController
                 }
             }
             
-            // 3. Find schedule with assignments (prefer schedules with children)
+            // 3. Find schedule with waitlist entries (prefer schedules with children)
             if (!$selectedSchedule) {
                 foreach ($schedules as $schedule) {
-                    // Check if this schedule has assignments
-                    $hasAssignments = $this->fetchTable('Assignments')->find()
-                        ->innerJoinWith('ScheduleDays')
-                        ->where(['ScheduleDays.schedule_id' => $schedule->id])
+                    // Check if this schedule has waitlist entries
+                    $hasEntries = $this->fetchTable('WaitlistEntries')->find()
+                        ->where(['WaitlistEntries.schedule_id' => $schedule->id])
                         ->count();
                     
-                    if ($hasAssignments > 0) {
+                    if ($hasEntries > 0) {
                         $selectedSchedule = $schedule;
                         $scheduleId = $schedule->id;
                         // Set as active in session
@@ -90,7 +89,6 @@ class WaitlistController extends AppController
             // Load waitlist entries and available children (same logic as for regular users)
             $waitlistEntries = [];
             $availableChildren = [];
-            $childrenInSchedule = [];
             $childrenOnWaitlist = [];
             
             if ($scheduleId) {
@@ -101,39 +99,26 @@ class WaitlistController extends AppController
                     ->orderBy(['WaitlistEntries.priority' => 'ASC'])
                     ->all();
                 
-                // Get children that are assigned to any day in this schedule
-                $assignments = $this->fetchTable('Assignments')->find()
-                    ->select(['child_id' => 'DISTINCT Assignments.child_id'])
-                    ->innerJoinWith('ScheduleDays')
-                    ->where(['ScheduleDays.schedule_id' => $scheduleId])
-                    ->all();
-                
-                foreach ($assignments as $assignment) {
-                    $childrenInSchedule[] = $assignment->child_id;
-                }
-                
                 // Get children already on waitlist
                 foreach ($waitlistEntries as $entry) {
                     $childrenOnWaitlist[] = $entry->child_id;
                 }
                 
-                // Available children: In schedule BUT NOT on waitlist
-                if (!empty($childrenInSchedule)) {
-                    $availableChildrenQuery = $this->fetchTable('Children')->find()
-                        ->where([
-                            'Children.id IN' => $childrenInSchedule,
-                            'Children.is_active' => true,
-                        ])
-                        ->orderBy(['Children.name' => 'ASC']);
-                    
-                    if (!empty($childrenOnWaitlist)) {
-                        $availableChildrenQuery->where([
-                            'Children.id NOT IN' => $childrenOnWaitlist
-                        ]);
-                    }
-                    
-                    $availableChildren = $availableChildrenQuery->all();
+                // Available children: All active children from organization NOT on waitlist
+                $availableChildrenQuery = $this->fetchTable('Children')->find()
+                    ->where([
+                        'Children.organization_id' => $selectedSchedule->organization_id,
+                        'Children.is_active' => true,
+                    ])
+                    ->orderBy(['Children.name' => 'ASC']);
+                
+                if (!empty($childrenOnWaitlist)) {
+                    $availableChildrenQuery->where([
+                        'Children.id NOT IN' => $childrenOnWaitlist
+                    ]);
                 }
+                
+                $availableChildren = $availableChildrenQuery->all();
             }
             
             $countNotOnWaitlist = count($availableChildren);
@@ -169,7 +154,7 @@ class WaitlistController extends AppController
                     foreach ($siblings as $sib) {
                         $names[] = $sib->name;
                         
-                        if (!in_array($sib->id, $childrenInSchedule)) {
+                        if (!in_array($sib->id, $childrenOnWaitlist)) {
                             $missingSiblings[] = [
                                 'name' => $sib->name,
                                 'sibling_of' => $entry->child->name,
@@ -277,21 +262,7 @@ class WaitlistController extends AppController
                 ->all();
         }
         
-        // Get children that are assigned to any day in this schedule
-        $childrenInSchedule = [];
-        if ($scheduleId) {
-            $assignments = $this->fetchTable('Assignments')->find()
-                ->select(['child_id' => 'DISTINCT Assignments.child_id'])
-                ->innerJoinWith('ScheduleDays')
-                ->where(['ScheduleDays.schedule_id' => $scheduleId])
-                ->all();
-            
-            foreach ($assignments as $assignment) {
-                $childrenInSchedule[] = $assignment->child_id;
-            }
-        }
-        
-        // Get children already on waitlist
+        // Get children already on waitlist (no separate "in schedule" in new concept)
         $childrenOnWaitlist = [];
         foreach ($waitlistEntries as $entry) {
             $childrenOnWaitlist[] = $entry->child_id;
@@ -331,8 +302,8 @@ class WaitlistController extends AppController
                 foreach ($siblings as $sib) {
                     $names[] = $sib->name;
                     
-                    // Check if sibling is in schedule
-                    if (!in_array($sib->id, $childrenInSchedule)) {
+                    // Check if sibling is on waitlist
+                    if (!in_array($sib->id, $childrenOnWaitlist)) {
                         $missingSiblings[] = [
                             'name' => $sib->name,
                             'sibling_of' => $entry->child->name,
@@ -349,12 +320,12 @@ class WaitlistController extends AppController
             }
         }
         
-        // Available children: In schedule BUT NOT on waitlist
+        // Available children: All active org children NOT on waitlist
         $availableChildren = [];
-        if (!empty($childrenInSchedule)) {
+        if ($scheduleId && $selectedSchedule) {
             $availableChildrenQuery = $this->fetchTable('Children')->find()
                 ->where([
-                    'Children.id IN' => $childrenInSchedule,
+                    'Children.organization_id' => $selectedSchedule->organization_id,
                     'Children.is_active' => true,
                 ])
                 ->orderBy(['Children.name' => 'ASC']);
