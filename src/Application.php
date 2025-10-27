@@ -154,7 +154,8 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
             'loginUrl' => null, // Allow login from any URL
         ]);
         
-        // Load identifier - suppress deprecation in config/app.php instead
+        // Load identifier (deprecated but new syntax breaks authentication)
+        // Deprecation suppressed in config/app.php
         $service->loadIdentifier('Authentication.Password', [
             'fields' => [
                 'username' => 'email',
