@@ -52,14 +52,16 @@ bei http://localhost:8080/schedules/add muss eine selectbox, die nur sichtbar is
  - die sprachauswahl oben rechts muss auch im register form funktionieren, (im moment ist immer deutsch)
 - phpunittests alle noch mal reparieren @phpunit_remaining_work.md#L1-312 
 
-- [ ] wenn ein kind nicht auf der nachrückliste ist, dann muss es im report rechts unterhalb der nachrückliste angezeigt werden unter "immer am Ende" auftauchen, das ist zwar implementiert aber funktioinierrt nicht, da ist ein bug drin 
-- [ ] wenn ein kind nicht auf der nachrückliste ist, dann darf es auch nicht an den einzelnen tagen unten als kind für den start der nachrückliste mit auftauchen (das ist zwar BEREITS IMPLEMENTIERT in ReportService.php, aber es funktioniert nicht, die kinder werden dort trotzdem aufgeführt)
+- [x] wenn ein kind nicht auf der nachrückliste ist, dann muss es im report rechts unterhalb der nachrückliste angezeigt werden unter "immer am Ende" auftauchen, das ist zwar implementiert aber funktioinierrt nicht, da ist ein bug drin ✅ 26.10. 22:45 - BUG BEHOBEN: getSortedChildrenFromAssignments() nutzt jetzt waitlist_entries.priority statt assignments.sort_order (das Feld existierte gar nicht!)
+- [x] wenn ein kind nicht auf der nachrückliste ist, dann darf es auch nicht an den einzelnen tagen unten als kind für den start der nachrückliste mit auftauchen (das ist zwar BEREITS IMPLEMENTIERT in ReportService.php, aber es funktioniert nicht, die kinder werden dort trotzdem aufgeführt) ✅ 26.10. 22:45 - FIX AUTOMATISCH: Durch Fix von getSortedChildrenFromAssignments() werden nur noch Kinder aus waitlist_entries in den Tagesboxen angezeigt
 
 - [x] der ausfallplan muss exportierbar sein als csv ✅ 26.10. 21:32 - BEREITS IMPLEMENTIERT in SchedulesController::exportCsv()
 
 - [ ] die sprachwechslung von englisch zurück zu deutsch funktioniert nicht immer, mache einen playwright test, der sich einloggt, dann die sprache ein paar mal wechselt und die navigation überprüft ob das in der richtigen sprache ist TEST HINZUGEFÜGT in tests/e2e/language-switcher.spec.js aber noch nciht ausgeführt
 
-
+- TEST_FAILURES_TODO.md#L1-224  lösche alle hinweise auf in der vergangenheit gefixte tests, nur die noch offenen probleme und tests sollen in der datei aufgelistet werden. 
+ keine zeilen mit grünen haken, sondern die zeilen entfernen! 
+ dann mach weiter und löse alle probleme nach und nach
 
 # weitere TODOs
 
