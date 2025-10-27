@@ -394,6 +394,7 @@ class WaitlistServiceTest extends TestCase
             'child_id' => $child1->id,
             'weight' => 1,
             'source' => 'manual',
+            'sort_order' => 0,
         ]);
         $assignments->save($preAssignment);
 
