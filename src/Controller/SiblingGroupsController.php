@@ -163,4 +163,30 @@ class SiblingGroupsController extends AppController
 
         return $this->redirect(['action' => 'index']);
     }
+
+    /**
+     * Remove child from sibling group - Only removes the connection, not the child
+     *
+     * @param string|null $groupId Sibling Group id.
+     * @param string|null $childId Child id.
+     * @return \Cake\Http\Response|null Redirects to group view
+     */
+    public function removeChild($groupId = null, $childId = null)
+    {
+        $this->request->allowMethod(['post', 'delete']);
+        
+        $childrenTable = $this->fetchTable('Children');
+        $child = $childrenTable->get($childId);
+        
+        // Remove sibling group connection by setting sibling_group_id to null
+        $child->sibling_group_id = null;
+        
+        if ($childrenTable->save($child)) {
+            $this->Flash->success(__('Kind wurde aus der Geschwistergruppe entfernt.'));
+        } else {
+            $this->Flash->error(__('Kind konnte nicht aus der Geschwistergruppe entfernt werden.'));
+        }
+
+        return $this->redirect(['action' => 'view', $groupId]);
+    }
 }

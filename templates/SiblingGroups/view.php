@@ -42,7 +42,7 @@
                     <td class="actions">
                         <?= $this->Html->link(__('View'), ['controller' => 'Children', 'action' => 'view', $child->id]) ?>
                         <?= $this->Html->link(__('Edit'), ['controller' => 'Children', 'action' => 'edit', $child->id]) ?>
-                        <?= $this->Form->postLink(__('Delete'), ['controller' => 'Children', 'action' => 'delete', $child->id], ['confirm' => __('Are you sure you want to delete {0}?', $child->name)]) ?>
+                        <?= $this->Form->postLink(__('Remove from Group'), ['controller' => 'SiblingGroups', 'action' => 'removeChild', $siblingGroup->id, $child->id]) ?>
                     </td>
                 </tr>
                 <?php endforeach; ?>
