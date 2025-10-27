@@ -105,6 +105,7 @@ return [
     'Delete' => 'Löschen',
     'Edit' => 'Bearbeiten',
     'View' => 'Ansehen',
+    'Remove from Group' => 'Aus Gruppe entfernen',
     'Please enter your email and password to access your account.' => 'Bitte geben Sie Ihre E-Mail und Ihr Passwort ein, um sich anzumelden.',
     'Actions' => 'Aktionen',
     'Created' => 'Erstellt',
