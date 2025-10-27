@@ -480,7 +480,11 @@ class SchedulesController extends AppController
             'contain' => ['Organizations'],
         ]);
         
-        $this->Authorization->authorize($schedule);
+        // Permission check: User must be member of schedule's organization
+        if (!$this->hasOrgRole($schedule->organization_id)) {
+            $this->Flash->error(__('Zugriff verweigert.'));
+            return $this->redirect(['action' => 'index']);
+        }
         
         // Get same data as report
         $assignedChildrenCount = $this->Schedules->ScheduleChildren
@@ -497,8 +501,8 @@ class SchedulesController extends AppController
         $csv = [];
         
         // Header
-        $csv[] = ['Ausfallplan', $schedule->name];
-        $csv[] = ['Datum', $schedule->start_date->format('d.m.Y')];
+        $csv[] = ['Ausfallplan', $schedule->title];
+        $csv[] = ['Datum', $schedule->starts_on->format('d.m.Y')];
         $csv[] = ['Organisation', $schedule->organization->name];
         $csv[] = [];
         
@@ -507,7 +511,7 @@ class SchedulesController extends AppController
         $csv[] = ['Name', 'Priorität', 'Integrativ'];
         foreach ($reportData['waitlist'] as $entry) {
             $csv[] = [
-                $entry->child->name,
+                $entry->child->display_name ?? ($entry->child->name . ($entry->child->last_name ? ' ' . $entry->child->last_name : '')),
                 $entry->priority,
                 $entry->child->is_integrative ? 'Ja' : 'Nein'
             ];
@@ -520,7 +524,7 @@ class SchedulesController extends AppController
             $csv[] = ['Name', 'Gewichtung', 'Integrativ'];
             foreach ($reportData['alwaysAtEnd'] as $childData) {
                 $csv[] = [
-                    $childData['child']->name,
+                    $childData['child']->display_name ?? ($childData['child']->name . ($childData['child']->last_name ? ' ' . $childData['child']->last_name : '')),
                     $childData['weight'],
                     $childData['child']->is_integrative ? 'Ja' : 'Nein'
                 ];
@@ -546,7 +550,12 @@ class SchedulesController extends AppController
         for ($i = 0; $i < $maxChildren; $i++) {
             $row = ['Kind ' . ($i + 1)];
             foreach ($reportData['days'] as $day) {
-                $row[] = isset($day['children'][$i]) ? $day['children'][$i]->name : '';
+                if (isset($day['children'][$i])) {
+                    $child = $day['children'][$i];
+                    $row[] = $child->display_name ?? ($child->name . ($child->last_name ? ' ' . $child->last_name : ''));
+                } else {
+                    $row[] = '';
+                }
             }
             $csv[] = $row;
         }
@@ -561,7 +570,7 @@ class SchedulesController extends AppController
         fclose($output);
         
         // Return as download
-        $filename = 'ausfallplan_' . $schedule->name . '_' . date('Y-m-d') . '.csv';
+        $filename = 'ausfallplan_' . $schedule->title . '_' . date('Y-m-d') . '.csv';
         
         $this->response = $this->response->withStringBody($csvContent);
         $this->response = $this->response->withType('text/csv');
