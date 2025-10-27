@@ -210,6 +210,7 @@ class ReportServiceTest extends TestCase
                 'child_id' => $child->id,
                 'weight' => $i, // Different weights
                 'source' => 'manual',
+                'sort_order' => $i,
             ]);
             $assignmentsTable->save($assignment);
         }
@@ -251,6 +252,7 @@ class ReportServiceTest extends TestCase
                 'child_id' => $child->id,
                 'weight' => $i,
                 'source' => 'manual',
+                'sort_order' => $i,
             ]);
             $assignmentsTable->save($assignment);
         }
@@ -297,6 +299,7 @@ class ReportServiceTest extends TestCase
                 'child_id' => $child->id,
                 'weight' => 5,
                 'source' => 'manual',
+                'sort_order' => 0,
             ]);
             $assignmentsTable->save($assignment);
         }

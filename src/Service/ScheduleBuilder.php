@@ -248,6 +248,7 @@ class ScheduleBuilder
             'child_id' => $child->id,
             'weight' => $weight,
             'source' => $source,
+            'sort_order' => 0,
         ]);
 
         $this->assignmentsTable->save($assignment);
