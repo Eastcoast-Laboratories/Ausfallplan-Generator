@@ -30,11 +30,8 @@ class SchedulesControllerPermissionsTest extends TestCase
      */
     public function testEditorCanViewOwnSchedule(): void
     {
-        // Login as editor from organization 1 (User ID 2)
-        $usersTable = $this->getTableLocator()->get('Users');
-        $editor = $usersTable->get(2);
-        
-        $this->session(['Auth' => $editor]);
+        // Create editor user
+        $this->createAndLoginUser('editor-view@test.com', 'editor', 1);
         $this->session(['Config.language' => 'en']);
 
         // Try to view schedule from own organization
@@ -47,18 +44,9 @@ class SchedulesControllerPermissionsTest extends TestCase
      */
     public function testEditorCannotViewOtherOrgSchedule(): void
     {
-        // Login as editor from organization 1 (User ID 2)
-        $this->session([
-            'Auth' => [
-                'User' => [
-                    'id' => 2,
-                    'email' => 'editor@example.com',
-                    'is_system_admin' => false,
-                    'status' => 'active',
-                    'email_verified' => 1,
-                ]
-            ]
-        ]);
+        // Create editor user from organization 1
+        $this->createAndLoginUser('editor-other@test.com', 'editor', 1);
+        $this->session(['Config.language' => 'en']);
 
         // Try to view schedule from organization 2
         $this->get('/schedules/view/2'); // Schedule 2 belongs to org 2
@@ -70,14 +58,9 @@ class SchedulesControllerPermissionsTest extends TestCase
      */
     public function testEditorCanEditOwnSchedule(): void
     {
-        $this->session([
-            'Auth' => [
-                'id' => 2,
-                'email' => 'editor@org1.com',
-                'role' => 'editor',
-                'organization_id' => 1,
-            ]
-        ]);
+        // Create editor user
+        $this->createAndLoginUser('editor-edit@test.com', 'editor', 1);
+        $this->session(['Config.language' => 'en']);
 
         $this->get('/schedules/edit/1');
         $this->assertResponseOk();
@@ -88,14 +71,9 @@ class SchedulesControllerPermissionsTest extends TestCase
      */
     public function testEditorCannotEditOtherOrgSchedule(): void
     {
-        $this->session([
-            'Auth' => [
-                'id' => 2,
-                'email' => 'editor@org1.com',
-                'role' => 'editor',
-                'organization_id' => 1,
-            ]
-        ]);
+        // Create editor user from organization 1
+        $this->createAndLoginUser('editor-noedit@test.com', 'editor', 1);
+        $this->session(['Config.language' => 'en']);
 
         $this->get('/schedules/edit/2'); // Schedule 2 belongs to org 2
         $this->assertResponseError();
@@ -106,14 +84,9 @@ class SchedulesControllerPermissionsTest extends TestCase
      */
     public function testEditorCannotDeleteOtherOrgSchedule(): void
     {
-        $this->session([
-            'Auth' => [
-                'id' => 2,
-                'email' => 'editor@org1.com',
-                'role' => 'editor',
-                'organization_id' => 1,
-            ]
-        ]);
+        // Create editor user from organization 1
+        $this->createAndLoginUser('editor-nodelete@test.com', 'editor', 1);
+        $this->session(['Config.language' => 'en']);
 
         $this->post('/schedules/delete/2'); // Schedule 2 belongs to org 2
         $this->assertResponseError();
@@ -124,18 +97,22 @@ class SchedulesControllerPermissionsTest extends TestCase
      */
     public function testAdminCanViewAllSchedules(): void
     {
-        // Login as system admin (User ID 1)
-        $this->session([
-            'Auth' => [
-                'User' => [
-                    'id' => 1,
-                    'email' => 'ausfallplan-sysadmin@it.z11.de',
-                    'is_system_admin' => true,
-                    'status' => 'active',
-                    'email_verified' => 1,
-                ]
-            ]
+        // Create system admin
+        $users = $this->getTableLocator()->get('Users');
+        $admin = $users->newEntity([
+            'email' => 'sysadmin-test@example.com',
+            'password' => 'password123',
+            'is_system_admin' => true,
+            'status' => 'active',
+            'email_verified' => 1,
+            'email_token' => null,
+            'approved_at' => new \DateTime(),
+            'approved_by' => null,
         ]);
+        $users->save($admin);
+        
+        $this->session(['Auth' => $admin]);
+        $this->session(['Config.language' => 'en']);
 
         // Admin should be able to view schedule from any organization
         $this->get('/schedules/view/2'); // Schedule 2 belongs to org 2
@@ -147,18 +124,9 @@ class SchedulesControllerPermissionsTest extends TestCase
      */
     public function testViewerCannotEdit(): void
     {
-        // Login as viewer from organization 1 (User ID 3)
-        $this->session([
-            'Auth' => [
-                'User' => [
-                    'id' => 3,
-                    'email' => 'viewer@example.com',
-                    'is_system_admin' => false,
-                    'status' => 'active',
-                    'email_verified' => 1,
-                ]
-            ]
-        ]);
+        // Create viewer user
+        $this->createAndLoginUser('viewer-test@test.com', 'viewer', 1);
+        $this->session(['Config.language' => 'en']);
 
         $this->get('/schedules/edit/1');
         $this->assertResponseError(); // Viewer should not be able to edit
@@ -169,14 +137,9 @@ class SchedulesControllerPermissionsTest extends TestCase
      */
     public function testIndexFiltersByOrganization(): void
     {
-        $this->session([
-            'Auth' => [
-                'id' => 2,
-                'email' => 'editor@org1.com',
-                'role' => 'editor',
-                'organization_id' => 1,
-            ]
-        ]);
+        // Create editor user
+        $this->createAndLoginUser('editor-index@test.com', 'editor', 1);
+        $this->session(['Config.language' => 'en']);
 
         $this->get('/schedules');
         $this->assertResponseOk();
@@ -188,5 +151,36 @@ class SchedulesControllerPermissionsTest extends TestCase
         foreach ($viewVariable as $schedule) {
             $this->assertEquals(1, $schedule->organization_id);
         }
+    }
+
+    /**
+     * Helper: Create user with organization membership and log in
+     */
+    private function createAndLoginUser(string $email, string $role = 'org_admin', int $orgId = 1): void
+    {
+        $users = $this->getTableLocator()->get('Users');
+        $user = $users->newEntity([
+            'email' => $email,
+            'password' => 'password123',
+            'is_system_admin' => false,
+            'status' => 'active',
+            'email_verified' => 1,
+            'email_token' => null,
+            'approved_at' => new \DateTime(),
+            'approved_by' => null,
+        ]);
+        $users->save($user);
+        
+        $orgUsers = $this->getTableLocator()->get('OrganizationUsers');
+        $orgUsers->save($orgUsers->newEntity([
+            'organization_id' => $orgId,
+            'user_id' => $user->id,
+            'role' => $role,
+            'is_primary' => true,
+            'joined_at' => new \DateTime(),
+        ]));
+        
+        // Set session with correct format (just the user entity)
+        $this->session(['Auth' => $user]);
     }
 }
