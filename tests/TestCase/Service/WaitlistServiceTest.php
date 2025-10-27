@@ -18,8 +18,6 @@ class WaitlistServiceTest extends TestCase
         'app.Children',
         'app.SiblingGroups',
         'app.Schedules',
-        'app.ScheduleDays',
-        'app.Assignments',
         'app.WaitlistEntries',
         'app.Rules',
     ];
@@ -242,9 +240,13 @@ class WaitlistServiceTest extends TestCase
 
     /**
      * Test applying waitlist to schedule
+     * 
+     * ⚠️  DEPRECATED: applyToSchedule() is obsolete
      */
     public function testApplyToSchedule(): void
     {
+        $this->markTestIncomplete('applyToSchedule() is deprecated - waitlist is source, report generates dynamically');
+        
         // Create test data
         $organizations = TableRegistry::getTableLocator()->get('Organizations');
         $children = TableRegistry::getTableLocator()->get('Children');
@@ -338,9 +340,13 @@ class WaitlistServiceTest extends TestCase
 
     /**
      * Test waitlist respects capacity
+     * 
+     * ⚠️  DEPRECATED: Tests applyToSchedule() which is obsolete
      */
     public function testWaitlistRespectsCapacity(): void
     {
+        $this->markTestIncomplete('applyToSchedule() is deprecated - capacity is now checked in ReportService');
+        
         // Create test data
         $organizations = TableRegistry::getTableLocator()->get('Organizations');
         $children = TableRegistry::getTableLocator()->get('Children');
@@ -417,9 +423,13 @@ class WaitlistServiceTest extends TestCase
 
     /**
      * Test waitlist handles integrative children with double weight
+     * 
+     * ⚠️  DEPRECATED: Tests applyToSchedule() which is obsolete
      */
     public function testWaitlistIntegrativeWeight(): void
     {
+        $this->markTestIncomplete('applyToSchedule() is deprecated - integrative weight now handled in ReportService');
+        
         // Create test data
         $organizations = TableRegistry::getTableLocator()->get('Organizations');
         $children = TableRegistry::getTableLocator()->get('Children');

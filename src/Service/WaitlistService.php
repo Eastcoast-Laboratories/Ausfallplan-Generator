@@ -13,20 +13,21 @@ use Cake\Log\Log;
 
 /**
  * Waitlist Service
- *
- * Manages waitlist entries and applies them to schedule days.
- * Features:
- * - Priority-based ordering
- * - Start child rotation for fairness
- * - Remaining counter decrements
- * - Sibling group support (atomic placement)
- * - Capacity validation
+ * 
+ * ⚠️  PARTIALLY DEPRECATED: Some methods obsolete in new concept
+ * Old: Applied waitlist to schedule_days/assignments
+ * New: Waitlist is the source of truth, report generates dynamically
+ * 
+ * Still useful methods:
+ * - Add/remove from waitlist
+ * - Update priority/ordering
+ * - Manage waitlist entries
+ * 
+ * @deprecated applyToSchedule() method will be removed
  */
 class WaitlistService
 {
     private WaitlistEntriesTable $waitlistEntries;
-    private ScheduleDaysTable $scheduleDays;
-    private AssignmentsTable $assignments;
     private ChildrenTable $children;
     private SiblingGroupsTable $siblingGroups;
     private RulesService $rulesService;
@@ -35,22 +36,30 @@ class WaitlistService
     public function __construct()
     {
         $this->waitlistEntries = TableRegistry::getTableLocator()->get('WaitlistEntries');
-        $this->scheduleDays = TableRegistry::getTableLocator()->get('ScheduleDays');
-        $this->assignments = TableRegistry::getTableLocator()->get('Assignments');
         $this->children = TableRegistry::getTableLocator()->get('Children');
         $this->siblingGroups = TableRegistry::getTableLocator()->get('SiblingGroups');
         $this->rulesTable = TableRegistry::getTableLocator()->get('Rules');
         $this->rulesService = new RulesService();
+        // NOTE: ScheduleDays and Assignments tables no longer exist
     }
 
     /**
      * Apply waitlist entries to a schedule
+     * 
+     * ⚠️  DEPRECATED: This method is obsolete
+     * Old: Created assignments in schedule_days
+     * New: Waitlist is the source, report generates dynamically
      *
+     * @deprecated Will be removed
      * @param int $scheduleId Schedule ID
-     * @return int Number of assignments created
+     * @return int Number of assignments created (always 0 now)
      */
     public function applyToSchedule(int $scheduleId): int
     {
+        // DEPRECATED: No longer creates assignments
+        return 0;
+        
+        // OLD CODE (kept for reference):
         // Load all schedule days for this schedule
         $days = $this->scheduleDays->find()
             ->where(['schedule_id' => $scheduleId])
