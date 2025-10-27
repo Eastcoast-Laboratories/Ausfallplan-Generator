@@ -199,55 +199,46 @@ class OrganizationsController extends AppController
 
         try {
             // Delete in correct order due to foreign key constraints
+            // Use deleteAll() to avoid nested transaction issues
             
-            // 1. Delete or reassign children (they HAVE organization_id!)
-            $childrenTable = $this->fetchTable('Children');
-            $children = $childrenTable->find()
-                ->where(['Children.organization_id' => $id])
-                ->all();
-            
-            // Get "keine organisation" as fallback (id=1)
+            // Get "keine organisation" as fallback
             $noOrg = $this->Organizations->find()->where(['name' => 'keine organisation'])->first();
             
-            foreach ($children as $child) {
-                if ($noOrg) {
-                    // Reassign to "keine organisation"
-                    $child->organization_id = $noOrg->id;
-                    $childrenTable->save($child);
-                } else {
-                    // If no fallback exists, delete the child
-                    $childrenTable->delete($child);
-                }
+            // 1. Reassign or delete children
+            $childrenTable = $this->fetchTable('Children');
+            if ($noOrg && $noOrg->id != $id) {
+                // Reassign children to "keine organisation"
+                $childrenTable->updateAll(
+                    ['organization_id' => $noOrg->id],
+                    ['organization_id' => $id]
+                );
+            } else {
+                // Delete children if no fallback
+                $childrenTable->deleteAll(['organization_id' => $id]);
             }
             
-            // 2. Delete sibling groups (linked via organization)
-            $siblingGroupsTable = $this->fetchTable('SiblingGroups');
-            $siblingGroups = $siblingGroupsTable->find()
-                ->where(['SiblingGroups.organization_id' => $id])
-                ->all();
-            foreach ($siblingGroups as $group) {
-                $siblingGroupsTable->delete($group);
-            }
-
-            // 3. Delete schedules (depends on organization)
-            $schedulesTable = $this->fetchTable('Schedules');
-            $schedules = $schedulesTable->find()
-                ->where(['Schedules.organization_id' => $id])
-                ->all();
-            foreach ($schedules as $schedule) {
-                $schedulesTable->delete($schedule);
-            }
-
-            // 4. Delete organization_users entries
-            $orgUsersTable = $this->fetchTable('OrganizationUsers');
-            $orgUsers = $orgUsersTable->find()
+            // 2. Delete waitlist entries for schedules in this org
+            $waitlistTable = $this->fetchTable('WaitlistEntries');
+            $schedulesInOrg = $this->fetchTable('Schedules')
+                ->find()
                 ->where(['organization_id' => $id])
-                ->all();
-            foreach ($orgUsers as $orgUser) {
-                $orgUsersTable->delete($orgUser);
+                ->extract('id')
+                ->toArray();
+            
+            if (!empty($schedulesInOrg)) {
+                $waitlistTable->deleteAll(['schedule_id IN' => $schedulesInOrg]);
             }
 
-            // 5. Finally delete the organization
+            // 3. Delete schedules
+            $this->fetchTable('Schedules')->deleteAll(['organization_id' => $id]);
+
+            // 4. Delete sibling groups
+            $this->fetchTable('SiblingGroups')->deleteAll(['organization_id' => $id]);
+
+            // 5. Delete organization_users entries
+            $this->fetchTable('OrganizationUsers')->deleteAll(['organization_id' => $id]);
+
+            // 6. Finally delete the organization
             if (!$this->Organizations->delete($organization)) {
                 throw new \RuntimeException('Organization could not be deleted');
             }
