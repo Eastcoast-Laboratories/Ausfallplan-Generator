@@ -18,17 +18,16 @@ module.exports = defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-    {
-      name: 'firefox',
       use: { 
-        ...devices['Desktop Firefox'],
-        launchOptions: {
-          executablePath: '/usr/bin/firefox', // Use system Firefox
-        },
+        ...devices['Desktop Chrome'],
+        // Chromium is stable and works well with Playwright
       },
     },
+    // Firefox disabled due to AppArmor policy conflicts with system Firefox
+    // System Firefox headless mode blocked by:
+    // - AppArmor DBus restrictions
+    // - Sandbox CLONE_NEWPID permissions
+    // Use chromium instead (already installed via npx playwright install chromium)
     {
       name: 'mobile',
       use: { ...devices['iPhone 12'] },
