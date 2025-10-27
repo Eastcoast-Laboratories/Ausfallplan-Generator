@@ -75,9 +75,9 @@ class ReportServiceTest extends TestCase
         
         $result = $this->service->generateReportData($scheduleId, 3);
         
-        $this->assertEquals('Ameisen', $result['days'][0]['name']);
-        $this->assertEquals('Bienen', $result['days'][1]['name']);
-        $this->assertEquals('Chamäleon', $result['days'][2]['name']);
+        $this->assertEquals('Ameisen', $result['days'][0]['animalName']);
+        $this->assertEquals('Bienen', $result['days'][1]['animalName']);
+        $this->assertEquals('Chamäleon', $result['days'][2]['animalName']);
     }
 
     /**
@@ -93,7 +93,7 @@ class ReportServiceTest extends TestCase
         $this->assertNotEmpty($result['days']);
         
         foreach ($result['days'] as $day) {
-            $this->assertArrayHasKey('name', $day);
+            $this->assertArrayHasKey('animalName', $day);
             $this->assertArrayHasKey('children', $day);
             // Each day should respect capacity (9 by default)
             $this->assertLessThanOrEqual(9, count($day['children']));
