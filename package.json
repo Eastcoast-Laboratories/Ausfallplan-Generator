@@ -7,14 +7,14 @@
     "test": "tests"
   },
   "scripts": {
+    "postinstall": "npx playwright install chromium",
     "test": "playwright test",
     "test:headed": "playwright test --headed",
     "test:ui": "playwright test --ui",
     "test:screenshots": "playwright test tests/e2e/navigation.spec.js",
     "test:debug": "playwright test --debug",
-    "test:chromium": "playwright test --browser=chromium",
-    "test:firefox": "playwright test --browser=firefox",
-    "test:webkit": "playwright test --browser=webkit"
+    "test:chromium": "playwright test --project=chromium",
+    "setup:browsers": "npx playwright install chromium"
   },
   "repository": {
     "type": "git",
