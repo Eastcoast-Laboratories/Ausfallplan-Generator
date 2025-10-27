@@ -1,7 +1,9 @@
 <?php
 /**
  * @var \App\View\AppView $this
- * @var \App\Model\Entity\Organization|null $primaryOrg
+ * @var array $organizations
+ * @var int|null $selectedOrgId
+ * @var bool $canSelectOrganization
  */
 $this->assign('title', __('Kinder importieren'));
 ?>
@@ -18,14 +20,26 @@ $this->assign('title', __('Kinder importieren'));
             <li><?= __('Bereits vorhandene Kinder werden übersprungen') ?></li>
             <li><?= __('Integrative Kinder: Wert "2" in der letzten Spalte') ?></li>
         </ul>
-        <?php if ($primaryOrg): ?>
-            <p><strong><?= __('Import in Organisation') ?>:</strong> <?= h($primaryOrg->name) ?></p>
-        <?php endif; ?>
     </div>
 
     <?= $this->Form->create(null, ['type' => 'file']) ?>
     <fieldset>
-        <legend><?= __('CSV-Datei auswählen') ?></legend>
+        <legend><?= __('Import-Optionen') ?></legend>
+        
+        <?php if ($canSelectOrganization ?? false): ?>
+        <?= $this->Form->control('organization_id', [
+            'type' => 'select',
+            'label' => __('Organization'),
+            'options' => $organizations,
+            'value' => $selectedOrgId,
+            'required' => true,
+            'empty' => __('-- Select Organization --'),
+        ]) ?>
+        <?php else: ?>
+        <?= $this->Form->hidden('organization_id', ['value' => $selectedOrgId]) ?>
+        <p><strong><?= __('Import in Organisation') ?>:</strong> <?= h($organizations[$selectedOrgId] ?? __('Unknown')) ?></p>
+        <?php endif; ?>
+        
         <?= $this->Form->control('csv_file', [
             'type' => 'file',
             'label' => __('CSV-Datei'),

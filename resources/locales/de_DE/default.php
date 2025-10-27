@@ -89,6 +89,10 @@ return [
     'Select Schedule' => 'Ausfallplan wählen',
     '-- Select Schedule --' => '-- Ausfallplan wählen --',
     'Could not remove child from waitlist.' => 'Kind konnte nicht von der Nachrückliste entfernt werden.',
+    'Import-Optionen' => 'Import-Optionen',
+    '-- Select Organization --' => '-- Organisation wählen --',
+    'Unknown' => 'Unbekannt',
+    'Bitte wählen Sie eine Organisation aus.' => 'Bitte wählen Sie eine Organisation aus.',
     
     // Common
     'Submit' => 'Absenden',

@@ -102,6 +102,10 @@ return [
     'Select Schedule' => 'Select Schedule',
     '-- Select Schedule --' => '-- Select Schedule --',
     'Could not remove child from waitlist.' => 'Could not remove child from waitlist.',
+    'Import-Optionen' => 'Import Options',
+    '-- Select Organization --' => '-- Select Organization --',
+    'Unknown' => 'Unknown',
+    'Bitte wählen Sie eine Organisation aus.' => 'Please select an organization.',
     
     // Common
     'Submit' => 'Submit',
