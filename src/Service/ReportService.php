@@ -72,24 +72,22 @@ class ReportService
     }
 
     /**
-     * Get sorted children from assignments
-     * Groups siblings together, respects sort_order
+     * Get sorted children from waitlist (NOT assignments!)
+     * Groups siblings together, respects priority from waitlist_entries
      *
      * @param int $scheduleId
      * @return array Array of child units (singles or sibling groups)
      */
     private function getSortedChildrenFromAssignments(int $scheduleId): array
     {
-        $assignmentsTable = TableRegistry::getTableLocator()->get('Assignments');
+        $waitlistTable = TableRegistry::getTableLocator()->get('WaitlistEntries');
         $childrenTable = TableRegistry::getTableLocator()->get('Children');
         
-        // Get all child IDs with their sort_order
-        $childSortMap = $assignmentsTable->find()
-            ->select(['child_id' => 'DISTINCT Assignments.child_id', 'sort_order' => 'MIN(Assignments.sort_order)'])
-            ->innerJoinWith('ScheduleDays')
-            ->where(['ScheduleDays.schedule_id' => $scheduleId])
-            ->groupBy(['Assignments.child_id'])
-            ->orderBy(['sort_order' => 'ASC'])
+        // Get all child IDs from WAITLIST with their priority (not assignments!)
+        $childSortMap = $waitlistTable->find()
+            ->select(['child_id', 'priority'])
+            ->where(['WaitlistEntries.schedule_id' => $scheduleId])
+            ->orderBy(['priority' => 'ASC'])
             ->all()
             ->toArray();
 
