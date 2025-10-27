@@ -501,13 +501,24 @@ class UsersController extends AppController
                 
                 $usersTable = $this->fetchTable('Users');
                 if ($usersTable->save($user)) {
+                    // Mark reset as used - need to mark it as dirty first
+                    $resetTable = $this->fetchTable('PasswordResets');
                     $reset->used_at = new \DateTime();
-                    $this->fetchTable('PasswordResets')->save($reset);
+                    $reset->setDirty('used_at', true); // Force CakePHP to update this field
+                    
+                    if (!$resetTable->save($reset)) {
+                        // Log error but don't fail - password was already changed
+                        error_log('Failed to mark password reset as used: ' . json_encode($reset->getErrors()));
+                    }
+                    
                     $this->Flash->success(__('Password reset successful!'));
                     return $this->redirect(['action' => 'login']);
+                } else {
+                    $this->Flash->error(__('Failed to update password.'));
                 }
+            } else {
+                $this->Flash->error(__('Invalid or expired code.'));
             }
-            $this->Flash->error(__('Invalid or expired code.'));
         }
     }
 }
