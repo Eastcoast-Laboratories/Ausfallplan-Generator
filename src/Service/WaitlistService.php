@@ -163,6 +163,7 @@ class WaitlistService
                             'child_id' => $sibling->id,
                             'weight' => $weight,
                             'source' => 'waitlist',
+                            'sort_order' => 0,
                         ]);
 
                         if (!$this->assignments->save($assignment)) {
@@ -191,6 +192,7 @@ class WaitlistService
                         'child_id' => $child->id,
                         'weight' => $totalWeight,
                         'source' => 'waitlist',
+                        'sort_order' => 0,
                     ]);
 
                     if (!$this->assignments->save($assignment)) {
