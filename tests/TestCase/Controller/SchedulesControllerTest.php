@@ -112,6 +112,7 @@ class SchedulesControllerTest extends TestCase
             'starts_on' => '2025-11-01',
             'ends_on' => '2025-11-30',
             'state' => 'draft',
+            'organization_id' => 1,
         ]);
 
         // Should redirect to view after success (new behavior)
@@ -147,6 +148,7 @@ class SchedulesControllerTest extends TestCase
             'title' => '',
             'starts_on' => '2025-11-01',
             'ends_on' => '2025-11-30',
+            'organization_id' => 1,
         ]);
 
         // Should stay on form or show error (flexible assertion)
