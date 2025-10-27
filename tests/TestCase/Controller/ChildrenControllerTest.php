@@ -311,6 +311,173 @@ class ChildrenControllerTest extends TestCase
     }
 
     /**
+     * ✅ Test display_name field - POST with explicit display_name
+     * TESTS: Child creation with display_name saves correctly to DB
+     *
+     * @return void
+     * @uses \App\Controller\ChildrenController::add()
+     */
+    public function testAddWithDisplayName(): void
+    {
+        // Create and log in user
+        $this->createAndLoginUser('displayname@test.com');
+
+        // Submit child with display_name
+        $this->post('/children/add', [
+            'name' => 'Valentina',
+            'last_name' => 'Schmidt',
+            'display_name' => 'V. Schmidt',
+            'is_active' => true,
+            'is_integrative' => false,
+        ]);
+
+        // Should redirect after success
+        $this->assertRedirect(['controller' => 'Children', 'action' => 'index']);
+
+        // Verify child was created with display_name
+        $children = $this->getTableLocator()->get('Children');
+        $child = $children->find()
+            ->where(['name' => 'Valentina'])
+            ->first();
+
+        $this->assertNotNull($child);
+        $this->assertEquals('Valentina', $child->name);
+        $this->assertEquals('Schmidt', $child->last_name);
+        $this->assertEquals('V. Schmidt', $child->display_name);
+    }
+
+    /**
+     * ✅ Test display_name field - POST without display_name (should allow NULL)
+     * TESTS: Child creation without display_name saves with NULL
+     *
+     * @return void
+     * @uses \App\Controller\ChildrenController::add()
+     */
+    public function testAddWithoutDisplayName(): void
+    {
+        // Create and log in user
+        $this->createAndLoginUser('nodisplayname@test.com');
+
+        // Submit child without display_name
+        $this->post('/children/add', [
+            'name' => 'Noah',
+            'last_name' => 'Kuder',
+            'is_active' => true,
+            'is_integrative' => false,
+        ]);
+
+        // Should redirect after success
+        $this->assertRedirect(['controller' => 'Children', 'action' => 'index']);
+
+        // Verify child was created
+        $children = $this->getTableLocator()->get('Children');
+        $child = $children->find()
+            ->where(['name' => 'Noah'])
+            ->first();
+
+        $this->assertNotNull($child);
+        $this->assertEquals('Noah', $child->name);
+        $this->assertEquals('Kuder', $child->last_name);
+        // display_name should be NULL or empty
+        $this->assertTrue(empty($child->display_name) || $child->display_name === null);
+    }
+
+    /**
+     * ✅ Test display_name Virtual Field - full_name property
+     * TESTS: Virtual full_name returns display_name if set, else name + last_name
+     *
+     * @return void
+     * @uses \App\Model\Entity\Child::_getFullName()
+     */
+    public function testDisplayNameVirtualField(): void
+    {
+        // Create and log in user
+        $this->createAndLoginUser('virtualfield@test.com');
+
+        $children = $this->getTableLocator()->get('Children');
+
+        // Test 1: With display_name set
+        $child1 = $children->newEntity([
+            'name' => 'Amadeus',
+            'last_name' => 'Mozart',
+            'display_name' => 'Bär',
+            'organization_id' => 1,
+            'is_active' => true,
+            'is_integrative' => false,
+        ]);
+        $children->save($child1);
+
+        // full_name should return display_name
+        $this->assertEquals('Bär', $child1->full_name);
+
+        // Test 2: Without display_name (NULL)
+        $child2 = $children->newEntity([
+            'name' => 'Zoe',
+            'last_name' => 'Boampong',
+            'display_name' => null,
+            'organization_id' => 1,
+            'is_active' => true,
+            'is_integrative' => false,
+        ]);
+        $children->save($child2);
+
+        // full_name should fallback to name + last_name
+        $this->assertEquals('Zoe Boampong', $child2->full_name);
+
+        // Test 3: Without last_name
+        $child3 = $children->newEntity([
+            'name' => 'Levin',
+            'last_name' => null,
+            'display_name' => null,
+            'organization_id' => 1,
+            'is_active' => true,
+            'is_integrative' => false,
+        ]);
+        $children->save($child3);
+
+        // full_name should return just name
+        $this->assertEquals('Levin', $child3->full_name);
+    }
+
+    /**
+     * ✅ Test edit with display_name update
+     * TESTS: Child edit updates display_name correctly
+     *
+     * @return void
+     * @uses \App\Controller\ChildrenController::edit()
+     */
+    public function testEditDisplayName(): void
+    {
+        // Create and log in user
+        $this->createAndLoginUser('editdisplay@test.com');
+
+        // Create a child
+        $children = $this->getTableLocator()->get('Children');
+        $child = $children->newEntity([
+            'name' => 'Arun',
+            'last_name' => 'Zia',
+            'display_name' => 'Arun Zia',
+            'organization_id' => 1,
+            'is_active' => true,
+            'is_integrative' => false,
+        ]);
+        $children->save($child);
+
+        // Update display_name
+        $this->post("/children/edit/{$child->id}", [
+            'name' => 'Arun',
+            'last_name' => 'Zia',
+            'display_name' => 'A. Zia',  // Changed to initial + last name
+            'is_active' => true,
+            'is_integrative' => false,
+        ]);
+
+        // Verify update
+        $updatedChild = $children->get($child->id);
+        $this->assertEquals('A. Zia', $updatedChild->display_name);
+    }
+
+    /**
      * Helper: Create user with organization membership and log in
      * NOTE: Call $this->session(['Config.language' => 'en']) AFTER this method and BEFORE GET requests
      */

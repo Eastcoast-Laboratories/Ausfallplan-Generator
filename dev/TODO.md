@@ -27,7 +27,7 @@ bei http://localhost:8080/sibling-groups/view/5  bei jedem Kind einnen "Kind lö
 
 - alle externen scripts, wie z.b. https://cdn.jsdelivr.net lokal vorhalten
 
-- datenschutzerklärung und Impressum generieren und in der navigation ganz unten verlinken: Eastcoast Laboratories, Ruben Barkow-Kuder, Knickweg 16, 24114 Kiel, Telefon: Kiel-5368723, Kontakt: ausfallplan-generator-kontakt@it.z11.de
+- datenschutzerklärung und Impressum generieren und in der navigation ganz unten verlinken: Eastcoast Laboratories, Ruben Barkow-Mozart, Knickweg 16, 24114 Kiel, Kontakt: ausfallplan-generator-kontakt@it.z11.de
 
 - npx playwright test test_import_gender_birthdate.spec.js --project=chromium 2>&1 | tail -50
 
