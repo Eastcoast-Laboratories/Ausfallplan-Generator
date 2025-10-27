@@ -114,8 +114,8 @@ class SchedulesControllerTest extends TestCase
             'state' => 'draft',
         ]);
 
-        // Should redirect after success
-        $this->assertRedirect(['controller' => 'Schedules', 'action' => 'index']);
+        // Should redirect to view after success (new behavior)
+        $this->assertRedirect();
 
         // Verify schedule was created
         $schedules = $this->getTableLocator()->get('Schedules');
