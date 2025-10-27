@@ -499,7 +499,8 @@ class UsersController extends AppController
                 $user = $reset->user;
                 $user->password = $newPassword;
                 
-                if ($this->Users->save($user)) {
+                $usersTable = $this->fetchTable('Users');
+                if ($usersTable->save($user)) {
                     $reset->used_at = new \DateTime();
                     $this->fetchTable('PasswordResets')->save($reset);
                     $this->Flash->success(__('Password reset successful!'));
