@@ -181,7 +181,9 @@ return [
         'skipLog' => [],
         'log' => true,
         'trace' => true,
-        'ignoredDeprecationPaths' => [],
+        'ignoredDeprecationPaths' => [
+            'src/Application.php', // Ignore loadIdentifier() deprecation until new syntax is fixed in CakePHP
+        ],
     ],
 
     /*
