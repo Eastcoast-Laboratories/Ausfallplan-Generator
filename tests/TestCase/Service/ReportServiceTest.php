@@ -8,6 +8,8 @@ use Cake\TestSuite\TestCase;
 
 /**
  * ReportService Test Case
+ * 
+ * Tests the dynamic report generation based on waitlist_entries
  */
 class ReportServiceTest extends TestCase
 {
@@ -20,8 +22,6 @@ class ReportServiceTest extends TestCase
         'app.Schedules',
         'app.Children',
         'app.SiblingGroups',
-        'app.ScheduleDays',
-        'app.Assignments',
         'app.WaitlistEntries',
     ];
 
@@ -50,20 +50,20 @@ class ReportServiceTest extends TestCase
      */
     public function testGenerateReportDataStructure(): void
     {
-        // Create test data
-        $scheduleId = $this->createTestSchedule();
+        // Create schedule with children in waitlist
+        $scheduleId = $this->createScheduleWithWaitlist();
         
-        $reportData = $this->service->generateReportData($scheduleId, 5);
-
-        $this->assertIsArray($reportData);
-        $this->assertArrayHasKey('schedule', $reportData);
-        $this->assertArrayHasKey('days', $reportData);
-        $this->assertArrayHasKey('waitlist', $reportData);
-        $this->assertArrayHasKey('alwaysAtEnd', $reportData);
-        $this->assertArrayHasKey('daysCount', $reportData);
+        $result = $this->service->generateReportData($scheduleId, 3);
         
-        $this->assertEquals(5, $reportData['daysCount']);
-        $this->assertCount(5, $reportData['days']);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('schedule', $result);
+        $this->assertArrayHasKey('days', $result);
+        $this->assertArrayHasKey('waitlist', $result);
+        $this->assertArrayHasKey('daysCount', $result);
+        $this->assertArrayHasKey('childStats', $result);
+        
+        $this->assertEquals(3, $result['daysCount']);
+        $this->assertCount(3, $result['days']);
     }
 
     /**
@@ -71,54 +71,33 @@ class ReportServiceTest extends TestCase
      */
     public function testAnimalNamesGeneration(): void
     {
-        $scheduleId = $this->createTestSchedule();
+        $scheduleId = $this->createScheduleWithWaitlist();
         
-        $reportData = $this->service->generateReportData($scheduleId, 3);
-
-        $this->assertEquals('Ameisen-Tag 1', $reportData['days'][0]['title']);
-        $this->assertEquals('Bienen-Tag 2', $reportData['days'][1]['title']);
-        $this->assertEquals('Chamäleon-Tag 3', $reportData['days'][2]['title']);
+        $result = $this->service->generateReportData($scheduleId, 3);
+        
+        $this->assertEquals('Ameisen', $result['days'][0]['name']);
+        $this->assertEquals('Bienen', $result['days'][1]['name']);
+        $this->assertEquals('Chamäleon', $result['days'][2]['name']);
     }
 
     /**
-     * Test children distribution with weights
+     * Test children are distributed based on waitlist priority
      */
-    public function testChildrenDistributionWithWeights(): void
+    public function testChildrenDistributionByPriority(): void
     {
-        $this->markTestIncomplete('Test data helper needs fixing - children not properly assigned to schedule days');
+        $scheduleId = $this->createScheduleWithWaitlist();
         
-        $scheduleId = $this->createTestScheduleWithChildren();
+        $result = $this->service->generateReportData($scheduleId, 2);
         
-        $reportData = $this->service->generateReportData($scheduleId, 3);
-
-        // First day should have children
-        $firstDay = $reportData['days'][0];
-        $this->assertNotEmpty($firstDay['children']);
+        // Verify we have children distributed
+        $this->assertNotEmpty($result['days']);
         
-        // Each child should have a weight
-        foreach ($firstDay['children'] as $child) {
-            $this->assertArrayHasKey('child', $child);
-            $this->assertArrayHasKey('weight', $child);
-            $this->assertGreaterThan(0, $child['weight']);
+        foreach ($result['days'] as $day) {
+            $this->assertArrayHasKey('name', $day);
+            $this->assertArrayHasKey('children', $day);
+            // Each day should respect capacity (9 by default)
+            $this->assertLessThanOrEqual(9, count($day['children']));
         }
-    }
-
-    /**
-     * Test leaving child identification
-     */
-    public function testLeavingChildIdentification(): void
-    {
-        $this->markTestIncomplete('Test data helper needs fixing - leaving child logic not properly set up');
-        
-        $scheduleId = $this->createTestScheduleWithChildren();
-        
-        $reportData = $this->service->generateReportData($scheduleId, 2);
-
-        // First day should have a leaving child
-        $firstDay = $reportData['days'][0];
-        $this->assertNotNull($firstDay['leavingChild']);
-        $this->assertArrayHasKey('child', $firstDay['leavingChild']);
-        $this->assertArrayHasKey('weight', $firstDay['leavingChild']);
     }
 
     /**
@@ -126,44 +105,39 @@ class ReportServiceTest extends TestCase
      */
     public function testRespectsCapacityPerDay(): void
     {
-        $scheduleId = $this->createTestScheduleWithManyChildren();
+        $scheduleId = $this->createScheduleWithManyChildren();
         
-        $reportData = $this->service->generateReportData($scheduleId, 1);
-
-        $firstDay = $reportData['days'][0];
-        // Should not exceed capacity (default 9)
-        $this->assertLessThanOrEqual(9, count($firstDay['children']));
+        $result = $this->service->generateReportData($scheduleId, 2);
+        
+        foreach ($result['days'] as $day) {
+            // Should not exceed capacity of 9
+            $this->assertLessThanOrEqual(9, count($day['children']));
+        }
     }
 
     /**
-     * Test always at end children are identified
-     * "Immer am Ende" shows children assigned to schedule but NOT on waitlist
+     * Test child statistics are calculated
      */
-    public function testAlwaysAtEndIdentification(): void
+    public function testChildStatisticsCalculation(): void
     {
-        $scheduleId = $this->createTestScheduleWithWaitlist();
+        $scheduleId = $this->createScheduleWithWaitlist();
         
-        $reportData = $this->service->generateReportData($scheduleId, 1);
-
-        // Should have children that are assigned but NOT on waitlist
-        $this->assertNotEmpty($reportData['alwaysAtEnd']);
+        $result = $this->service->generateReportData($scheduleId, 3);
         
-        // Get waitlist child IDs
-        $waitlistChildIds = [];
-        foreach ($reportData['waitlist'] as $entry) {
-            $waitlistChildIds[] = $entry->child_id;
-        }
+        $this->assertIsArray($result['childStats']);
         
-        // All children in "alwaysAtEnd" should NOT be on waitlist
-        foreach ($reportData['alwaysAtEnd'] as $child) {
-            $this->assertNotContains($child['child']->id, $waitlistChildIds);
+        // Each child in waitlist should have stats
+        foreach ($result['childStats'] as $childId => $stats) {
+            $this->assertArrayHasKey('daysCount', $stats);
+            $this->assertIsInt($stats['daysCount']);
+            $this->assertGreaterThanOrEqual(0, $stats['daysCount']);
         }
     }
 
     /**
-     * Helper: Create a test schedule
+     * Helper: Create a test schedule with waitlist
      */
-    private function createTestSchedule(): int
+    private function createScheduleWithWaitlist(): int
     {
         $schedulesTable = $this->getTableLocator()->get('Schedules');
         $schedule = $schedulesTable->newEntity([
@@ -173,32 +147,13 @@ class ReportServiceTest extends TestCase
             'ends_on' => '2025-12-31',
             'state' => 'draft',
             'capacity_per_day' => 9,
+            'user_id' => 1,
         ]);
         $schedulesTable->save($schedule);
         
-        return $schedule->id;
-    }
-
-    /**
-     * Helper: Create test schedule with children
-     */
-    private function createTestScheduleWithChildren(): int
-    {
-        $scheduleId = $this->createTestSchedule();
-        
-        // Create schedule day
-        $scheduleDaysTable = $this->getTableLocator()->get('ScheduleDays');
-        $scheduleDay = $scheduleDaysTable->newEntity([
-            'schedule_id' => $scheduleId,
-            'title' => 'Day 1',
-            'position' => 1,
-            'capacity' => 9,
-        ]);
-        $scheduleDaysTable->save($scheduleDay);
-        
-        // Create children and assignments
+        // Create children and add to waitlist
         $childrenTable = $this->getTableLocator()->get('Children');
-        $assignmentsTable = $this->getTableLocator()->get('Assignments');
+        $waitlistTable = $this->getTableLocator()->get('WaitlistEntries');
         
         for ($i = 1; $i <= 5; $i++) {
             $child = $childrenTable->newEntity([
@@ -209,117 +164,56 @@ class ReportServiceTest extends TestCase
             ]);
             $childrenTable->save($child);
             
-            $assignment = $assignmentsTable->newEntity([
-                'schedule_day_id' => $scheduleDay->id,
+            // Add to waitlist with priority
+            $entry = $waitlistTable->newEntity([
+                'schedule_id' => $schedule->id,
                 'child_id' => $child->id,
-                'weight' => $i, // Different weights
-                'source' => 'manual',
-                'sort_order' => $i,
+                'priority' => $i,
             ]);
-            $assignmentsTable->save($assignment);
+            $waitlistTable->save($entry);
         }
         
-        return $scheduleId;
+        return $schedule->id;
     }
 
     /**
-     * Helper: Create test schedule with many children
+     * Helper: Create test schedule with many children (more than capacity)
      */
-    private function createTestScheduleWithManyChildren(): int
+    private function createScheduleWithManyChildren(): int
     {
-        $scheduleId = $this->createTestSchedule();
-        
-        $scheduleDaysTable = $this->getTableLocator()->get('ScheduleDays');
-        $scheduleDay = $scheduleDaysTable->newEntity([
-            'schedule_id' => $scheduleId,
-            'title' => 'Day 1',
-            'position' => 1,
-            'capacity' => 9,
+        $schedulesTable = $this->getTableLocator()->get('Schedules');
+        $schedule = $schedulesTable->newEntity([
+            'organization_id' => 1,
+            'title' => 'Test Schedule Many',
+            'starts_on' => '2025-01-01',
+            'ends_on' => '2025-12-31',
+            'state' => 'draft',
+            'capacity_per_day' => 9,
+            'user_id' => 1,
         ]);
-        $scheduleDaysTable->save($scheduleDay);
+        $schedulesTable->save($schedule);
         
         $childrenTable = $this->getTableLocator()->get('Children');
-        $assignmentsTable = $this->getTableLocator()->get('Assignments');
+        $waitlistTable = $this->getTableLocator()->get('WaitlistEntries');
         
-        // Create 15 children (more than capacity)
-        for ($i = 1; $i <= 15; $i++) {
+        // Create 20 children (more than capacity of 9)
+        for ($i = 1; $i <= 20; $i++) {
             $child = $childrenTable->newEntity([
                 'organization_id' => 1,
                 'name' => 'Child ' . $i,
-                'is_integrative' => false,
+                'is_integrative' => ($i % 5 == 0), // Every 5th is integrative
                 'is_active' => true,
             ]);
             $childrenTable->save($child);
             
-            $assignment = $assignmentsTable->newEntity([
-                'schedule_day_id' => $scheduleDay->id,
+            $entry = $waitlistTable->newEntity([
+                'schedule_id' => $schedule->id,
                 'child_id' => $child->id,
-                'weight' => $i,
-                'source' => 'manual',
-                'sort_order' => $i,
+                'priority' => $i,
             ]);
-            $assignmentsTable->save($assignment);
+            $waitlistTable->save($entry);
         }
         
-        return $scheduleId;
-    }
-
-    /**
-     * Helper: Create test schedule with waitlist
-     * Some children are assigned AND on waitlist, others are only assigned
-     */
-    private function createTestScheduleWithWaitlist(): int
-    {
-        $scheduleId = $this->createTestSchedule();
-        
-        $scheduleDaysTable = $this->getTableLocator()->get('ScheduleDays');
-        $scheduleDay = $scheduleDaysTable->newEntity([
-            'schedule_id' => $scheduleId,
-            'title' => 'Day 1',
-            'position' => 1,
-            'capacity' => 9,
-        ]);
-        $scheduleDaysTable->save($scheduleDay);
-        
-        $childrenTable = $this->getTableLocator()->get('Children');
-        $assignmentsTable = $this->getTableLocator()->get('Assignments');
-        $waitlistTable = $this->getTableLocator()->get('WaitlistEntries');
-        
-        // Create 4 children
-        $childIds = [];
-        foreach (['Anna', 'Ben', 'Clara', 'David'] as $name) {
-            $child = $childrenTable->newEntity([
-                'organization_id' => 1,
-                'name' => $name,
-                'is_integrative' => false,
-                'is_active' => true,
-            ]);
-            $childrenTable->save($child);
-            $childIds[] = $child->id;
-            
-            // All children are assigned to schedule
-            $assignment = $assignmentsTable->newEntity([
-                'schedule_day_id' => $scheduleDay->id,
-                'child_id' => $child->id,
-                'weight' => 5,
-                'source' => 'manual',
-                'sort_order' => 0,
-            ]);
-            $assignmentsTable->save($assignment);
-        }
-        
-        // But only first 2 children are on waitlist
-        foreach (array_slice($childIds, 0, 2) as $priority => $childId) {
-            $waitlistEntry = $waitlistTable->newEntity([
-                'schedule_id' => $scheduleId,
-                'child_id' => $childId,
-                'priority' => $priority + 1,
-            ]);
-            $waitlistTable->save($waitlistEntry);
-        }
-        
-        // So "alwaysAtEnd" should contain Clara and David (not on waitlist)
-        
-        return $scheduleId;
+        return $schedule->id;
     }
 }

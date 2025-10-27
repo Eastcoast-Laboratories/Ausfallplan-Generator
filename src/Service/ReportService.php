@@ -320,31 +320,17 @@ class ReportService
 
     /**
      * Get all assigned children (for "always at end")
+     * 
+     * NOTE: In new concept, all children are in waitlist_entries
+     * "Always at end" is now handled differently - children not fitting in days
+     * This function returns empty array (no separate assignments anymore)
      */
     private function getAssignedChildren(int $scheduleId): array
     {
-        $assignmentsTable = TableRegistry::getTableLocator()->get('Assignments');
-        
-        $assignments = $assignmentsTable->find()
-            ->contain(['Children', 'ScheduleDays'])
-            ->innerJoinWith('ScheduleDays', function ($q) use ($scheduleId) {
-                return $q->where(['ScheduleDays.schedule_id' => $scheduleId]);
-            })
-            ->all();
-
-        $children = [];
-        foreach ($assignments as $assignment) {
-            $childId = $assignment->child->id;
-            if (!isset($children[$childId])) {
-                $children[$childId] = [
-                    'child' => $assignment->child,
-                    'weight' => $assignment->weight ?? 1,
-                    'is_integrative' => $assignment->child->is_integrative,
-                ];
-            }
-        }
-
-        return array_values($children);
+        // In new concept: No separate assignments table
+        // All children are managed via waitlist_entries
+        // "Always at end" children are those that don't fit in generated days
+        return [];
     }
 
     /**

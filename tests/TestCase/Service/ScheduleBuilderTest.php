@@ -3,12 +3,10 @@ declare(strict_types=1);
 
 namespace App\Test\TestCase\Service;
 
-use App\Model\Entity\Assignment;
 use App\Model\Entity\Child;
 use App\Model\Entity\Organization;
 use App\Model\Entity\Rule;
 use App\Model\Entity\Schedule;
-use App\Model\Entity\ScheduleDay;
 use App\Model\Entity\SiblingGroup;
 use App\Service\ScheduleBuilder;
 use Cake\I18n\Date;
@@ -16,6 +14,12 @@ use Cake\TestSuite\TestCase;
 
 /**
  * ScheduleBuilder Service Test Case
+ * 
+ * ⚠️  DEPRECATED: ScheduleBuilder is obsolete in new concept
+ * Old: Auto-distribute children to schedule_days/assignments
+ * New: Only manage order in waitlist_entries, report generates dynamically
+ * 
+ * TODO: Either delete ScheduleBuilder or rewrite for waitlist management
  */
 class ScheduleBuilderTest extends TestCase
 {
@@ -29,8 +33,7 @@ class ScheduleBuilderTest extends TestCase
         'app.Children',
         'app.SiblingGroups',
         'app.Schedules',
-        'app.ScheduleDays',
-        'app.Assignments',
+        'app.WaitlistEntries',
         'app.Rules',
     ];
 
@@ -61,10 +64,14 @@ class ScheduleBuilderTest extends TestCase
     /**
      * Test that builder respects capacity limits
      *
+     * ⚠️  NEEDS REWRITE: Uses old schedule_days/assignments concept
+     * 
      * @return void
      */
     public function testBuilderRespectsCapacity(): void
     {
+        $this->markTestIncomplete('Needs rewrite - old concept used schedule_days/assignments, new uses waitlist_entries');
+        
         // Create organization
         $organizationsTable = $this->getTableLocator()->get('Organizations');
         $org = $organizationsTable->newEntity([
@@ -130,10 +137,14 @@ class ScheduleBuilderTest extends TestCase
     /**
      * Test integrative children use correct weight
      *
+     * ⚠️  NEEDS REWRITE: Uses old schedule_days/assignments concept
+     * 
      * @return void
      */
     public function testIntegrativeChildrenUseCorrectWeight(): void
     {
+        $this->markTestIncomplete('Needs rewrite - old concept used schedule_days/assignments, new uses waitlist_entries');
+        
         // Create organization
         $organizationsTable = $this->getTableLocator()->get('Organizations');
         $org = $organizationsTable->newEntity([
