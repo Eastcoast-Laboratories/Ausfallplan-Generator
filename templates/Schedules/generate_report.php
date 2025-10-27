@@ -254,13 +254,17 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
             $totalCountingChildren = 0;
             
             // Count from waitlist
-            foreach ($waitlist as $entry) {
-                $totalCountingChildren += $entry->child->is_integrative ? 2 : 1;
+            if (!empty($waitlist)) {
+                foreach ($waitlist as $entry) {
+                    $totalCountingChildren += $entry->child->is_integrative ? 2 : 1;
+                }
             }
             
             // Count from "always at end"
-            foreach ($alwaysAtEnd as $childData) {
-                $totalCountingChildren += $childData['child']->is_integrative ? 2 : 1;
+            if (!empty($alwaysAtEnd)) {
+                foreach ($alwaysAtEnd as $childData) {
+                    $totalCountingChildren += $childData['child']->is_integrative ? 2 : 1;
+                }
             }
             ?>
             <div class="total-counting-children" style="text-align: right;">
