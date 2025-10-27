@@ -284,12 +284,15 @@ class UsersController extends AppController
         $validLanguages = ['de', 'en'];
         
         if ($lang && in_array($lang, $validLanguages)) {
-            // Write to session
+            // Convert to full locale format (de -> de_DE, en -> en_US)
+            $locale = $lang === 'de' ? 'de_DE' : 'en_US';
+            
+            // Write to session in correct format
             $session = $this->request->getSession();
-            $session->write('Config.language', $lang);
+            $session->write('Config.language', $locale);
             
             // Also set locale immediately for current request
-            \Cake\I18n\I18n::setLocale($lang === 'de' ? 'de_DE' : 'en_US');
+            \Cake\I18n\I18n::setLocale($locale);
             
             $this->Flash->success(__('Language changed to {0}', $lang === 'de' ? 'Deutsch' : 'English'));
         }

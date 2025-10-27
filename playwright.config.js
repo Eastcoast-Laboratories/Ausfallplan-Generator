@@ -21,6 +21,15 @@ module.exports = defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
     {
+      name: 'firefox',
+      use: { 
+        ...devices['Desktop Firefox'],
+        launchOptions: {
+          executablePath: '/usr/bin/firefox', // Use system Firefox
+        },
+      },
+    },
+    {
       name: 'mobile',
       use: { ...devices['iPhone 12'] },
     },
