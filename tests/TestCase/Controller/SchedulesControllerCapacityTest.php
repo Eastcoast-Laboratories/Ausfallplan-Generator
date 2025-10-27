@@ -112,7 +112,7 @@ class SchedulesControllerCapacityTest extends TestCase
         $this->assertRedirect(['controller' => 'Schedules', 'action' => 'view', $schedule->id]);
 
         // Verify updated value (reload from DB)
-        $schedule = $schedules->get($schedule->id, ['cache' => false]);
+        $schedule = $schedules->get($schedule->id);
         $this->assertEquals(20, $schedule->capacity_per_day, 'Updated capacity should be 20');
 
         // Edit again to verify display
@@ -153,7 +153,7 @@ class SchedulesControllerCapacityTest extends TestCase
         $this->assertRedirect(['controller' => 'Schedules', 'action' => 'view', $schedule->id]);
 
         // Verify it uses default value (9) - reload from DB
-        $schedule = $schedules->get($schedule->id, ['cache' => false]);
+        $schedule = $schedules->get($schedule->id);
         $this->assertEquals(9, $schedule->capacity_per_day, 'Capacity should use default value when not provided');
     }
 }
