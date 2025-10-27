@@ -67,6 +67,10 @@ class SchedulesTable extends Table
             'foreignKey' => 'schedule_id',
             'className' => 'Rules',
         ]);
+        $this->hasMany('ScheduleChildren', [
+            'foreignKey' => 'schedule_id',
+            'className' => 'ScheduleChildren',
+        ]);
     }
 
     /**
