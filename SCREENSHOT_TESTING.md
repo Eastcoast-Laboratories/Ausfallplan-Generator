@@ -29,8 +29,8 @@ test.describe('Navigation Screenshots', () => {
     await page.goto('http://localhost:8080/users/login');
     
     // 2. Login
-    await page.fill('input[name="email"]', 'ausfallplan-sysadmin@it.z11.de');
-    await page.fill('input[name="password"]', 'password123');
+    await page.fill('input[name="email"]', 'admin@demo.kita');
+    await page.fill('input[name="password"]', '84fhr38hf43iahfuX_2');
     await page.click('button[type="submit"]');
     
     // 3. Warte bis Dashboard geladen ist
@@ -55,8 +55,8 @@ test.describe('Navigation Screenshots', () => {
     
     // Login und Screenshot
     await page.goto('http://localhost:8080/users/login');
-    await page.fill('input[name="email"]', 'ausfallplan-sysadmin@it.z11.de');
-    await page.fill('input[name="password"]', 'password123');
+    await page.fill('input[name="email"]', 'admin@demo.kita');
+    await page.fill('input[name="password"]', '84fhr38hf43iahfuX_2');
     await page.click('button[type="submit"]');
     await page.waitForSelector('.hamburger');
     

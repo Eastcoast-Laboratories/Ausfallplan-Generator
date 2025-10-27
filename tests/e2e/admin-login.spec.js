@@ -26,8 +26,8 @@ test.describe('Admin Login and Permissions', () => {
         
         console.log('📍 Step 2: Fill in admin credentials');
         // Use the admin account created in fixtures
-        await page.fill('input[name="email"]', 'ausfallplan-sysadmin@it.z11.de');
-        await page.fill('input[name="password"]', 'password123');
+        await page.fill('input[name="email"]', 'admin@demo.kita');
+        await page.fill('input[name="password"]', '84fhr38hf43iahfuX_2');
         
         console.log('📍 Step 3: Submit login form');
         await page.click('button[type="submit"]');
@@ -46,8 +46,8 @@ test.describe('Admin Login and Permissions', () => {
     test('should show admin navigation links', async ({ page }) => {
         console.log('📍 Step 1: Login as admin');
         await page.goto('http://localhost:8080/login');
-        await page.fill('input[name="email"]', 'ausfallplan-sysadmin@it.z11.de');
-        await page.fill('input[name="password"]', 'password123');
+        await page.fill('input[name="email"]', 'admin@demo.kita');
+        await page.fill('input[name="password"]', '84fhr38hf43iahfuX_2');
         await page.click('button[type="submit"]');
         await page.waitForURL('**/dashboard');
         
@@ -64,8 +64,8 @@ test.describe('Admin Login and Permissions', () => {
     test('should see all schedules from all users', async ({ page }) => {
         console.log('📍 Step 1: Login as admin');
         await page.goto('http://localhost:8080/login');
-        await page.fill('input[name="email"]', 'ausfallplan-sysadmin@it.z11.de');
-        await page.fill('input[name="password"]', 'password123');
+        await page.fill('input[name="email"]', 'admin@demo.kita');
+        await page.fill('input[name="password"]', '84fhr38hf43iahfuX_2');
         await page.click('button[type="submit"]');
         await page.waitForURL('**/dashboard');
         

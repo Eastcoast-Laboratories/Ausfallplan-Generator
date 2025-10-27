@@ -7,8 +7,8 @@ test.describe('Login Test', () => {
     await page.goto('http://localhost:8080/login');
     
     // Fill in credentials
-    await page.fill('input[name="email"]', 'admin@test.com');
-    await page.fill('input[name="password"]', 'password123');
+    await page.fill('input[name="email"]', 'admin@demo.kita');
+    await page.fill('input[name="password"]', '84fhr38hf43iahfuX_2');
     
     // Submit
     await page.click('button[type="submit"]');

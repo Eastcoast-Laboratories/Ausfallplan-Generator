@@ -27,7 +27,7 @@ test.describe('Debug Admin Access to Organizations', () => {
         
         console.log('🔍 Step 2: Fill login form with admin@demo.kita');
         await page.fill('input[name="email"]', 'admin@demo.kita');
-        await page.fill('input[name="password"]', 'asbdasdaddd');
+        await page.fill('input[name="password"]', '84fhr38hf43iahfuX_2');
         
         await page.screenshot({ 
             path: `screenshots/debug-login-filled-${timestamp}.png`,
@@ -160,7 +160,7 @@ test.describe('Debug Admin Access to Organizations', () => {
         // Login
         await page.goto('https://ausfallplan-generator.z11.de/login');
         await page.fill('input[name="email"]', 'admin@demo.kita');
-        await page.fill('input[name="password"]', 'asbdasdaddd');
+        await page.fill('input[name="password"]', '84fhr38hf43iahfuX_2');
         await page.click('button[type="submit"]');
         await page.waitForTimeout(2000);
         

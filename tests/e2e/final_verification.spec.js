@@ -41,7 +41,7 @@ test('Final verification - All critical features', async ({ page }) => {
     console.log('6️⃣ Testing Login Flow...');
     await page.goto('http://localhost:8080/users/login');
     await page.fill('input[name="email"]', 'admin@demo.kita');
-    await page.fill('input[name="password"]', 'asbdasdaddd');
+    await page.fill('input[name="password"]', '84fhr38hf43iahfuX_2');
     await page.click('button[type="submit"]');
     await page.waitForTimeout(2000);
     

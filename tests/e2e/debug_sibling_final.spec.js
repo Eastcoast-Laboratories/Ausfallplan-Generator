@@ -4,7 +4,7 @@ test('Extract debug info from waitlist page', async ({ page }) => {
     // Login
     await page.goto('http://localhost:8080/users/login');
     await page.fill('input[name="email"]', 'admin@demo.kita');
-    await page.fill('input[name="password"]', 'asbdasdaddd');
+    await page.fill('input[name="password"]', '84fhr38hf43iahfuX_2');
     await page.click('button[type="submit"]');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
