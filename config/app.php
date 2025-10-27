@@ -183,6 +183,7 @@ return [
         'trace' => true,
         'ignoredDeprecationPaths' => [
             'src/Application.php', // Ignore loadIdentifier() deprecation until new syntax is fixed in CakePHP
+            'vendor/cakephp/authentication/*', // Ignore all authentication plugin deprecations
         ],
     ],
 
