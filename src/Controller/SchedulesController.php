@@ -368,6 +368,8 @@ class SchedulesController extends AppController
         $this->set('days', $reportData['days']);
         $this->set('daysCount', $reportData['daysCount']);
         $this->set('childStats', $reportData['childStats']);
+        $this->set('waitlist', $reportData['waitlist'] ?? []);
+        $this->set('alwaysAtEnd', $reportData['alwaysAtEnd'] ?? []);
     }
 
     /**
