@@ -144,18 +144,7 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
             'queryParam' => 'redirect',
         ]);
 
-        // Load authenticators
-        $service->loadAuthenticator('Authentication.Session');
-        $service->loadAuthenticator('Authentication.Form', [
-            'fields' => [
-                'username' => 'email',
-                'password' => 'password',
-            ],
-            'loginUrl' => null, // Allow login from any URL
-        ]);
-        
-        // Load identifier (deprecated but new syntax breaks authentication)
-        // Deprecation suppressed in config/app.php
+        // Load the identifier first (must be loaded before authenticators)
         $service->loadIdentifier('Authentication.Password', [
             'fields' => [
                 'username' => 'email',
@@ -166,6 +155,16 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
                 'userModel' => 'Users',
                 'finder' => 'all', // Ensure all fields are loaded including is_system_admin
             ],
+        ]);
+        
+        // Load authenticators (must come after identifier)
+        $service->loadAuthenticator('Authentication.Session');
+        $service->loadAuthenticator('Authentication.Form', [
+            'fields' => [
+                'username' => 'email',
+                'password' => 'password',
+            ],
+            'loginUrl' => null, // Allow login from any URL
         ]);
 
         return $service;
