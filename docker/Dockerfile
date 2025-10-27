@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install -y \
     php8.4-zip \
     php8.4-pdo-mysql \
     php8.4-mysqli \
+    php8.4-xdebug \
     git \
     curl \
     zip \
@@ -25,6 +26,10 @@ RUN apt-get update && apt-get install -y \
     sqlite3 \
     cron \
     && rm -rf /var/lib/apt/lists/*
+
+# Configure Xdebug for code coverage
+RUN echo "xdebug.mode=coverage" >> /etc/php/8.4/cli/conf.d/20-xdebug.ini \
+    && echo "xdebug.start_with_request=yes" >> /etc/php/8.4/cli/conf.d/20-xdebug.ini
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite php8.4
