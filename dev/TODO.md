@@ -1,16 +1,5 @@
 # TODO
 
-## Current Sprint - Completed! 🎉
-
-- [x] Admin kann alle Schedules/Ausfallpläne sehen (mit User/Org-Spalten) - ✅ 23.10. 22:50
-- [x] Admin kann Organisationen verwalten - ✅ 23.10. 23:00
-- [x] Playwright Test: Admin login und Berechtigungen testen - ✅ 23.10. 23:00
-- [x] Email und Passwort ändern - ✅ 23.10. 23:15
-- [x] Password recovery mit Konfirmationscode - ✅ 23.10. 23:15
-- [x] Organization Autocomplete bei Registration - ✅ 23.10. 23:20
-- [x] Viewer Role (Read-Only) - ✅ 23.10. 23:20
-- [x] organization_id in children table - ✅ 23.10. 23:20
-
 ## Backlog
 
 - Erstelle mir eine möglichkeit die db mit phpmyadmin zugreifen
@@ -52,18 +41,7 @@ bei http://localhost:8080/schedules/add muss eine selectbox, die nur sichtbar is
  - die sprachauswahl oben rechts muss auch im register form funktionieren, (im moment ist immer deutsch)
 - phpunittests alle noch mal reparieren @phpunit_remaining_work.md#L1-312 
 
-- [x] wenn ein kind nicht auf der nachrückliste ist, dann muss es im report rechts unterhalb der nachrückliste angezeigt werden unter "immer am Ende" auftauchen, das ist zwar implementiert aber funktioinierrt nicht, da ist ein bug drin ✅ 26.10. 22:45 - BUG BEHOBEN: getSortedChildrenFromAssignments() nutzt jetzt waitlist_entries.priority statt assignments.sort_order (das Feld existierte gar nicht!)
-- [x] wenn ein kind nicht auf der nachrückliste ist, dann darf es auch nicht an den einzelnen tagen unten als kind für den start der nachrückliste mit auftauchen (das ist zwar BEREITS IMPLEMENTIERT in ReportService.php, aber es funktioniert nicht, die kinder werden dort trotzdem aufgeführt) ✅ 26.10. 22:45 - FIX AUTOMATISCH: Durch Fix von getSortedChildrenFromAssignments() werden nur noch Kinder aus waitlist_entries in den Tagesboxen angezeigt
-
-- [x] der ausfallplan muss exportierbar sein als csv ✅ 26.10. 21:32 - BEREITS IMPLEMENTIERT in SchedulesController::exportCsv()
-
 - [ ] die sprachwechslung von englisch zurück zu deutsch funktioniert nicht immer, mache einen playwright test, der sich einloggt, dann die sprache ein paar mal wechselt und die navigation überprüft ob das in der richtigen sprache ist TEST HINZUGEFÜGT in tests/e2e/language-switcher.spec.js aber noch nciht ausgeführt
-
-- TEST_FAILURES_TODO.md#L1-224  lösche alle hinweise auf in der vergangenheit gefixte tests, nur die noch offenen probleme und tests sollen in der datei aufgelistet werden. 
-
-- [x] last-name wird noch nicht importiert im kinder import script ✅ 27.10. 05:05 - BEREITS IMPLEMENTIERT: CsvImportService parst last_name aus CSV, ChildrenController speichert es (Zeile 416)
-
-- [x] wenn man in mehreren organisationen ist, dann muss http://localhost:8080/children eine selectbox bekommen um auszuwählen, welche kinder man angezeigt werden will, also welcher organisation zugehörig ✅ 27.10. 05:05 - Organization Filter implementiert mit Dropdown, Query-Parameter ?organization_id=X, Auto-Select primary org
 
 # weitere TODOs
 
