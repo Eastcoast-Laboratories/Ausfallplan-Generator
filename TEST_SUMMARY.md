@@ -73,8 +73,6 @@ Tests the automatic distribution algorithm:
 - Children  
 - SiblingGroups
 - Schedules
-- ScheduleDays
-- Assignments
 - Rules
 
 ### Key Test Features

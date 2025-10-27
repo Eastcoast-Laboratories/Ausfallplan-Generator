@@ -6,7 +6,7 @@
 
 ✅ **Completed**:
 - CakePHP 5 application structure with migrations
-- Domain models (Organizations, Users, Children, Schedules, ScheduleDays, Assignments, Rules, WaitlistEntries, SiblingGroups)
+- Domain models (Organizations, Users, Children, Schedules, Rules, WaitlistEntries, SiblingGroups)
 - Business logic services (RulesService, ScheduleBuilder)
 - Comprehensive unit tests (18 tests passing, 36 assertions)
 - Automatic distribution algorithm with capacity tracking
@@ -197,8 +197,7 @@ Screenshots are saved to `screenshots/` directory (gitignored).
 
 ### Key Relationships
 - Organizations ← Users, Children, Schedules, SiblingGroups
-- Schedules ← ScheduleDays, WaitlistEntries, Rules
-- ScheduleDays ← Assignments
+- Schedules ← WaitlistEntries, Rules
 - Children ← Assignments, WaitlistEntries
 - SiblingGroups ← Children
 

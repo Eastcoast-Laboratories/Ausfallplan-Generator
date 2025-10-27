@@ -34,7 +34,7 @@ class SchedulesControllerTest extends TestCase
         'app.Users',
         'app.OrganizationUsers',
         'app.Schedules',
-        'app.ScheduleDays',
+        'app.WaitlistEntries',
     ];
 
     /**
