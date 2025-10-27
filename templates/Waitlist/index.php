@@ -35,7 +35,7 @@ $this->assign('title', __('Waitlist'));
                     ['controller' => 'Schedules', 'action' => 'generateReport', $selectedSchedule->id],
                     [
                         'class' => 'button',
-                        'style' => 'background: #2196F3; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; font-weight: bold;'
+                        'style' => 'background: #2196F3; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; font-weight: bold; margin-left: 1rem; margin-top: 2.5rem;'
                     ]
                 ) ?>
             <?php endif; ?>
