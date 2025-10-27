@@ -19,38 +19,54 @@ class ChildrenController extends AppController
     {
         $user = $this->Authentication->getIdentity();
         
-        // System admins have no organization - show empty list or redirect
+        // Get user's organizations
+        $userOrgs = $this->getUserOrganizations();
+        $organizations = collection($userOrgs)->combine('id', 'name')->toArray();
+        
+        // System admins see all organizations
         if ($user && $user->is_system_admin) {
-            // Admins can see all children across all organizations
-            $children = $this->Children->find()
-                ->contain(['Organizations', 'SiblingGroups'])
-                ->orderBy(['Children.is_active' => 'DESC', 'Children.name' => 'ASC'])
-                ->all();
-            
-            // Load sibling names for children with siblings
-            $siblingNames = $this->loadSiblingNames($children);
-            
-            $this->set(compact('children', 'siblingNames'));
-            return;
+            $organizationsTable = $this->fetchTable('Organizations');
+            $allOrgs = $organizationsTable->find()->all();
+            $organizations = collection($allOrgs)->combine('id', 'name')->toArray();
         }
         
-        // Get user's primary organization
-        $primaryOrg = $this->getPrimaryOrganization();
-        if (!$primaryOrg) {
-            $this->Flash->error(__('Sie sind keiner Organisation zugeordnet.'));
-            return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
+        // Get selected organization ID from query parameter or use primary
+        $selectedOrgId = $this->request->getQuery('organization_id');
+        
+        // If no selection and user has organizations, use primary
+        if (!$selectedOrgId && !empty($userOrgs)) {
+            $primaryOrg = $this->getPrimaryOrganization();
+            $selectedOrgId = $primaryOrg ? $primaryOrg->id : null;
         }
         
-        $children = $this->Children->find()
-            ->where(['Children.organization_id' => $primaryOrg->id])
+        // Build query
+        $query = $this->Children->find()
             ->contain(['Organizations', 'SiblingGroups'])
-            ->orderBy(['Children.is_active' => 'DESC', 'Children.name' => 'ASC'])
-            ->all();
+            ->orderBy(['Children.is_active' => 'DESC', 'Children.name' => 'ASC']);
+        
+        // Filter by selected organization
+        if ($selectedOrgId) {
+            $query->where(['Children.organization_id' => $selectedOrgId]);
+        } elseif (!$user->is_system_admin) {
+            // Regular users without selection: show children from their organizations
+            $orgIds = array_keys($organizations);
+            if (!empty($orgIds)) {
+                $query->where(['Children.organization_id IN' => $orgIds]);
+            } else {
+                // User has no organizations
+                $query->where(['1 = 0']); // Empty result
+            }
+        }
+        
+        $children = $query->all();
         
         // Load sibling names for children with siblings
         $siblingNames = $this->loadSiblingNames($children);
+        
+        // Can show selector if user has multiple organizations or is system admin
+        $canSelectOrganization = $user->is_system_admin || count($organizations) > 1;
 
-        $this->set(compact('children', 'siblingNames'));
+        $this->set(compact('children', 'siblingNames', 'organizations', 'selectedOrgId', 'canSelectOrganization'));
     }
 
     /**

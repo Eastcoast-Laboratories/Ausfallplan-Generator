@@ -2,11 +2,30 @@
 /**
  * @var \App\View\AppView $this
  * @var iterable<\App\Model\Entity\Child> $children
+ * @var array $organizations
+ * @var int|null $selectedOrgId
+ * @var bool $canSelectOrganization
  */
 $this->assign('title', __('Children'));
 ?>
 <div class="children index content">
     <h3><?= __('Children') ?></h3>
+    
+    <?php if ($canSelectOrganization ?? false): ?>
+    <!-- Organization Selector -->
+    <div class="organization-selector" style="margin-bottom: 2rem;">
+        <label for="organization-select"><?= __('Filter by Organization') ?>:</label>
+        <select id="organization-select" onchange="window.location.href='<?= $this->Url->build(['action' => 'index']) ?>?organization_id=' + this.value" style="margin-left: 1rem; padding: 0.5rem;">
+            <option value=""><?= __('-- All Organizations --') ?></option>
+            <?php foreach ($organizations as $orgId => $orgName): ?>
+                <option value="<?= $orgId ?>" <?= $selectedOrgId == $orgId ? 'selected' : '' ?>>
+                    <?= h($orgName) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+    <?php endif; ?>
+    
     <div class="actions" style="display: flex; gap: 1rem; justify-content: flex-end;">
         <?= $this->Html->link('📥 ' . __('CSV Import'), ['action' => 'import'], ['class' => 'button', 'style' => 'background: #2196f3; color: white;']) ?>
         <?= $this->Html->link(__('New Child'), ['action' => 'add'], ['class' => 'button', 'id' => 'new-child-button']) ?>
