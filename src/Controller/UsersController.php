@@ -232,13 +232,13 @@ class UsersController extends AppController
             if (!$identity->email_verified) {
                 $this->Authentication->logout();
                 $this->Flash->error(__('Please verify your email before logging in.'));
-                return;
+                return $this->redirect(['action' => 'login']);
             }
             
             if ($identity->status !== 'active') {
                 $this->Authentication->logout();
                 $this->Flash->error(__('Your account is pending approval by an administrator.'));
-                return;
+                return $this->redirect(['action' => 'login']);
             }
             
             // Get redirect target from query parameter or use dashboard as fallback
