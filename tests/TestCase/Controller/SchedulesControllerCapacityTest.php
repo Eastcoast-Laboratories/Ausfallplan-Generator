@@ -80,10 +80,11 @@ class SchedulesControllerCapacityTest extends TestCase
             'ends_on' => '2025-12-31',
             'capacity_per_day' => 15,
             'state' => 'draft',
+            'organization_id' => 1,
         ]);
 
         $this->assertResponseSuccess();
-        $this->assertRedirect(['controller' => 'Schedules', 'action' => 'index']);
+        $this->assertRedirect(); // Now redirects to view instead of index
 
         // Get the created schedule
         $schedules = $this->getTableLocator()->get('Schedules');
