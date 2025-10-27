@@ -448,11 +448,36 @@ class ChildrenController extends AppController
                 $dbSiblingGroupId = $siblingGroupMap[$childData['sibling_group_id']];
             }
             
+            // Determine display_name based on anonymization mode
+            $displayName = null;
+            switch ($anonymizationMode) {
+                case 'full':
+                    // Full name: "Valentina Schmidt"
+                    $displayName = trim($firstName . ' ' . $childData['last_name']);
+                    break;
+                case 'first_name':
+                    // First name only: "Valentina"
+                    $displayName = $firstName;
+                    break;
+                case 'animal_name':
+                    // Animal name only: "Bär"
+                    $displayName = $childData['animal_name'];
+                    break;
+                case 'initial_animal':
+                    // Initial + Animal: "V. Bär"
+                    $displayName = $childData['initial_animal'];
+                    break;
+                default:
+                    // Default: full name
+                    $displayName = trim($firstName . ' ' . $childData['last_name']);
+            }
+            
             // Create child
             $child = $this->Children->newEntity([
                 'organization_id' => $orgId,
                 'name' => $firstName, // Only first name in 'name' field
                 'last_name' => $childData['last_name'], // Last name in separate field
+                'display_name' => $displayName, // Display name based on anonymization mode
                 'birthdate' => $childData['birth_date'] ? $childData['birth_date']->format('Y-m-d') : null,
                 'gender' => $childData['gender'],
                 'is_integrative' => $childData['is_integrative'],

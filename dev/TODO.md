@@ -1,5 +1,16 @@
 # TODO
 
+## Current Sprint - Completed! 🎉
+
+- [x] Admin kann alle Schedules/Ausfallpläne sehen (mit User/Org-Spalten) - ✅ 23.10. 22:50
+- [x] Admin kann Organisationen verwalten - ✅ 23.10. 23:00
+- [x] Playwright Test: Admin login und Berechtigungen testen - ✅ 23.10. 23:00
+- [x] Email und Passwort ändern - ✅ 23.10. 23:15
+- [x] Password recovery mit Konfirmationscode - ✅ 23.10. 23:15
+- [x] Organization Autocomplete bei Registration - ✅ 23.10. 23:20
+- [x] Viewer Role (Read-Only) - ✅ 23.10. 23:20
+- [x] organization_id in children table - ✅ 23.10. 23:20
+
 ## Backlog
 
 - Erstelle mir eine möglichkeit die db mit phpmyadmin zugreifen
@@ -42,6 +53,12 @@ bei http://localhost:8080/schedules/add muss eine selectbox, die nur sichtbar is
 - phpunittests alle noch mal reparieren @phpunit_remaining_work.md#L1-312 
 
 - [ ] die sprachwechslung von englisch zurück zu deutsch funktioniert nicht immer, mache einen playwright test, der sich einloggt, dann die sprache ein paar mal wechselt und die navigation überprüft ob das in der richtigen sprache ist TEST HINZUGEFÜGT in tests/e2e/language-switcher.spec.js aber noch nciht ausgeführt
+
+- TEST_FAILURES_TODO.md#L1-224  lösche alle hinweise auf in der vergangenheit gefixte tests, nur die noch offenen probleme und tests sollen in der datei aufgelistet werden. 
+
+- [x] last-name wird noch nicht importiert im kinder import script ✅ 27.10. 05:05 - BEREITS IMPLEMENTIERT: CsvImportService parst last_name aus CSV, ChildrenController speichert es (Zeile 416)
+
+- [x] wenn man in mehreren organisationen ist, dann muss http://localhost:8080/children eine selectbox bekommen um auszuwählen, welche kinder man angezeigt werden will, also welcher organisation zugehörig ✅ 27.10. 05:05 - Organization Filter implementiert mit Dropdown, Query-Parameter ?organization_id=X, Auto-Select primary org
 
 # weitere TODOs
 
