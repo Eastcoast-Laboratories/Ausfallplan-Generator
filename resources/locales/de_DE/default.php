@@ -68,6 +68,9 @@ return [
     '(No Sibling Group)' => '(Keine Geschwistergruppe)',
     'Sibling Group' => 'Geschwistergruppe',
     'Name' => 'Name',
+    'Last Name' => 'Nachname',
+    'Gender' => 'Geschlecht',
+    'Birthdate' => 'Geburtsdatum',
     'Organization' => 'Organisation',
     'New Child' => 'Neues Kind',
     
