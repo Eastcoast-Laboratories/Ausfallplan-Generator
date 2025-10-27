@@ -415,19 +415,20 @@ class ChildrenController extends AppController
         }
         
         foreach ($parsedChildren as $childData) {
-            // Apply anonymization for display name (used for checking duplicates and display)
-            $displayName = $importService->anonymizeName($childData, $anonymizationMode);
+            // Always use first_name for the name field
+            $firstName = $childData['first_name'];
             
-            // Check if child already exists
+            // Check if child already exists (by first name + last name combination)
             $existingChild = $this->Children->find()
                 ->where([
-                    'name' => $displayName,
+                    'name' => $firstName,
+                    'last_name' => $childData['last_name'],
                     'organization_id' => $orgId,
                 ])
                 ->first();
             
             if ($existingChild) {
-                $skipped[]=$displayName;
+                $skipped[] = $firstName . ' ' . $childData['last_name'];
                 continue;
             }
             
@@ -450,8 +451,8 @@ class ChildrenController extends AppController
             // Create child
             $child = $this->Children->newEntity([
                 'organization_id' => $orgId,
-                'name' => $displayName, // Anonymized display name
-                'last_name' => $childData['last_name'], // Always save real last name
+                'name' => $firstName, // Only first name in 'name' field
+                'last_name' => $childData['last_name'], // Last name in separate field
                 'birthdate' => $childData['birth_date'] ? $childData['birth_date']->format('Y-m-d') : null,
                 'gender' => $childData['gender'],
                 'is_integrative' => $childData['is_integrative'],
@@ -463,8 +464,9 @@ class ChildrenController extends AppController
             if ($this->Children->save($child)) {
                 $imported++;
             } else {
-                $errors[] = $displayName . ': ' . implode(', ', $child->getErrors());
-                $skipped[]=$displayName;
+                $fullName = $firstName . ' ' . $childData['last_name'];
+                $errors[] = $fullName . ': ' . implode(', ', $child->getErrors());
+                $skipped[] = $fullName;
             }
         }
         
