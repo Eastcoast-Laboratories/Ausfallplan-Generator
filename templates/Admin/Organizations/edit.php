@@ -4,10 +4,10 @@
  * @var \App\Model\Entity\Organization $organization
  * @var array $allUsers
  */
-$this->assign('title', __('Organisation bearbeiten'));
+$this->assign('title', __('Edit Organization'));
 ?>
 <div class="organization form content">
-    <h3><?= __('Organisation bearbeiten') ?></h3>
+    <h3><?= __('Edit Organization') ?></h3>
     
     <div class="row">
         <div class="column">
@@ -48,9 +48,9 @@ $this->assign('title', __('Organisation bearbeiten'));
                             <td>
                                 <?php
                                 $roleLabels = [
-                                    'org_admin' => __('Organisations-Admin'),
-                                    'editor' => __('Bearbeiter'),
-                                    'viewer' => __('Betrachter')
+                                    'org_admin' => __('Organization Admin'),
+                                    'editor' => __('Editor'),
+                                    'viewer' => __('Viewer')
                                 ];
                                 echo h($roleLabels[$orgUser->role] ?? $orgUser->role);
                                 ?>
@@ -84,9 +84,9 @@ $this->assign('title', __('Organisation bearbeiten'));
                     ]) ?>
                     <?= $this->Form->control('role', [
                         'options' => [
-                            'org_admin' => __('Organisations-Admin'),
-                            'editor' => __('Bearbeiter'),
-                            'viewer' => __('Betrachter')
+                            'org_admin' => __('Organization Admin'),
+                            'editor' => __('Editor'),
+                            'viewer' => __('Viewer')
                         ],
                         'default' => 'viewer',
                         'label' => __('Rolle')

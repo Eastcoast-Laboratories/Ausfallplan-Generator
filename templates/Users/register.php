@@ -59,14 +59,14 @@
             // Role selector (only for existing orgs)
             echo $this->Form->control('requested_role', [
                 'options' => [
-                    'viewer' => __('Betrachter') . ' - ' . __('Nur Lesezugriff'),
-                    'editor' => __('Redakteur') . ' - ' . __('Pläne erstellen und bearbeiten'),
-                    'org_admin' => __('Organisations-Admin') . ' - ' . __('Voller Zugriff (Genehmigung erforderlich)')
+                    'viewer' => __('Viewer') . ' - ' . __('Read-only access'),
+                    'editor' => __('Editor') . ' - ' . __('Create and edit schedules'),
+                    'org_admin' => __('Organization Admin') . ' - ' . __('Full access (approval required)')
                 ],
-                'label' => __('Gewünschte Rolle in der Organisation'),
+                'label' => __('Desired role in the organization'),
                 'default' => 'editor',
                 'id' => 'role-selector',
-                'help' => __('Bei einer existierenden Organisation prüfen Administratoren Ihre Anfrage')
+                'help' => __('For existing organizations, administrators will review your request')
             ]);
         ?>
     </fieldset>

@@ -443,7 +443,7 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
             <?php if ($showOrganizationsLink): ?>
             <a href="/admin/organizations" class="sidebar-nav-item <?= $this->request->getParam('controller') === 'Organizations' && $this->request->getParam('prefix') === 'Admin' ? 'active' : '' ?>">
                 <span>🏢</span>
-                <span><?= __('Organisationen') ?></span>
+                <span><?= __('Organizations') ?></span>
             </a>
             <?php endif; ?>
         </nav>

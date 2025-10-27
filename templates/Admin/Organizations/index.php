@@ -3,11 +3,11 @@
  * @var \App\View\AppView $this
  * @var iterable<\App\Model\Entity\Organization> $organizations
  */
-$this->assign('title', __('Organisationsverwaltung'));
+$this->assign('title', __('Organization Management'));
 ?>
 <div class="organizations index content">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <h3 style="margin: 0;"><?= __('Organisationen') ?></h3>
+        <h3 style="margin: 0;"><?= __('Organizations') ?></h3>
         <?= $this->Html->link('+ ' . __('Add Organization'), ['action' => 'add'], ['class' => 'button']) ?>
     </div>
     

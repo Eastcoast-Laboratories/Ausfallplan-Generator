@@ -58,9 +58,9 @@ class OrganizationUser extends Entity
     public static function getRoles(): array
     {
         return [
-            self::ROLE_ORG_ADMIN => __('Organisations-Admin'),
-            self::ROLE_EDITOR => __('Bearbeiter'),
-            self::ROLE_VIEWER => __('Betrachter'),
+            self::ROLE_ORG_ADMIN => __('Organization Admin'),
+            self::ROLE_EDITOR => __('Editor'),
+            self::ROLE_VIEWER => __('Viewer'),
         ];
     }
 
