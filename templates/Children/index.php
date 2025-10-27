@@ -35,9 +35,9 @@ $this->assign('title', __('Children'));
             <thead>
                 <tr>
                     <th><?= __('Name') ?></th>
-                    <th><?= __('Nachname') ?></th>
-                    <th><?= __('Geschlecht') ?></th>
-                    <th><?= __('Geburtsdatum') ?></th>
+                    <th><?= __('Last Name') ?></th>
+                    <th><?= __('Gender') ?></th>
+                    <th><?= __('Birthdate') ?></th>
                     <th><?= __('Status') ?></th>
                     <th><?= __('Integrative') ?></th>
                     <th><?= __('Sibling Group') ?></th>
