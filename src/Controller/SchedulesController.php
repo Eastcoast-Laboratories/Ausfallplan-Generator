@@ -125,16 +125,18 @@ class SchedulesController extends AppController
             // Set user_id to current user
             $schedule->user_id = $user->id;
             
+            // Ensure organization_id is set FIRST (before validation)
+            if (!$schedule->organization_id) {
+                $this->Flash->error(__('Please select an organization.'));
+                $this->set(compact('schedule', 'organizations'));
+                return;
+            }
+            
             // Validate organization membership
             if (!$this->hasOrgRole($schedule->organization_id)) {
                 $this->Flash->error(__('You do not have permission to create schedules for this organization.'));
-                return $this->redirect(['action' => 'add']);
-            }
-            
-            // Ensure organization_id is set
-            if (!$schedule->organization_id) {
-                $this->Flash->error(__('Please select an organization.'));
-                return $this->redirect(['action' => 'add']);
+                $this->set(compact('schedule', 'organizations'));
+                return;
             }
             
             if ($this->Schedules->save($schedule)) {
