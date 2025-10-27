@@ -17,7 +17,7 @@ test.describe('Verify organization_users Fix', () => {
         
         console.log('🔍 Step 2: Login as admin');
         await page.fill('input[name="email"]', 'admin@demo.kita');
-        await page.fill('input[name="password"]', 'asbdasdaddd');
+        await page.fill('input[name="password"]', '84fhr38hf43iahfuX_2');
         await page.click('button[type="submit"]');
         
         await page.waitForTimeout(2000);
@@ -88,7 +88,7 @@ test.describe('Verify organization_users Fix', () => {
         // Login
         await page.goto('https://ausfallplan-generator.z11.de/login');
         await page.fill('input[name="email"]', 'admin@demo.kita');
-        await page.fill('input[name="password"]', 'asbdasdaddd');
+        await page.fill('input[name="password"]', '84fhr38hf43iahfuX_2');
         await page.click('button[type="submit"]');
         await page.waitForTimeout(2000);
         

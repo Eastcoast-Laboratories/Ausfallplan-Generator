@@ -9,7 +9,7 @@ test('Debug login flow', async ({ page }) => {
     
     // Fill credentials
     await page.fill('input[name="email"]', 'admin@demo.kita');
-    await page.fill('input[name="password"]', 'asbdasdaddd');
+    await page.fill('input[name="password"]', '84fhr38hf43iahfuX_2');
     console.log('✅ 2. Credentials filled');
     
     // Click submit and wait

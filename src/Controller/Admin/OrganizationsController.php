@@ -200,7 +200,36 @@ class OrganizationsController extends AppController
         try {
             // Delete in correct order due to foreign key constraints
             
-            // 1. Delete schedules (depends on users)
+            // 1. Delete or reassign children (they HAVE organization_id!)
+            $childrenTable = $this->fetchTable('Children');
+            $children = $childrenTable->find()
+                ->where(['Children.organization_id' => $id])
+                ->all();
+            
+            // Get "keine organisation" as fallback (id=1)
+            $noOrg = $this->Organizations->find()->where(['name' => 'keine organisation'])->first();
+            
+            foreach ($children as $child) {
+                if ($noOrg) {
+                    // Reassign to "keine organisation"
+                    $child->organization_id = $noOrg->id;
+                    $childrenTable->save($child);
+                } else {
+                    // If no fallback exists, delete the child
+                    $childrenTable->delete($child);
+                }
+            }
+            
+            // 2. Delete sibling groups (linked via organization)
+            $siblingGroupsTable = $this->fetchTable('SiblingGroups');
+            $siblingGroups = $siblingGroupsTable->find()
+                ->where(['SiblingGroups.organization_id' => $id])
+                ->all();
+            foreach ($siblingGroups as $group) {
+                $siblingGroupsTable->delete($group);
+            }
+
+            // 3. Delete schedules (depends on organization)
             $schedulesTable = $this->fetchTable('Schedules');
             $schedules = $schedulesTable->find()
                 ->where(['Schedules.organization_id' => $id])
@@ -209,15 +238,7 @@ class OrganizationsController extends AppController
                 $schedulesTable->delete($schedule);
             }
 
-            // 2. Delete children (linked via organization_users)
-            // Children are linked via their user's organization, so they get deleted via cascade when users are deleted
-            // No direct action needed here as Children don't have organization_id
-
-            // 3. Delete sibling groups (linked via organization)
-            // SiblingGroups are linked via their organization, cascade will handle deletion
-            // Or handle via organization relationship
-
-            // 4. Delete organization_users entries (cascade will handle user cleanup if needed)
+            // 4. Delete organization_users entries
             $orgUsersTable = $this->fetchTable('OrganizationUsers');
             $orgUsers = $orgUsersTable->find()
                 ->where(['organization_id' => $id])

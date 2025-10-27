@@ -21,7 +21,7 @@ Call to undefined method Authentication\Identity::isSystemAdmin()
 test('should login as system admin and access organizations', async ({ page }) => {
     await page.goto('https://ausfallplan-generator.z11.de/login');
     await page.fill('input[name="email"]', 'admin@demo.kita');
-    await page.fill('input[name="password"]', 'asbdasdaddd');
+    await page.fill('input[name="password"]', '84fhr38hf43iahfuX_2');
     await page.click('button[type="submit"]');
     
     await page.goto('https://ausfallplan-generator.z11.de/admin/organizations');
@@ -43,7 +43,7 @@ test('should login as system admin and access organizations', async ({ page }) =
 test('should login as system admin and access organizations', async ({ page }) => {
     await page.goto('https://ausfallplan-generator.z11.de/login');
     await page.fill('input[name="email"]', 'admin@demo.kita');
-    await page.fill('input[name="password"]', 'asbdasdaddd');
+    await page.fill('input[name="password"]', '84fhr38hf43iahfuX_2');
     await page.click('button[type="submit"]');
     
     await page.goto('https://ausfallplan-generator.z11.de/admin/organizations');

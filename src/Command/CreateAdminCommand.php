@@ -88,7 +88,7 @@ class CreateAdminCommand extends Command
         $io->info('Creating admin user...');
         $user = $usersTable->newEntity([
             'email' => 'admin@demo.kita',
-            'password' => 'asbdasdaddd',
+            'password' => '84fhr38hf43iahfuX_2',
             'is_system_admin' => true, // System-wide admin access
             'status' => 'active',
             'email_verified' => true
@@ -110,7 +110,7 @@ class CreateAdminCommand extends Command
             $io->out('');
             $io->out('Login credentials:');
             $io->out('  Email:    admin@demo.kita');
-            $io->out('  Password: asbdasdaddd');
+            $io->out('  Password: 84fhr38hf43iahfuX_2');
             $io->out('  Type:     System Admin (is_system_admin = true)');
             $io->out('');
             return self::CODE_SUCCESS;

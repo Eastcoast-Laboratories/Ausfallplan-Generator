@@ -20,10 +20,12 @@ test.describe('Organization Complete Deletion', () => {
   // Login as system admin
   async function loginAsAdmin(page) {
     await page.goto('/users/login');
-    await page.fill('input[name="email"]', 'ausfallplan-sysadmin@it.z11.de');
-    await page.fill('input[name="password"]', 'password123');
+    await page.waitForLoadState('networkidle');
+    await page.waitForSelector('input[name="email"]');
+    await page.fill('input[name="email"]', 'admin@demo.kita');
+    await page.fill('input[name="password"]', '84fhr38hf43iahfuX_2');
     await page.click('button[type="submit"]');
-    await page.waitForURL(/dashboard/);
+    await page.waitForURL(/dashboard/, { timeout: 10000 });
   }
 
   test('should delete organization with all related data', async ({ page }) => {

@@ -12,7 +12,7 @@ const { test, expect } = require('@playwright/test');
  * 
  * SETUP REQUIRED:
  * Run: `bin/cake create_admin` to create system admin user
- * Credentials: admin@demo.kita / asbdasdaddd
+ * Credentials: admin@demo.kita / 84fhr38hf43iahfuX_2
  * 
  * WHAT IT TESTS:
  * 1. Admin can access organizations page
@@ -27,7 +27,7 @@ test.describe('Admin Organizations Management', () => {
         console.log('🔐 Login as admin@demo.kita');
         await page.goto('http://localhost:8080/users/login');
         await page.fill('input[name="email"]', 'admin@demo.kita');
-        await page.fill('input[name="password"]', 'asbdasdaddd');
+        await page.fill('input[name="password"]', '84fhr38hf43iahfuX_2');
         await page.click('button[type="submit"]');
         await page.waitForURL('**/dashboard', { timeout: 10000 });
         console.log('✅ Login successful');

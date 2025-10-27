@@ -45,7 +45,7 @@ test.describe('Language Switching Verification', () => {
     // Step 3: Login
     console.log('🔐 Step 3: Login with admin credentials');
     await page.fill('input[name="email"]', 'admin@demo.kita');
-    await page.fill('input[name="password"]', 'asbdasdaddd');
+    await page.fill('input[name="password"]', '84fhr38hf43iahfuX_2');
     await page.click('button[type="submit"]');
     
     // Wait for dashboard
@@ -166,7 +166,7 @@ test.describe('Language Switching Verification', () => {
     // Login first
     await page.goto('/users/login');
     await page.fill('input[name="email"]', 'admin@demo.kita');
-    await page.fill('input[name="password"]', 'asbdasdaddd');
+    await page.fill('input[name="password"]', '84fhr38hf43iahfuX_2');
     await page.click('button[type="submit"]');
     await page.waitForURL(/dashboard/, { timeout: 10000 });
     

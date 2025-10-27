@@ -10520,7 +10520,7 @@ echo "=== Test 1: Login als System-Admin ==="
 LOGIN_RESULT=$(curl -s -c "$COOKIE_FILE" -X POST \
   "https://ausfallplan-generator.z11.de/users/login" \
   -d "email=admin@demo.kita" \
-  -d "password=asbdasdaddd" \
+  -d "password=84fhr38hf43iahfuX_2" \
   -L 2>&1)
 
 if echo "$LOGIN_RESULT" | grep -qi "dashboard"; then
@@ -10610,7 +10610,7 @@ echo "=== Test 1: Login als System-Admin ==="
 curl -s -c "$COOKIE_FILE" -X POST \
   "https://ausfallplan-generator.z11.de/users/login" \
   -d "email=admin@demo.kita" \
-  -d "password=asbdasdaddd" \
+  -d "password=84fhr38hf43iahfuX_2" \
   -L > /tmp/login-result.html
 
 if grep -qi "dashboard" /tmp/login-result.html; then
@@ -10676,7 +10676,7 @@ echo "=== Vollständige Fehlermeldung ==="
 curl -s -X POST \
   "https://ausfallplan-generator.z11.de/users/login" \
   -d "email=admin@demo.kita" \
-  -d "password=asbdasdaddd" \
+  -d "password=84fhr38hf43iahfuX_2" \
   -L | grep -A 10 "<p class=\"error\">" | head -20
 '`*
 
@@ -10707,7 +10707,7 @@ LOGIN_RESULT=$(curl -s -b "$COOKIE_FILE" -c "$COOKIE_FILE" -X POST \
   "https://ausfallplan-generator.z11.de/users/login" \
   -d "_csrfToken=$CSRF_TOKEN" \
   -d "email=admin@demo.kita" \
-  -d "password=asbdasdaddd" \
+  -d "password=84fhr38hf43iahfuX_2" \
   -L)
 
 if echo "$LOGIN_RESULT" | grep -qi "dashboard"; then
@@ -10748,7 +10748,7 @@ curl -s -b "$COOKIE_FILE" -c "$COOKIE_FILE" -X POST \
   "https://ausfallplan-generator.z11.de/users/login" \
   -d "_csrfToken=$CSRF_TOKEN" \
   -d "email=admin@demo.kita" \
-  -d "password=asbdasdaddd" \
+  -d "password=84fhr38hf43iahfuX_2" \
   -L | grep -A 5 "Error:" | head -10
 
 rm -f "$COOKIE_FILE"
@@ -10781,7 +10781,7 @@ curl -s -b "$COOKIE_FILE" -c "$COOKIE_FILE" -X POST \
   "https://ausfallplan-generator.z11.de/login" \
   -d "_csrfToken=$CSRF_TOKEN" \
   -d "email=admin@demo.kita" \
-  -d "password=asbdasdaddd" \
+  -d "password=84fhr38hf43iahfuX_2" \
   -L > /tmp/login-result.html
 
 if grep -qi "dashboard" /tmp/login-result.html; then
@@ -10826,7 +10826,7 @@ Die curl-Tests funktionieren nicht zuverlässig. Lass mich die Dokumentation akt
 Updated admin-organizations.spec.js:
 - Changed localhost:8080 to production URL
 - Added SETUP REQUIRED section in test description
-- Documents credentials: admin@demo.kita / asbdasdaddd
+- Documents credentials: admin@demo.kita / 84fhr38hf43iahfuX_2
 - Notes requirement for is_system_admin = true
 - All test URLs updated to production
 
@@ -10877,14 +10877,14 @@ Du hast recht - ich muss die verbleibenden localhost URLs noch korrekt ersetzen:
 #### **2. admin-organizations.spec.js Test aktualisiert** ✅
 - ✅ Alle `localhost:8080` URLs → `https://ausfallplan-generator.z11.de`
 - ✅ SETUP-Anweisungen im Test-Header hinzugefügt
-- ✅ Credentials dokumentiert: `admin@demo.kita / asbdasdaddd`
+- ✅ Credentials dokumentiert: `admin@demo.kita / 84fhr38hf43iahfuX_2`
 - ✅ Notiz über `is_system_admin = true` Requirement
 
 #### **3. System-Admin erfolgreich erstellt** ✅
 ```bash
 bin/cake create_admin
 # Email: admin@demo.kita
-# Password: asbdasdaddd
+# Password: 84fhr38hf43iahfuX_2
 # is_system_admin: Yes
 # email_verified: true
 # status: active
@@ -11015,7 +11015,7 @@ LOGIN_RESULT=$(curl -s -b "$COOKIE_FILE" -c "$COOKIE_FILE" \
   -X POST "https://ausfallplan-generator.z11.de/login" \
   -d "_csrfToken=$CSRF_TOKEN" \
   -d "email=admin@demo.kita" \
-  -d "password=asbdasdaddd" \
+  -d "password=84fhr38hf43iahfuX_2" \
   -L 2>&1)
 
 if echo "$LOGIN_RESULT" | grep -qi "dashboard"; then
@@ -11170,7 +11170,7 @@ curl -s -b "$COOKIE_FILE" -c "$COOKIE_FILE" \
   -X POST "https://ausfallplan-generator.z11.de/login" \
   -d "_csrfToken=$CSRF_TOKEN" \
   -d "email=admin@demo.kita" \
-  -d "password=asbdasdaddd" \
+  -d "password=84fhr38hf43iahfuX_2" \
   -L > /tmp/login.html
 
 if grep -qi "dashboard" /tmp/login.html; then
@@ -11264,7 +11264,7 @@ curl -s -b "$COOKIE_FILE" -c "$COOKIE_FILE" \
   -X POST "https://ausfallplan-generator.z11.de/login" \
   -d "_csrfToken=$CSRF_TOKEN" \
   -d "email=admin@demo.kita" \
-  -d "password=asbdasdaddd" \
+  -d "password=84fhr38hf43iahfuX_2" \
   -L > /tmp/login.html
 
 if grep -qi "dashboard" /tmp/login.html; then
@@ -11393,7 +11393,7 @@ Vollständige Analyse des Problems und der Lösung.
 ### **🧪 Manueller Test (Browser):**
 1. Login: https://ausfallplan-generator.z11.de/login
    - Email: `admin@demo.kita`
-   - Password: `asbdasdaddd`
+   - Password: `84fhr38hf43iahfuX_2`
 2. Navigate zu: https://ausfallplan-generator.z11.de/admin/organizations
 3. **Erwartung:** ✅ Organizations Liste mit "Demo Kita"
 
@@ -11475,7 +11475,7 @@ curl -s -b "$COOKIE_FILE" -c "$COOKIE_FILE" \
   -X POST "https://ausfallplan-generator.z11.de/login" \
   -d "_csrfToken=$CSRF_TOKEN" \
   -d "email=admin@demo.kita" \
-  -d "password=asbdasdaddd" \
+  -d "password=84fhr38hf43iahfuX_2" \
   -L > /tmp/login.html
 
 echo "Login durchgeführt, jetzt /admin/organizations aufrufen..."
@@ -11572,7 +11572,7 @@ curl -s -b "$COOKIE_FILE" -c "$COOKIE_FILE" \
   -X POST "https://ausfallplan-generator.z11.de/login" \
   -d "_csrfToken=$CSRF_TOKEN" \
   -d "email=admin@demo.kita" \
-  -d "password=asbdasdaddd" \
+  -d "password=84fhr38hf43iahfuX_2" \
   -L > /tmp/login.html
 
 echo "1. Login durchgeführt"
@@ -12122,7 +12122,7 @@ curl -s -b "$COOKIE_FILE" -c "$COOKIE_FILE" \
   -X POST "https://ausfallplan-generator.z11.de/login" \
   -d "_csrfToken=$CSRF_TOKEN" \
   -d "email=admin@demo.kita" \
-  -d "password=asbdasdaddd" \
+  -d "password=84fhr38hf43iahfuX_2" \
   -L > /tmp/login.html
 
 echo "1. Login durchgeführt"
@@ -12198,7 +12198,7 @@ curl -s -b "$COOKIE_FILE" -c "$COOKIE_FILE" \
   -X POST "https://ausfallplan-generator.z11.de/login" \
   -d "_csrfToken=$CSRF_TOKEN" \
   -d "email=admin@demo.kita" \
-  -d "password=asbdasdaddd" \
+  -d "password=84fhr38hf43iahfuX_2" \
   -L > /tmp/login.html
 
 # Dashboard
@@ -13254,7 +13254,7 @@ Die Session enthält noch die alten User-Daten ohne `is_system_admin`. Nach neu 
 
 ### User Input
 
-dann vervollständige den gui test der sich als admin einloggt mit user admin@demo.kita und passwort asbdasdaddd
+dann vervollständige den gui test der sich als admin einloggt mit user admin@demo.kita und passwort 84fhr38hf43iahfuX_2
 
 
 
@@ -13291,7 +13291,7 @@ Playwright-Browser fehlen, aber der Test ist aktualisiert. Ich committe jetzt:
 *User accepted the command `timeout 5 bash -c 'git add tests/e2e/admin-organizations.spec.js && git commit -m "test: Complete admin organizations E2E test with admin@demo.kita
 
 Updated test/e2e/admin-organizations.spec.js:
-- Changed credentials from ausfallplan-sysadmin@it.z11.de to admin@demo.kita / asbdasdaddd
+- Changed credentials from ausfallplan-sysadmin@it.z11.de to admin@demo.kita / 84fhr38hf43iahfuX_2
 - Changed URLs from remote (z11.de) to localhost:8080
 - Enhanced main test to explicitly check NO access denied messages
 - Added comprehensive checks:
@@ -13325,7 +13325,7 @@ await page.fill('input[name="password"]', 'password123');
 
 // NEU:
 await page.fill('input[name="email"]', 'admin@demo.kita');
-await page.fill('input[name="password"]', 'asbdasdaddd');
+await page.fill('input[name="password"]', '84fhr38hf43iahfuX_2');
 ```
 
 #### **2. URLs auf localhost geändert**

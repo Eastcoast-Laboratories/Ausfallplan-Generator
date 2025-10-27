@@ -43,7 +43,7 @@ test.describe('Login Demo with Visible GUI', () => {
     // Step 4: Fill in password (slowly)
     console.log('🔑 Step 4: Typing password...');
     await page.fill('input[name="password"]', '');
-    await page.type('input[name="password"]', 'asbdasdaddd', { delay: 100 });
+    await page.type('input[name="password"]', '84fhr38hf43iahfuX_2', { delay: 100 });
     await page.waitForTimeout(500);
     
     // Step 5: Show filled form
