@@ -110,8 +110,6 @@ Nach dem Copilot-Implementation sind folgende Features verfügbar:
 - Children (mit integrative Flag)
 - SiblingGroups (Geschwistergruppen)
 - Schedules (Zeitpläne)
-- ScheduleDays (Einzelne Tage)
-- Assignments (Zuweisungen)
 - WaitlistEntries (Warteliste)
 - Rules (Regeln)
 

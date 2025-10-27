@@ -22,7 +22,7 @@
 
 ## 1. Product Summary
 
-A multi-tenant web app for Kitas (organizations) to create and manage **Schedules** (a whole plan for a period), consisting of multiple **ScheduleDays** ("Ameisen-Tag 1", ...). Children are assigned fairly across days with capacity limits, **integrative** children count double, **sibling groups** are assigned atomically, and a **waitlist** fills empty slots with **priorities**. Each day supports a **start child** to rotate waitlist fairness. Admins export beautiful PDF/PNG posters.
+A multi-tenant web app for Kitas (organizations) to create and manage **Schedules** (a whole plan for a period), consisting of soome Days ("Ameisen-Tag 1", ...). Children are assigned fairly across days with capacity limits, **integrative** children count double, **sibling groups** are assigned atomically, and a **waitlist** fills empty slots with **priorities**. Each day supports a **start child** to rotate waitlist fairness. Admins export beautiful PDF/PNG posters.
 
 ### Core Features
 - Organizations, users, roles (admin/editor/viewer)
@@ -45,10 +45,8 @@ A multi-tenant web app for Kitas (organizations) to create and manage **Schedule
 Organization 1--* Users
 Organization 1--* Children
 Organization 1--* Schedules
-Schedule 1--* ScheduleDays
 Schedule 1--* Rules
 Schedule 1--* WaitlistEntries
-ScheduleDay 1--* Assignments
 Child 0..1 -- 1 SiblingGroup  (aka Family)    // a group has many Children
 ```
 
@@ -143,7 +141,7 @@ Child 0..1 -- 1 SiblingGroup  (aka Family)    // a group has many Children
 - **Dashboard**: recent schedules, alerts, capacity warnings
 - **Children**: list, create, edit, CSV import, sibling group assignment
 - **Schedules**: CRUD
-  - Detail view: grid of **ScheduleDays** (cards), live counters (used/total), badges for integrative (×2)
+  - Detail view: grid of days, live counters (used/total), badges for integrative (×2)
   - Buttons: *Auto-distribute*, *Apply Waitlist*, *Export PDF/PNG*, *Finalize*
   - Panel: **Waitlist** with priorities and remaining; **Rules** (JSON form)
   - Per day: **start child** picker, capacity, position drag
@@ -285,9 +283,7 @@ Create files and implementations in this order:
 
 ## 12. Glossary
 
-- **Schedule**: The whole plan for a period (e.g., a week), containing many **ScheduleDays**.
-- **ScheduleDay**: A single day/card in the plan with a capacity.
-- **Assignment**: Link of child to a day with a weight (1 or 2).
+- **Schedule**: The whole plan for a period (e.g., a week)
 - **Waitlist**: Global list per schedule used to fill remaining slots.
 - **Start Child**: Per-day pointer into the waitlist to rotate fairness.
 - **Sibling Group**: Children that must be placed together (atomic).

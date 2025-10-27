@@ -10,7 +10,6 @@ use Cake\Validation\Validator;
  * Schedules Model
  *
  * @property \App\Model\Table\OrganizationsTable&\Cake\ORM\Association\BelongsTo $Organizations
- * @property \App\Model\Table\ScheduleDaysTable&\Cake\ORM\Association\HasMany $ScheduleDays
  * @property \App\Model\Table\WaitlistEntriesTable&\Cake\ORM\Association\HasMany $WaitlistEntries
  * @property \App\Model\Table\RulesTable&\Cake\ORM\Association\HasMany $Rules
  *
@@ -55,10 +54,6 @@ class SchedulesTable extends Table
             'foreignKey' => 'user_id',
             'className' => 'Users',
         ]);
-        $this->hasMany('ScheduleDays', [
-            'foreignKey' => 'schedule_id',
-            'className' => 'ScheduleDays',
-        ]);
         $this->hasMany('WaitlistEntries', [
             'foreignKey' => 'schedule_id',
             'className' => 'WaitlistEntries',
@@ -66,10 +61,6 @@ class SchedulesTable extends Table
         $this->hasMany('Rules', [
             'foreignKey' => 'schedule_id',
             'className' => 'Rules',
-        ]);
-        $this->hasMany('ScheduleChildren', [
-            'foreignKey' => 'schedule_id',
-            'className' => 'ScheduleChildren',
         ]);
     }
 

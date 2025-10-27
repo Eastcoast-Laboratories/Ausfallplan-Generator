@@ -20,7 +20,11 @@ module.exports = defineConfig({
       name: 'chromium',
       use: { 
         ...devices['Desktop Chrome'],
-        // Chromium is stable and works well with Playwright
+        // Use system chromium-browser
+        channel: 'chromium',
+        launchOptions: {
+          executablePath: '/usr/bin/chromium-browser',
+        },
       },
     },
     // Firefox disabled due to AppArmor policy conflicts with system Firefox

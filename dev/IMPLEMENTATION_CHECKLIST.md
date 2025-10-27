@@ -92,13 +92,7 @@
   - [ ] hasMany: Children
 - [ ] `src/Model/Table/SchedulesTable.php`
   - [ ] belongsTo: Organization
-  - [ ] hasMany: ScheduleDays, WaitlistEntries, Rules
-- [ ] `src/Model/Table/ScheduleDaysTable.php`
-  - [ ] belongsTo: Schedule, StartChild (children)
-  - [ ] hasMany: Assignments
-- [ ] `src/Model/Table/AssignmentsTable.php`
-  - [ ] belongsTo: ScheduleDay, Child
-  - [ ] Validation: unique(schedule_day_id, child_id)
+  - [ ] hasMany: WaitlistEntries, Rules
 - [ ] `src/Model/Table/WaitlistEntriesTable.php`
   - [ ] belongsTo: Schedule, Child
   - [ ] Validation: unique(schedule_id, child_id)
