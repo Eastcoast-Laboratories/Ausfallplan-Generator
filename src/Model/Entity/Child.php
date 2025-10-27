@@ -12,6 +12,7 @@ use Cake\ORM\Entity;
  * @property int $organization_id
  * @property string $name
  * @property string|null $last_name
+ * @property string|null $display_name
  * @property string|null $gender
  * @property \Cake\I18n\DateTime|null $birthdate
  * @property string|null $postal_code
@@ -37,6 +38,7 @@ class Child extends Entity
         'organization_id' => true,
         'name' => true,
         'last_name' => true,
+        'display_name' => true,
         'gender' => true,
         'birthdate' => true,
         'postal_code' => true,
@@ -50,4 +52,18 @@ class Child extends Entity
         'assignments' => true,
         'waitlist_entries' => true,
     ];
+    
+    /**
+     * Get full name with fallback to display_name or name + last_name
+     *
+     * @return string
+     */
+    protected function _getFullName(): string
+    {
+        if (!empty($this->display_name)) {
+            return $this->display_name;
+        }
+        
+        return $this->name . ($this->last_name ? ' ' . $this->last_name : '');
+    }
 }

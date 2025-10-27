@@ -27,6 +27,11 @@ $this->assign('title', __('Edit Child'));
         <?php
             echo $this->Form->control('name', ['label' => __('Name'), 'required' => true]);
             echo $this->Form->control('last_name', ['label' => __('Last Name'), 'required' => false]);
+            echo $this->Form->control('display_name', [
+                'label' => __('Display Name (for Reports)'),
+                'required' => false,
+                'help' => __('How the child\'s name should appear in reports. Leave empty to auto-generate from name + last name.')
+            ]);
             echo $this->Form->control('gender', [
                 'type' => 'select',
                 'options' => [

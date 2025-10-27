@@ -36,6 +36,7 @@ $this->assign('title', __('Children'));
                 <tr>
                     <th><?= __('Name') ?></th>
                     <th><?= __('Last Name') ?></th>
+                    <th><?= __('Display Name') ?></th>
                     <th><?= __('Gender') ?></th>
                     <th><?= __('Birthdate') ?></th>
                     <th><?= __('Status') ?></th>
@@ -63,6 +64,7 @@ $this->assign('title', __('Children'));
                         <?php endif; ?>
                     </td>
                     <td><?= h($child->last_name) ?></td>
+                    <td><strong><?= h($child->display_name ?? ($child->name . ' ' . $child->last_name)) ?></strong></td>
                     <td style="text-align: center; font-size: 1.2rem;">
                         <?php
                         if ($child->gender === 'male') {

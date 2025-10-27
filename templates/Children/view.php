@@ -25,6 +25,14 @@
             <td><?= h($child->name) ?></td>
         </tr>
         <tr>
+            <th><?= __('Last Name') ?></th>
+            <td><?= h($child->last_name) ?></td>
+        </tr>
+        <tr>
+            <th><?= __('Display Name (for Reports)') ?></th>
+            <td><strong><?= h($child->display_name ?? ($child->name . ' ' . $child->last_name)) ?></strong></td>
+        </tr>
+        <tr>
             <th><?= __('Status') ?></th>
             <td><?= $child->is_active ? __('Active') : __('Inactive') ?></td>
         </tr>
