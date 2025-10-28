@@ -11,8 +11,6 @@ use Cake\Validation\Validator;
  *
  * @property \App\Model\Table\OrganizationsTable&\Cake\ORM\Association\BelongsTo $Organizations
  * @property \App\Model\Table\SiblingGroupsTable&\Cake\ORM\Association\BelongsTo $SiblingGroups
- * @property \App\Model\Table\AssignmentsTable&\Cake\ORM\Association\HasMany $Assignments
- * @property \App\Model\Table\WaitlistEntriesTable&\Cake\ORM\Association\HasMany $WaitlistEntries
  *
  * @method \App\Model\Entity\Child newEmptyEntity()
  * @method \App\Model\Entity\Child newEntity(array $data, array $options = [])
@@ -54,14 +52,6 @@ class ChildrenTable extends Table
         $this->belongsTo('SiblingGroups', [
             'foreignKey' => 'sibling_group_id',
             'className' => 'SiblingGroups',
-        ]);
-        $this->hasMany('Assignments', [
-            'foreignKey' => 'child_id',
-            'className' => 'Assignments',
-        ]);
-        $this->hasMany('WaitlistEntries', [
-            'foreignKey' => 'child_id',
-            'className' => 'WaitlistEntries',
         ]);
     }
 

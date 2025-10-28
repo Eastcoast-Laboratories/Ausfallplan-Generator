@@ -24,8 +24,6 @@ use Cake\ORM\Entity;
  *
  * @property \App\Model\Entity\Organization $organization
  * @property \App\Model\Entity\SiblingGroup|null $sibling_group
- * @property \App\Model\Entity\Assignment[] $assignments
- * @property \App\Model\Entity\WaitlistEntry[] $waitlist_entries
  */
 class Child extends Entity
 {
@@ -49,8 +47,6 @@ class Child extends Entity
         'modified' => true,
         'organization' => true,
         'sibling_group' => true,
-        'assignments' => true,
-        'waitlist_entries' => true,
     ];
     
     /**
