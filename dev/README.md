@@ -118,11 +118,12 @@ Child 0..1 -- 1 SiblingGroup  (aka Family)    // a group has many Children
 - After main loop, process `always_last` list with the same constraints.
 
 ### 3.2 Waitlist Filling
-- Sort `waitlist_entries` by `priority DESC, created ASC`.
-- For each **ScheduleDay**, set cursor to `start_child_id` if present, otherwise first in the sorted list. Iterate circularly (round-robin) to try filling gaps until capacity reached.
+- Sort waitlist by `waitlist_order ASC`.
+- For each day in the schedule, iterate through waitlist and try to fill based on capacity.
 - Each time a child/group is added from the waitlist:
-  - decrement its `remaining` (stop when zero)
-  - update day's `start_child_id` to the **next** child in the round-robin sequence for fairness over time.
+  - Track placement in the report
+  - Maintain sibling group atomicity
+  - Respect capacity constraints
 
 ### 3.3 Manual Overrides
 - Drag & drop UI must: validate capacity (including group weights), prevent partial sibling placement unless user explicitly opts into a "Split once" override, which is tracked on the assignment(s).

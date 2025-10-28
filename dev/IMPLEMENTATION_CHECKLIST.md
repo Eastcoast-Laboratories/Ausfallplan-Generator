@@ -73,9 +73,6 @@
 - [ ] `src/Model/Entity/Child.php`
 - [ ] `src/Model/Entity/SiblingGroup.php`
 - [ ] `src/Model/Entity/Schedule.php` (state transitions)
-- [ ] `src/Model/Entity/ScheduleDay.php`
-- [ ] `src/Model/Entity/Assignment.php`
-- [ ] `src/Model/Entity/WaitlistEntry.php`
 - [ ] `src/Model/Entity/Rule.php` (JSON accessor)
 
 ### 2.2 Table Classes
@@ -124,7 +121,6 @@
     - [ ] Process always_last in second pass
     - [ ] Create assignments with source='auto'
   - [ ] `clearAssignments(scheduleId, source)` method
-  - [ ] `validateCapacity(scheduleDay)` method
 
 ### 3.2 WaitlistService
 - [ ] `src/Service/WaitlistService.php`
