@@ -3,6 +3,11 @@
 # Quick test runner - runs tests without verbose output
 # Usage: ./quick_test.sh [phpunit|playwright|all]
 
+# Get the directory where this script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# Go to project root (one level up from dev/)
+cd "$SCRIPT_DIR/.."
+
 TEST_TYPE=${1:-all}
 
 run_phpunit() {
