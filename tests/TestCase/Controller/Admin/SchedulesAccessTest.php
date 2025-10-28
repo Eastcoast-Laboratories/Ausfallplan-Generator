@@ -93,6 +93,7 @@ class SchedulesAccessTest extends TestCase
             'title' => 'Schedule Editor 1',
             'starts_on' => '2025-01-01',
             'ends_on' => '2025-01-31',
+            'days_count' => 5,
             'state' => 'draft',
         ]);
         
@@ -102,6 +103,7 @@ class SchedulesAccessTest extends TestCase
             'title' => 'Schedule Editor 2',
             'starts_on' => '2025-02-01',
             'ends_on' => '2025-02-28',
+            'days_count' => 5,
             'state' => 'draft',
         ]);
         
@@ -188,6 +190,7 @@ class SchedulesAccessTest extends TestCase
             'title' => 'Schedule 1',
             'starts_on' => '2025-01-01',
             'ends_on' => '2025-01-31',
+            'days_count' => 5,
             'state' => 'draft',
         ]);
         
@@ -197,6 +200,7 @@ class SchedulesAccessTest extends TestCase
             'title' => 'Schedule 2',
             'starts_on' => '2025-02-01',
             'ends_on' => '2025-02-28',
+            'days_count' => 5,
             'state' => 'draft',
         ]);
         
