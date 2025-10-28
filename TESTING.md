@@ -2,9 +2,9 @@
 
 ## Quick Start
 
-### Run All Tests
+### Run Alle Tests ausführen:
 ```bash
-bash run_all_tests.sh
+bash dev/run_all_tests.sh
 ```
 
 This will:
@@ -15,9 +15,9 @@ This will:
 
 ### Quick Test (Fast)
 ```bash
-bash quick_test.sh              # Run all tests (quick summary only)
-bash quick_test.sh phpunit      # PHPUnit only
-bash quick_test.sh playwright   # Playwright only
+bash dev/quick_test.sh              # Run all tests (quick summary only)
+bash dev/quick_test.sh phpunit      # PHPUnit only
+bash dev/quick_test.sh playwright   # Playwright only
 ```
 
 ## Individual Test Commands
@@ -208,7 +208,7 @@ The `run_all_tests.sh` script is designed for CI/CD:
 Example GitHub Actions:
 ```yaml
 - name: Run all tests
-  run: bash run_all_tests.sh
+  run: bash dev/run_all_tests.sh
 ```
 
 ## More Information

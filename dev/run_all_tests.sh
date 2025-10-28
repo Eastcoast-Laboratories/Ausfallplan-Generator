@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Get the directory where this script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# Go to project root (one level up from dev/)
+cd "$SCRIPT_DIR/.."
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -44,8 +49,8 @@ echo ""
 
 # Show errors if any
 if [ $PHPUNIT_EXIT -ne 0 ]; then
-    echo -e "${YELLOW}   Last 15 lines of output:${NC}"
-    tail -15 /tmp/phpunit_output.txt | sed 's/^/   /'
+    echo -e "${YELLOW}   Full error output:${NC}"
+    cat /tmp/phpunit_output.txt | sed 's/^/   /'
     echo ""
 fi
 
@@ -89,8 +94,8 @@ else
     
     # Show errors if any
     if [ $PLAYWRIGHT_EXIT -ne 0 ] && [ $PLAYWRIGHT_EXIT -ne 124 ]; then
-        echo -e "${YELLOW}   Last 20 lines of output:${NC}"
-        tail -20 /tmp/playwright_output.txt | sed 's/^/   /'
+        echo -e "${YELLOW}   Full error output:${NC}"
+        cat /tmp/playwright_output.txt | sed 's/^/   /'
         echo ""
     fi
 fi
