@@ -56,6 +56,12 @@ bei http://localhost:8080/schedules/add muss eine selectbox, die nur sichtbar is
 
 - TEST_FAILURES_TODO.md#L1-224  lösche alle hinweise auf in der vergangenheit gefixte tests, nur die noch offenen probleme und tests sollen in der datei aufgelistet werden. 
 
+gehe alle playwright tests durch  und wenn ein  test nicht funktoiniert lösche ihn falls er nicht ganz einfach zu reparieren ist
+
+wenn er lääuft schau ob er eine gut eerklärung im header hat
+
+lasse alle phpunitt ests durchlaufen und schau ob sie alle gute comments im header haben
+
 - [x] last-name wird noch nicht importiert im kinder import script ✅ 27.10. 05:05 - BEREITS IMPLEMENTIERT: CsvImportService parst last_name aus CSV, ChildrenController speichert es (Zeile 416)
 
 - [x] wenn man in mehreren organisationen ist, dann muss http://localhost:8080/children eine selectbox bekommen um auszuwählen, welche kinder man angezeigt werden will, also welcher organisation zugehörig ✅ 27.10. 05:05 - Organization Filter implementiert mit Dropdown, Query-Parameter ?organization_id=X, Auto-Select primary org

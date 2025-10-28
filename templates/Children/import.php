@@ -33,7 +33,6 @@ $this->assign('title', __('Kinder importieren'));
             'options' => $organizations,
             'value' => $selectedOrgId,
             'required' => true,
-            'empty' => __('-- Select Organization --'),
         ]) ?>
         <?php else: ?>
         <?= $this->Form->hidden('organization_id', ['value' => $selectedOrgId]) ?>
