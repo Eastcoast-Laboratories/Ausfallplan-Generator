@@ -71,6 +71,7 @@ class WaitlistServiceTest extends TestCase
             'title' => 'Test Schedule',
             'starts_on' => '2025-10-01',
             'ends_on' => '2025-10-31',
+            'days_count' => 5,
             'state' => 'draft',
         ]);
         $schedules->save($schedule);
@@ -118,6 +119,7 @@ class WaitlistServiceTest extends TestCase
             'title' => 'Test Schedule',
             'starts_on' => '2025-10-01',
             'ends_on' => '2025-10-31',
+            'days_count' => 5,
             'state' => 'draft',
         ]);
         $schedules->save($schedule);
@@ -157,6 +159,7 @@ class WaitlistServiceTest extends TestCase
             'title' => 'Test Schedule',
             'starts_on' => '2025-10-01',
             'ends_on' => '2025-10-31',
+            'days_count' => 5,
             'state' => 'draft',
         ]);
         $schedules->save($schedule);
@@ -204,6 +207,7 @@ class WaitlistServiceTest extends TestCase
             'title' => 'Test Schedule',
             'starts_on' => '2025-10-01',
             'ends_on' => '2025-10-31',
+            'days_count' => 5,
             'state' => 'draft',
         ]);
         $schedules->save($schedule);

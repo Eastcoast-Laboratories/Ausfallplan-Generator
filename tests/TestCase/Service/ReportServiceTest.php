@@ -151,15 +151,15 @@ class ReportServiceTest extends TestCase
             'title' => 'Test Schedule',
             'starts_on' => '2025-01-01',
             'ends_on' => '2025-12-31',
+            'days_count' => 5,
             'state' => 'draft',
             'capacity_per_day' => 9,
             'user_id' => 1,
         ]);
         $schedulesTable->save($schedule);
         
-        // Create children and add to waitlist
+        // Create children and add to waitlist (new schema: children have schedule_id and waitlist_order directly)
         $childrenTable = $this->getTableLocator()->get('Children');
-        $waitlistTable = $this->getTableLocator()->get('WaitlistEntries');
         
         for ($i = 1; $i <= 5; $i++) {
             $child = $childrenTable->newEntity([
@@ -167,16 +167,10 @@ class ReportServiceTest extends TestCase
                 'name' => 'Test Child ' . $i,
                 'is_integrative' => false,
                 'is_active' => true,
+                'schedule_id' => $schedule->id,
+                'waitlist_order' => $i,
             ]);
             $childrenTable->save($child);
-            
-            // Add to waitlist with priority
-            $entry = $waitlistTable->newEntity([
-                'schedule_id' => $schedule->id,
-                'child_id' => $child->id,
-                'priority' => $i,
-            ]);
-            $waitlistTable->save($entry);
         }
         
         return $schedule->id;
@@ -193,6 +187,7 @@ class ReportServiceTest extends TestCase
             'title' => 'Test Schedule Many',
             'starts_on' => '2025-01-01',
             'ends_on' => '2025-12-31',
+            'days_count' => 5,
             'state' => 'draft',
             'capacity_per_day' => 9,
             'user_id' => 1,
@@ -200,7 +195,6 @@ class ReportServiceTest extends TestCase
         $schedulesTable->save($schedule);
         
         $childrenTable = $this->getTableLocator()->get('Children');
-        $waitlistTable = $this->getTableLocator()->get('WaitlistEntries');
         
         // Create 20 children (more than capacity of 9)
         for ($i = 1; $i <= 20; $i++) {
@@ -209,15 +203,10 @@ class ReportServiceTest extends TestCase
                 'name' => 'Child ' . $i,
                 'is_integrative' => ($i % 5 == 0), // Every 5th is integrative
                 'is_active' => true,
+                'schedule_id' => $schedule->id,
+                'waitlist_order' => $i,
             ]);
             $childrenTable->save($child);
-            
-            $entry = $waitlistTable->newEntity([
-                'schedule_id' => $schedule->id,
-                'child_id' => $child->id,
-                'priority' => $i,
-            ]);
-            $waitlistTable->save($entry);
         }
         
         return $schedule->id;
