@@ -1,6 +1,13 @@
 const { test, expect } = require('@playwright/test');
 
-test('VERIFY: Two linked siblings visible in waitlist with screenshot proof', async ({ page }) => {
+/**
+ * TEST: Two siblings visible in waitlist
+ * 
+ * Verifies that linked siblings are both visible in the waitlist
+ * and have correct sibling group badges.
+ */
+test.describe('Sibling Group Visibility', () => {
+    test('should show two linked siblings in waitlist', async ({ page }) => {
     console.log('\n🎯 === FINAL VERIFICATION: Two Linked Siblings ===\n');
     
     // Login
@@ -95,5 +102,6 @@ test('VERIFY: Two linked siblings visible in waitlist with screenshot proof', as
         throw new Error('Could not find N. Storch or A. Seehund in waitlist!');
     }
     
-    console.log('\n=== TEST PASSED ===\n');
+    console.log('\n=== TEST COMPLETE ===\n');
+    });
 });

@@ -1,6 +1,13 @@
 const { test, expect } = require('@playwright/test');
 
-test('Verify sibling badges show correct names in waitlist', async ({ page }) => {
+/**
+ * TEST: Sibling badges in waitlist
+ * 
+ * Tests that sibling group badges display correct sibling names
+ * when hovering/clicking on them in the waitlist.
+ */
+test.describe('Sibling Badges Verification', () => {
+    test('should show correct sibling names in badges', async ({ page }) => {
     console.log('\n🔍 === SIBLING BADGES VERIFICATION TEST ===\n');
     
     // Login
@@ -110,4 +117,5 @@ test('Verify sibling badges show correct names in waitlist', async ({ page }) =>
         console.log('❌ FAILURE: No sibling badges found!');
         throw new Error('No sibling badges found in waitlist');
     }
+    });
 });
