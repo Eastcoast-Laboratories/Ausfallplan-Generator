@@ -20,8 +20,6 @@ use Cake\ORM\Entity;
  * @property \Cake\I18n\DateTime $modified
  *
  * @property \App\Model\Entity\Organization $organization
- * @property \App\Model\Entity\ScheduleDay[] $schedule_days
- * @property \App\Model\Entity\WaitlistEntry[] $waitlist_entries
  * @property \App\Model\Entity\Rule[] $rules
  */
 class Schedule extends Entity
@@ -42,8 +40,6 @@ class Schedule extends Entity
         'created' => true,
         'modified' => true,
         'organization' => true,
-        'schedule_days' => true,
-        'waitlist_entries' => true,
         'rules' => true,
     ];
 }
