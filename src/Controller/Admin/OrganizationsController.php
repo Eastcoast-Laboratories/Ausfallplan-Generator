@@ -222,6 +222,7 @@ class OrganizationsController extends AppController
             $schedulesInOrg = $this->fetchTable('Schedules')
                 ->find()
                 ->where(['organization_id' => $id])
+                ->all()
                 ->extract('id')
                 ->toArray();
             
