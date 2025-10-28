@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <title>Dashboard for /var/www/html/src/Controller</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="../_css/bootstrap.min.css?v=12.4.0" rel="stylesheet" type="text/css">
+  <link href="../_css/billboard.min.css?v=12.4.0" rel="stylesheet" type="text/css">
+  <link href="../_css/style.css?v=12.4.0" rel="stylesheet" type="text/css">
+  <link href="../_css/custom.css" rel="stylesheet" type="text/css">
+ </head>
+ <body>
+  <header>
+   <div class="container-fluid">
+    <div class="row">
+     <div class="col-md-12">
+      <nav aria-label="breadcrumb">
+       <ol class="breadcrumb">
+         <li class="breadcrumb-item"><a href="../index.html">/var/www/html/src</a></li>
+         <li class="breadcrumb-item"><a href="index.html">Controller</a></li>
+         <li class="breadcrumb-item active">(Dashboard)</li>
+
+       </ol>
+      </nav>
+     </div>
+    </div>
+   </div>
+  </header>
+  <div class="container-fluid">
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Classes</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="classesCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="classComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3 style="margin-top: 2rem;">Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Admin/DashboardController.php.html#14">App\Controller\Admin\DashboardController</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Admin/OrganizationsController.php.html#13">App\Controller\Admin\OrganizationsController</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="DebugController.php.html#16">App\Controller\DebugController</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="WaitlistController.php.html#15">App\Controller\WaitlistController</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Admin/UsersController.php.html#12">App\Controller\Admin\UsersController</a></td><td class="text-right">22%</td></tr>
+       <tr><td><a href="ChildrenController.php.html#11">App\Controller\ChildrenController</a></td><td class="text-right">27%</td></tr>
+       <tr><td><a href="SchedulesController.php.html#11">App\Controller\SchedulesController</a></td><td class="text-right">38%</td></tr>
+       <tr><td><a href="SiblingGroupsController.php.html#11">App\Controller\SiblingGroupsController</a></td><td class="text-right">58%</td></tr>
+       <tr><td><a href="DashboardController.php.html#11">App\Controller\DashboardController</a></td><td class="text-right">65%</td></tr>
+       <tr><td><a href="UsersController.php.html#13">App\Controller\UsersController</a></td><td class="text-right">67%</td></tr>
+       <tr><td><a href="AppController.php.html#29">App\Controller\AppController</a></td><td class="text-right">75%</td></tr>
+       <tr><td><a href="PagesController.php.html#32">App\Controller\PagesController</a></td><td class="text-right">88%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3 style="margin-top: 2rem;">Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right">Coverage</th>
+         <th class="text-right">Complexity</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="WaitlistController.php.html#15">App\Controller\WaitlistController</a></td><td class="text-right">0.0%</td><td class="text-right">63</td><td class="text-right">4032</td></tr>
+       <tr><td><a href="ChildrenController.php.html#11">App\Controller\ChildrenController</a></td><td class="text-right">27.0%</td><td class="text-right">72</td><td class="text-right">2088</td></tr>
+       <tr><td><a href="Admin/OrganizationsController.php.html#13">App\Controller\Admin\OrganizationsController</a></td><td class="text-right">0.0%</td><td class="text-right">45</td><td class="text-right">2070</td></tr>
+       <tr><td><a href="SchedulesController.php.html#11">App\Controller\SchedulesController</a></td><td class="text-right">38.6%</td><td class="text-right">41</td><td class="text-right">430</td></tr>
+       <tr><td><a href="UsersController.php.html#13">App\Controller\UsersController</a></td><td class="text-right">67.8%</td><td class="text-right">61</td><td class="text-right">185</td></tr>
+       <tr><td><a href="DebugController.php.html#16">App\Controller\DebugController</a></td><td class="text-right">0.0%</td><td class="text-right">13</td><td class="text-right">182</td></tr>
+       <tr><td><a href="Admin/DashboardController.php.html#14">App\Controller\Admin\DashboardController</a></td><td class="text-right">0.0%</td><td class="text-right">8</td><td class="text-right">72</td></tr>
+       <tr><td><a href="SiblingGroupsController.php.html#11">App\Controller\SiblingGroupsController</a></td><td class="text-right">58.6%</td><td class="text-right">21</td><td class="text-right">52</td></tr>
+       <tr><td><a href="Admin/UsersController.php.html#12">App\Controller\Admin\UsersController</a></td><td class="text-right">22.2%</td><td class="text-right">8</td><td class="text-right">38</td></tr>
+       <tr><td><a href="AppController.php.html#29">App\Controller\AppController</a></td><td class="text-right">75.9%</td><td class="text-right">27</td><td class="text-right">37</td></tr>
+       <tr><td><a href="PagesController.php.html#32">App\Controller\PagesController</a></td><td class="text-right">88.2%</td><td class="text-right">9</td><td class="text-right">9</td></tr>
+       <tr><td><a href="DashboardController.php.html#11">App\Controller\DashboardController</a></td><td class="text-right">65.1%</td><td class="text-right">5</td><td class="text-right">6</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-12">
+     <h2 style="margin-top: 3rem;">Methods</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="methodsCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="methodComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3 style="margin-top: 2rem;">Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Admin/DashboardController.php.html#21"><abbr title="App\Controller\Admin\DashboardController::index">index</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Admin/OrganizationsController.php.html#20"><abbr title="App\Controller\Admin\OrganizationsController::index">index</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Admin/OrganizationsController.php.html#61"><abbr title="App\Controller\Admin\OrganizationsController::view">view</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Admin/OrganizationsController.php.html#91"><abbr title="App\Controller\Admin\OrganizationsController::add">add</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Admin/OrganizationsController.php.html#130"><abbr title="App\Controller\Admin\OrganizationsController::edit">edit</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Admin/OrganizationsController.php.html#174"><abbr title="App\Controller\Admin\OrganizationsController::delete">delete</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Admin/OrganizationsController.php.html#272"><abbr title="App\Controller\Admin\OrganizationsController::toggleActive">toggleActive</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Admin/OrganizationsController.php.html#306"><abbr title="App\Controller\Admin\OrganizationsController::addUser">addUser</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Admin/OrganizationsController.php.html#364"><abbr title="App\Controller\Admin\OrganizationsController::removeUser">removeUser</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Admin/UsersController.php.html#33"><abbr title="App\Controller\Admin\UsersController::index">index</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Admin/UsersController.php.html#46"><abbr title="App\Controller\Admin\UsersController::approve">approve</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Admin/UsersController.php.html#67"><abbr title="App\Controller\Admin\UsersController::deactivate">deactivate</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AppController.php.html#199"><abbr title="App\Controller\AppController::getUserRoleInOrg">getUserRoleInOrg</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChildrenController.php.html#217"><abbr title="App\Controller\ChildrenController::import">import</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChildrenController.php.html#290"><abbr title="App\Controller\ChildrenController::importPreview">importPreview</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChildrenController.php.html#315"><abbr title="App\Controller\ChildrenController::importConfirm">importConfirm</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="DebugController.php.html#21"><abbr title="App\Controller\DebugController::initialize">initialize</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="DebugController.php.html#28"><abbr title="App\Controller\DebugController::beforeFilter">beforeFilter</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="DebugController.php.html#44"><abbr title="App\Controller\DebugController::emails">emails</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="DebugController.php.html#62"><abbr title="App\Controller\DebugController::clearEmails">clearEmails</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="DebugController.php.html#83"><abbr title="App\Controller\DebugController::isLocalhost">isLocalhost</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="SchedulesController.php.html#72"><abbr title="App\Controller\SchedulesController::setActive">setActive</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="SchedulesController.php.html#236"><abbr title="App\Controller\SchedulesController::manageChildren">manageChildren</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="SchedulesController.php.html#251"><abbr title="App\Controller\SchedulesController::assignChild">assignChild</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="SchedulesController.php.html#262"><abbr title="App\Controller\SchedulesController::removeChild">removeChild</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="SchedulesController.php.html#274"><abbr title="App\Controller\SchedulesController::generateReport">generateReport</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="SchedulesController.php.html#309"><abbr title="App\Controller\SchedulesController::exportCsv">exportCsv</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="SchedulesController.php.html#410"><abbr title="App\Controller\SchedulesController::reorderChildren">reorderChildren</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="SiblingGroupsController.php.html#174"><abbr title="App\Controller\SiblingGroupsController::removeChild">removeChild</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="UsersController.php.html#267"><abbr title="App\Controller\UsersController::logout">logout</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="UsersController.php.html#282"><abbr title="App\Controller\UsersController::changeLanguage">changeLanguage</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="UsersController.php.html#317"><abbr title="App\Controller\UsersController::profile">profile</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="UsersController.php.html#358"><abbr title="App\Controller\UsersController::account">account</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="UsersController.php.html#481"><abbr title="App\Controller\UsersController::resetPassword">resetPassword</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="WaitlistController.php.html#22"><abbr title="App\Controller\WaitlistController::index">index</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="WaitlistController.php.html#249"><abbr title="App\Controller\WaitlistController::add">add</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="WaitlistController.php.html#327"><abbr title="App\Controller\WaitlistController::delete">delete</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="WaitlistController.php.html#354"><abbr title="App\Controller\WaitlistController::reorder">reorder</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="WaitlistController.php.html#387"><abbr title="App\Controller\WaitlistController::reorderWaitlist">reorderWaitlist</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="WaitlistController.php.html#411"><abbr title="App\Controller\WaitlistController::addAll">addAll</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ChildrenController.php.html#467"><abbr title="App\Controller\ChildrenController::loadSiblingNames">loadSiblingNames</abbr></a></td><td class="text-right">17%</td></tr>
+       <tr><td><a href="SiblingGroupsController.php.html#18"><abbr title="App\Controller\SiblingGroupsController::index">index</abbr></a></td><td class="text-right">46%</td></tr>
+       <tr><td><a href="ChildrenController.php.html#153"><abbr title="App\Controller\ChildrenController::edit">edit</abbr></a></td><td class="text-right">46%</td></tr>
+       <tr><td><a href="DashboardController.php.html#18"><abbr title="App\Controller\DashboardController::index">index</abbr></a></td><td class="text-right">64%</td></tr>
+       <tr><td><a href="ChildrenController.php.html#191"><abbr title="App\Controller\ChildrenController::delete">delete</abbr></a></td><td class="text-right">66%</td></tr>
+       <tr><td><a href="SchedulesController.php.html#210"><abbr title="App\Controller\SchedulesController::delete">delete</abbr></a></td><td class="text-right">66%</td></tr>
+       <tr><td><a href="SiblingGroupsController.php.html#147"><abbr title="App\Controller\SiblingGroupsController::delete">delete</abbr></a></td><td class="text-right">66%</td></tr>
+       <tr><td><a href="UsersController.php.html#222"><abbr title="App\Controller\UsersController::login">login</abbr></a></td><td class="text-right">72%</td></tr>
+       <tr><td><a href="UsersController.php.html#377"><abbr title="App\Controller\UsersController::verify">verify</abbr></a></td><td class="text-right">72%</td></tr>
+       <tr><td><a href="SchedulesController.php.html#115"><abbr title="App\Controller\SchedulesController::add">add</abbr></a></td><td class="text-right">73%</td></tr>
+       <tr><td><a href="AppController.php.html#60"><abbr title="App\Controller\AppController::beforeFilter">beforeFilter</abbr></a></td><td class="text-right">75%</td></tr>
+       <tr><td><a href="SiblingGroupsController.php.html#123"><abbr title="App\Controller\SiblingGroupsController::edit">edit</abbr></a></td><td class="text-right">75%</td></tr>
+       <tr><td><a href="ChildrenController.php.html#78"><abbr title="App\Controller\ChildrenController::view">view</abbr></a></td><td class="text-right">77%</td></tr>
+       <tr><td><a href="ChildrenController.php.html#18"><abbr title="App\Controller\ChildrenController::index">index</abbr></a></td><td class="text-right">80%</td></tr>
+       <tr><td><a href="SiblingGroupsController.php.html#93"><abbr title="App\Controller\SiblingGroupsController::add">add</abbr></a></td><td class="text-right">81%</td></tr>
+       <tr><td><a href="PagesController.php.html#60"><abbr title="App\Controller\PagesController::display">display</abbr></a></td><td class="text-right">86%</td></tr>
+       <tr><td><a href="ChildrenController.php.html#102"><abbr title="App\Controller\ChildrenController::add">add</abbr></a></td><td class="text-right">86%</td></tr>
+       <tr><td><a href="UsersController.php.html#20"><abbr title="App\Controller\UsersController::register">register</abbr></a></td><td class="text-right">88%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3 style="margin-top: 2rem;">Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right">Coverage</th>
+         <th class="text-right">Complexity</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="WaitlistController.php.html#22"><abbr title="App\Controller\WaitlistController::index">index</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">39</td><td class="text-right">1560</td></tr>
+       <tr><td><a href="ChildrenController.php.html#315"><abbr title="App\Controller\ChildrenController::importConfirm">importConfirm</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">22</td><td class="text-right">506</td></tr>
+       <tr><td><a href="ChildrenController.php.html#217"><abbr title="App\Controller\ChildrenController::import">import</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">13</td><td class="text-right">182</td></tr>
+       <tr><td><a href="SchedulesController.php.html#309"><abbr title="App\Controller\SchedulesController::exportCsv">exportCsv</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">13</td><td class="text-right">182</td></tr>
+       <tr><td><a href="Admin/OrganizationsController.php.html#174"><abbr title="App\Controller\Admin\OrganizationsController::delete">delete</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">10</td><td class="text-right">110</td></tr>
+       <tr><td><a href="WaitlistController.php.html#249"><abbr title="App\Controller\WaitlistController::add">add</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">9</td><td class="text-right">90</td></tr>
+       <tr><td><a href="WaitlistController.php.html#411"><abbr title="App\Controller\WaitlistController::addAll">addAll</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">9</td><td class="text-right">90</td></tr>
+       <tr><td><a href="Admin/DashboardController.php.html#21"><abbr title="App\Controller\Admin\DashboardController::index">index</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">8</td><td class="text-right">72</td></tr>
+       <tr><td><a href="Admin/OrganizationsController.php.html#364"><abbr title="App\Controller\Admin\OrganizationsController::removeUser">removeUser</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">7</td><td class="text-right">56</td></tr>
+       <tr><td><a href="UsersController.php.html#282"><abbr title="App\Controller\UsersController::changeLanguage">changeLanguage</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">7</td><td class="text-right">56</td></tr>
+       <tr><td><a href="Admin/OrganizationsController.php.html#91"><abbr title="App\Controller\Admin\OrganizationsController::add">add</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">6</td><td class="text-right">42</td></tr>
+       <tr><td><a href="Admin/OrganizationsController.php.html#306"><abbr title="App\Controller\Admin\OrganizationsController::addUser">addUser</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">6</td><td class="text-right">42</td></tr>
+       <tr><td><a href="ChildrenController.php.html#467"><abbr title="App\Controller\ChildrenController::loadSiblingNames">loadSiblingNames</abbr></a></td><td class="text-right">17.4%</td><td class="text-right">7</td><td class="text-right">34</td></tr>
+       <tr><td><a href="Admin/OrganizationsController.php.html#130"><abbr title="App\Controller\Admin\OrganizationsController::edit">edit</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">5</td><td class="text-right">30</td></tr>
+       <tr><td><a href="Admin/OrganizationsController.php.html#272"><abbr title="App\Controller\Admin\OrganizationsController::toggleActive">toggleActive</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">5</td><td class="text-right">30</td></tr>
+       <tr><td><a href="UsersController.php.html#317"><abbr title="App\Controller\UsersController::profile">profile</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">5</td><td class="text-right">30</td></tr>
+       <tr><td><a href="UsersController.php.html#481"><abbr title="App\Controller\UsersController::resetPassword">resetPassword</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">5</td><td class="text-right">30</td></tr>
+       <tr><td><a href="AppController.php.html#199"><abbr title="App\Controller\AppController::getUserRoleInOrg">getUserRoleInOrg</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">4</td><td class="text-right">20</td></tr>
+       <tr><td><a href="ChildrenController.php.html#290"><abbr title="App\Controller\ChildrenController::importPreview">importPreview</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">4</td><td class="text-right">20</td></tr>
+       <tr><td><a href="DebugController.php.html#44"><abbr title="App\Controller\DebugController::emails">emails</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">4</td><td class="text-right">20</td></tr>
+       <tr><td><a href="DebugController.php.html#62"><abbr title="App\Controller\DebugController::clearEmails">clearEmails</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">4</td><td class="text-right">20</td></tr>
+       <tr><td><a href="SiblingGroupsController.php.html#18"><abbr title="App\Controller\SiblingGroupsController::index">index</abbr></a></td><td class="text-right">46.2%</td><td class="text-right">8</td><td class="text-right">17</td></tr>
+       <tr><td><a href="UsersController.php.html#377"><abbr title="App\Controller\UsersController::verify">verify</abbr></a></td><td class="text-right">73.0%</td><td class="text-right">11</td><td class="text-right">13</td></tr>
+       <tr><td><a href="Admin/OrganizationsController.php.html#20"><abbr title="App\Controller\Admin\OrganizationsController::index">index</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">3</td><td class="text-right">12</td></tr>
+       <tr><td><a href="Admin/OrganizationsController.php.html#61"><abbr title="App\Controller\Admin\OrganizationsController::view">view</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">3</td><td class="text-right">12</td></tr>
+       <tr><td><a href="UsersController.php.html#20"><abbr title="App\Controller\UsersController::register">register</abbr></a></td><td class="text-right">88.8%</td><td class="text-right">12</td><td class="text-right">12</td></tr>
+       <tr><td><a href="UsersController.php.html#267"><abbr title="App\Controller\UsersController::logout">logout</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">3</td><td class="text-right">12</td></tr>
+       <tr><td><a href="ChildrenController.php.html#18"><abbr title="App\Controller\ChildrenController::index">index</abbr></a></td><td class="text-right">80.0%</td><td class="text-right">10</td><td class="text-right">10</td></tr>
+       <tr><td><a href="UsersController.php.html#222"><abbr title="App\Controller\UsersController::login">login</abbr></a></td><td class="text-right">72.2%</td><td class="text-right">8</td><td class="text-right">9</td></tr>
+       <tr><td><a href="PagesController.php.html#60"><abbr title="App\Controller\PagesController::display">display</abbr></a></td><td class="text-right">86.7%</td><td class="text-right">8</td><td class="text-right">8</td></tr>
+       <tr><td><a href="AppController.php.html#60"><abbr title="App\Controller\AppController::beforeFilter">beforeFilter</abbr></a></td><td class="text-right">75.0%</td><td class="text-right">7</td><td class="text-right">7</td></tr>
+       <tr><td><a href="ChildrenController.php.html#102"><abbr title="App\Controller\ChildrenController::add">add</abbr></a></td><td class="text-right">87.0%</td><td class="text-right">7</td><td class="text-right">7</td></tr>
+       <tr><td><a href="Admin/UsersController.php.html#46"><abbr title="App\Controller\Admin\UsersController::approve">approve</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">2</td><td class="text-right">6</td></tr>
+       <tr><td><a href="Admin/UsersController.php.html#67"><abbr title="App\Controller\Admin\UsersController::deactivate">deactivate</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">2</td><td class="text-right">6</td></tr>
+       <tr><td><a href="ChildrenController.php.html#153"><abbr title="App\Controller\ChildrenController::edit">edit</abbr></a></td><td class="text-right">46.7%</td><td class="text-right">4</td><td class="text-right">6</td></tr>
+       <tr><td><a href="DebugController.php.html#28"><abbr title="App\Controller\DebugController::beforeFilter">beforeFilter</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">2</td><td class="text-right">6</td></tr>
+       <tr><td><a href="DebugController.php.html#83"><abbr title="App\Controller\DebugController::isLocalhost">isLocalhost</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">2</td><td class="text-right">6</td></tr>
+       <tr><td><a href="SchedulesController.php.html#72"><abbr title="App\Controller\SchedulesController::setActive">setActive</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">2</td><td class="text-right">6</td></tr>
+       <tr><td><a href="SchedulesController.php.html#115"><abbr title="App\Controller\SchedulesController::add">add</abbr></a></td><td class="text-right">73.9%</td><td class="text-right">6</td><td class="text-right">6</td></tr>
+       <tr><td><a href="SiblingGroupsController.php.html#174"><abbr title="App\Controller\SiblingGroupsController::removeChild">removeChild</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">2</td><td class="text-right">6</td></tr>
+       <tr><td><a href="WaitlistController.php.html#327"><abbr title="App\Controller\WaitlistController::delete">delete</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">2</td><td class="text-right">6</td></tr>
+       <tr><td><a href="WaitlistController.php.html#354"><abbr title="App\Controller\WaitlistController::reorder">reorder</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">2</td><td class="text-right">6</td></tr>
+       <tr><td><a href="WaitlistController.php.html#387"><abbr title="App\Controller\WaitlistController::reorderWaitlist">reorderWaitlist</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">2</td><td class="text-right">6</td></tr>
+       <tr><td><a href="DashboardController.php.html#18"><abbr title="App\Controller\DashboardController::index">index</abbr></a></td><td class="text-right">64.3%</td><td class="text-right">4</td><td class="text-right">4</td></tr>
+       <tr><td><a href="ChildrenController.php.html#191"><abbr title="App\Controller\ChildrenController::delete">delete</abbr></a></td><td class="text-right">66.7%</td><td class="text-right">3</td><td class="text-right">3</td></tr>
+       <tr><td><a href="SchedulesController.php.html#210"><abbr title="App\Controller\SchedulesController::delete">delete</abbr></a></td><td class="text-right">66.7%</td><td class="text-right">3</td><td class="text-right">3</td></tr>
+       <tr><td><a href="SiblingGroupsController.php.html#93"><abbr title="App\Controller\SiblingGroupsController::add">add</abbr></a></td><td class="text-right">81.8%</td><td class="text-right">3</td><td class="text-right">3</td></tr>
+       <tr><td><a href="SiblingGroupsController.php.html#123"><abbr title="App\Controller\SiblingGroupsController::edit">edit</abbr></a></td><td class="text-right">75.0%</td><td class="text-right">3</td><td class="text-right">3</td></tr>
+       <tr><td><a href="SiblingGroupsController.php.html#147"><abbr title="App\Controller\SiblingGroupsController::delete">delete</abbr></a></td><td class="text-right">66.7%</td><td class="text-right">3</td><td class="text-right">3</td></tr>
+       <tr><td><a href="ChildrenController.php.html#78"><abbr title="App\Controller\ChildrenController::view">view</abbr></a></td><td class="text-right">77.8%</td><td class="text-right">2</td><td class="text-right">2</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <footer>
+    <hr/>
+    <p>
+     <small>Generated by <a href="https://github.com/sebastianbergmann/php-code-coverage" target="_top">php-code-coverage 12.4.0</a> using <a href="https://www.php.net/" target="_top">PHP 8.4.13</a> and <a href="https://phpunit.de/">PHPUnit 12.4.1</a> at Tue Oct 28 18:51:19 UTC 2025.</small>
+    </p>
+   </footer>
+  </div>
+  <script src="../_js/billboard.pkgd.min.js?v=12.4.0" type="text/javascript"></script>
+  <script type="application/json" id="complexity_class">[[0,8,"Admin\/DashboardController.php.html#14","App\\Controller\\Admin\\DashboardController","72"],[0,45,"Admin\/OrganizationsController.php.html#13","App\\Controller\\Admin\\OrganizationsController","2070"],[0,13,"DebugController.php.html#16","App\\Controller\\DebugController","182"],[0,63,"WaitlistController.php.html#15","App\\Controller\\WaitlistController","4032"],[22.22222222222222,8,"Admin\/UsersController.php.html#12","App\\Controller\\Admin\\UsersController","38.11"],[27.004219409282697,72,"ChildrenController.php.html#11","App\\Controller\\ChildrenController","2088.31"],[38.58695652173913,41,"SchedulesController.php.html#11","App\\Controller\\SchedulesController","430.36"],[58.57142857142858,21,"SiblingGroupsController.php.html#11","App\\Controller\\SiblingGroupsController","52.36"],[65.11627906976744,5,"DashboardController.php.html#11","App\\Controller\\DashboardController","6.06"],[67.7536231884058,61,"UsersController.php.html#13","App\\Controller\\UsersController","185.77"],[75.9493670886076,27,"AppController.php.html#29","App\\Controller\\AppController","37.14"],[88.23529411764706,9,"PagesController.php.html#32","App\\Controller\\PagesController","9.13"],[100,5,"Api\/OrganizationsController.php.html#12","App\\Controller\\Api\\OrganizationsController","5"],[100,4,"ErrorController.php.html#26","App\\Controller\\ErrorController","4"]]</script>
+  <script type="application/json" id="complexity_method">[[0,8,"Admin\/DashboardController.php.html#21","App\\Controller\\Admin\\DashboardController::index","72"],[0,3,"Admin\/OrganizationsController.php.html#20","App\\Controller\\Admin\\OrganizationsController::index","12"],[0,3,"Admin\/OrganizationsController.php.html#61","App\\Controller\\Admin\\OrganizationsController::view","12"],[0,6,"Admin\/OrganizationsController.php.html#91","App\\Controller\\Admin\\OrganizationsController::add","42"],[0,5,"Admin\/OrganizationsController.php.html#130","App\\Controller\\Admin\\OrganizationsController::edit","30"],[0,10,"Admin\/OrganizationsController.php.html#174","App\\Controller\\Admin\\OrganizationsController::delete","110"],[0,5,"Admin\/OrganizationsController.php.html#272","App\\Controller\\Admin\\OrganizationsController::toggleActive","30"],[0,6,"Admin\/OrganizationsController.php.html#306","App\\Controller\\Admin\\OrganizationsController::addUser","42"],[0,7,"Admin\/OrganizationsController.php.html#364","App\\Controller\\Admin\\OrganizationsController::removeUser","56"],[0,1,"Admin\/UsersController.php.html#33","App\\Controller\\Admin\\UsersController::index","2"],[0,2,"Admin\/UsersController.php.html#46","App\\Controller\\Admin\\UsersController::approve","6"],[0,2,"Admin\/UsersController.php.html#67","App\\Controller\\Admin\\UsersController::deactivate","6"],[0,4,"AppController.php.html#199","App\\Controller\\AppController::getUserRoleInOrg","20"],[0,13,"ChildrenController.php.html#217","App\\Controller\\ChildrenController::import","182"],[0,4,"ChildrenController.php.html#290","App\\Controller\\ChildrenController::importPreview","20"],[0,22,"ChildrenController.php.html#315","App\\Controller\\ChildrenController::importConfirm","506"],[0,1,"DebugController.php.html#21","App\\Controller\\DebugController::initialize","2"],[0,2,"DebugController.php.html#28","App\\Controller\\DebugController::beforeFilter","6"],[0,4,"DebugController.php.html#44","App\\Controller\\DebugController::emails","20"],[0,4,"DebugController.php.html#62","App\\Controller\\DebugController::clearEmails","20"],[0,2,"DebugController.php.html#83","App\\Controller\\DebugController::isLocalhost","6"],[0,2,"SchedulesController.php.html#72","App\\Controller\\SchedulesController::setActive","6"],[0,1,"SchedulesController.php.html#236","App\\Controller\\SchedulesController::manageChildren","2"],[0,1,"SchedulesController.php.html#251","App\\Controller\\SchedulesController::assignChild","2"],[0,1,"SchedulesController.php.html#262","App\\Controller\\SchedulesController::removeChild","2"],[0,1,"SchedulesController.php.html#274","App\\Controller\\SchedulesController::generateReport","2"],[0,13,"SchedulesController.php.html#309","App\\Controller\\SchedulesController::exportCsv","182"],[0,1,"SchedulesController.php.html#410","App\\Controller\\SchedulesController::reorderChildren","2"],[0,2,"SiblingGroupsController.php.html#174","App\\Controller\\SiblingGroupsController::removeChild","6"],[0,3,"UsersController.php.html#267","App\\Controller\\UsersController::logout","12"],[0,7,"UsersController.php.html#282","App\\Controller\\UsersController::changeLanguage","56"],[0,5,"UsersController.php.html#317","App\\Controller\\UsersController::profile","30"],[0,1,"UsersController.php.html#358","App\\Controller\\UsersController::account","2"],[0,5,"UsersController.php.html#481","App\\Controller\\UsersController::resetPassword","30"],[0,39,"WaitlistController.php.html#22","App\\Controller\\WaitlistController::index","1560"],[0,9,"WaitlistController.php.html#249","App\\Controller\\WaitlistController::add","90"],[0,2,"WaitlistController.php.html#327","App\\Controller\\WaitlistController::delete","6"],[0,2,"WaitlistController.php.html#354","App\\Controller\\WaitlistController::reorder","6"],[0,2,"WaitlistController.php.html#387","App\\Controller\\WaitlistController::reorderWaitlist","6"],[0,9,"WaitlistController.php.html#411","App\\Controller\\WaitlistController::addAll","90"],[17.391304347826086,7,"ChildrenController.php.html#467","App\\Controller\\ChildrenController::loadSiblingNames","34.62"],[46.15384615384615,8,"SiblingGroupsController.php.html#18","App\\Controller\\SiblingGroupsController::index","17.99"],[46.666666666666664,4,"ChildrenController.php.html#153","App\\Controller\\ChildrenController::edit","6.43"],[64.28571428571429,4,"DashboardController.php.html#18","App\\Controller\\DashboardController::index","4.73"],[66.66666666666666,3,"ChildrenController.php.html#191","App\\Controller\\ChildrenController::delete","3.33"],[66.66666666666666,3,"SchedulesController.php.html#210","App\\Controller\\SchedulesController::delete","3.33"],[66.66666666666666,3,"SiblingGroupsController.php.html#147","App\\Controller\\SiblingGroupsController::delete","3.33"],[72.22222222222221,8,"UsersController.php.html#222","App\\Controller\\UsersController::login","9.37"],[72.97297297297297,11,"UsersController.php.html#377","App\\Controller\\UsersController::verify","13.39"],[73.91304347826086,6,"SchedulesController.php.html#115","App\\Controller\\SchedulesController::add","6.64"],[75,7,"AppController.php.html#60","App\\Controller\\AppController::beforeFilter","7.77"],[75,3,"SiblingGroupsController.php.html#123","App\\Controller\\SiblingGroupsController::edit","3.14"],[77.77777777777779,2,"ChildrenController.php.html#78","App\\Controller\\ChildrenController::view","2.04"],[80,10,"ChildrenController.php.html#18","App\\Controller\\ChildrenController::index","10.80"],[81.81818181818183,3,"SiblingGroupsController.php.html#93","App\\Controller\\SiblingGroupsController::add","3.05"],[86.66666666666667,8,"PagesController.php.html#60","App\\Controller\\PagesController::display","8.15"],[86.95652173913044,7,"ChildrenController.php.html#102","App\\Controller\\ChildrenController::add","7.11"],[88.76404494382022,12,"UsersController.php.html#20","App\\Controller\\UsersController::register","12.20"],[92.3076923076923,3,"AppController.php.html#131","App\\Controller\\AppController::getUserOrganizations","3.00"],[93.33333333333333,4,"UsersController.php.html#439","App\\Controller\\UsersController::forgotPassword","4.00"],[94.44444444444444,5,"SchedulesController.php.html#167","App\\Controller\\SchedulesController::edit","5.00"],[94.73684210526315,7,"AppController.php.html#91","App\\Controller\\AppController::hasOrgRole","7.01"],[94.73684210526315,5,"AppController.php.html#161","App\\Controller\\AppController::getPrimaryOrganization","5.00"],[95,4,"UsersController.php.html#162","App\\Controller\\UsersController::notifyOrgAdminsAboutNewUser","4"],[96.29629629629629,5,"SchedulesController.php.html#18","App\\Controller\\SchedulesController::index","5"],[100,3,"Admin\/UsersController.php.html#17","App\\Controller\\Admin\\UsersController::beforeFilter","3"],[100,1,"Api\/OrganizationsController.php.html#14","App\\Controller\\Api\\OrganizationsController::initialize","1"],[100,1,"Api\/OrganizationsController.php.html#20","App\\Controller\\Api\\OrganizationsController::beforeFilter","1"],[100,3,"Api\/OrganizationsController.php.html#32","App\\Controller\\Api\\OrganizationsController::search","3"],[100,1,"AppController.php.html#40","App\\Controller\\AppController::initialize","1"],[100,1,"DashboardController.php.html#82","App\\Controller\\DashboardController::beforeFilter","1"],[100,1,"ErrorController.php.html#33","App\\Controller\\ErrorController::initialize","1"],[100,1,"ErrorController.php.html#44","App\\Controller\\ErrorController::beforeFilter","1"],[100,1,"ErrorController.php.html#54","App\\Controller\\ErrorController::beforeRender","1"],[100,1,"ErrorController.php.html#67","App\\Controller\\ErrorController::afterFilter","1"],[100,1,"PagesController.php.html#40","App\\Controller\\PagesController::beforeFilter","1"],[100,2,"SchedulesController.php.html#97","App\\Controller\\SchedulesController::view","2"],[100,2,"SiblingGroupsController.php.html#72","App\\Controller\\SiblingGroupsController::view","2"],[100,1,"UsersController.php.html#369","App\\Controller\\UsersController::beforeFilter","1"]]</script>
+  <script type="text/javascript" defer>
+  const barLabels = [
+    '0%',
+    '0-10%',
+    '10-20%',
+    '20-30%',
+    '30-40%',
+    '40-50%',
+    '50-60%',
+    '60-70%',
+    '70-80%',
+    '80-90%',
+    '90-100%',
+    '100%'
+  ];
+  const barConfig = (name, fullName, values) => ({
+    axis: {
+      x: {
+        type: "category",
+        categories: barLabels,
+      },
+      y: {
+        label: {
+          text: `#${name}`,
+          position: 'outer-top',
+        },
+      },
+    },
+    bindto: `#${name}CoverageDistribution`,
+    data: {
+      columns: [
+        [fullName].concat(values),
+      ],
+      colors: {
+        [fullName]: "rgba(69, 114, 167, 0.75)",
+      },
+      type: "bar",
+    },
+    bar: {
+      width: {
+        ratio: 0.9,
+      },
+    },
+    grid: {
+      focus: {
+        show: false,
+      },
+      x: {
+        show: true,
+      },
+      y: {
+        show: true,
+      },
+    },
+    legend: {
+      show: false,
+    },
+    tooltip: {
+      contents: function (data) {
+        return `<table class="bb-tooltip"><tbody>
+            <tr><th colspan="2">Coverage ${barLabels[data[0].x]}</th></tr>
+            <tr><td class="value">${data[0].value} ${name}</td></tr>
+          </tbody></table>`;
+      },
+      grouped: false,
+    },
+  });
+  bb.generate(
+    barConfig('classes', "Class Coverage", [4,0,0,2,1,0,1,2,1,1,0,2])
+  );
+  bb.generate(
+    barConfig('methods', "Method Coverage", [40,0,1,0,0,2,0,4,6,5,7,14])
+  );
+
+  const scatterConfig = (name, complexityData) => ({
+    axis: {
+      x: {
+        label: {
+          text: 'Code Coverage (in percent)',
+          position: 'outer-right',
+        },
+        tick: {
+          values: [0, 20, 40, 60, 80, 100],
+        },
+      },
+      y: {
+        label: {
+          text: 'Cyclomatic Complexity',
+          position: 'outer-top',
+        },
+        min: 0,
+        padding: {
+          bottom: 0,
+          top: 5,
+        },
+      },
+    },
+    bindto: `#${name}Complexity`,
+    data: {
+      columns: [
+        ["complexity_x"].concat(complexityData.map(d => d[0])),
+        ["complexity"].concat(complexityData.map(d => d[1])),
+      ],
+      onclick: function(data, element) {
+        window.location = complexityData[data.index][2];
+      },
+      type: "scatter",
+      xs: {
+        "complexity": "complexity_x",
+      },
+    },
+    grid: {
+      focus: {
+        show: true,
+        y: true,
+      },
+      x: {
+        show: true,
+      },
+      y: {
+        show: true,
+      },
+    },
+    legend: {
+      show: false,
+    },
+    tooltip: {
+      contents: function (data) {
+        const coverage = Math.round(data[0].x);
+        const complexity = data[0].value;
+        const targetName = complexityData[data[0].index][3];
+        const crap = complexityData[data[0].index][4];
+        return `<table class="bb-tooltip"><tbody>
+            <tr><th colspan="2">${targetName}</th></tr>
+            <tr class="bb-tooltip-name-complexity"><td>Coverage</td><td class="name">${coverage}%</td></tr>
+            <tr class="bb-tooltip-name-complexity"><td>Complexity</td><td class="value">${complexity}</td></tr>
+            <tr class="bb-tooltip-name-complexity"><td>Crap</td><td class="value">${crap}</td></tr>
+          </tbody></table>`;
+      },
+      grouped: false,
+    },
+  });
+  const classComplexityData = JSON.parse(document.getElementById('complexity_class').textContent);
+  bb.generate(
+    scatterConfig("class", classComplexityData)
+  );
+  const methodComplexityData = JSON.parse(document.getElementById('complexity_method').textContent);
+  bb.generate(
+    scatterConfig("method", methodComplexityData),
+  );
+  </script>
+ </body>
+</html>
