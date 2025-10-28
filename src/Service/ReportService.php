@@ -8,9 +8,8 @@ use Cake\ORM\TableRegistry;
 /**
  * Report Service
  * 
- * Generates Ausfallplan (substitute plan) reports
- * Uses Assignment sort_order instead of Waitlist priority
- * Handles sibling groups as atomic units
+ * Generates Ausfallplan (substitute plan) reports.
+ * Handles sibling groups as atomic units and respects waitlist ordering.
  */
 class ReportService
 {
@@ -39,7 +38,7 @@ class ReportService
         // Load schedule
         $schedule = $schedulesTable->get($scheduleId, contain: ['Organizations']);
 
-        // Get sorted children from waitlist (NEW ARCHITECTURE: from children table)
+        // Get sorted children from waitlist
         $sortedChildren = $this->getSortedChildrenFromWaitlist($scheduleId);
         
         // Get waitlist children for display
@@ -66,7 +65,7 @@ class ReportService
         return [
             'schedule' => $schedule,
             'days' => $days,
-            'waitlist' => $waitlist, // Keep for backward compatibility
+            'waitlist' => $waitlist,
             'alwaysAtEnd' => $alwaysAtEnd,
             'daysCount' => $daysCount,
             'childStats' => $childStats,
@@ -314,10 +313,9 @@ class ReportService
     }
 
     /**
-     * Get all assigned children (for "always at end")
+     * Get children for "always at end" section
      * 
-     * NEW ARCHITECTURE: Children with schedule_id set but waitlist_order = NULL
-     * These are children assigned to schedule but not on waitlist
+     * Finds children assigned to schedule (schedule_id set) but not on waitlist (waitlist_order = NULL)
      */
     private function getAssignedChildren(int $scheduleId): array
     {
