@@ -24,6 +24,8 @@ class SchedulesControllerTest extends TestCase
 {
     use IntegrationTestTrait;
 
+    private $currentUser;
+
     /**
      * Fixtures
      *
@@ -181,7 +183,9 @@ class SchedulesControllerTest extends TestCase
             'title' => 'View Test Schedule',
             'starts_on' => '2025-12-01',
             'ends_on' => '2025-12-31',
+            'days_count' => 5,
             'state' => 'draft',
+            'user_id' => $this->currentUser->id,
         ]);
         $schedules->save($schedule);
 
@@ -210,7 +214,9 @@ class SchedulesControllerTest extends TestCase
             'title' => 'Original Title',
             'starts_on' => '2025-12-01',
             'ends_on' => '2025-12-31',
+            'days_count' => 5,
             'state' => 'draft',
+            'user_id' => $this->currentUser->id,
         ]);
         $schedules->save($schedule);
 
@@ -245,7 +251,9 @@ class SchedulesControllerTest extends TestCase
             'title' => 'To Delete',
             'starts_on' => '2025-12-01',
             'ends_on' => '2025-12-31',
+            'days_count' => 5,
             'state' => 'draft',
+            'user_id' => $this->currentUser->id,
         ]);
         $schedules->save($schedule);
 
@@ -262,7 +270,7 @@ class SchedulesControllerTest extends TestCase
     /**
      * Helper: Create user with organization membership and log in
      */
-    private function createAndLoginUser(string $email, string $role = 'org_admin', int $orgId = 1): void
+    private function createAndLoginUser(string $email, string $role = 'org_admin', int $orgId = 1): object
     {
         $users = $this->getTableLocator()->get('Users');
         $user = $users->newEntity([
@@ -288,5 +296,7 @@ class SchedulesControllerTest extends TestCase
         
         // Set session with correct format (just the user entity)
         $this->session(['Auth' => $user]);
+        $this->currentUser = $user;
+        return $user;
     }
 }
