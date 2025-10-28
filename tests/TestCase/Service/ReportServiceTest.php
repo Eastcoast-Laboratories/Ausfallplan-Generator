@@ -9,7 +9,14 @@ use Cake\TestSuite\TestCase;
 /**
  * ReportService Test Case
  * 
- * Tests the dynamic report generation based on waitlist_entries
+ * Tests the dynamic report generation based on waitlist.
+ * 
+ * Verifies:
+ * - Report generation with sorted children
+ * - Sibling group handling in reports
+ * - Day assignment distribution
+ * - Statistics calculation (Z, D, ⬇️)
+ * - "Always at End" section
  */
 class ReportServiceTest extends TestCase
 {
