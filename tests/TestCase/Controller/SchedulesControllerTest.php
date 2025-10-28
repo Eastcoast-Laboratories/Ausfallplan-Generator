@@ -112,6 +112,7 @@ class SchedulesControllerTest extends TestCase
             'title' => 'Test Schedule',
             'starts_on' => '2025-11-01',
             'ends_on' => '2025-11-30',
+            'days_count' => 5,
             'state' => 'draft',
             'organization_id' => 1,
         ]);

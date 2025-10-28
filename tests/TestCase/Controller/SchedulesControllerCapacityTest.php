@@ -136,7 +136,9 @@ class SchedulesControllerCapacityTest extends TestCase
             'title' => 'Test Schedule',
             'starts_on' => '2025-01-01',
             'ends_on' => '2025-12-31',
+            'days_count' => 5,
             'state' => 'draft',
+            'user_id' => 1,
         ]);
         $schedules->save($schedule);
 
