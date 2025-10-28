@@ -78,6 +78,7 @@ class SchedulesControllerCapacityTest extends TestCase
             'title' => 'Test Schedule with Capacity',
             'starts_on' => '2025-01-01',
             'ends_on' => '2025-12-31',
+            'days_count' => 5,
             'capacity_per_day' => 15,
             'state' => 'draft',
             'organization_id' => 1,
