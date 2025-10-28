@@ -16,7 +16,7 @@ $this->assign('title', __('Children'));
     <div class="organization-selector" style="margin-bottom: 2rem;">
         <label for="organization-select"><?= __('Filter by Organization') ?>:</label>
         <select id="organization-select" onchange="window.location.href='<?= $this->Url->build(['action' => 'index']) ?>?organization_id=' + this.value" style="margin-left: 1rem; padding: 0.5rem;">
-            <option value=""><?= __('-- All Organizations --') ?></option>
+            <option value=""><?= __('-- Alle Organisationen --') ?></option>
             <?php foreach ($organizations as $orgId => $orgName): ?>
                 <option value="<?= $orgId ?>" <?= $selectedOrgId == $orgId ? 'selected' : '' ?>>
                     <?= h($orgName) ?>
@@ -37,6 +37,9 @@ $this->assign('title', __('Children'));
                     <th><?= __('Name') ?></th>
                     <th><?= __('Last Name') ?></th>
                     <th><?= __('Display Name') ?></th>
+                    <?php if (!$selectedOrgId && $canSelectOrganization): ?>
+                    <th><?= __('Organization') ?></th>
+                    <?php endif; ?>
                     <th><?= __('Gender') ?></th>
                     <th><?= __('Birthdate') ?></th>
                     <th><?= __('Status') ?></th>
@@ -65,6 +68,9 @@ $this->assign('title', __('Children'));
                     </td>
                     <td><?= h($child->last_name) ?></td>
                     <td><strong><?= h($child->display_name ?? ($child->name . ' ' . $child->last_name)) ?></strong></td>
+                    <?php if (!$selectedOrgId && $canSelectOrganization): ?>
+                    <td><?= h($organizations[$child->organization_id] ?? '-') ?></td>
+                    <?php endif; ?>
                     <td style="text-align: center; font-size: 1.2rem;">
                         <?php
                         if ($child->gender === 'male') {
