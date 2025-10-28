@@ -80,7 +80,6 @@ class ChildrenController extends AppController
         $child = $this->Children->get($id, contain: [
             'Organizations',
             'SiblingGroups',
-            'WaitlistEntries',
         ]);
         
         // Permission check: User must be member of child's organization
