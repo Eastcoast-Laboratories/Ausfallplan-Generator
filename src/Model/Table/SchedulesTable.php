@@ -98,6 +98,12 @@ class SchedulesTable extends Table
             ->allowEmptyString('capacity_per_day')
             ->greaterThan('capacity_per_day', 0);
 
+        $validator
+            ->integer('days_count')
+            ->requirePresence('days_count', 'create')
+            ->notEmptyString('days_count')
+            ->greaterThan('days_count', 0, __('Anzahl Tage muss größer als 0 sein'));
+
         return $validator;
     }
 }
