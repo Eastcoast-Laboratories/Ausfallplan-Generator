@@ -4,22 +4,23 @@ declare(strict_types=1);
 namespace App\Controller;
 
 /**
- * Waitlist Controller
+ * Waitlist Controller - NEW ARCHITECTURE
  *
- * Manages the waitlist for schedules with drag & drop reordering
- *
- * @property \App\Model\Table\WaitlistEntriesTable $WaitlistEntries
+ * Uses children table fields directly:
+ * - children.schedule_id
+ * - children.waitlist_order
+ * 
+ * No separate waitlist_entries table!
  */
 class WaitlistController extends AppController
 {
     /**
-     * Index method - List all waitlist entries for a schedule
+     * Index method - List all children on waitlist for a schedule
      *
      * @return \Cake\Http\Response|null|void
      */
     public function index()
     {
-        // Get current user's organization
         $user = $this->Authentication->getIdentity();
         
         // System admins can see all schedules
@@ -29,22 +30,19 @@ class WaitlistController extends AppController
                 ->orderBy(['Schedules.created' => 'DESC'])
                 ->all();
             
-            // Priority: Query param > Session > Schedule with assignments > First schedule
+            // Get selected schedule (query param > session > first)
             $scheduleId = $this->request->getQuery('schedule_id');
             $selectedSchedule = null;
             
-            // 1. Try query parameter first
             if ($scheduleId) {
                 try {
                     $selectedSchedule = $schedulesTable->get($scheduleId);
-                    // Update session when user manually selects a schedule
                     $this->request->getSession()->write('activeScheduleId', (int)$scheduleId);
                 } catch (\Exception $e) {
                     $scheduleId = null;
                 }
             }
             
-            // 2. Try active schedule from session
             if (!$selectedSchedule) {
                 $activeScheduleId = $this->request->getSession()->read('activeScheduleId');
                 if ($activeScheduleId) {
@@ -52,275 +50,101 @@ class WaitlistController extends AppController
                         $selectedSchedule = $schedulesTable->get($activeScheduleId);
                         $scheduleId = $selectedSchedule->id;
                     } catch (\Exception $e) {
-                        // Schedule doesn't exist anymore, clear from session
                         $this->request->getSession()->delete('activeScheduleId');
                     }
                 }
             }
             
-            // 3. Find schedule with waitlist entries (prefer schedules with children)
+            // Find schedule with waitlist children
             if (!$selectedSchedule) {
                 foreach ($schedules as $schedule) {
-                    // Check if this schedule has waitlist entries
-                    $hasEntries = $this->fetchTable('WaitlistEntries')->find()
-                        ->where(['WaitlistEntries.schedule_id' => $schedule->id])
+                    $hasChildren = $this->fetchTable('Children')->find()
+                        ->where([
+                            'schedule_id' => $schedule->id,
+                            'waitlist_order IS NOT' => null
+                        ])
                         ->count();
                     
-                    if ($hasEntries > 0) {
+                    if ($hasChildren > 0) {
                         $selectedSchedule = $schedule;
                         $scheduleId = $schedule->id;
-                        // Set as active in session
                         $this->request->getSession()->write('activeScheduleId', (int)$scheduleId);
                         break;
                     }
                 }
             }
             
-            // 4. Fallback to first schedule if no schedule has assignments
+            // Fallback to first schedule
             if (!$selectedSchedule) {
                 $selectedSchedule = $schedules->first();
                 $scheduleId = $selectedSchedule ? $selectedSchedule->id : null;
                 if ($scheduleId) {
-                    // Set as active in session
                     $this->request->getSession()->write('activeScheduleId', (int)$scheduleId);
                 }
             }
+        } else {
+            // Regular user: Get their organization
+            $primaryOrg = $this->getPrimaryOrganization();
+            if (!$primaryOrg) {
+                $this->Flash->error(__('Sie sind keiner Organisation zugeordnet.'));
+                return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
+            }
             
-            // Load waitlist entries and available children (same logic as for regular users)
-            $waitlistEntries = [];
-            $availableChildren = [];
-            $childrenOnWaitlist = [];
+            $schedulesTable = $this->fetchTable('Schedules');
+            $schedules = $schedulesTable->find()
+                ->where(['Schedules.organization_id' => $primaryOrg->id])
+                ->orderBy(['Schedules.created' => 'DESC'])
+                ->all();
+            
+            $scheduleId = $this->request->getQuery('schedule_id');
+            $selectedSchedule = null;
             
             if ($scheduleId) {
-                // Get waitlist entries
-                $waitlistEntries = $this->fetchTable('WaitlistEntries')->find()
-                    ->where(['WaitlistEntries.schedule_id' => $scheduleId])
-                    ->contain(['Children', 'Schedules'])
-                    ->orderBy(['WaitlistEntries.priority' => 'ASC'])
-                    ->all();
-                
-                // Get children already on waitlist
-                foreach ($waitlistEntries as $entry) {
-                    $childrenOnWaitlist[] = $entry->child_id;
-                }
-                
-                // Available children: All active children from organization NOT on waitlist
-                $availableChildrenQuery = $this->fetchTable('Children')->find()
-                    ->where([
-                        'Children.organization_id' => $selectedSchedule->organization_id,
-                        'Children.is_active' => true,
-                    ])
-                    ->orderBy(['Children.name' => 'ASC']);
-                
-                if (!empty($childrenOnWaitlist)) {
-                    $availableChildrenQuery->where([
-                        'Children.id NOT IN' => $childrenOnWaitlist
-                    ]);
-                }
-                
-                $availableChildren = $availableChildrenQuery->all();
-            }
-            
-            $countNotOnWaitlist = count($availableChildren);
-            
-            // Build sibling groups map and load sibling names (SAME LOGIC AS BELOW)
-            $siblingGroupsMap = [];
-            $siblingNames = [];
-            $missingSiblings = [];
-            
-            foreach ($waitlistEntries as $entry) {
-                if ($entry->child && $entry->child->sibling_group_id) {
-                    // Check total count in group FIRST
-                    $totalInGroup = $this->fetchTable('Children')->find()
-                        ->where(['sibling_group_id' => $entry->child->sibling_group_id])
-                        ->count();
-                    
-                    if ($totalInGroup <= 1) {
-                        continue; // Skip single-child groups
-                    }
-                    
-                    $siblingGroupsMap[$entry->id] = $entry->child->sibling_group_id;
-                    
-                    // Load ALL siblings
-                    $siblings = $this->fetchTable('Children')->find()
-                        ->where([
-                            'sibling_group_id' => $entry->child->sibling_group_id,
-                            'id !=' => $entry->child->id
-                        ])
-                        ->orderBy(['name' => 'ASC'])
-                        ->all();
-                    
-                    $names = [];
-                    foreach ($siblings as $sib) {
-                        $names[] = $sib->name;
-                        
-                        if (!in_array($sib->id, $childrenOnWaitlist)) {
-                            $missingSiblings[] = [
-                                'name' => $sib->name,
-                                'sibling_of' => $entry->child->name,
-                            ];
-                        }
-                    }
-                    
-                    if (!empty($names)) {
-                        $siblingNames[$entry->child->id] = implode(', ', $names);
-                    }
-                }
-            }
-            
-            // Load sibling names for available children too
-            foreach ($availableChildren as $child) {
-                if ($child->sibling_group_id && !isset($siblingNames[$child->id])) {
-                    $totalInGroup = $this->fetchTable('Children')->find()
-                        ->where(['sibling_group_id' => $child->sibling_group_id])
-                        ->count();
-                    
-                    if ($totalInGroup <= 1) {
-                        continue;
-                    }
-                    
-                    $siblings = $this->fetchTable('Children')->find()
-                        ->where([
-                            'sibling_group_id' => $child->sibling_group_id,
-                            'id !=' => $child->id
-                        ])
-                        ->orderBy(['name' => 'ASC'])
-                        ->all();
-                    
-                    $names = [];
-                    foreach ($siblings as $sib) {
-                        $names[] = $sib->name;
-                    }
-                    
-                    if (!empty($names)) {
-                        $siblingNames[$child->id] = implode(', ', $names);
-                    }
-                }
-            }
-            
-            $this->set(compact('schedules', 'selectedSchedule', 'waitlistEntries', 'availableChildren', 'countNotOnWaitlist', 'siblingGroupsMap', 'siblingNames', 'missingSiblings', 'user'));
-            return;
-        }
-        
-        // Get user's primary organization
-        $primaryOrg = $this->getPrimaryOrganization();
-        if (!$primaryOrg) {
-            $this->Flash->error(__('Sie sind keiner Organisation zugeordnet.'));
-            return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
-        }
-        
-        // Get schedules for this organization
-        $schedulesTable = $this->fetchTable('Schedules');
-        $schedules = $schedulesTable->find()
-            ->where(['Schedules.organization_id' => $primaryOrg->id])
-            ->orderBy(['Schedules.created' => 'DESC'])
-            ->all();
-        
-        // Get selected schedule with priority: Query param > Session > First schedule
-        $scheduleId = $this->request->getQuery('schedule_id');
-        $selectedSchedule = null;
-        
-        // 1. Try query parameter
-        if ($scheduleId) {
-            try {
-                $selectedSchedule = $schedulesTable->get($scheduleId);
-                // Update session when user manually selects a schedule
-                $this->request->getSession()->write('activeScheduleId', (int)$scheduleId);
-            } catch (\Exception $e) {
-                // Invalid schedule ID
-                $scheduleId = null;
-            }
-        }
-        // 2. Try active schedule from session
-        if (!$selectedSchedule) {
-            $activeScheduleId = $this->request->getSession()->read('activeScheduleId');
-            if ($activeScheduleId) {
                 try {
-                    $selectedSchedule = $schedulesTable->get($activeScheduleId);
-                    $scheduleId = $selectedSchedule->id;
+                    $selectedSchedule = $schedulesTable->get($scheduleId);
+                    $this->request->getSession()->write('activeScheduleId', (int)$scheduleId);
                 } catch (\Exception $e) {
-                    // Schedule doesn't exist anymore, clear from session
-                    $this->request->getSession()->delete('activeScheduleId');
+                    $scheduleId = null;
                 }
             }
-        }
-        // 3. Default to first schedule
-        if (!$selectedSchedule && $schedules->count() > 0) {
-            $selectedSchedule = $schedules->first();
-            $scheduleId = $selectedSchedule->id;
-            // Also set as active in session
-            $this->request->getSession()->write('activeScheduleId', (int)$scheduleId);
-        }
-        
-        // Get waitlist entries for selected schedule
-        $waitlistEntries = [];
-        if ($scheduleId) {
-            $waitlistEntries = $this->fetchTable('WaitlistEntries')->find()
-                ->where(['WaitlistEntries.schedule_id' => $scheduleId])
-                ->contain(['Children', 'Schedules'])
-                ->orderBy(['WaitlistEntries.priority' => 'ASC'])
-                ->all();
-        }
-        
-        // Get children already on waitlist (no separate "in schedule" in new concept)
-        $childrenOnWaitlist = [];
-        foreach ($waitlistEntries as $entry) {
-            $childrenOnWaitlist[] = $entry->child_id;
-        }
-        
-        // Build sibling groups map and load sibling names
-        $siblingGroupsMap = [];
-        $siblingNames = [];
-        $missingSiblings = []; // Track siblings not in schedule
-        
-        foreach ($waitlistEntries as $entry) {
-            if ($entry->child && $entry->child->sibling_group_id) {
-                // CRITICAL: Check total count in group FIRST
-                $totalInGroup = $this->fetchTable('Children')->find()
-                    ->where(['sibling_group_id' => $entry->child->sibling_group_id])
-                    ->count();
-                
-                // ERROR: A sibling group with only 1 child is a DATA ERROR!
-                if ($totalInGroup <= 1) {
-                    error_log("ERROR: Child '{$entry->child->name}' (ID: {$entry->child->id}) has sibling_group_id {$entry->child->sibling_group_id} but is ALONE in that group! This is a data integrity error.");
-                    // SKIP this child - do NOT show sibling badge
-                    continue;
-                }
-                
-                $siblingGroupsMap[$entry->id] = $entry->child->sibling_group_id;
-                
-                // Load ALL siblings for this group (from entire Children table, not just schedule/waitlist)
-                $siblings = $this->fetchTable('Children')->find()
-                    ->where([
-                        'sibling_group_id' => $entry->child->sibling_group_id,
-                        'id !=' => $entry->child->id // Exclude current child from list
-                    ])
-                    ->orderBy(['name' => 'ASC'])
-                    ->all();
-                
-                $names = [];
-                foreach ($siblings as $sib) {
-                    $names[] = $sib->name;
-                    
-                    // Check if sibling is on waitlist
-                    if (!in_array($sib->id, $childrenOnWaitlist)) {
-                        $missingSiblings[] = [
-                            'name' => $sib->name,
-                            'sibling_of' => $entry->child->name,
-                        ];
+            
+            if (!$selectedSchedule) {
+                $activeScheduleId = $this->request->getSession()->read('activeScheduleId');
+                if ($activeScheduleId) {
+                    try {
+                        $selectedSchedule = $schedulesTable->get($activeScheduleId);
+                        $scheduleId = $selectedSchedule->id;
+                    } catch (\Exception $e) {
+                        $this->request->getSession()->delete('activeScheduleId');
                     }
                 }
-                
-                // CRITICAL: Only set if names found (safety check)
-                if (!empty($names)) {
-                    $siblingNames[$entry->child->id] = implode(', ', $names);
-                } else {
-                    error_log("WARNING: Child '{$entry->child->name}' (ID: {$entry->child->id}) passed count check but siblings query returned empty! Database inconsistency!");
-                }
+            }
+            
+            if (!$selectedSchedule && $schedules->count() > 0) {
+                $selectedSchedule = $schedules->first();
+                $scheduleId = $selectedSchedule->id;
+                $this->request->getSession()->write('activeScheduleId', (int)$scheduleId);
             }
         }
         
-        // Available children: All active org children NOT on waitlist
+        // Get children on waitlist (NEW: from children table)
+        $waitlistChildren = [];
+        $childrenOnWaitlist = [];
+        if ($scheduleId) {
+            $waitlistChildren = $this->fetchTable('Children')->find()
+                ->where([
+                    'schedule_id' => $scheduleId,
+                    'waitlist_order IS NOT' => null
+                ])
+                ->orderBy(['waitlist_order' => 'ASC'])
+                ->all();
+            
+            foreach ($waitlistChildren as $child) {
+                $childrenOnWaitlist[] = $child->id;
+            }
+        }
+        
+        // Get available children (not on waitlist)
         $availableChildren = [];
         if ($scheduleId && $selectedSchedule) {
             $availableChildrenQuery = $this->fetchTable('Children')->find()
@@ -337,61 +161,84 @@ class WaitlistController extends AppController
             }
             
             $availableChildren = $availableChildrenQuery->all();
-            
-            // Load sibling names for available children too
-            foreach ($availableChildren as $child) {
-                if ($child->sibling_group_id && !isset($siblingNames[$child->id])) {
-                    // CRITICAL: Check total count in group FIRST
-                    $totalInGroup = $this->fetchTable('Children')->find()
-                        ->where(['sibling_group_id' => $child->sibling_group_id])
-                        ->count();
+        }
+        
+        $countNotOnWaitlist = count($availableChildren);
+        
+        // Build sibling groups map and load sibling names
+        $siblingGroupsMap = [];
+        $siblingNames = [];
+        $missingSiblings = [];
+        
+        foreach ($waitlistChildren as $child) {
+            if ($child->sibling_group_id) {
+                $totalInGroup = $this->fetchTable('Children')->find()
+                    ->where(['sibling_group_id' => $child->sibling_group_id])
+                    ->count();
+                
+                if ($totalInGroup <= 1) {
+                    continue; // Skip single-child groups
+                }
+                
+                $siblingGroupsMap[$child->id] = $child->sibling_group_id;
+                
+                $siblings = $this->fetchTable('Children')->find()
+                    ->where([
+                        'sibling_group_id' => $child->sibling_group_id,
+                        'id !=' => $child->id
+                    ])
+                    ->orderBy(['name' => 'ASC'])
+                    ->all();
+                
+                $names = [];
+                foreach ($siblings as $sib) {
+                    $names[] = $sib->name;
                     
-                    // ERROR: A sibling group with only 1 child is a DATA ERROR!
-                    if ($totalInGroup <= 1) {
-                        error_log("ERROR: Child '{$child->name}' (ID: {$child->id}) has sibling_group_id {$child->sibling_group_id} but is ALONE in that group! This is a data integrity error.");
-                        // SKIP this child - do NOT show sibling badge
-                        continue;
+                    if (!in_array($sib->id, $childrenOnWaitlist)) {
+                        $missingSiblings[] = [
+                            'name' => $sib->name,
+                            'sibling_of' => $child->name,
+                        ];
                     }
-                    
-                    $siblings = $this->fetchTable('Children')->find()
-                        ->where([
-                            'sibling_group_id' => $child->sibling_group_id,
-                            'id !=' => $child->id
-                        ])
-                        ->orderBy(['name' => 'ASC'])
-                        ->all();
-                    
-                    $names = [];
-                    foreach ($siblings as $sib) {
-                        $names[] = $sib->name;
-                    }
-                    
-                    // CRITICAL: Only set if names found (safety check)
-                    if (!empty($names)) {
-                        $siblingNames[$child->id] = implode(', ', $names);
-                    } else {
-                        error_log("WARNING: Child '{$child->name}' (ID: {$child->id}) passed count check but siblings query returned empty! Database inconsistency!");
-                    }
+                }
+                
+                if (!empty($names)) {
+                    $siblingNames[$child->id] = implode(', ', $names);
                 }
             }
         }
         
-        // Count total children not yet on waitlist (for "Add All" button visibility)
-        $childrenNotOnWaitlist = $this->fetchTable('Children')->find()
-            ->where([
-                'Children.organization_id' => $primaryOrg->id,
-                'Children.is_active' => true
-            ]);
-        
-        if (!empty($childrenOnWaitlist)) {
-            $childrenNotOnWaitlist->where([
-                'Children.id NOT IN' => $childrenOnWaitlist
-            ]);
+        // Load sibling names for available children
+        foreach ($availableChildren as $child) {
+            if ($child->sibling_group_id && !isset($siblingNames[$child->id])) {
+                $totalInGroup = $this->fetchTable('Children')->find()
+                    ->where(['sibling_group_id' => $child->sibling_group_id])
+                    ->count();
+                
+                if ($totalInGroup <= 1) {
+                    continue;
+                }
+                
+                $siblings = $this->fetchTable('Children')->find()
+                    ->where([
+                        'sibling_group_id' => $child->sibling_group_id,
+                        'id !=' => $child->id
+                    ])
+                    ->orderBy(['name' => 'ASC'])
+                    ->all();
+                
+                $names = [];
+                foreach ($siblings as $sib) {
+                    $names[] = $sib->name;
+                }
+                
+                if (!empty($names)) {
+                    $siblingNames[$child->id] = implode(', ', $names);
+                }
+            }
         }
         
-        $countNotOnWaitlist = $childrenNotOnWaitlist->count();
-        
-        $this->set(compact('schedules', 'selectedSchedule', 'waitlistEntries', 'availableChildren', 'countNotOnWaitlist', 'siblingGroupsMap', 'siblingNames', 'missingSiblings'));
+        $this->set(compact('schedules', 'selectedSchedule', 'waitlistChildren', 'availableChildren', 'countNotOnWaitlist', 'siblingGroupsMap', 'siblingNames', 'missingSiblings', 'user'));
     }
 
     /**
@@ -407,55 +254,62 @@ class WaitlistController extends AppController
         $scheduleId = $data['schedule_id'];
         $childId = $data['child_id'];
         
-        // Load child to check for siblings
-        $child = $this->fetchTable('Children')->get($childId);
+        $childrenTable = $this->fetchTable('Children');
+        $child = $childrenTable->get($childId);
         
-        // Check if child has siblings already on waitlist
-        $nextPriority = null;
+        // Check if already on waitlist
+        if ($child->schedule_id == $scheduleId && $child->waitlist_order !== null) {
+            $this->Flash->error(__('Child is already on waitlist.'));
+            return $this->redirect(['action' => 'index', '?' => ['schedule_id' => $scheduleId]]);
+        }
+        
+        // Find position: place after sibling or at end
+        $nextOrder = null;
         if ($child->sibling_group_id) {
-            // Find sibling on waitlist with highest priority
-            $siblingEntry = $this->fetchTable('WaitlistEntries')->find()
-                ->contain(['Children'])
+            // Find sibling on waitlist with highest order
+            $siblingOnWaitlist = $childrenTable->find()
                 ->where([
-                    'WaitlistEntries.schedule_id' => $scheduleId,
-                    'Children.sibling_group_id' => $child->sibling_group_id,
-                    'Children.id !=' => $childId
+                    'schedule_id' => $scheduleId,
+                    'sibling_group_id' => $child->sibling_group_id,
+                    'id !=' => $childId,
+                    'waitlist_order IS NOT' => null
                 ])
-                ->orderBy(['WaitlistEntries.priority' => 'DESC'])
+                ->orderBy(['waitlist_order' => 'DESC'])
                 ->first();
             
-            if ($siblingEntry) {
+            if ($siblingOnWaitlist) {
                 // Place directly after sibling
-                $nextPriority = $siblingEntry->priority + 1;
+                $nextOrder = $siblingOnWaitlist->waitlist_order + 1;
                 
                 // Shift all following entries down by 1
-                $this->fetchTable('WaitlistEntries')->updateAll(
-                    ['priority' => new \Cake\Database\Expression\QueryExpression('priority + 1')],
+                $childrenTable->updateAll(
+                    ['waitlist_order' => new \Cake\Database\Expression\QueryExpression('waitlist_order + 1')],
                     [
                         'schedule_id' => $scheduleId,
-                        'priority >=' => $nextPriority
+                        'waitlist_order >=' => $nextOrder,
+                        'waitlist_order IS NOT' => null
                     ]
                 );
             }
         }
         
-        // If no sibling found or no siblings, add at end
-        if ($nextPriority === null) {
-            $maxPriority = $this->fetchTable('WaitlistEntries')->find()
-                ->where(['schedule_id' => $scheduleId])
-                ->select(['max_priority' => 'MAX(priority)'])
+        // If no sibling found, add at end
+        if ($nextOrder === null) {
+            $maxOrder = $childrenTable->find()
+                ->where([
+                    'schedule_id' => $scheduleId,
+                    'waitlist_order IS NOT' => null
+                ])
+                ->select(['max_order' => $childrenTable->find()->func()->max('waitlist_order')])
                 ->first();
             
-            $nextPriority = ($maxPriority && $maxPriority->max_priority) ? $maxPriority->max_priority + 1 : 1;
+            $nextOrder = ($maxOrder && $maxOrder->max_order) ? $maxOrder->max_order + 1 : 1;
         }
         
-        $entry = $this->fetchTable('WaitlistEntries')->newEntity([
-            'schedule_id' => $scheduleId,
-            'child_id' => $childId,
-            'priority' => $nextPriority,
-        ]);
+        $child->schedule_id = $scheduleId;
+        $child->waitlist_order = $nextOrder;
         
-        if ($this->fetchTable('WaitlistEntries')->save($entry)) {
+        if ($childrenTable->save($child)) {
             $this->Flash->success(__('Child added to waitlist.'));
         } else {
             $this->Flash->error(__('Could not add child to waitlist.'));
@@ -467,19 +321,23 @@ class WaitlistController extends AppController
     /**
      * Remove child from waitlist
      *
-     * @param string|null $id Waitlist Entry id
+     * @param string|null $id Child id
      * @return \Cake\Http\Response|null Redirects back to index
      */
     public function delete($id = null)
     {
         $this->request->allowMethod(['post', 'delete']);
         
-        $entry = $this->fetchTable('WaitlistEntries')->get($id);
-        $scheduleId = $entry->schedule_id;
+        $childrenTable = $this->fetchTable('Children');
+        $child = $childrenTable->get($id);
+        $scheduleId = $child->schedule_id;
         
-        if ($this->fetchTable('WaitlistEntries')->delete($entry)) {
-            // Reorder remaining entries
-            $this->reorderPriorities($scheduleId);
+        $child->waitlist_order = null;
+        // Keep schedule_id - child stays assigned
+        
+        if ($childrenTable->save($child)) {
+            // Reorder remaining children
+            $this->reorderWaitlist($scheduleId);
             $this->Flash->success(__('Child removed from waitlist.'));
         } else {
             $this->Flash->error(__('Could not remove child from waitlist.'));
@@ -489,7 +347,7 @@ class WaitlistController extends AppController
     }
 
     /**
-     * Update priority order via AJAX (for drag & drop)
+     * Update waitlist order via AJAX (for drag & drop)
      *
      * @return \Cake\Http\Response JSON response
      */
@@ -500,15 +358,15 @@ class WaitlistController extends AppController
         
         $data = $this->request->getData();
         $scheduleId = $data['schedule_id'];
-        $order = $data['order']; // Array of entry IDs in new order
+        $order = $data['order']; // Array of child IDs in new order
         
-        $table = $this->fetchTable('WaitlistEntries');
+        $childrenTable = $this->fetchTable('Children');
         
-        // Update priorities based on new order
-        foreach ($order as $index => $entryId) {
-            $entry = $table->get($entryId);
-            $entry->priority = $index + 1;
-            $table->save($entry);
+        // Update waitlist_order based on new order
+        foreach ($order as $index => $childId) {
+            $child = $childrenTable->get($childId);
+            $child->waitlist_order = $index + 1;
+            $childrenTable->save($child);
         }
         
         $this->set([
@@ -521,22 +379,26 @@ class WaitlistController extends AppController
     }
 
     /**
-     * Reorder priorities after deletion to remove gaps
+     * Reorder waitlist after deletion to remove gaps
      *
      * @param int $scheduleId Schedule ID
      * @return void
      */
-    private function reorderPriorities(int $scheduleId): void
+    private function reorderWaitlist(int $scheduleId): void
     {
-        $entries = $this->fetchTable('WaitlistEntries')->find()
-            ->where(['schedule_id' => $scheduleId])
-            ->orderBy(['priority' => 'ASC'])
+        $childrenTable = $this->fetchTable('Children');
+        $children = $childrenTable->find()
+            ->where([
+                'schedule_id' => $scheduleId,
+                'waitlist_order IS NOT' => null
+            ])
+            ->orderBy(['waitlist_order' => 'ASC'])
             ->all();
         
-        $priority = 1;
-        foreach ($entries as $entry) {
-            $entry->priority = $priority++;
-            $this->fetchTable('WaitlistEntries')->save($entry);
+        $order = 1;
+        foreach ($children as $child) {
+            $child->waitlist_order = $order++;
+            $childrenTable->save($child);
         }
     }
 
@@ -557,60 +419,54 @@ class WaitlistController extends AppController
         
         $user = $this->Authentication->getIdentity();
         $childrenTable = $this->fetchTable('Children');
-        $waitlistTable = $this->fetchTable('WaitlistEntries');
         
-        // Get user's primary organization (or all orgs for system admins)
-        $primaryOrg = $this->getPrimaryOrganization();
-        
-        if (!$primaryOrg && !$user->is_system_admin) {
-            $this->Flash->error(__('You must belong to an organization.'));
-            return $this->redirect(['action' => 'index']);
-        }
+        // Get schedule to find organization
+        $schedule = $this->fetchTable('Schedules')->get($scheduleId);
         
         // Get all active children for this organization
         $allChildrenQuery = $childrenTable->find()
-            ->where(['Children.is_active' => true]);
-        
-        // System admins see all children, regular users only their org
-        if (!$user->is_system_admin && $primaryOrg) {
-            $allChildrenQuery->where(['Children.organization_id' => $primaryOrg->id]);
-        }
+            ->where([
+                'Children.is_active' => true,
+                'Children.organization_id' => $schedule->organization_id
+            ]);
         
         $allChildren = $allChildrenQuery->all();
         
-        // Get existing waitlist entries - build array of child IDs
-        $existingEntries = $waitlistTable->find()
-            ->where(['schedule_id' => $scheduleId])
+        // Get existing waitlist children IDs
+        $existingOnWaitlist = $childrenTable->find()
+            ->where([
+                'schedule_id' => $scheduleId,
+                'waitlist_order IS NOT' => null
+            ])
             ->all();
         
         $existingChildIds = [];
-        foreach ($existingEntries as $entry) {
-            $existingChildIds[] = (int)$entry->child_id;  // Cast to int to ensure type consistency
+        foreach ($existingOnWaitlist as $child) {
+            $existingChildIds[] = (int)$child->id;
         }
         
-        // Find next priority number
-        $maxPriority = $waitlistTable->find()
-            ->where(['schedule_id' => $scheduleId])
-            ->select(['max_priority' => $waitlistTable->find()->func()->max('priority')])
+        // Find next order number
+        $maxOrder = $childrenTable->find()
+            ->where([
+                'schedule_id' => $scheduleId,
+                'waitlist_order IS NOT' => null
+            ])
+            ->select(['max_order' => $childrenTable->find()->func()->max('waitlist_order')])
             ->first();
         
-        $nextPriority = ($maxPriority && isset($maxPriority->max_priority)) ? (int)$maxPriority->max_priority + 1 : 1;
+        $nextOrder = ($maxOrder && $maxOrder->max_order) ? (int)$maxOrder->max_order + 1 : 1;
         $addedCount = 0;
         
         // Add children that aren't already on the waitlist
         foreach ($allChildren as $child) {
             $childId = (int)$child->id;
-            $isInArray = in_array($childId, $existingChildIds, true);
             
-            if (!$isInArray) {
-                $entry = $waitlistTable->newEntity([
-                    'schedule_id' => (int)$scheduleId,
-                    'child_id' => $childId,
-                    'priority' => (int)$nextPriority
-                ]);
-                $nextPriority++;
+            if (!in_array($childId, $existingChildIds, true)) {
+                $child->schedule_id = (int)$scheduleId;
+                $child->waitlist_order = (int)$nextOrder;
+                $nextOrder++;
                 
-                if ($waitlistTable->save($entry)) {
+                if ($childrenTable->save($child)) {
                     $addedCount++;
                 }
             }

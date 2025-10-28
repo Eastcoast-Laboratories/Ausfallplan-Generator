@@ -3,227 +3,48 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use App\Model\Table\WaitlistEntriesTable;
-use App\Model\Table\ScheduleDaysTable;
-use App\Model\Table\AssignmentsTable;
 use App\Model\Table\ChildrenTable;
 use App\Model\Table\SiblingGroupsTable;
 use Cake\ORM\TableRegistry;
 use Cake\Log\Log;
 
 /**
- * Waitlist Service
+ * Waitlist Service - NEW ARCHITECTURE
  * 
- * ⚠️  PARTIALLY DEPRECATED: Some methods obsolete in new concept
- * Old: Applied waitlist to schedule_days/assignments
- * New: Waitlist is the source of truth, report generates dynamically
+ * Uses children table fields directly:
+ * - children.schedule_id (which schedule the child is assigned to)
+ * - children.waitlist_order (position in waitlist, null = not on waitlist)
+ * - children.organization_order (general org-wide ordering)
  * 
- * Still useful methods:
- * - Add/remove from waitlist
- * - Update priority/ordering
- * - Manage waitlist entries
- * 
- * @deprecated applyToSchedule() method will be removed
+ * No separate waitlist_entries table anymore!
  */
 class WaitlistService
 {
-    private WaitlistEntriesTable $waitlistEntries;
     private ChildrenTable $children;
     private SiblingGroupsTable $siblingGroups;
-    private RulesService $rulesService;
-    private $rulesTable;
 
     public function __construct()
     {
-        $this->waitlistEntries = TableRegistry::getTableLocator()->get('WaitlistEntries');
         $this->children = TableRegistry::getTableLocator()->get('Children');
         $this->siblingGroups = TableRegistry::getTableLocator()->get('SiblingGroups');
-        $this->rulesTable = TableRegistry::getTableLocator()->get('Rules');
-        $this->rulesService = new RulesService();
-        // NOTE: ScheduleDays and Assignments tables no longer exist
     }
 
     /**
-     * Apply waitlist entries to a schedule
+     * Get children on waitlist for a schedule
      * 
-     * ⚠️  DEPRECATED: This method is obsolete
-     * Old: Created assignments in schedule_days
-     * New: Waitlist is the source, report generates dynamically
-     *
-     * @deprecated Will be removed
      * @param int $scheduleId Schedule ID
-     * @return int Number of assignments created (always 0 now)
+     * @return array Children with waitlist_order set, ordered by waitlist_order ASC
      */
-    public function applyToSchedule(int $scheduleId): int
+    public function getWaitlistChildren(int $scheduleId): array
     {
-        // DEPRECATED: No longer creates assignments
-        return 0;
-        
-        // OLD CODE (kept for reference):
-        // Load all schedule days for this schedule
-        $days = $this->scheduleDays->find()
-            ->where(['schedule_id' => $scheduleId])
-            ->orderByAsc('position')
-            ->all();
-
-        if ($days->isEmpty()) {
-            Log::warning("No schedule days found for schedule {$scheduleId}");
-            return 0;
-        }
-
-        // Load rules for schedule
-        $rules = $this->rulesTable->find()
-            ->where(['schedule_id' => $scheduleId])
-            ->all()
-            ->toArray();
-
-        // Load waitlist entries sorted by priority DESC, created ASC
-        $waitlistEntries = $this->waitlistEntries->find()
+        return $this->children->find()
             ->where([
                 'schedule_id' => $scheduleId,
-                'remaining >' => 0,
+                'waitlist_order IS NOT' => null
             ])
-            ->contain(['Children'])
-            ->orderByDesc('priority')
-            ->orderByAsc('WaitlistEntries.created')
-            ->all();
-
-        if ($waitlistEntries->isEmpty()) {
-            Log::info("No active waitlist entries for schedule {$scheduleId}");
-            return 0;
-        }
-
-        // Get integrative weight from rules
-        $integrativeWeight = $this->rulesService->getIntegrativeWeight($rules);
-
-        $assignmentsCreated = 0;
-
-        // Process each waitlist entry
-        foreach ($waitlistEntries as $entry) {
-            if ($entry->remaining <= 0) {
-                continue;
-            }
-
-            $child = $entry->child;
-            
-            // Check if child is in a sibling group
-            $siblingGroupId = $child->sibling_group_id;
-            $siblings = [];
-            $totalWeight = $child->is_integrative ? $integrativeWeight : 1;
-
-            if ($siblingGroupId !== null) {
-                // Load all siblings in the group
-                $siblings = $this->children->find()
-                    ->where(['sibling_group_id' => $siblingGroupId])
-                    ->all()
-                    ->toArray();
-
-                // Calculate total weight for the sibling group
-                $totalWeight = 0;
-                foreach ($siblings as $sibling) {
-                    $totalWeight += $sibling->is_integrative ? $integrativeWeight : 1;
-                }
-            }
-
-            // Try to place child/group on days where they can fit
-            $placementsThisEntry = 0;
-
-            foreach ($days as $day) {
-                if ($placementsThisEntry >= $entry->remaining) {
-                    break;
-                }
-
-                // Get current capacity usage
-                $currentWeight = $this->calculateCurrentWeight($day->id, $integrativeWeight);
-                $remainingCapacity = $day->capacity - $currentWeight;
-
-                // Check if there's enough capacity
-                if ($remainingCapacity < $totalWeight) {
-                    continue;
-                }
-
-                // Check if child/siblings are already assigned to this day
-                if ($siblingGroupId !== null) {
-                    // Check all siblings
-                    $alreadyAssigned = false;
-                    foreach ($siblings as $sibling) {
-                        $existingAssignment = $this->assignments->find()
-                            ->where([
-                                'schedule_day_id' => $day->id,
-                                'child_id' => $sibling->id,
-                            ])
-                            ->first();
-                        
-                        if ($existingAssignment) {
-                            $alreadyAssigned = true;
-                            break;
-                        }
-                    }
-
-                    if ($alreadyAssigned) {
-                        continue;
-                    }
-
-                    // Place all siblings atomically
-                    foreach ($siblings as $sibling) {
-                        $weight = $sibling->is_integrative ? $integrativeWeight : 1;
-                        $assignment = $this->assignments->newEntity([
-                            'schedule_day_id' => $day->id,
-                            'child_id' => $sibling->id,
-                            'weight' => $weight,
-                            'source' => 'waitlist',
-                            'sort_order' => 0,
-                        ]);
-
-                        if (!$this->assignments->save($assignment)) {
-                            Log::error("Failed to create waitlist assignment for child {$sibling->id}");
-                            continue;
-                        }
-
-                        $assignmentsCreated++;
-                    }
-                } else {
-                    // Check if child is already assigned to this day
-                    $existingAssignment = $this->assignments->find()
-                        ->where([
-                            'schedule_day_id' => $day->id,
-                            'child_id' => $child->id,
-                        ])
-                        ->first();
-
-                    if ($existingAssignment) {
-                        continue;
-                    }
-
-                    // Place single child
-                    $assignment = $this->assignments->newEntity([
-                        'schedule_day_id' => $day->id,
-                        'child_id' => $child->id,
-                        'weight' => $totalWeight,
-                        'source' => 'waitlist',
-                        'sort_order' => 0,
-                    ]);
-
-                    if (!$this->assignments->save($assignment)) {
-                        Log::error("Failed to create waitlist assignment for child {$child->id}");
-                        continue;
-                    }
-
-                    $assignmentsCreated++;
-                }
-
-                $placementsThisEntry++;
-            }
-
-            // Decrement remaining counter
-            if ($placementsThisEntry > 0) {
-                $entry->remaining -= $placementsThisEntry;
-                $this->waitlistEntries->save($entry);
-            }
-        }
-
-        Log::info("Created {$assignmentsCreated} waitlist assignments for schedule {$scheduleId}");
-        return $assignmentsCreated;
+            ->orderBy(['waitlist_order' => 'ASC'])
+            ->all()
+            ->toArray();
     }
 
     /**
@@ -231,110 +52,146 @@ class WaitlistService
      *
      * @param int $scheduleId Schedule ID
      * @param int $childId Child ID
-     * @param int $priority Priority (higher = first)
-     * @param int $remaining Number of days to place child
+     * @param int|null $waitlistOrder Position in waitlist (null = add at end)
      * @return bool Success
      */
-    public function addToWaitlist(int $scheduleId, int $childId, int $priority = 1, int $remaining = 1): bool
+    public function addToWaitlist(int $scheduleId, int $childId, ?int $waitlistOrder = null): bool
     {
-        // Check if entry already exists
-        $existing = $this->waitlistEntries->find()
-            ->where([
-                'schedule_id' => $scheduleId,
-                'child_id' => $childId,
-            ])
-            ->first();
+        $child = $this->children->get($childId);
 
-        if ($existing) {
+        // Check if already on waitlist for this schedule
+        if ($child->schedule_id == $scheduleId && $child->waitlist_order !== null) {
             Log::warning("Child {$childId} is already on waitlist for schedule {$scheduleId}");
             return false;
         }
 
-        $entry = $this->waitlistEntries->newEntity([
-            'schedule_id' => $scheduleId,
-            'child_id' => $childId,
-            'priority' => $priority,
-            'remaining' => $remaining,
-        ]);
+        // If no order specified, add at end
+        if ($waitlistOrder === null) {
+            $maxOrder = $this->children->find()
+                ->where([
+                    'schedule_id' => $scheduleId,
+                    'waitlist_order IS NOT' => null
+                ])
+                ->select(['max_order' => $this->children->find()->func()->max('waitlist_order')])
+                ->first();
+            
+            $waitlistOrder = ($maxOrder && $maxOrder->max_order !== null) ? $maxOrder->max_order + 1 : 1;
+        }
 
-        if (!$this->waitlistEntries->save($entry)) {
+        $child->schedule_id = $scheduleId;
+        $child->waitlist_order = $waitlistOrder;
+
+        if (!$this->children->save($child)) {
             Log::error("Failed to add child {$childId} to waitlist for schedule {$scheduleId}");
             return false;
         }
 
-        Log::info("Added child {$childId} to waitlist for schedule {$scheduleId} with priority {$priority}");
+        Log::info("Added child {$childId} to waitlist for schedule {$scheduleId} with order {$waitlistOrder}");
         return true;
     }
 
     /**
      * Remove a child from the waitlist
      *
-     * @param int $entryId Waitlist entry ID
+     * @param int $childId Child ID
      * @return bool Success
      */
-    public function removeFromWaitlist(int $entryId): bool
+    public function removeFromWaitlist(int $childId): bool
     {
-        $entry = $this->waitlistEntries->get($entryId);
+        $child = $this->children->get($childId);
 
-        if (!$entry) {
-            Log::error("Waitlist entry {$entryId} not found");
+        if (!$child) {
+            Log::error("Child {$childId} not found");
             return false;
         }
 
-        if (!$this->waitlistEntries->delete($entry)) {
-            Log::error("Failed to delete waitlist entry {$entryId}");
+        if ($child->waitlist_order === null) {
+            Log::warning("Child {$childId} is not on a waitlist");
             return false;
         }
 
-        Log::info("Removed waitlist entry {$entryId}");
+        $child->waitlist_order = null;
+        // Keep schedule_id - child stays "assigned" but not on waitlist
+
+        if (!$this->children->save($child)) {
+            Log::error("Failed to remove child {$childId} from waitlist");
+            return false;
+        }
+
+        Log::info("Removed child {$childId} from waitlist");
         return true;
     }
 
     /**
-     * Update priority of a waitlist entry
+     * Update waitlist order of a child
      *
-     * @param int $entryId Waitlist entry ID
-     * @param int $newPriority New priority value
+     * @param int $childId Child ID
+     * @param int $newOrder New waitlist order value
      * @return bool Success
      */
-    public function updatePriority(int $entryId, int $newPriority): bool
+    public function updateWaitlistOrder(int $childId, int $newOrder): bool
     {
-        $entry = $this->waitlistEntries->get($entryId);
+        $child = $this->children->get($childId);
 
-        if (!$entry) {
-            Log::error("Waitlist entry {$entryId} not found");
+        if (!$child) {
+            Log::error("Child {$childId} not found");
             return false;
         }
 
-        $entry->priority = $newPriority;
-
-        if (!$this->waitlistEntries->save($entry)) {
-            Log::error("Failed to update priority for waitlist entry {$entryId}");
+        if ($child->waitlist_order === null) {
+            Log::warning("Child {$childId} is not on a waitlist");
             return false;
         }
 
-        Log::info("Updated priority for waitlist entry {$entryId} to {$newPriority}");
+        $child->waitlist_order = $newOrder;
+
+        if (!$this->children->save($child)) {
+            Log::error("Failed to update waitlist order for child {$childId}");
+            return false;
+        }
+
+        Log::info("Updated waitlist order for child {$childId} to {$newOrder}");
         return true;
     }
 
     /**
-     * Calculate current weight usage for a schedule day
-     *
-     * @param int $scheduleDayId Schedule day ID
-     * @param int $integrativeWeight Weight for integrative children
-     * @return int Total weight
+     * Reorder entire waitlist (shift orders)
+     * 
+     * @param int $scheduleId Schedule ID
+     * @param int $childId Child to move
+     * @param int $newPosition New position (1-based)
+     * @return bool Success
      */
-    private function calculateCurrentWeight(int $scheduleDayId, int $integrativeWeight): int
+    public function reorderWaitlist(int $scheduleId, int $childId, int $newPosition): bool
     {
-        $assignments = $this->assignments->find()
-            ->where(['schedule_day_id' => $scheduleDayId])
-            ->all();
-
-        $totalWeight = 0;
-        foreach ($assignments as $assignment) {
-            $totalWeight += $assignment->weight;
+        $child = $this->children->get($childId);
+        if (!$child || $child->schedule_id != $scheduleId) {
+            return false;
         }
 
-        return $totalWeight;
+        $currentPosition = $child->waitlist_order;
+        if ($currentPosition === null) {
+            return false;
+        }
+
+        // Get all waitlist children for this schedule
+        $waitlistChildren = $this->getWaitlistChildren($scheduleId);
+        
+        // Remove child from list temporarily
+        $tempList = array_filter($waitlistChildren, fn($c) => $c->id != $childId);
+        
+        // Insert at new position
+        array_splice($tempList, $newPosition - 1, 0, [$child]);
+        
+        // Save new orders
+        $order = 1;
+        foreach ($tempList as $c) {
+            $c->waitlist_order = $order++;
+            $this->children->save($c);
+        }
+
+        Log::info("Reordered waitlist for schedule {$scheduleId}, moved child {$childId} to position {$newPosition}");
+        return true;
     }
 }
+

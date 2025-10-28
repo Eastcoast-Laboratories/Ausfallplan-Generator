@@ -39,15 +39,17 @@ class ReportService
         // Load schedule
         $schedule = $schedulesTable->get($scheduleId, contain: ['Organizations']);
 
-        // Get sorted children from assignments (NEW: using sort_order instead of waitlist)
-        $sortedChildren = $this->getSortedChildrenFromAssignments($scheduleId);
+        // Get sorted children from waitlist (NEW ARCHITECTURE: from children table)
+        $sortedChildren = $this->getSortedChildrenFromWaitlist($scheduleId);
         
-        // Get waitlist for backward compatibility (still needed for "always at end" display)
-        $waitlistTable = TableRegistry::getTableLocator()->get('WaitlistEntries');
-        $waitlist = $waitlistTable->find()
-            ->contain(['Children'])
-            ->where(['WaitlistEntries.schedule_id' => $scheduleId])
-            ->orderBy(['WaitlistEntries.priority' => 'ASC'])
+        // Get waitlist children for display
+        $childrenTable = TableRegistry::getTableLocator()->get('Children');
+        $waitlist = $childrenTable->find()
+            ->where([
+                'schedule_id' => $scheduleId,
+                'waitlist_order IS NOT' => null
+            ])
+            ->orderBy(['waitlist_order' => 'ASC'])
             ->all()
             ->toArray();
 
@@ -72,36 +74,29 @@ class ReportService
     }
 
     /**
-     * Get sorted children from waitlist (NOT assignments!)
-     * Groups siblings together, respects priority from waitlist_entries
+     * Get sorted children from waitlist
+     * Groups siblings together, respects waitlist_order from children table
      *
      * @param int $scheduleId
      * @return array Array of child units (singles or sibling groups)
      */
-    private function getSortedChildrenFromAssignments(int $scheduleId): array
+    private function getSortedChildrenFromWaitlist(int $scheduleId): array
     {
-        $waitlistTable = TableRegistry::getTableLocator()->get('WaitlistEntries');
         $childrenTable = TableRegistry::getTableLocator()->get('Children');
         
-        // Get all child IDs from WAITLIST with their priority (not assignments!)
-        $childSortMap = $waitlistTable->find()
-            ->select(['child_id', 'priority'])
-            ->where(['WaitlistEntries.schedule_id' => $scheduleId])
-            ->orderBy(['priority' => 'ASC'])
+        // Get all children on waitlist for this schedule
+        $children = $childrenTable->find()
+            ->where([
+                'schedule_id' => $scheduleId,
+                'waitlist_order IS NOT' => null
+            ])
+            ->orderBy(['waitlist_order' => 'ASC'])
             ->all()
             ->toArray();
 
-        if (empty($childSortMap)) {
+        if (empty($children)) {
             return [];
         }
-
-        $childIds = array_map(fn($row) => $row->child_id, $childSortMap);
-
-        // Load all children with sibling_group_id
-        $children = $childrenTable->find()
-            ->where(['Children.id IN' => $childIds])
-            ->all()
-            ->toArray();
 
         // Create a map for quick access
         $childrenMap = [];
@@ -114,8 +109,8 @@ class ReportService
         $processedIds = [];
         $result = [];
 
-        foreach ($childSortMap as $row) {
-            $childId = $row->child_id;
+        foreach ($children as $child) {
+            $childId = $child->id;
             
             if (in_array($childId, $processedIds)) {
                 continue;
