@@ -72,24 +72,18 @@ class WaitlistServiceTest extends TestCase
         $result = $this->service->addToWaitlist(
             scheduleId: $schedule->id,
             childId: $child->id,
-            priority: 5,
-            remaining: 3
+            waitlistOrder: 5
         );
 
         $this->assertTrue($result);
 
-        // Verify entry was created
-        $waitlistEntries = TableRegistry::getTableLocator()->get('WaitlistEntries');
-        $entry = $waitlistEntries->find()
-            ->where([
-                'schedule_id' => $schedule->id,
-                'child_id' => $child->id,
-            ])
-            ->first();
+        // Verify child was updated
+        $childrenTable = TableRegistry::getTableLocator()->get('Children');
+        $updatedChild = $childrenTable->get($child->id);
 
-        $this->assertNotNull($entry);
-        $this->assertEquals(5, $entry->priority);
-        $this->assertEquals(3, $entry->remaining);
+        $this->assertNotNull($updatedChild->waitlist_order);
+        $this->assertEquals(5, $updatedChild->waitlist_order);
+        $this->assertEquals($schedule->id, $updatedChild->schedule_id);
     }
 
     /**
@@ -161,27 +155,21 @@ class WaitlistServiceTest extends TestCase
         ]);
         $schedules->save($schedule);
 
-        // Add entry first
-        $this->service->addToWaitlist($schedule->id, $child->id, 5, 3);
+        // Add child to waitlist first
+        $this->service->addToWaitlist($schedule->id, $child->id, 5);
 
-        // Get entry ID
-        $waitlistEntries = TableRegistry::getTableLocator()->get('WaitlistEntries');
-        $entry = $waitlistEntries->find()
-            ->where([
-                'schedule_id' => $schedule->id,
-                'child_id' => $child->id,
-            ])
-            ->first();
-
-        $this->assertNotNull($entry);
+        // Verify child is on waitlist
+        $childrenTable = TableRegistry::getTableLocator()->get('Children');
+        $updatedChild = $childrenTable->get($child->id);
+        $this->assertNotNull($updatedChild->waitlist_order);
 
         // Remove it
-        $result = $this->service->removeFromWaitlist($entry->id);
+        $result = $this->service->removeFromWaitlist($child->id);
         $this->assertTrue($result);
 
-        // Verify it's gone
-        $deleted = $waitlistEntries->find()->where(['id' => $entry->id])->first();
-        $this->assertNull($deleted);
+        // Verify waitlist_order is cleared
+        $removedChild = $childrenTable->get($child->id);
+        $this->assertNull($removedChild->waitlist_order);
     }
 
     /**
@@ -214,28 +202,22 @@ class WaitlistServiceTest extends TestCase
         ]);
         $schedules->save($schedule);
 
-        // Add entry first
-        $this->service->addToWaitlist($schedule->id, $child->id, 5, 3);
+        // Add child to waitlist first
+        $this->service->addToWaitlist($schedule->id, $child->id, 5);
 
-        // Get entry ID
-        $waitlistEntries = TableRegistry::getTableLocator()->get('WaitlistEntries');
-        $entry = $waitlistEntries->find()
-            ->where([
-                'schedule_id' => $schedule->id,
-                'child_id' => $child->id,
-            ])
-            ->first();
+        // Verify initial order
+        $childrenTable = TableRegistry::getTableLocator()->get('Children');
+        $updatedChild = $childrenTable->get($child->id);
+        $this->assertNotNull($updatedChild->waitlist_order);
+        $this->assertEquals(5, $updatedChild->waitlist_order);
 
-        $this->assertNotNull($entry);
-        $this->assertEquals(5, $entry->priority);
-
-        // Update priority
-        $result = $this->service->updatePriority($entry->id, 10);
+        // Update waitlist order
+        $result = $this->service->updateWaitlistOrder($child->id, 10);
         $this->assertTrue($result);
 
         // Verify update
-        $entry = $waitlistEntries->get($entry->id);
-        $this->assertEquals(10, $entry->priority);
+        $updatedChild = $childrenTable->get($child->id);
+        $this->assertEquals(10, $updatedChild->waitlist_order);
     }
 
 
