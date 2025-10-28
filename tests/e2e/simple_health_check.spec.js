@@ -1,6 +1,13 @@
-const { test, expect } = require('@playwright/test');
+const { test, expect} = require('@playwright/test');
 
-test('Simple health check', async ({ page }) => {
+/**
+ * TEST: Simple health check
+ * 
+ * Basic test to verify the application is reachable and responds.
+ * Tests that the homepage loads and has a title.
+ */
+test.describe('Health Check', () => {
+    test('should load homepage successfully', async ({ page }) => {
     console.log('🔍 Testing if app is reachable...');
     
     await page.goto('http://localhost:8080');
@@ -12,4 +19,5 @@ test('Simple health check', async ({ page }) => {
     console.log(`📄 Page title: "${title}"`);
     
     expect(title.length).toBeGreaterThan(0);
+    });
 });
