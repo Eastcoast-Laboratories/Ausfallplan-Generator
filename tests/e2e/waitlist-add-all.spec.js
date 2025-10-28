@@ -49,14 +49,28 @@ test.describe('Waitlist - Add All Children', () => {
         await page.waitForTimeout(2000);
         console.log(`✅ Second child created: ${child2Name}`);
 
-        // Step 4: Navigate to waitlist with existing schedule (ID 1)
-        console.log('📍 Step 4: Navigate to waitlist with schedule ID 1');
-        await page.goto('http://localhost:8080/waitlist?schedule_id=1');
+        // Step 4: Create a schedule for testing
+        console.log('📍 Step 4: Create test schedule');
+        await page.goto('http://localhost:8080/schedules/add');
+        await page.fill('input[name="title"]', `Test Schedule ${Date.now()}`);
+        await page.fill('input[name="starts_on"]', '2025-01-01');
+        await page.fill('input[name="ends_on"]', '2025-12-31');
+        await page.click('button[type="submit"]');
+        await page.waitForLoadState('networkidle');
+        
+        // Extract schedule ID from URL
+        const url = page.url();
+        const scheduleId = url.match(/\/schedules\/view\/(\d+)/)?.[1];
+        console.log(`✅ Test schedule created with ID: ${scheduleId}`);
+
+        // Step 5: Navigate to waitlist with the created schedule
+        console.log('📍 Step 5: Navigate to waitlist with test schedule');
+        await page.goto(`http://localhost:8080/waitlist?schedule_id=${scheduleId}`);
         await page.waitForLoadState('networkidle');
         console.log('✅ Navigated to waitlist with schedule');
 
-        // Step 5: Verify "Add All Children" button is visible (or check if children need to be added)
-        console.log('📍 Step 5: Check if Add All Children button exists');
+        // Step 6: Verify "Add All Children" button is visible (or check if children need to be added)
+        console.log('📍 Step 6: Check if Add All Children button exists');
         const addAllButton = page.locator('text=+ Alle Kinder hinzufügen').or(page.locator('text=+ Add All Children'));
         
         // Check if button exists
@@ -70,20 +84,20 @@ test.describe('Waitlist - Add All Children', () => {
         
         console.log('✅ Add All Children button is visible');
 
-        // Step 6: Click "Add All Children" button
-        console.log('📍 Step 6: Click Add All Children button');
+        // Step 7: Click "Add All Children" button
+        console.log('📍 Step 7: Click Add All Children button');
         await addAllButton.click();
         await page.waitForTimeout(1000); // Wait for action to complete
         console.log('✅ Button clicked');
 
-        // Step 7: Verify success message
-        console.log('📍 Step 7: Verify success message');
+        // Step 8: Verify success message
+        console.log('📍 Step 8: Verify success message');
         const successMessage = page.locator('text=/.*Kinder zur Nachrückliste hinzugefügt|Added.*children to waitlist/i');
         await expect(successMessage).toBeVisible({ timeout: 5000 });
         console.log('✅ Success message displayed');
 
-        // Step 8: Verify both children appear in waitlist
-        console.log('📍 Step 8: Verify children in waitlist');
+        // Step 9: Verify both children appear in waitlist
+        console.log('📍 Step 9: Verify children in waitlist');
         const child1InList = page.locator('.waitlist-item').filter({ hasText: child1Name });
         const child2InList = page.locator('.waitlist-item').filter({ hasText: child2Name });
         
@@ -91,18 +105,15 @@ test.describe('Waitlist - Add All Children', () => {
         await expect(child2InList).toBeVisible();
         console.log(`✅ Both children found in waitlist: ${child1Name}, ${child2Name}`);
 
-        // Step 9: Verify button is no longer visible (all children added)
-        console.log('📍 Step 9: Verify button disappears after adding all');
+        // Step 10: Verify button is no longer visible (all children added)
+        console.log('📍 Step 10: Verify button disappears after adding all');
         await page.waitForTimeout(500);
         const buttonAfter = page.locator('text=+ Alle Kinder hinzufügen').or(page.locator('text=+ Add All Children'));
         await expect(buttonAfter).not.toBeVisible();
         console.log('✅ Button correctly hidden after all children added');
 
         console.log('');
-        console.log('📊 SUMMARY:');
-        console.log(`  - Schedule created: ${scheduleTitle}`);
-        console.log(`  - Children created: ${child1Name}, ${child2Name}`);
-        console.log(`  - Add All button: ✅ Works correctly`);
+        console.log('🎉 TEST COMPLETED SUCCESSFULLY!');
         console.log(`  - Both children in waitlist: ✅`);
         console.log(`  - Button hidden after: ✅`);
         console.log('');
