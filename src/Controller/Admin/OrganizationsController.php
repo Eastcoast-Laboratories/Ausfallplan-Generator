@@ -217,8 +217,7 @@ class OrganizationsController extends AppController
                 $childrenTable->deleteAll(['organization_id' => $id]);
             }
             
-            // 2. Delete waitlist entries for schedules in this org
-            $waitlistTable = $this->fetchTable('WaitlistEntries');
+            // 2. Clear schedule_id and waitlist_order for children in this org's schedules
             $schedulesInOrg = $this->fetchTable('Schedules')
                 ->find()
                 ->where(['organization_id' => $id])
@@ -227,7 +226,14 @@ class OrganizationsController extends AppController
                 ->toArray();
             
             if (!empty($schedulesInOrg)) {
-                $waitlistTable->deleteAll(['schedule_id IN' => $schedulesInOrg]);
+                // Clear waitlist assignments (set schedule_id and waitlist_order to null)
+                $childrenTable->updateAll(
+                    [
+                        'schedule_id' => null,
+                        'waitlist_order' => null
+                    ],
+                    ['schedule_id IN' => $schedulesInOrg]
+                );
             }
 
             // 3. Delete schedules
