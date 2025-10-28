@@ -3,7 +3,7 @@
  * @var \App\View\AppView $this
  * @var iterable<\App\Model\Entity\Schedule> $schedules
  * @var \App\Model\Entity\Schedule|null $selectedSchedule
- * @var iterable<\App\Model\Entity\WaitlistEntry> $waitlistEntries
+ * @var iterable<\App\Model\Entity\Child> $waitlistChildren
  * @var iterable<\App\Model\Entity\Child> $availableChildren
  */
 $this->assign('title', __('Waitlist'));
@@ -127,27 +127,27 @@ $this->assign('title', __('Waitlist'));
         <div class="waitlist-children">
             <h4><?= __('Children on Waitlist') ?> <span style="font-size: 0.9rem; color: #666;">(<?= __('Drag to reorder') ?>)</span></h4>
             <div id="waitlist-sortable" style="background: #fff3e0; padding: 1rem; border-radius: 8px; min-height: 300px;">
-                <?php if (!empty($waitlistEntries) && (is_countable($waitlistEntries) ? count($waitlistEntries) : $waitlistEntries->count()) > 0): ?>
-                    <?php foreach ($waitlistEntries as $entry): ?>
-                        <div class="waitlist-item" data-id="<?= $entry->id ?>" data-sibling-group="<?= $entry->child->sibling_group_id ?? '' ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; cursor: move; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #ff9800;">
+                <?php if (!empty($waitlistChildren) && (is_countable($waitlistChildren) ? count($waitlistChildren) : $waitlistChildren->count()) > 0): ?>
+                    <?php foreach ($waitlistChildren as $child): ?>
+                        <div class="waitlist-item" data-id="<?= $child->id ?>" data-sibling-group="<?= $child->sibling_group_id ?? '' ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; cursor: move; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #ff9800;">
                             <div style="display: flex; align-items: center; gap: 1rem;">
                                 <span style="background: #ff9800; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">
-                                    <?= $entry->priority ?>
+                                    <?= $child->waitlist_order ?>
                                 </span>
                                 <div>
-                                    <strong><?= h($entry->child->name) ?></strong>
-                                    <?php if ($entry->child->sibling_group_id && isset($siblingNames[$entry->child->id])): ?>
+                                    <strong><?= h($child->name) ?></strong>
+                                    <?php if ($child->sibling_group_id && isset($siblingNames[$child->id])): ?>
                                         <?= $this->Html->link(
-                                            '👨‍👩‍👧 ' . __("Geschwister"),
-                                            ['controller' => 'SiblingGroups', 'action' => 'view', $entry->child->sibling_group_id],
+                                            '👨‍👩‍👧 ' . __('Geschwister'),
+                                            ['controller' => 'SiblingGroups', 'action' => 'view', $child->sibling_group_id],
                                             [
                                                 'style' => 'background: #fff3cd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem; text-decoration: none; color: #856404; display: inline-block;',
-                                                'title' => 'Geschwister: ' . h($siblingNames[$entry->child->id]),
+                                                'title' => 'Geschwister: ' . h($siblingNames[$child->id]),
                                                 'escape' => false
                                             ]
                                         ) ?>
                                     <?php endif; ?>
-                                    <?php if ($entry->child->is_integrative): ?>
+                                    <?php if ($child->is_integrative): ?>
                                         <span style="background: #e3f2fd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
                                             <?= __('Integrative') ?>
                                         </span>
@@ -156,7 +156,7 @@ $this->assign('title', __('Waitlist'));
                             </div>
                             <?= $this->Form->postLink(
                                 '✕',
-                                ['action' => 'delete', $entry->id],
+                                ['action' => 'delete', $child->id],
                                 [
                                     'class' => 'button button-small',
                                     'style' => 'background: #f44336; color: white; padding: 0.5rem 0.75rem; text-decoration: none; border-radius: 4px;'
@@ -181,7 +181,7 @@ $this->assign('title', __('Waitlist'));
     <?php endif; ?>
 </div>
 
-<?php if ($selectedSchedule && $waitlistEntries && $waitlistEntries->count() > 0): ?>
+<?php if ($selectedSchedule && $waitlistChildren && $waitlistChildren->count() > 0): ?>
 <script>
 // Initialize Sortable.js for drag & drop
 const el = document.getElementById('waitlist-sortable');
