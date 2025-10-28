@@ -9,6 +9,13 @@ use Cake\TestSuite\TestCase;
 
 /**
  * WaitlistService Test Case
+ * 
+ * Tests the core waitlist functionality:
+ * - Adding children to waitlist
+ * - Removing children from waitlist
+ * - Reordering waitlist
+ * - Sibling group handling in waitlist
+ * - Waitlist ordering (waitlist_order field)
  */
 class WaitlistServiceTest extends TestCase
 {

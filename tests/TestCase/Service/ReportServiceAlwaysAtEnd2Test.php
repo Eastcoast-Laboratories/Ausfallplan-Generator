@@ -8,7 +8,15 @@ use Cake\ORM\TableRegistry;
 use Cake\TestSuite\TestCase;
 
 /**
- * Simple test for "Always at End" functionality
+ * ReportService "Always at End" Test
+ * 
+ * Tests that children assigned to schedule but not on waitlist
+ * appear in the "Always at End" (Immer am Ende) section.
+ * 
+ * Verifies:
+ * - Children with schedule_id and waitlist_order=NULL appear in alwaysAtEnd
+ * - Children on waitlist do NOT appear in alwaysAtEnd
+ * - Children not assigned to schedule do NOT appear in alwaysAtEnd
  */
 class ReportServiceAlwaysAtEnd2Test extends TestCase
 {
