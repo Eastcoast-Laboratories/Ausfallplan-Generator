@@ -316,16 +316,32 @@ class ReportService
     /**
      * Get all assigned children (for "always at end")
      * 
-     * NOTE: In new concept, all children are in waitlist_entries
-     * "Always at end" is now handled differently - children not fitting in days
-     * This function returns empty array (no separate assignments anymore)
+     * NEW ARCHITECTURE: Children with schedule_id set but waitlist_order = NULL
+     * These are children assigned to schedule but not on waitlist
      */
     private function getAssignedChildren(int $scheduleId): array
     {
-        // In new concept: No separate assignments table
-        // All children are managed via waitlist_entries
-        // "Always at end" children are those that don't fit in generated days
-        return [];
+        $childrenTable = TableRegistry::getTableLocator()->get('Children');
+        
+        // Find children assigned to schedule but NOT on waitlist
+        $children = $childrenTable->find()
+            ->where([
+                'schedule_id' => $scheduleId,
+                'waitlist_order IS' => null  // NOT on waitlist
+            ])
+            ->all()
+            ->toArray();
+        
+        // Format for compatibility with findAlwaysAtEndChildren
+        $result = [];
+        foreach ($children as $child) {
+            $result[] = [
+                'child' => $child,
+                'weight' => $child->is_integrative ? 2 : 1
+            ];
+        }
+        
+        return $result;
     }
 
     /**
