@@ -25,11 +25,10 @@ class SchedulesAccessTest extends TestCase
      */
     public function testAdminSeesAllSchedules()
     {
-        // Create two organizations
+        // Use existing fixture organizations
         $orgsTable = $this->getTableLocator()->get('Organizations');
-        $org1 = $orgsTable->newEntity(['name' => 'Org 1']);
-        $org2 = $orgsTable->newEntity(['name' => 'Org 2']);
-        $orgsTable->saveMany([$org1, $org2]);
+        $org1 = $orgsTable->get(1); // From fixture
+        $org2 = $orgsTable->get(2); // From fixture
 
         // Create users in different organizations
         $usersTable = $this->getTableLocator()->get('Users');
@@ -139,10 +138,9 @@ class SchedulesAccessTest extends TestCase
      */
     public function testEditorSeesOnlyOwnSchedules()
     {
-        // Create organization and users
+        // Use existing fixture organization
         $orgsTable = $this->getTableLocator()->get('Organizations');
-        $org = $orgsTable->newEntity(['name' => 'Test Org']);
-        $orgsTable->save($org);
+        $org = $orgsTable->get(1); // From fixture
 
         $usersTable = $this->getTableLocator()->get('Users');
         $editor1 = $usersTable->newEntity([
