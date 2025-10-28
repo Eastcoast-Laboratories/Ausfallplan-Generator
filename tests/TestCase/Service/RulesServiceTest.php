@@ -9,6 +9,14 @@ use Cake\TestSuite\TestCase;
 
 /**
  * RulesService Test Case
+ * 
+ * Tests the rule-based scheduling functionality.
+ * 
+ * Verifies:
+ * - Children can be excluded from specific days
+ * - Rules are applied correctly when generating reports
+ * - Multiple rules per child/schedule work
+ * - Rule validation and constraints
  */
 class RulesServiceTest extends TestCase
 {
