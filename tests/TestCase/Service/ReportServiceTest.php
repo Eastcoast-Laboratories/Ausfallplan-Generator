@@ -22,7 +22,6 @@ class ReportServiceTest extends TestCase
         'app.Schedules',
         'app.Children',
         'app.SiblingGroups',
-        'app.WaitlistEntries',
     ];
 
     private ReportService $service;

@@ -21,7 +21,6 @@ class SchedulesControllerPermissionsTest extends TestCase
         'app.OrganizationUsers',
         'app.Schedules',
         'app.Children',
-        'app.WaitlistEntries',
     ];
 
     /**
