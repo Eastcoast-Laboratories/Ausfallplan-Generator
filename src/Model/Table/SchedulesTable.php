@@ -10,7 +10,6 @@ use Cake\Validation\Validator;
  * Schedules Model
  *
  * @property \App\Model\Table\OrganizationsTable&\Cake\ORM\Association\BelongsTo $Organizations
- * @property \App\Model\Table\WaitlistEntriesTable&\Cake\ORM\Association\HasMany $WaitlistEntries
  * @property \App\Model\Table\RulesTable&\Cake\ORM\Association\HasMany $Rules
  *
  * @method \App\Model\Entity\Schedule newEmptyEntity()
@@ -53,10 +52,6 @@ class SchedulesTable extends Table
         $this->belongsTo('Users', [
             'foreignKey' => 'user_id',
             'className' => 'Users',
-        ]);
-        $this->hasMany('WaitlistEntries', [
-            'foreignKey' => 'schedule_id',
-            'className' => 'WaitlistEntries',
         ]);
         $this->hasMany('Rules', [
             'foreignKey' => 'schedule_id',

@@ -45,14 +45,17 @@ class SchedulesController extends AppController
         // Get active schedule from session for highlighting
         $activeScheduleId = $this->request->getSession()->read('activeScheduleId');
 
-        // Count children per schedule (from waitlist_entries)
-        $waitlistTable = $this->fetchTable('WaitlistEntries');
+        // Count children per schedule (from children table)
+        $childrenTable = $this->fetchTable('Children');
         
         $childrenCounts = [];
         foreach ($schedules as $schedule) {
-            // Count children in waitlist for this schedule
-            $count = $waitlistTable->find()
-                ->where(['schedule_id' => $schedule->id])
+            // Count children on waitlist for this schedule
+            $count = $childrenTable->find()
+                ->where([
+                    'schedule_id' => $schedule->id,
+                    'waitlist_order IS NOT' => null
+                ])
                 ->count();
                 
             $childrenCounts[$schedule->id] = $count;
