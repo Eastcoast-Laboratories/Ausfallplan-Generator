@@ -25,6 +25,7 @@ test.describe('Report - Always at End Section', () => {
         await page.fill('input[name="title"]', `Test Report Schedule ${Date.now()}`);
         await page.fill('input[name="starts_on"]', '2025-01-01');
         await page.fill('input[name="ends_on"]', '2025-12-31');
+        await page.fill('input[name="days_count"]', '5');
         await page.click('button[type="submit"]');
         await page.waitForLoadState('networkidle');
         
