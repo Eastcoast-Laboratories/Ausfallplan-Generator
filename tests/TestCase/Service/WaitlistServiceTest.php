@@ -18,7 +18,6 @@ class WaitlistServiceTest extends TestCase
         'app.Children',
         'app.SiblingGroups',
         'app.Schedules',
-        'app.WaitlistEntries',
         'app.Rules',
     ];
 
