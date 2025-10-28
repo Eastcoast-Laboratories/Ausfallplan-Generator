@@ -228,122 +228,41 @@ class SchedulesController extends AppController
     }
 
     /**
-     * Manage children - Shows assigned children and allows adding/removing
+     * Manage children - Redirect to Waitlist
      *
      * @param string|null $id Schedule id
-     * @return \Cake\Http\Response|null|void
+     * @return \Cake\Http\Response
      */
     public function manageChildren($id = null)
     {
-        $schedule = $this->Schedules->get($id);
-        
-        // Get all children in waitlist with priority (sorted)
-        $waitlistTable = $this->fetchTable("WaitlistEntries");
-        $assignedChildrenData = $waitlistTable->find()
-            ->contain(['Children'])
-            ->where(['WaitlistEntries.schedule_id' => $schedule->id])
-            ->orderBy(['WaitlistEntries.priority' => 'ASC'])
-            ->all();
-        
-        $assignedChildren = [];
-        foreach ($assignedChildrenData as $entry) {
-            $assignedChildren[] = $entry->child;
-        }
-        
-        // Get all available children from same organization
-        $childrenTable = $this->fetchTable("Children");
-        $allChildren = $childrenTable->find()
-            ->where(["Children.organization_id" => $schedule->organization_id])
-            ->orderBy(["Children.display_name" => "ASC"])
-            ->all();
-        
-        $this->set(compact("schedule", "assignedChildren", "allChildren"));
+        // Redirect to waitlist controller for schedule management
+        return $this->redirect([
+            'controller' => 'Waitlist',
+            'action' => 'index',
+            '?' => ['schedule_id' => $id]
+        ]);
     }
 
     /**
-     * Assign child to schedule - Adds to waitlist_entries
+     * Assign child to schedule - Deprecated, redirect to Waitlist
      *
-     * @return \Cake\Http\Response|null
+     * @return \Cake\Http\Response
      */
     public function assignChild()
     {
-        $this->request->allowMethod(["post"]);
-        
-        $scheduleId = $this->request->getData("schedule_id");
-        $childId = $this->request->getData("child_id");
-        
-        if (!$scheduleId || !$childId) {
-            $this->Flash->error(__('Invalid data.'));
-            return $this->redirect(['action' => 'index']);
-        }
-        
-        $waitlistTable = $this->fetchTable("WaitlistEntries");
-        
-        // Check if already assigned
-        $existing = $waitlistTable->find()
-            ->where(['schedule_id' => $scheduleId, 'child_id' => $childId])
-            ->first();
-        
-        if ($existing) {
-            $this->Flash->error(__('Child is already assigned to this schedule.'));
-            return $this->redirect(["action" => "manageChildren", $scheduleId]);
-        }
-        
-        // Get max priority for this schedule
-        $maxPriority = $waitlistTable->find()
-            ->where(['schedule_id' => $scheduleId])
-            ->select(['max_priority' => 'MAX(priority)'])
-            ->first();
-        
-        $nextPriority = ($maxPriority && $maxPriority->max_priority) ? $maxPriority->max_priority + 1 : 1;
-        
-        // Create waitlist entry
-        $entry = $waitlistTable->newEntity([
-            "schedule_id" => $scheduleId,
-            "child_id" => $childId,
-            "priority" => $nextPriority,
-        ]);
-        
-        if ($waitlistTable->save($entry)) {
-            $this->Flash->success(__('Child added successfully.'));
-        } else {
-            $this->Flash->error(__('Could not add child. Please try again.'));
-        }
-        
-        return $this->redirect(["action" => "manageChildren", $scheduleId]);
+        $this->Flash->info(__('Please use the Waitlist page to manage children.'));
+        return $this->redirect(['controller' => 'Waitlist', 'action' => 'index']);
     }
 
     /**
-     * Remove child from schedule - Deletes from waitlist_entries
+     * Remove child from schedule - Deprecated, redirect to Waitlist
      *
-     * @return \Cake\Http\Response|null Redirects back
+     * @return \Cake\Http\Response
      */
     public function removeChild()
     {
-        $this->request->allowMethod(['post']);
-        
-        $scheduleId = $this->request->getData('schedule_id');
-        $childId = $this->request->getData('child_id');
-        
-        if (!$scheduleId || !$childId) {
-            $this->Flash->error(__('Zugriff verweigert.'));
-            return $this->redirect(['action' => 'index']);
-        }
-        
-        // Delete from waitlist_entries
-        $waitlistTable = $this->fetchTable('WaitlistEntries');
-        $deleted = $waitlistTable->deleteAll([
-            'schedule_id' => $scheduleId,
-            'child_id' => $childId
-        ]);
-        
-        if ($deleted > 0) {
-            $this->Flash->success(__('Kind erfolgreich entfernt.'));
-        } else {
-            $this->Flash->error(__('Kind konnte nicht entfernt werden.'));
-        }
-        
-        return $this->redirect(['action' => 'manageChildren', $scheduleId]);
+        $this->Flash->info(__('Please use the Waitlist page to manage children.'));
+        return $this->redirect(['controller' => 'Waitlist', 'action' => 'index']);
     }
 
     /**
@@ -357,9 +276,12 @@ class SchedulesController extends AppController
         $schedule = $this->Schedules->get($id, contain: ['Organizations']);
         
         // Get children count from waitlist for default days_count suggestion
-        $waitlistTable = $this->fetchTable('WaitlistEntries');
-        $assignedChildrenCount = $waitlistTable->find()
-            ->where(['WaitlistEntries.schedule_id' => $schedule->id])
+        $childrenTable = $this->fetchTable('Children');
+        $assignedChildrenCount = $childrenTable->find()
+            ->where([
+                'schedule_id' => $schedule->id,
+                'waitlist_order IS NOT' => null
+            ])
             ->count();
         
         // Use days_count from schedule or default to assigned children count
@@ -397,9 +319,12 @@ class SchedulesController extends AppController
         }
         
         // Get children count from waitlist
-        $waitlistTable = $this->fetchTable('WaitlistEntries');
-        $assignedChildrenCount = $waitlistTable->find()
-            ->where(['WaitlistEntries.schedule_id' => $schedule->id])
+        $childrenTable = $this->fetchTable('Children');
+        $assignedChildrenCount = $childrenTable->find()
+            ->where([
+                'schedule_id' => $schedule->id,
+                'waitlist_order IS NOT' => null
+            ])
             ->count();
         
         $daysCount = $schedule->days_count ?? $assignedChildrenCount;
@@ -478,48 +403,17 @@ class SchedulesController extends AppController
     }
 
     /**
-     * Reorder children via AJAX - Updates waitlist_entries.priority
+     * Reorder children via AJAX - Deprecated, redirect to Waitlist
      *
      * @return \Cake\Http\Response
      */
     public function reorderChildren()
     {
-        $this->request->allowMethod(["post"]);
-        $data = $this->request->getData();
-        $scheduleId = $data["schedule_id"] ?? null;
-        $order = $data["order"] ?? [];
-        
-        if (!$scheduleId || !is_array($order)) {
-            return $this->response
-                ->withType('application/json')
-                ->withStringBody(json_encode(["success" => false, "error" => "Invalid data"]));
-        }
-        
-        // Update priorities in waitlist_entries
-        $waitlistTable = $this->fetchTable("WaitlistEntries");
-        $success = true;
-        
-        foreach ($order as $index => $childId) {
-            $priority = $index + 1;
-            
-            // Update priority for this child in this schedule
-            $entry = $waitlistTable->find()
-                ->where([
-                    "schedule_id" => $scheduleId,
-                    "child_id" => $childId
-                ])
-                ->first();
-            
-            if ($entry) {
-                $entry->priority = $priority;
-                if (!$waitlistTable->save($entry)) {
-                    $success = false;
-                }
-            }
-        }
-        
         return $this->response
             ->withType('application/json')
-            ->withStringBody(json_encode(["success" => $success]));
+            ->withStringBody(json_encode([
+                "success" => false,
+                "error" => "Please use the Waitlist controller to reorder children"
+            ]));
     }
 }
