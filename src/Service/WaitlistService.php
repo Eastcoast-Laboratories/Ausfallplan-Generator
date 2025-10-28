@@ -9,14 +9,12 @@ use Cake\ORM\TableRegistry;
 use Cake\Log\Log;
 
 /**
- * Waitlist Service - NEW ARCHITECTURE
+ * Waitlist Service
  * 
- * Uses children table fields directly:
+ * Manages waitlist functionality using children table fields:
  * - children.schedule_id (which schedule the child is assigned to)
  * - children.waitlist_order (position in waitlist, null = not on waitlist)
  * - children.organization_order (general org-wide ordering)
- * 
- * No separate waitlist_entries table anymore!
  */
 class WaitlistService
 {
