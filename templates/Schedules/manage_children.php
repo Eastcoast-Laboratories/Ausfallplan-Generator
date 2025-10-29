@@ -64,7 +64,7 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                             <button 
                                 class="add-to-order" 
                                 data-child-id="<?= $child->id ?>"
-                                style="background: #4caf50; color: white; border: none; padding: 0.75rem 1rem; border-radius: 4px; cursor: pointer; font-size: 1.2rem; font-weight: bold;"
+                                style="background: #4caf50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1.2rem; font-weight: bold;"
                                 title="<?= __("Add to organization order") ?>">
                                 +
                             </button>
@@ -93,36 +93,94 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                         $inOrderChildren[] = $child;
                     }
                 }
+                
+                // Group children by sibling_group_id
+                $siblingGroups = [];
+                foreach ($inOrderChildren as $child) {
+                    if ($child->sibling_group_id) {
+                        if (!isset($siblingGroups[$child->sibling_group_id])) {
+                            $siblingGroups[$child->sibling_group_id] = [];
+                        }
+                        $siblingGroups[$child->sibling_group_id][] = $child;
+                    }
+                }
+                
+                // Build ordered list - iterate through inOrderChildren (already sorted by organization_order)
+                $processedGroups = [];
+                $orderedItems = [];
+                
+                foreach ($inOrderChildren as $child) {
+                    if ($child->sibling_group_id) {
+                        // If first sibling in group, add whole group
+                        if (!in_array($child->sibling_group_id, $processedGroups)) {
+                            $orderedItems[] = ['type' => 'group', 'group_id' => $child->sibling_group_id, 'siblings' => $siblingGroups[$child->sibling_group_id]];
+                            $processedGroups[] = $child->sibling_group_id;
+                        }
+                        // Skip other siblings (already added in group)
+                    } else {
+                        // Single child (no siblings)
+                        $orderedItems[] = ['type' => 'single', 'child' => $child];
+                    }
+                }
                 ?>
-                <?php if (!empty($inOrderChildren)): ?>
-                    <?php foreach ($inOrderChildren as $child): ?>
-                        <div class="child-item" data-child-id="<?= $child->id ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #4caf50; cursor: move;">
-                            <div>
-                                <strong><?= h($child->name) ?></strong>
-                                <?php if ($child->is_integrative): ?>
-                                    <span style="background: #e3f2fd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
-                                        <?= __("Integrative") ?>
+                <?php if (!empty($orderedItems)): ?>
+                    <?php foreach ($orderedItems as $item): ?>
+                        <?php if ($item['type'] === 'single'): 
+                            $child = $item['child'];
+                        ?>
+                            <div class="child-item" data-child-id="<?= $child->id ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #4caf50; cursor: move;">
+                                <div>
+                                    <strong><?= h($child->name) ?></strong>
+                                    <?php if ($child->is_integrative): ?>
+                                        <span style="background: #e3f2fd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
+                                            <?= __("Integrative") ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <button 
+                                        class="remove-from-order" 
+                                        data-child-id="<?= $child->id ?>"
+                                        style="background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1.2rem; font-weight: bold;"
+                                        title="<?= __("Remove from organization order") ?>">
+                                        ✕
+                                    </button>
+                                    <span style="color: #666; font-size: 0.9rem; cursor: move;">
+                                        ⋮⋮
                                     </span>
-                                <?php endif; ?>
-                                <?php if ($child->sibling_group_id): ?>
-                                    <span style="background: #fff3cd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
-                                        👨‍👩‍👧 <?= __("Sibling Group") ?>
-                                    </span>
-                                <?php endif; ?>
+                                </div>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <button 
-                                    class="remove-from-order" 
-                                    data-child-id="<?= $child->id ?>"
-                                    style="background: #f44336; color: white; border: none; padding: 0.75rem 1rem; border-radius: 4px; cursor: pointer; font-size: 1.2rem; font-weight: bold;"
-                                    title="<?= __("Remove from organization order") ?>">
-                                    ✕
-                                </button>
-                                <span style="color: #666; font-size: 0.9rem; cursor: move;">
-                                    ⋮⋮
-                                </span>
+                        <?php else: // group
+                            $siblings = $item['siblings'];
+                            $siblingNames = array_map(fn($s) => $s->name, $siblings);
+                        ?>
+                            <div class="sibling-group" data-child-ids="<?= implode(',', array_map(fn($c) => $c->id, $siblings)) ?>" style="background: #fff9c4; padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 4px; border-left: 4px solid #ffc107; cursor: move;">
+                                <div style="font-size: 0.85rem; color: #f57c00; font-weight: bold; margin-bottom: 0.5rem;">
+                                    👨‍👩‍👧 <?= __("Sibling Group") ?>
+                                </div>
+                                <?php foreach ($siblings as $child): 
+                                    $otherSiblings = array_filter($siblingNames, fn($n) => $n !== $child->name);
+                                ?>
+                                    <div style="background: white; padding: 0.75rem; margin-bottom: 0.25rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                                        <div>
+                                            <strong title="<?= __("Siblings") ?>: <?= implode(', ', $otherSiblings) ?>"><?= h($child->name) ?></strong>
+                                            <?php if ($child->is_integrative): ?>
+                                                <span style="background: #e3f2fd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
+                                                    <?= __("Integrative") ?>
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
+                                        <button 
+                                            class="remove-sibling-group" 
+                                            data-child-ids="<?= implode(',', array_map(fn($c) => $c->id, $siblings)) ?>"
+                                            style="background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1.2rem; font-weight: bold;"
+                                            title="<?= __("Remove sibling group from organization order") ?>">
+                                            ✕
+                                        </button>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
-                        </div>
+                        <?php endif; ?>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <p style="color: #666; text-align: center; padding: 2rem;">
@@ -142,14 +200,20 @@ const el = document.getElementById("children-sortable");
 const sortable = Sortable.create(el, {
     animation: 150,
     ghostClass: "sortable-ghost",
-    handle: ".child-item",
     onEnd: function (evt) {
-        // Get new order - extract child IDs
-        const items = el.querySelectorAll(".child-item");
+        // Get new order - extract child IDs from both single items and sibling groups
+        const items = el.querySelectorAll(".child-item, .sibling-group");
         const childrenIds = [];
         
         items.forEach(item => {
-            childrenIds.push(parseInt(item.dataset.childId));
+            if (item.classList.contains('sibling-group')) {
+                // Sibling group - add all child IDs in group
+                const ids = item.dataset.childIds.split(',').map(id => parseInt(id));
+                childrenIds.push(...ids);
+            } else {
+                // Single child
+                childrenIds.push(parseInt(item.dataset.childId));
+            }
         });
         
         // Send AJAX request to update organization_order
@@ -230,6 +294,37 @@ document.querySelectorAll(".remove-from-order").forEach(button => {
             console.error("Error:", error);
             location.reload(); // Reload to show correct state
         });
+    });
+});
+
+// Handle remove sibling group from order buttons
+document.querySelectorAll(".remove-sibling-group").forEach(button => {
+    button.addEventListener("click", function(e) {
+        e.stopPropagation();
+        const childIds = this.dataset.childIds.split(',').map(id => parseInt(id));
+        
+        // Send AJAX request to remove all siblings from order
+        const removePromises = childIds.map(childId => {
+            return fetch("<?= $this->Url->build(["action" => "removeFromOrder", $schedule->id]) ?>", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-Token": "<?= $this->request->getAttribute("csrfToken") ?>"
+                },
+                body: JSON.stringify({
+                    child_id: childId
+                })
+            });
+        });
+        
+        Promise.all(removePromises)
+            .then(() => {
+                location.reload();
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                location.reload();
+            });
     });
 });
 
