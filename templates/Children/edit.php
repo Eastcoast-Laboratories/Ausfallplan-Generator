@@ -42,7 +42,7 @@ $this->assign('title', __('Edit Child'));
                 'empty' => __('(Not specified)'),
                 'label' => __('Gender')
             ]);
-            echo $this->Form->control('birth_date', [
+            echo $this->Form->control('birthdate', [
                 'type' => 'date',
                 'label' => __('Birthdate'),
                 'empty' => true,
