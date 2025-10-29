@@ -329,6 +329,10 @@ class SchedulesController extends AppController
         $reportService = new \App\Service\ReportService();
         $reportData = $reportService->generateReportData((int)$id, $daysCount);
         
+        // Punkt 5: Generate 2D grid
+        $gridService = new \App\Service\ReportGridService();
+        $gridData = $gridService->generateGrid($reportData);
+        
         // Set up view
         $this->viewBuilder()->setLayout('print');
         $this->set('schedule', $reportData['schedule']);
@@ -337,6 +341,51 @@ class SchedulesController extends AppController
         $this->set('childStats', $reportData['childStats']);
         $this->set('waitlist', $reportData['waitlist'] ?? []);
         $this->set('alwaysAtEnd', $reportData['alwaysAtEnd'] ?? []);
+        $this->set('grid', $gridData['grid'] ?? []);
+        $this->set('gridMetadata', $gridData['metadata'] ?? []);
+    }
+
+    /**
+     * Generate report as grid table (Punkt 5)
+     *
+     * @param string|null $id Schedule id.
+     * @return \Cake\Http\Response|null|void
+     */
+    public function generateReportGrid($id = null)
+    {
+        $schedule = $this->Schedules->get($id, contain: ['Organizations']);
+        
+        // Permission check
+        if (!$this->hasOrgRole($schedule->organization_id)) {
+            $this->Flash->error(__('Zugriff verweigert.'));
+            return $this->redirect(['action' => 'index']);
+        }
+        
+        // Get children count from waitlist for default days_count suggestion
+        $childrenTable = $this->fetchTable('Children');
+        $assignedChildrenCount = $childrenTable->find()
+            ->where([
+                'schedule_id' => $schedule->id,
+                'waitlist_order IS NOT' => null
+            ])
+            ->count();
+        
+        // Use days_count from schedule or default to assigned children count
+        $daysCount = $schedule->days_count ?? $assignedChildrenCount;
+        
+        $reportService = new \App\Service\ReportService();
+        $reportData = $reportService->generateReportData((int)$id, $daysCount);
+        
+        // Generate 2D grid
+        $gridService = new \App\Service\ReportGridService();
+        $gridData = $gridService->generateGrid($reportData);
+        
+        // Set up view
+        $this->viewBuilder()->setLayout('print');
+        $this->set('schedule', $reportData['schedule']);
+        $this->set('grid', $gridData['grid'] ?? []);
+        $this->set('gridMetadata', $gridData['metadata'] ?? []);
+        $this->render('generate_report_grid');
     }
 
     /**
