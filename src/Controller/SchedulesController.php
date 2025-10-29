@@ -373,12 +373,15 @@ class SchedulesController extends AppController
             $child = $childrenTable->get($childId);
             
             // Find max organization_order and assign next number
-            $maxOrder = $childrenTable->find()
-                ->where(['organization_id' => $schedule->organization_id])
-                ->select(['max_order' => $childrenTable->find()->func()->max('organization_order')])
+            $maxOrderResult = $childrenTable->find()
+                ->where([
+                    'organization_id' => $schedule->organization_id,
+                    'organization_order IS NOT' => null
+                ])
+                ->orderBy(['organization_order' => 'DESC'])
                 ->first();
             
-            $nextOrder = ($maxOrder && $maxOrder->max_order) ? (int)$maxOrder->max_order + 1 : 1;
+            $nextOrder = $maxOrderResult ? (int)$maxOrderResult->organization_order + 1 : 1;
             $child->organization_order = $nextOrder;
             
             if ($childrenTable->save($child)) {
