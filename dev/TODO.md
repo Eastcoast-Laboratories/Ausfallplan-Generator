@@ -49,22 +49,27 @@ bei http://localhost:8080/schedules/add muss eine selectbox, die nur sichtbar is
  - beim eingeben der organisation soll das ayax weg, stattdessen eine selectbox mit der auswahl der organisationen die existieren bei denen man sich anmelden kann und als errste option in der selectbox: "neu organisation anlegen". wenn man eine existierende organisation auswählt, dann wird die selectbox unten mit den rollen "Viewer" und "Editor" und "Organization adminn" angezeigt
  - wenn man bei der registrierung eine neue organisation errstellt, dann müssen die anderen optionen "Viewer" und "Editor" in der selectbox untenversteckt werden und automatisch  "Orga-admin" ausgewählt werden
  - "Viewer" und "Editor" und "Organization adminn" und "Requested Role in Organization" muss noch auf deutsch
- - die sprachauswahl oben rechts muss auch im register form funktionieren, (im moment ist immer deutsch)
-- phpunittests alle noch mal reparieren @phpunit_remaining_work.md#L1-312 
+ 
+ 
+- @database_structure.sql#L358-361 passe hier das passwort an mit dem @SCREENSHOT_TESTING.md#L33-34 
 
-- [ ] die sprachwechslung von englisch zurück zu deutsch funktioniert nicht immer, mache einen playwright test, der sich einloggt, dann die sprache ein paar mal wechselt und die navigation überprüft ob das in der richtigen sprache ist TEST HINZUGEFÜGT in tests/e2e/language-switcher.spec.js aber noch nciht ausgeführt
+lege in dem @database_structure.sql#L358-361 auch eine default Organisation, einen default editor und einen default viewer an, die auf die organisation zugreifen können, auch im initial migration ergänzen und dann lösche die db und führe die iinitial migration mit den usern neu aus
 
-- TEST_FAILURES_TODO.md#L1-224  lösche alle hinweise auf in der vergangenheit gefixte tests, nur die noch offenen probleme und tests sollen in der datei aufgelistet werden. 
+2.
+bei den Kindern in der nachrückliste sollen Buttons zum Sortieren der kinder nach geb. oder nach PLZ
 
-gehe alle playwright tests durch  und wenn ein  test nicht funktoiniert lösche ihn falls er nicht ganz einfach zu reparieren ist
+3.
+Wenn noch keine Kinder in der Nachrückliste, dann alle in der selben Reihenfolge wie im schedule aufnehmen. 
 
-wenn er lääuft schau ob er eine gut eerklärung im header hat
+4.
+Neue Kinder immer gleich in den aktiven schedule und im die Nachrückliste aufnehmen
 
-lasse alle phpunitt ests durchlaufen und schau ob sie alle gute comments im header haben
+5.
+Den report neu strukturieren, als eine große Tabelle mit dem HTML table, Befehl und TD und tr. Erzeugen. Zuerst ein zweidimensionales Array mit den Daten für die tabellenzellen, wobei jede Zelle als Eigenschaft den Inhalt, den Typ der Zelle (Kind, Nachrückliste, leer, nachrückliste rechts, checksumme, ...) damit man diese Daten sowohl für die HTML Anzeige, als auch für einen Export verwenden kann, als CSV oder Excel Tabelle mit weiteren checksummen Prüfungen über die gesamte Liste als Formeln in Excel
 
-- [x] last-name wird noch nicht importiert im kinder import script ✅ 27.10. 05:05 - BEREITS IMPLEMENTIERT: CsvImportService parst last_name aus CSV, ChildrenController speichert es (Zeile 416)
+6. 
+man kann die kinder nicht mehr gesondert sortieren für den schedule, das leitet jetzt um zur waitlist, das soll unter http://localhost:8080/schedules/manage-children/1 die kinder wieder sortieren können, wie gehabt, dies gilt dann nur für organization_order, die in dem report für die reihenfoolge in den listen genutzt werden soll, nur für die nachrückliste rechts soll die waitlist_order genutzt werden
 
-- [x] wenn man in mehreren organisationen ist, dann muss http://localhost:8080/children eine selectbox bekommen um auszuwählen, welche kinder man angezeigt werden will, also welcher organisation zugehörig ✅ 27.10. 05:05 - Organization Filter implementiert mit Dropdown, Query-Parameter ?organization_id=X, Auto-Select primary org
 
 # weitere TODOs
 

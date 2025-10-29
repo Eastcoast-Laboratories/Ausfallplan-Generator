@@ -276,7 +276,7 @@ class SchedulesControllerTest extends TestCase
         $users = $this->getTableLocator()->get('Users');
         $user = $users->newEntity([
             'email' => $email,
-            'password' => 'password123',
+            'password' => '84hbfUb_3dsf',
             'is_system_admin' => false,
             'status' => 'active',
             'email_verified' => 1,

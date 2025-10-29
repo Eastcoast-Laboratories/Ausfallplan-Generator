@@ -144,7 +144,7 @@ Screenshots are saved to `screenshots/` directory (gitignored).
 
 **Test User Credentials:**
 - Email: `ausfallplan-sysadmin@it.z11.de`
-- Password: `password123`
+- Password: `84hbfUb_3dsf`
 
 ## Tech Stack
 

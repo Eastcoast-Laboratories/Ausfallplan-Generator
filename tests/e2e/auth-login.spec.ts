@@ -20,7 +20,7 @@ test.describe('Authentication Flow', () => {
     
     // Fill in credentials (assuming test user exists)
     await page.fill('input[type="email"]', 'admin@test.com');
-    await page.fill('input[type="password"]', 'password123');
+    await page.fill('input[type="password"]', '84hbfUb_3dsf');
     
     // Submit form
     await page.click('button[type="submit"]');
@@ -90,7 +90,7 @@ test.describe('Authentication Flow', () => {
     // Login as viewer (assuming viewer user exists)
     await page.goto('http://localhost:8080/login');
     await page.fill('input[type="email"]', 'viewer@test.com');
-    await page.fill('input[type="password"]', 'password123');
+    await page.fill('input[type="password"]', '84hbfUb_3dsf');
     await page.click('button[type="submit"]');
     
     // Try to access add child page

@@ -53,8 +53,8 @@ class AuthenticationFlowTest extends TestCase
         $data = [
             'organization_name' => 'Test Kita',
             'email' => 'newuser@example.com',
-            'password' => 'password123',
-            'password_confirm' => 'password123',
+            'password' => '84hbfUb_3dsf',
+            'password_confirm' => '84hbfUb_3dsf',
             'requested_role' => 'viewer',
         ];
 
@@ -93,7 +93,7 @@ class AuthenticationFlowTest extends TestCase
         $usersTable = $this->getTableLocator()->get('Users');
         $user = $usersTable->newEntity([
             'email' => 'firstuser@test.com',
-            'password' => 'password123',
+            'password' => '84hbfUb_3dsf',
             'status' => 'pending',
             'is_system_admin' => false,
             'email_verified' => 0,
@@ -137,7 +137,7 @@ class AuthenticationFlowTest extends TestCase
         $usersTable = $this->getTableLocator()->get('Users');
         $firstUser = $usersTable->newEntity([
             'email' => 'admin@test.com',
-            'password' => 'password123',
+            'password' => '84hbfUb_3dsf',
             'status' => 'active',
             'is_system_admin' => false,
             'email_verified' => 1,
@@ -156,7 +156,7 @@ class AuthenticationFlowTest extends TestCase
         // Create second user
         $secondUser = $usersTable->newEntity([
             'email' => 'seconduser@test.com',
-            'password' => 'password123',
+            'password' => '84hbfUb_3dsf',
             'status' => 'pending',
             'is_system_admin' => false,
             'email_verified' => 0,
@@ -194,7 +194,7 @@ class AuthenticationFlowTest extends TestCase
         $usersTable = $this->getTableLocator()->get('Users');
         
         // Password will be auto-hashed by Entity
-        $plainPassword = 'password123';
+        $plainPassword = '84hbfUb_3dsf';
         $user = $usersTable->newEntity([
             'email' => 'unverified@test.com',
             'password' => $plainPassword,
@@ -241,7 +241,7 @@ class AuthenticationFlowTest extends TestCase
         $this->session(['Config.language' => 'en']);
         $usersTable = $this->getTableLocator()->get('Users');
         
-        $plainPassword = 'password123';
+        $plainPassword = '84hbfUb_3dsf';
         $user = $usersTable->newEntity([
             'email' => 'pending@test.com',
             'password' => $plainPassword,
@@ -363,7 +363,7 @@ class AuthenticationFlowTest extends TestCase
         $this->session(['Config.language' => 'en']);
         $this->post('/users/reset-password', [
             'code' => '123456',
-            'new_password' => 'newpassword123',
+            'new_password' => 'new84hbfUb_3dsf',
         ]);
 
         // Test accepts either redirect or OK response

@@ -28,7 +28,7 @@ $user = $connection->execute('SELECT id FROM users WHERE email = ?', ['ausfallpl
 if (!$user) {
     echo "Creating test user...\n";
     $hasher = new DefaultPasswordHasher();
-    $hashedPassword = $hasher->hash('password123');
+    $hashedPassword = $hasher->hash('84hbfUb_3dsf');
     
     $connection->execute(
         'INSERT INTO users (organization_id, email, password, role, created, modified) VALUES (?, ?, ?, ?, NOW(), NOW())',
@@ -42,4 +42,4 @@ if (!$user) {
 
 echo "\nLogin credentials:\n";
 echo "  Email: ausfallplan-sysadmin@it.z11.de\n";
-echo "  Password: password123\n";
+echo "  Password: 84hbfUb_3dsf\n";

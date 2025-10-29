@@ -30,7 +30,7 @@ import { test, expect } from '@playwright/test';
 const BASE_URL = 'https://ausfallplan-generator.z11.de';
 const TEST_TIMESTAMP = Date.now();
 const TEST_EMAIL = `e2e-test-${TEST_TIMESTAMP}@test.local`;
-const TEST_PASSWORD = 'TestPassword123!';
+const TEST_PASSWORD = 'Test84hbfUb_3dsf!';
 const TEST_ORG = `E2E-Test-Org-${TEST_TIMESTAMP}`;
 
 test.describe('Production E2E Test', () => {

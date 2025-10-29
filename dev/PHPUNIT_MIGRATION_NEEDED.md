@@ -9,7 +9,7 @@ $user = $usersTable->newEntity([
     'organization_id' => 1,  // ❌ Existiert nicht mehr!
     'role' => 'admin',       // ❌ Existiert nicht mehr!
     'email' => 'test@example.com',
-    'password' => 'password123',
+    'password' => '84hbfUb_3dsf',
 ]);
 ```
 
@@ -101,7 +101,7 @@ $user = $usersTable->newEntity([
     'organization_id' => 1,
     'role' => 'admin',
     'email' => 'test@example.com',
-    'password' => 'password123',
+    'password' => '84hbfUb_3dsf',
 ]);
 $usersTable->save($user);
 ```
@@ -111,7 +111,7 @@ $usersTable->save($user);
 // 1. Create user WITHOUT organization_id and role
 $user = $usersTable->newEntity([
     'email' => 'test@example.com',
-    'password' => 'password123',
+    'password' => '84hbfUb_3dsf',
     'status' => 'active',
     'email_verified' => true,
 ]);
@@ -133,7 +133,7 @@ $orgUsersTable->save($orgUser);
 ```php
 $admin = $usersTable->newEntity([
     'email' => 'admin@test.com',
-    'password' => 'password123',
+    'password' => '84hbfUb_3dsf',
     'is_system_admin' => true,  // ← System-wide admin
     'status' => 'active',
     'email_verified' => true,
@@ -162,7 +162,7 @@ if (!$user->hasOrgRole($organizationId, 'org_admin')) { ... }
 $this->post('/users/register', [
     'organization_name' => 'Test Kita',
     'email' => 'test@example.com',
-    'password' => 'password123',
+    'password' => '84hbfUb_3dsf',
     'role' => 'viewer',  // ← ALT
 ]);
 ```
@@ -172,8 +172,8 @@ $this->post('/users/register', [
 $this->post('/users/register', [
     'organization_name' => 'Test Kita',
     'email' => 'test@example.com',
-    'password' => 'password123',
-    'password_confirm' => 'password123',  // ← NEU
+    'password' => '84hbfUb_3dsf',
+    'password_confirm' => '84hbfUb_3dsf',  // ← NEU
     'requested_role' => 'viewer',  // ← NEU
 ]);
 

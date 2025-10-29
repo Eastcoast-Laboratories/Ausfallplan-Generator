@@ -78,8 +78,8 @@ class RegistrationNavigationTest extends TestCase
         $this->post('/users/register', [
             'organization_name' => 'Test Organization',
             'email' => $email,
-            'password' => 'NewPassword123!',
-            'password_confirm' => 'NewPassword123!',
+            'password' => 'New84hbfUb_3dsf!',
+            'password_confirm' => 'New84hbfUb_3dsf!',
             'requested_role' => 'viewer',
         ]);
         
@@ -113,7 +113,7 @@ class RegistrationNavigationTest extends TestCase
         // $this->assertEquals('viewer', $user->role);
         
         // 9. Verify password was hashed (not stored as plain text)
-        $this->assertNotEquals('NewPassword123!', $user->password);
+        $this->assertNotEquals('New84hbfUb_3dsf!', $user->password);
         $this->assertStringStartsWith('$2y$', $user->password, 'Password should be hashed');
     }
 
@@ -128,7 +128,7 @@ class RegistrationNavigationTest extends TestCase
         // 1. Create a new user via registration
         $timestamp = time();
         $email = "loginuser{$timestamp}@test.com";
-        $password = 'TestPassword123!';
+        $password = 'Test84hbfUb_3dsf!';
         
         $this->session(['Config.language' => 'en']);
         $this->post('/users/register', [
@@ -188,7 +188,7 @@ class RegistrationNavigationTest extends TestCase
         $users = $this->getTableLocator()->get('Users');
         $user = $users->newEntity([
             'email' => 'visibility@test.com',
-            'password' => 'password123',
+            'password' => '84hbfUb_3dsf',
             'is_system_admin' => false,
             'status' => 'active',
             'email_verified' => 1,

@@ -6,7 +6,7 @@ test.describe('Organization-based Permissions', () => {
       // Login as editor
       await page.goto('/users/login');
       await page.fill('input[name="email"]', 'editor@example.com');
-      await page.fill('input[name="password"]', 'password123');
+      await page.fill('input[name="password"]', '84hbfUb_3dsf');
       await page.click('button[type="submit"]');
       await expect(page).toHaveURL(/dashboard/);
     });
@@ -107,7 +107,7 @@ test.describe('Organization-based Permissions', () => {
       // Login as viewer
       await page.goto('/users/login');
       await page.fill('input[name="email"]', 'viewer@example.com');
-      await page.fill('input[name="password"]', 'password123');
+      await page.fill('input[name="password"]', '84hbfUb_3dsf');
       await page.click('button[type="submit"]');
       await expect(page).toHaveURL(/dashboard/);
     });

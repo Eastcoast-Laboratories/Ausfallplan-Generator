@@ -116,7 +116,7 @@ $user = $usersTable->newEntity([
     'organization_id' => 1,  // ❌
     'role' => 'admin',       // ❌
     'email' => 'test@example.com',
-    'password' => 'password123',
+    'password' => '84hbfUb_3dsf',
 ]);
 $usersTable->save($user);
 
@@ -141,7 +141,7 @@ $this->post('/users/register', [
 // User creation
 $user = $usersTable->newEntity([
     'email' => 'test@example.com',
-    'password' => 'password123',
+    'password' => '84hbfUb_3dsf',
     'is_system_admin' => false,  // ✅
     'status' => 'active',        // ✅
     'email_verified' => true,    // ✅
@@ -175,8 +175,8 @@ $this->session([
 $this->post('/users/register', [
     'organization_name' => 'Test Org',  // ✅ Name statt ID!
     'requested_role' => 'viewer',       // ✅ requested_role!
-    'password' => 'password123',
-    'password_confirm' => 'password123', // ✅ Confirm!
+    'password' => '84hbfUb_3dsf',
+    'password_confirm' => '84hbfUb_3dsf', // ✅ Confirm!
 ]);
 ```
 
@@ -185,7 +185,7 @@ $this->post('/users/register', [
 // System Admin braucht KEINE organization_users Entry!
 $admin = $usersTable->newEntity([
     'email' => 'ausfallplan-sysadmin@it.z11.de',
-    'password' => 'password123',
+    'password' => '84hbfUb_3dsf',
     'is_system_admin' => true,  // ✅ System-wide!
     'status' => 'active',
     'email_verified' => true,

@@ -284,12 +284,12 @@ Aus `dev/TODO.md`:
 ```bash
 # Als Admin
 curl -s -c /tmp/admin.txt -X POST http://localhost:8080/login \
-  -d "email=admin@demo.kita" -d "password=password123"
+  -d "email=admin@demo.kita" -d "password=84fhr38hf43iahfuX_2"
 curl -s -b /tmp/admin.txt http://localhost:8080/admin/organizations
 
 # Als Editor
 curl -s -c /tmp/editor.txt -X POST http://localhost:8080/login \
-  -d "email=a2@a.de" -d "password=password123"
+  -d "email=a2@a.de" -d "password=84hbfUb_3dsf"
 curl -s -b /tmp/editor.txt http://localhost:8080/schedules
 ```
 
@@ -370,7 +370,7 @@ docker compose -f docker/docker-compose.yml exec -T db mysql -uausfallplan -paus
   -e "SELECT id, email, password, status, email_verified FROM users WHERE email='test@example.com';"
 
 # Password neu setzen (wenn nötig)
-HASH=$(docker compose -f docker/docker-compose.yml exec -T app php -r "echo password_hash('password123', PASSWORD_DEFAULT);")
+HASH=$(docker compose -f docker/docker-compose.yml exec -T app php -r "echo password_hash('84hbfUb_3dsf', PASSWORD_DEFAULT);")
 docker compose -f docker/docker-compose.yml exec -T db mysql -uausfallplan -pausfallplan_secret ausfallplan \
   -e "UPDATE users SET password='$HASH', status='active', email_verified=1 WHERE email='test@example.com';"
 ```

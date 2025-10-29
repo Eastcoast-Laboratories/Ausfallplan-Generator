@@ -34,7 +34,7 @@ class SchedulesAccessTest extends TestCase
         $usersTable = $this->getTableLocator()->get('Users');
         $admin = $usersTable->newEntity([
             'email' => 'admin@test.com',
-            'password' => 'password123',
+            'password' => '84hbfUb_3dsf',
             'is_system_admin' => true,
             'status' => 'active',
             'email_verified' => 1,
@@ -42,7 +42,7 @@ class SchedulesAccessTest extends TestCase
         
         $editor1 = $usersTable->newEntity([
             'email' => 'editor1@test.com',
-            'password' => 'password123',
+            'password' => '84hbfUb_3dsf',
             'is_system_admin' => false,
             'status' => 'active',
             'email_verified' => 1,
@@ -50,7 +50,7 @@ class SchedulesAccessTest extends TestCase
         
         $editor2 = $usersTable->newEntity([
             'email' => 'editor2@test.com',
-            'password' => 'password123',
+            'password' => '84hbfUb_3dsf',
             'is_system_admin' => false,
             'status' => 'active',
             'email_verified' => 1,
@@ -145,7 +145,7 @@ class SchedulesAccessTest extends TestCase
         $usersTable = $this->getTableLocator()->get('Users');
         $editor1 = $usersTable->newEntity([
             'email' => 'editor1@test.com',
-            'password' => 'password123',
+            'password' => '84hbfUb_3dsf',
             'is_system_admin' => false,
             'status' => 'active',
             'email_verified' => 1,
@@ -153,7 +153,7 @@ class SchedulesAccessTest extends TestCase
         
         $editor2 = $usersTable->newEntity([
             'email' => 'editor2@test.com',
-            'password' => 'password123',
+            'password' => '84hbfUb_3dsf',
             'is_system_admin' => false,
             'status' => 'active',
             'email_verified' => 1,

@@ -23,13 +23,13 @@ if (!$admin) {
     $admin = $usersTable->newEntity([
         'organization_id' => $org->id,
         'email' => 'admin@test.com',
-        'password' => 'password123',
+        'password' => '84hbfUb_3dsf',
         'role' => 'admin',
         'status' => 'active',
         'email_verified' => true,
     ]);
     $usersTable->save($admin);
-    echo "✓ Admin created: admin@test.com / password123\n";
+    echo "✓ Admin created: admin@test.com / 84hbfUb_3dsf\n";
 } else {
     echo "✓ Admin exists\n";
 }
@@ -40,13 +40,13 @@ if (!$editor) {
     $editor = $usersTable->newEntity([
         'organization_id' => $org->id,
         'email' => 'editor@test.com',
-        'password' => 'password123',
+        'password' => '84hbfUb_3dsf',
         'role' => 'editor',
         'status' => 'active',
         'email_verified' => true,
     ]);
     $usersTable->save($editor);
-    echo "✓ Editor created: editor@test.com / password123\n";
+    echo "✓ Editor created: editor@test.com / 84hbfUb_3dsf\n";
 } else {
     echo "✓ Editor exists\n";
 }
@@ -57,19 +57,19 @@ if (!$viewer) {
     $viewer = $usersTable->newEntity([
         'organization_id' => $org->id,
         'email' => 'viewer@test.com',
-        'password' => 'password123',
+        'password' => '84hbfUb_3dsf',
         'role' => 'viewer',
         'status' => 'active',
         'email_verified' => true,
     ]);
     $usersTable->save($viewer);
-    echo "✓ Viewer created: viewer@test.com / password123\n";
+    echo "✓ Viewer created: viewer@test.com / 84hbfUb_3dsf\n";
 } else {
     echo "✓ Viewer exists\n";
 }
 
 echo "\n🎉 Test users ready!\n";
 echo "\nTest credentials:\n";
-echo "  Admin:  admin@test.com  / password123\n";
-echo "  Editor: editor@test.com / password123\n";
-echo "  Viewer: viewer@test.com / password123\n";
+echo "  Admin:  admin@test.com  / 84hbfUb_3dsf\n";
+echo "  Editor: editor@test.com / 84hbfUb_3dsf\n";
+echo "  Viewer: viewer@test.com / 84hbfUb_3dsf\n";

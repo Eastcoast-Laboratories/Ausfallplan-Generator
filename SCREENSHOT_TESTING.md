@@ -102,7 +102,7 @@ const puppeteer = require('puppeteer');
   // Login
   await page.goto('http://localhost:8080/users/login');
   await page.type('input[name="email"]', 'ausfallplan-sysadmin@it.z11.de');
-  await page.type('input[name="password"]', 'password123');
+  await page.type('input[name="password"]', '84hbfUb_3dsf');
   await page.click('button[type="submit"]');
   await page.waitForNavigation();
   
@@ -130,7 +130,7 @@ node tests/screenshots.js
 **Browser DevTools nutzen:**
 
 1. Öffne http://localhost:8080/users/login
-2. Logge dich ein (ausfallplan-sysadmin@it.z11.de / password123)
+2. Logge dich ein (ausfallplan-sysadmin@it.z11.de / 84hbfUb_3dsf)
 3. Drücke `F12` → DevTools
 4. Drücke `Ctrl+Shift+P` → "Capture full size screenshot"
 5. Screenshot wird automatisch gespeichert!

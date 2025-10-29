@@ -353,11 +353,29 @@ ALTER TABLE `sibling_groups`
 COMMIT;
 
 --
--- Default admin user
+-- Default Organization
+--
+
+INSERT INTO `organizations` (`id`, `name`, `is_active`, `contact_email`, `contact_phone`, `created`, `modified`) VALUES
+(1, 'Demo Kita', 1, 'demo@kita.de', '0123-456789', NOW(), NOW());
+
+--
+-- Default Users (Password: 84fhr38hf43iahfuX_2)
 --
 
 INSERT INTO `users` (`id`, `email`, `password`, `is_system_admin`, `created`, `modified`, `email_verified`, `email_token`, `status`, `approved_at`, `approved_by`) VALUES
-(31, 'admin@demo.kita', '$2y$12$S3CcPC2O6bAgAW5v6.CYq.vybYPG0xegueNsAKF84D6.2qJfsvlDS', 1, '2025-10-24 23:50:48', '2025-10-24 23:52:17', 1, NULL, 'active', NULL, NULL);
+(1, 'admin@demo.kita', '$2y$12$aa8WQuZBRhtVemDoA7DgTOxyryszPgabWRE1jvIZYMCX.k.cl2B7O', 1, NOW(), NOW(), 1, NULL, 'active', NOW(), NULL),
+(2, 'editor@demo.kita', '$2y$12$aa8WQuZBRhtVemDoA7DgTOxyryszPgabWRE1jvIZYMCX.k.cl2B7O', 0, NOW(), NOW(), 1, NULL, 'active', NOW(), 1),
+(3, 'viewer@demo.kita', '$2y$12$aa8WQuZBRhtVemDoA7DgTOxyryszPgabWRE1jvIZYMCX.k.cl2B7O', 0, NOW(), NOW(), 1, NULL, 'active', NOW(), 1);
+
+--
+-- Link Users to Organization
+--
+
+INSERT INTO `organization_users` (`id`, `organization_id`, `user_id`, `role`, `is_primary`, `joined_at`, `invited_by`, `created`, `modified`) VALUES
+(1, 1, 1, 'admin', 1, NOW(), NULL, NOW(), NOW()),
+(2, 1, 2, 'editor', 0, NOW(), 1, NOW(), NOW()),
+(3, 1, 3, 'viewer', 0, NOW(), 1, NOW(), NOW());
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
