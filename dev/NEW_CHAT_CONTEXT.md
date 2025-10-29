@@ -343,13 +343,6 @@ Aus `dev/TODO.md` und Memories:
 11. **Git Push:** NIEMALS ohne explizite Aufforderung
 12. **Deployment:** NIEMALS ohne explizite Aufforderung
 
-## Nützliche Test-User
-
-```
-Admin:  admin@demo.kita / password123
-Editor: a2@a.de / password123
-```
-
 ## Debugging Tipps
 
 ### Problem: Seite lädt nicht / 500 Error
