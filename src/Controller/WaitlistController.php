@@ -142,6 +142,33 @@ class WaitlistController extends AppController
             foreach ($waitlistChildren as $child) {
                 $childrenOnWaitlist[] = $child->id;
             }
+            
+            // Punkt 3: If waitlist is empty, auto-populate with all children from schedule
+            if (empty($childrenOnWaitlist) && $selectedSchedule) {
+                $scheduleChildren = $this->fetchTable('Children')->find()
+                    ->where([
+                        'schedule_id' => $scheduleId,
+                        'is_active' => true
+                    ])
+                    ->orderBy(['organization_order' => 'ASC'])
+                    ->all();
+                
+                $order = 1;
+                foreach ($scheduleChildren as $child) {
+                    $child->waitlist_order = $order++;
+                    $this->fetchTable('Children')->save($child);
+                    $childrenOnWaitlist[] = $child->id;
+                }
+                
+                // Reload waitlist with newly populated children
+                $waitlistChildren = $this->fetchTable('Children')->find()
+                    ->where([
+                        'schedule_id' => $scheduleId,
+                        'waitlist_order IS NOT' => null
+                    ])
+                    ->orderBy(['waitlist_order' => 'ASC'])
+                    ->all();
+            }
         }
         
         // Get available children (not on waitlist)
