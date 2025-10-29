@@ -2,8 +2,7 @@
 /**
  * @var \App\View\AppView $this
  * @var \App\Model\Entity\Schedule $schedule
- * @var iterable<\App\Model\Entity\Child> $assignedChildren
- * @var iterable<\App\Model\Entity\Child> $availableChildren
+ * @var iterable<\App\Model\Entity\Child> $children
  */
 $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
 ?>
@@ -14,8 +13,13 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
 <div class="manage-children content">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
         <div>
-            <h3 style="margin: 0;"><?= __("Manage Children") ?> - <?= h($schedule->title) ?></h3>
-            <p style="margin: 0.5rem 0 0 0;"><?= $this->Html->link("← " . __("Back to Schedules"), ["action" => "index"]) ?></p>
+            <h3 style="margin: 0;"><?= __("Manage Children Organization Order") ?> - <?= h($schedule->organization->name) ?></h3>
+            <p style="margin: 0.5rem 0 0 0;">
+                <?= $this->Html->link("← " . __("Back to Schedules"), ["action" => "index"]) ?>
+                <span style="color: #666; margin-left: 1rem;">
+                    <?= __("This order is used in reports. Use Waitlist for schedule assignments.") ?>
+                </span>
+            </p>
         </div>
         <?= $this->Html->link(
             "+ " . __("Add Child"),
@@ -24,95 +28,18 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
         ) ?>
     </div>
     
-    <div class="row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1rem;">
+    <div class="row" style="margin-top: 1rem;">
         
-        <!-- Available Children -->
-        <div class="available-children">
-            <h4><?= __("Available Children") ?></h4>
-            <div style="background: #f5f7fa; padding: 1rem; border-radius: 8px; min-height: 300px;">
-                <?php if (!empty($availableChildren) && (is_countable($availableChildren) ? count($availableChildren) : $availableChildren->count()) > 0): ?>
-                    <?php foreach ($availableChildren as $child): ?>
-                        <div style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <strong><?= h($child->name) ?></strong>
-                                <?php if ($child->is_integrative): ?>
-                                    <span style="background: #e3f2fd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
-                                        <?= __("Integrative") ?>
-                                    </span>
-                                <?php endif; ?>
-                                <?php if ($child->sibling_group_id): ?>
-                                    <?= $this->Html->link(
-                                        '👨‍👩‍👧 ' . __("Geschwister"),
-                                        ['controller' => 'SiblingGroups', 'action' => 'view', $child->sibling_group_id],
-                                        [
-                                            'style' => 'background: #fff3cd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem; text-decoration: none; color: #856404; display: inline-block;',
-                                            'escape' => false
-                                        ]
-                                    ) ?>
-                                <?php endif; ?>
-                            </div>
-                            <?= $this->Form->postLink(
-                                "+ " . __("Add"),
-                                ["action" => "assignChild", "?" => ["schedule_id" => $schedule->id, "child_id" => $child->id]],
-                                [
-                                    "class" => "button button-small",
-                                    "style" => "background: #4caf50; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px;"
-                                ]
-                            ) ?>
-                        </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <p style="color: #666; text-align: center; padding: 2rem;">
-                        <?= __("All children are assigned to this schedule.") ?>
-                    </p>
-                <?php endif; ?>
-            </div>
-        </div>
-        
-        <!-- Assigned Children (Sortable) -->
-        <div class="assigned-children">
-            <h4><?= __("Assigned Children") ?> 
+        <!-- Children (Sortable) -->
+        <div class="organization-children">
+            <h4><?= __("Organization Children") ?> 
                 <span style="font-size: 0.85rem; font-weight: normal; color: #666;">
                     (<?= __("Drag to reorder") ?>)
                 </span>
             </h4>
             <div id="children-sortable" style="background: #e8f5e9; padding: 1rem; border-radius: 8px; min-height: 300px;">
-                <?php if (!empty($assignedChildren) && (is_countable($assignedChildren) ? count($assignedChildren) : $assignedChildren->count()) > 0): ?>
-                    <?php 
-                    // Group children by sibling_group_id
-                    $siblingGroups = [];
-                    foreach ($assignedChildren as $child) {
-                        if ($child->sibling_group_id) {
-                            if (!isset($siblingGroups[$child->sibling_group_id])) {
-                                $siblingGroups[$child->sibling_group_id] = [];
-                            }
-                            $siblingGroups[$child->sibling_group_id][] = $child;
-                        }
-                    }
-                    
-                    // Build ordered list - iterate through assignedChildren (already sorted by sort_order)
-                    $processedGroups = [];
-                    $orderedItems = [];
-                    
-                    foreach ($assignedChildren as $child) {
-                        if ($child->sibling_group_id) {
-                            // If first sibling in group, add whole group
-                            if (!in_array($child->sibling_group_id, $processedGroups)) {
-                                $orderedItems[] = ['type' => 'group', 'group_id' => $child->sibling_group_id, 'siblings' => $siblingGroups[$child->sibling_group_id]];
-                                $processedGroups[] = $child->sibling_group_id;
-                            }
-                            // Skip other siblings (already added in group)
-                        } else {
-                            // Single child (no siblings)
-                            $orderedItems[] = ['type' => 'single', 'child' => $child];
-                        }
-                    }
-                    
-                    // Display in order
-                    foreach ($orderedItems as $item):
-                        if ($item['type'] === 'single'):
-                            $child = $item['child'];
-                    ?>
+                <?php if (!empty($children) && (is_countable($children) ? count($children) : $children->count()) > 0): ?>
+                    <?php foreach ($children as $child): ?>
                         <div class="child-item" data-child-id="<?= $child->id ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #4caf50; cursor: move;">
                             <div>
                                 <strong><?= h($child->name) ?></strong>
@@ -121,51 +48,22 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                                         <?= __("Integrative") ?>
                                     </span>
                                 <?php endif; ?>
+                                <?php if ($child->sibling_group_id): ?>
+                                    <span style="background: #fff3cd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
+                                        👨‍👩‍👧 <?= __("Sibling Group") ?>
+                                    </span>
+                                <?php endif; ?>
+                                <?php if ($child->schedule_id): ?>
+                                    <span style="background: #c8e6c9; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
+                                        📅 <?= __("In Schedule") ?>
+                                    </span>
+                                <?php endif; ?>
                             </div>
-                            <?= $this->Form->postLink(
-                                "✕",
-                                ["action" => "removeChild", "?" => ["schedule_id" => $schedule->id, "child_id" => $child->id]],
-                                [
-                                    "class" => "button button-small remove-child-btn",
-                                    "style" => "background: #f44336; color: white; padding: 0.5rem 0.75rem; text-decoration: none; border-radius: 4px;",
-                                    "data-child-id" => $child->id
-                                ]
-                            ) ?>
+                            <span style="color: #666; font-size: 0.9rem;">
+                                ⋮⋮
+                            </span>
                         </div>
-                    <?php 
-                        else: // group
-                            $siblings = $item['siblings'];
-                    ?>
-                        <div class="sibling-group" data-child-ids="<?= implode(",", array_map(fn($c) => $c->id, $siblings)) ?>" style="background: #fff9c4; padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 4px; border-left: 4px solid #ffc107; cursor: move;">
-                            <div style="font-size: 0.85rem; color: #f57c00; font-weight: bold; margin-bottom: 0.5rem;">
-                                👨‍👩‍👧 <?= __("Sibling Group") ?>
-                            </div>
-                            <?php foreach ($siblings as $child): ?>
-                                <div style="background: white; padding: 0.75rem; margin-bottom: 0.25rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
-                                    <div>
-                                        <strong><?= h($child->name) ?></strong>
-                                        <?php if ($child->is_integrative): ?>
-                                            <span style="background: #e3f2fd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
-                                                <?= __("Integrative") ?>
-                                            </span>
-                                        <?php endif; ?>
-                                    </div>
-                                    <?= $this->Form->postLink(
-                                        "✕",
-                                        ["action" => "removeChild", "?" => ["schedule_id" => $schedule->id, "child_id" => $child->id]],
-                                        [
-                                            "class" => "button button-small remove-child-btn",
-                                            "style" => "background: #f44336; color: white; padding: 0.5rem 0.75rem; text-decoration: none; border-radius: 4px;",
-                                            "data-child-id" => $child->id
-                                        ]
-                                    ) ?>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php 
-                        endif; 
-                    endforeach; 
-                    ?>
+                    <?php endforeach; ?>
                 <?php else: ?>
                     <p style="color: #666; text-align: center; padding: 2rem;">
                         <?= __("No children assigned to this schedule.") ?>
@@ -177,69 +75,40 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
     </div>
 </div>
 
-<?php if (!empty($assignedChildren) && (is_countable($assignedChildren) ? count($assignedChildren) : $assignedChildren->count()) > 0): ?>
+<?php if (!empty($children) && (is_countable($children) ? count($children) : $children->count()) > 0): ?>
 <script>
-// Hide element immediately on click (prevent double-click)
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('remove-child-btn') || e.target.closest('.remove-child-btn')) {
-        const btn = e.target.classList.contains('remove-child-btn') ? e.target : e.target.closest('.remove-child-btn');
-        const item = btn.closest('.child-item');
-        const siblingGroup = btn.closest('.sibling-group');
-        
-        if (item) {
-            item.style.opacity = '0.3';
-            item.style.pointerEvents = 'none';
-        } else if (siblingGroup) {
-            // Find the specific child item within sibling group
-            const childItem = btn.closest('div[style*="background: white"]');
-            if (childItem) {
-                childItem.style.opacity = '0.3';
-                childItem.style.pointerEvents = 'none';
-            }
-        }
-    }
-});
-
 // Initialize Sortable.js for drag & drop
 const el = document.getElementById("children-sortable");
 const sortable = Sortable.create(el, {
     animation: 150,
     ghostClass: "sortable-ghost",
-    handle: ".child-item, .sibling-group",
+    handle: ".child-item",
     onEnd: function (evt) {
-        // Get new order - extract child IDs (singles and groups)
-        const items = el.querySelectorAll(".child-item, .sibling-group");
-        const order = [];
+        // Get new order - extract child IDs
+        const items = el.querySelectorAll(".child-item");
+        const childrenIds = [];
         
         items.forEach(item => {
-            if (item.classList.contains("sibling-group")) {
-                // For sibling groups, add all child IDs
-                const childIds = item.dataset.childIds.split(",").map(id => parseInt(id));
-                order.push(...childIds);
-            } else {
-                // Single child
-                order.push(parseInt(item.dataset.childId));
-            }
+            childrenIds.push(parseInt(item.dataset.childId));
         });
         
-        // Send AJAX request to update order
-        fetch("<?= $this->Url->build(["action" => "reorderChildren"]) ?>", {
+        // Send AJAX request to update organization_order
+        fetch("<?= $this->Url->build(["action" => "manageChildren", $schedule->id]) ?>", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "X-CSRF-Token": "<?= $this->request->getAttribute("csrfToken") ?>"
             },
             body: JSON.stringify({
-                schedule_id: <?= $schedule->id ?>,
-                order: order
+                children: childrenIds
             })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                console.log("Order updated successfully");
+                console.log("Organization order updated successfully");
             } else {
-                console.error("Failed to update order:", data.error);
+                console.error("Failed to update order");
                 location.reload();
             }
         })

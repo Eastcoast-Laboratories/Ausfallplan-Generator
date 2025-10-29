@@ -92,6 +92,10 @@ return [
     // Navigation & Links
     'Back to Schedules' => 'Zurück zu Ausfallplänen',
     'Manage Children' => 'Kinder verwalten',
+    'Manage Children Organization Order' => 'Organisations-Reihenfolge verwalten',
+    'Organization Children' => 'Organisations-Kinder',
+    'This order is used in reports. Use Waitlist for schedule assignments.' => 'Diese Reihenfolge wird in Berichten verwendet. Nutzen Sie die Nachrückliste für Ausfallplan-Zuweisungen.',
+    'In Schedule' => 'Im Ausfallplan',
     'Change Language' => 'Sprache wechseln',
     
     // Waitlist

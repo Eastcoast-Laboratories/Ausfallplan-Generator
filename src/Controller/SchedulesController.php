@@ -228,19 +228,58 @@ class SchedulesController extends AppController
     }
 
     /**
-     * Manage children - Redirect to Waitlist
+     * Manage children - Sort children by organization_order
      *
      * @param string|null $id Schedule id
-     * @return \Cake\Http\Response
+     * @return \Cake\Http\Response|null|void
      */
     public function manageChildren($id = null)
     {
-        // Redirect to waitlist controller for schedule management
-        return $this->redirect([
-            'controller' => 'Waitlist',
-            'action' => 'index',
-            '?' => ['schedule_id' => $id]
+        $schedule = $this->Schedules->get($id, [
+            'contain' => ['Organizations']
         ]);
+
+        // Check permission
+        $this->checkScheduleAccess($schedule, 'edit');
+
+        // Handle AJAX reorder request
+        if ($this->request->is('post') && $this->request->is('ajax')) {
+            $this->request->allowMethod(['post']);
+            $childrenIds = $this->request->getData('children');
+            
+            if ($childrenIds) {
+                $childrenTable = $this->fetchTable('Children');
+                $success = true;
+                
+                // Update organization_order for each child
+                foreach ($childrenIds as $order => $childId) {
+                    $child = $childrenTable->get($childId);
+                    $child->organization_order = $order + 1;
+                    if (!$childrenTable->save($child)) {
+                        $success = false;
+                        break;
+                    }
+                }
+                
+                $this->set([
+                    'success' => $success,
+                    '_serialize' => ['success']
+                ]);
+                $this->viewBuilder()->setOption('serialize', ['success']);
+                return $this->response->withType('application/json')
+                    ->withStringBody(json_encode(['success' => $success]));
+            }
+        }
+
+        // Get children for this organization, sorted by organization_order
+        $childrenTable = $this->fetchTable('Children');
+        $children = $childrenTable->find()
+            ->where(['Children.organization_id' => $schedule->organization_id])
+            ->contain(['SiblingGroups'])
+            ->orderBy(['Children.organization_order' => 'ASC', 'Children.id' => 'ASC'])
+            ->all();
+
+        $this->set(compact('schedule', 'children'));
     }
 
     /**
