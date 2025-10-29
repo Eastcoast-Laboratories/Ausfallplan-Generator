@@ -53,7 +53,7 @@ class AuthenticatedLayoutTest extends TestCase
         $users = $this->getTableLocator()->get('Users');
         $user = $users->newEntity([
             'email' => 'navtest@test.com',
-            'password' => 'password123',
+            'password' => '84hbfUb_3dsf',
             'is_system_admin' => false,
             'email_verified' => 1,
             'status' => 'active',
@@ -110,7 +110,7 @@ class AuthenticatedLayoutTest extends TestCase
         $users = $this->getTableLocator()->get('Users');
         $user = $users->newEntity([
             'email' => 'hamburger@test.com',
-            'password' => 'password123',
+            'password' => '84hbfUb_3dsf',
             'is_system_admin' => false,
             'email_verified' => 1,
             'status' => 'active',
@@ -155,7 +155,7 @@ class AuthenticatedLayoutTest extends TestCase
         $users = $this->getTableLocator()->get('Users');
         $user = $users->newEntity([
             'email' => 'avatar@test.com',
-            'password' => 'password123',
+            'password' => '84hbfUb_3dsf',
             'is_system_admin' => false,
             'email_verified' => 1,
             'status' => 'active',
@@ -199,7 +199,7 @@ class AuthenticatedLayoutTest extends TestCase
         $users = $this->getTableLocator()->get('Users');
         $user = $users->newEntity([
             'email' => 'language@test.com',
-            'password' => 'password123',
+            'password' => '84hbfUb_3dsf',
             'is_system_admin' => false,
             'email_verified' => 1,
             'status' => 'active',

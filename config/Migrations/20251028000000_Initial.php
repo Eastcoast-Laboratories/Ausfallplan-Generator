@@ -352,5 +352,110 @@ class Initial extends AbstractMigration
                 'update' => 'CASCADE',
             ])
             ->create();
+
+        // Insert default data
+        $this->insertDefaultData();
+    }
+
+    /**
+     * Insert default organization and users
+     */
+    private function insertDefaultData(): void
+    {
+        // Default organization
+        $this->table('organizations')->insert([
+            [
+                'id' => 1,
+                'name' => 'Demo Kita',
+                'is_active' => 1,
+                'contact_email' => 'demo@kita.de',
+                'contact_phone' => '0123-456789',
+                'created' => date('Y-m-d H:i:s'),
+                'modified' => date('Y-m-d H:i:s'),
+            ]
+        ])->saveData();
+
+        // Default users (Password: 84fhr38hf43iahfuX_2)
+        $passwordHash = '$2y$12$aa8WQuZBRhtVemDoA7DgTOxyryszPgabWRE1jvIZYMCX.k.cl2B7O';
+        $now = date('Y-m-d H:i:s');
+        
+        $this->table('users')->insert([
+            [
+                'id' => 1,
+                'email' => 'admin@demo.kita',
+                'password' => $passwordHash,
+                'is_system_admin' => 1,
+                'created' => $now,
+                'modified' => $now,
+                'email_verified' => 1,
+                'email_token' => null,
+                'status' => 'active',
+                'approved_at' => $now,
+                'approved_by' => null,
+            ],
+            [
+                'id' => 2,
+                'email' => 'editor@demo.kita',
+                'password' => $passwordHash,
+                'is_system_admin' => 0,
+                'created' => $now,
+                'modified' => $now,
+                'email_verified' => 1,
+                'email_token' => null,
+                'status' => 'active',
+                'approved_at' => $now,
+                'approved_by' => 1,
+            ],
+            [
+                'id' => 3,
+                'email' => 'viewer@demo.kita',
+                'password' => $passwordHash,
+                'is_system_admin' => 0,
+                'created' => $now,
+                'modified' => $now,
+                'email_verified' => 1,
+                'email_token' => null,
+                'status' => 'active',
+                'approved_at' => $now,
+                'approved_by' => 1,
+            ],
+        ])->saveData();
+
+        // Link users to organization
+        $this->table('organization_users')->insert([
+            [
+                'id' => 1,
+                'organization_id' => 1,
+                'user_id' => 1,
+                'role' => 'admin',
+                'is_primary' => 1,
+                'joined_at' => $now,
+                'invited_by' => null,
+                'created' => $now,
+                'modified' => $now,
+            ],
+            [
+                'id' => 2,
+                'organization_id' => 1,
+                'user_id' => 2,
+                'role' => 'editor',
+                'is_primary' => 0,
+                'joined_at' => $now,
+                'invited_by' => 1,
+                'created' => $now,
+                'modified' => $now,
+            ],
+            [
+                'id' => 3,
+                'organization_id' => 1,
+                'user_id' => 3,
+                'role' => 'viewer',
+                'is_primary' => 0,
+                'joined_at' => $now,
+                'invited_by' => 1,
+                'created' => $now,
+                'modified' => $now,
+            ],
+        ])->saveData();
     }
 }

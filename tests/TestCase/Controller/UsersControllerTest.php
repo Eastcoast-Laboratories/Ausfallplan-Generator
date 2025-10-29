@@ -77,8 +77,8 @@ class UsersControllerTest extends TestCase
         $data = [
             'organization_name' => 'Brand New Test Kita 2025',  // Unique name not in fixtures
             'email' => 'newuser@test.com',
-            'password' => 'SecurePassword123!',
-            'password_confirm' => 'SecurePassword123!',
+            'password' => 'Secure84hbfUb_3dsf!',
+            'password_confirm' => 'Secure84hbfUb_3dsf!',
             'requested_role' => 'editor',
         ];
 
@@ -106,7 +106,7 @@ class UsersControllerTest extends TestCase
         $this->assertEquals('org_admin', $orgUser->role); // New org = org_admin
         
         // Verify password was hashed
-        $this->assertNotEquals('SecurePassword123!', $user->password);
+        $this->assertNotEquals('Secure84hbfUb_3dsf!', $user->password);
         $this->assertStringStartsWith('$2y$', $user->password); // bcrypt hash
     }
 
@@ -121,8 +121,8 @@ class UsersControllerTest extends TestCase
         $data = [
             'organization_name' => 'Test Kita 2',
             'email' => 'viewer@test.com',
-            'password' => 'SecurePassword123!',
-            'password_confirm' => 'SecurePassword123!',
+            'password' => 'Secure84hbfUb_3dsf!',
+            'password_confirm' => 'Secure84hbfUb_3dsf!',
             // No requested_role - should default to 'editor'
         ];
 
@@ -186,8 +186,8 @@ class UsersControllerTest extends TestCase
         $data1 = [
             'organization_name' => 'Test Kita',
             'email' => 'duplicate@test.com',
-            'password' => 'SecurePassword123!',
-            'password_confirm' => 'SecurePassword123!',
+            'password' => 'Secure84hbfUb_3dsf!',
+            'password_confirm' => 'Secure84hbfUb_3dsf!',
         ];
         $this->post('/users/register', $data1);
         $this->assertResponseSuccess();
@@ -219,7 +219,7 @@ class UsersControllerTest extends TestCase
      */
     public function testPasswordHashing(): void
     {
-        $plainPassword = 'MySecretPassword123!';
+        $plainPassword = 'MySecret84hbfUb_3dsf!';
         
         $data = [
             'organization_name' => 'Test Kita',
@@ -259,14 +259,14 @@ class UsersControllerTest extends TestCase
         $data = [
             'organization_name' => 'Test Kita',
             'email' => 'security@test.com',
-            'password' => 'SecurePassword123!',
-            'password_confirm' => 'SecurePassword123!',
+            'password' => 'Secure84hbfUb_3dsf!',
+            'password_confirm' => 'Secure84hbfUb_3dsf!',
         ];
 
         $this->post('/users/register', $data);
         
         // Verify password is not in the response
-        $this->assertResponseNotContains('SecurePassword123!');
+        $this->assertResponseNotContains('Secure84hbfUb_3dsf!');
         $this->assertResponseNotContains('$2y$'); // No password hash in response either
     }
 

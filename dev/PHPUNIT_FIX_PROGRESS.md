@@ -176,7 +176,7 @@ $user = $usersTable->newEntity([
     'organization_id' => 1,  // ❌ No longer exists
     'role' => 'admin',       // ❌ No longer exists
     'email' => 'test@example.com',
-    'password' => 'password123',
+    'password' => '84hbfUb_3dsf',
 ]);
 $usersTable->save($user);
 ```
@@ -186,7 +186,7 @@ $usersTable->save($user);
 // 1. Create user
 $user = $usersTable->newEntity([
     'email' => 'test@example.com',
-    'password' => 'password123',
+    'password' => '84hbfUb_3dsf',
     'is_system_admin' => false,  // or true for system admin
     'status' => 'active',
     'email_verified' => true,
@@ -209,7 +209,7 @@ $orgUsersTable->save($orgUser);
 ```php
 $admin = $usersTable->newEntity([
     'email' => 'ausfallplan-sysadmin@it.z11.de',
-    'password' => 'password123',
+    'password' => '84hbfUb_3dsf',
     'is_system_admin' => true,  // ← System-wide admin
     'status' => 'active',
     'email_verified' => true,

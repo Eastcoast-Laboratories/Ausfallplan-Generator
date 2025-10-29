@@ -51,7 +51,7 @@ e3d7d64 - SchedulesControllerCapacityTest user schema
 $user = $usersTable->newEntity([
     'organization_id' => 1,
     'email' => 'test@test.com',
-    'password' => 'password123',
+    'password' => '84hbfUb_3dsf',
     'role' => 'admin',  // oder 'editor', 'viewer'
 ]);
 ```
@@ -60,7 +60,7 @@ $user = $usersTable->newEntity([
 ```php
 $user = $usersTable->newEntity([
     'email' => 'test@test.com',
-    'password' => 'password123',
+    'password' => '84hbfUb_3dsf',
     'is_system_admin' => false,
     'email_verified' => 1,
     'status' => 'active',
@@ -267,7 +267,7 @@ docker exec ausfallplan-generator vendor/bin/phpunit --testdox 2>&1 | grep "✘"
 $users = $this->getTableLocator()->get('Users');
 $user = $users->newEntity([
     'email' => 'test@test.com',
-    'password' => 'password123',
+    'password' => '84hbfUb_3dsf',
     'is_system_admin' => false,  // true für Admins
     'email_verified' => 1,
     'status' => 'active',

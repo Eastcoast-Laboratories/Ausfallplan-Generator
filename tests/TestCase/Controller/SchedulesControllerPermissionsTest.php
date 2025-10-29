@@ -107,7 +107,7 @@ class SchedulesControllerPermissionsTest extends TestCase
         $users = $this->getTableLocator()->get('Users');
         $admin = $users->newEntity([
             'email' => 'sysadmin-test@example.com',
-            'password' => 'password123',
+            'password' => '84hbfUb_3dsf',
             'is_system_admin' => true,
             'status' => 'active',
             'email_verified' => 1,
@@ -171,7 +171,7 @@ class SchedulesControllerPermissionsTest extends TestCase
         $users = $this->getTableLocator()->get('Users');
         $user = $users->newEntity([
             'email' => $email,
-            'password' => 'password123',
+            'password' => '84hbfUb_3dsf',
             'is_system_admin' => false,
             'status' => 'active',
             'email_verified' => 1,

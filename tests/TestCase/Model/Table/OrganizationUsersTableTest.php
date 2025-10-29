@@ -53,7 +53,7 @@ class OrganizationUsersTableTest extends TestCase
         $usersTable = $this->getTableLocator()->get('Users');
         $newUser = $usersTable->newEntity([
             'email' => 'newuser@test.com',
-            'password' => 'password123',
+            'password' => '84hbfUb_3dsf',
             'status' => 'active',
             'email_verified' => 1,
             'is_system_admin' => false,
@@ -135,7 +135,7 @@ class OrganizationUsersTableTest extends TestCase
             // Create a new user for each role test
             $newUser = $usersTable->newEntity([
                 'email' => "role_{$role}@test.com",
-                'password' => 'password123',
+                'password' => '84hbfUb_3dsf',
                 'status' => 'active',
                 'email_verified' => 1,
                 'is_system_admin' => false,

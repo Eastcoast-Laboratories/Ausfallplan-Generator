@@ -54,7 +54,7 @@ class SchedulesControllerCapacityTest extends TestCase
         $users = $this->getTableLocator()->get('Users');
         $user = $users->newEntity([
             'email' => 'capacity@test.com',
-            'password' => 'password123',
+            'password' => '84hbfUb_3dsf',
             'is_system_admin' => false,
             'email_verified' => 1,
             'status' => 'active',

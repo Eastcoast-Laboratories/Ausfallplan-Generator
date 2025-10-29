@@ -30,13 +30,13 @@ if (!$admin) {
     $admin = $usersTable->newEntity([
         'organization_id' => $org1->id,
         'email' => 'admin@test.com',
-        'password' => 'password123',
+        'password' => '84hbfUb_3dsf',
         'role' => 'admin',
         'status' => 'active',
         'email_verified' => true,
     ]);
     $usersTable->save($admin);
-    echo "✓ Admin user created (admin@test.com / password123)\n";
+    echo "✓ Admin user created (admin@test.com / 84hbfUb_3dsf)\n";
 } else {
     echo "✓ Admin user already exists\n";
 }
@@ -47,13 +47,13 @@ if (!$editor) {
     $editor = $usersTable->newEntity([
         'organization_id' => $org1->id,
         'email' => 'editor@test.com',
-        'password' => 'password123',
+        'password' => '84hbfUb_3dsf',
         'role' => 'editor',
         'status' => 'active',
         'email_verified' => true,
     ]);
     $usersTable->save($editor);
-    echo "✓ Editor user created (editor@test.com / password123)\n";
+    echo "✓ Editor user created (editor@test.com / 84hbfUb_3dsf)\n";
 } else {
     echo "✓ Editor user already exists\n";
 }
@@ -64,13 +64,13 @@ if (!$viewer) {
     $viewer = $usersTable->newEntity([
         'organization_id' => $org1->id,
         'email' => 'viewer@test.com',
-        'password' => 'password123',
+        'password' => '84hbfUb_3dsf',
         'role' => 'viewer',
         'status' => 'active',
         'email_verified' => true,
     ]);
     $usersTable->save($viewer);
-    echo "✓ Viewer user created (viewer@test.com / password123)\n";
+    echo "✓ Viewer user created (viewer@test.com / 84hbfUb_3dsf)\n";
 } else {
     echo "✓ Viewer user already exists\n";
 }
@@ -80,6 +80,6 @@ echo "\n🎉 Test users ready!\n";
 
 echo ""
 echo "✅ Test users created:"
-echo "   Admin:  admin@test.com  / password123"
-echo "   Editor: editor@test.com / password123"
-echo "   Viewer: viewer@test.com / password123"
+echo "   Admin:  admin@test.com  / 84hbfUb_3dsf"
+echo "   Editor: editor@test.com / 84hbfUb_3dsf"
+echo "   Viewer: viewer@test.com / 84hbfUb_3dsf"
