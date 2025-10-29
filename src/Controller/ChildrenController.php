@@ -125,6 +125,26 @@ class ChildrenController extends AppController
                 $data['is_integrative'] = false;
             }
             
+            // Auto-assign to active schedule and set orders
+            $activeScheduleId = $this->request->getSession()->read('activeScheduleId');
+            if ($activeScheduleId) {
+                $data['schedule_id'] = $activeScheduleId;
+            }
+            
+            // Set organization_order (max + 1 for this organization)
+            $maxOrgOrder = $this->Children->find()
+                ->where(['organization_id' => $primaryOrg->id])
+                ->select(['max_order' => 'MAX(organization_order)'])
+                ->first();
+            $data['organization_order'] = ($maxOrgOrder && $maxOrgOrder->max_order) ? $maxOrgOrder->max_order + 1 : 1;
+            
+            // Set waitlist_order (max + 1 for this organization)
+            $maxWaitlistOrder = $this->Children->find()
+                ->where(['organization_id' => $primaryOrg->id])
+                ->select(['max_order' => 'MAX(waitlist_order)'])
+                ->first();
+            $data['waitlist_order'] = ($maxWaitlistOrder && $maxWaitlistOrder->max_order) ? $maxWaitlistOrder->max_order + 1 : 1;
+            
             $child = $this->Children->patchEntity($child, $data);
             
             if ($this->Children->save($child)) {
