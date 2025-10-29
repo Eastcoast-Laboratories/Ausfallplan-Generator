@@ -59,9 +59,18 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                                     </span>
                                 <?php endif; ?>
                             </div>
-                            <span style="color: #666; font-size: 0.9rem;">
-                                ⋮⋮
-                            </span>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <button 
+                                    class="remove-from-order" 
+                                    data-child-id="<?= $child->id ?>"
+                                    style="background: #f44336; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.75rem;"
+                                    title="<?= __("Remove from organization order") ?>">
+                                    ✕
+                                </button>
+                                <span style="color: #666; font-size: 0.9rem; cursor: move;">
+                                    ⋮⋮
+                                </span>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
@@ -128,5 +137,45 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// Handle remove from order buttons
+document.querySelectorAll(".remove-from-order").forEach(button => {
+    button.addEventListener("click", function(e) {
+        e.stopPropagation();
+        const childId = this.dataset.childId;
+        const childName = this.closest(".child-item").querySelector("strong").textContent;
+        
+        if (confirm("<?= __("Remove {0} from organization order?", "") ?>" + childName)) {
+            // Send AJAX request to remove from order
+            fetch("<?= $this->Url->build(["action" => "removeFromOrder", $schedule->id]) ?>", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-Token": "<?= $this->request->getAttribute("csrfToken") ?>"
+                },
+                body: JSON.stringify({
+                    child_id: parseInt(childId)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove item from DOM
+                    this.closest(".child-item").style.transition = "opacity 0.3s";
+                    this.closest(".child-item").style.opacity = "0";
+                    setTimeout(() => {
+                        this.closest(".child-item").remove();
+                    }, 300);
+                } else {
+                    alert("<?= __("Failed to remove from order") ?>");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("<?= __("An error occurred") ?>");
+            });
+        }
+    });
+});
 </script>
 <?php endif; ?>

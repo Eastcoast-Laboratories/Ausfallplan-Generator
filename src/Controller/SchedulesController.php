@@ -286,6 +286,63 @@ class SchedulesController extends AppController
     }
 
     /**
+     * Remove child from organization order (set to NULL)
+     *
+     * @param string|null $id Schedule id
+     * @return \Cake\Http\Response JSON response
+     */
+    public function removeFromOrder($id = null)
+    {
+        $this->request->allowMethod(['post']);
+        $this->viewBuilder()->setClassName('Json');
+        
+        $schedule = $this->Schedules->get($id);
+        
+        // Check permission
+        if (!$this->hasOrgRole($schedule->organization_id, 'editor')) {
+            $this->set([
+                'success' => false,
+                'message' => __('Permission denied'),
+                '_serialize' => ['success', 'message']
+            ]);
+            return $this->response->withType('application/json');
+        }
+        
+        $data = $this->request->getData();
+        $childId = $data['child_id'] ?? null;
+        
+        if ($childId) {
+            $childrenTable = $this->fetchTable('Children');
+            $child = $childrenTable->get($childId);
+            
+            // Set organization_order to NULL
+            $child->organization_order = null;
+            
+            if ($childrenTable->save($child)) {
+                $this->set([
+                    'success' => true,
+                    'message' => __('Child removed from organization order'),
+                    '_serialize' => ['success', 'message']
+                ]);
+            } else {
+                $this->set([
+                    'success' => false,
+                    'message' => __('Failed to save'),
+                    '_serialize' => ['success', 'message']
+                ]);
+            }
+        } else {
+            $this->set([
+                'success' => false,
+                'message' => __('Invalid child ID'),
+                '_serialize' => ['success', 'message']
+            ]);
+        }
+        
+        return $this->response->withType('application/json');
+    }
+
+    /**
      * Assign child to schedule - Deprecated, redirect to Waitlist
      *
      * @return \Cake\Http\Response
