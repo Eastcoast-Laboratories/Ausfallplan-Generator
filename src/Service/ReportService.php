@@ -38,8 +38,8 @@ class ReportService
         // Load schedule
         $schedule = $schedulesTable->get($scheduleId, contain: ['Organizations']);
 
-        // Get sorted children from waitlist
-        $sortedChildren = $this->getSortedChildrenFromWaitlist($scheduleId);
+        // Get sorted children by organization_order
+        $sortedChildren = $this->getSortedChildrenByOrganizationOrder($scheduleId);
         
         // Get waitlist children for display
         $childrenTable = TableRegistry::getTableLocator()->get('Children');
@@ -73,23 +73,28 @@ class ReportService
     }
 
     /**
-     * Get sorted children from waitlist
-     * Groups siblings together, respects waitlist_order from children table
+     * Get sorted children by organization_order
+     * Groups siblings together, respects organization_order from children table
+     * Children with organization_order = NULL are excluded from report
      *
      * @param int $scheduleId
      * @return array Array of child units (singles or sibling groups)
      */
-    private function getSortedChildrenFromWaitlist(int $scheduleId): array
+    private function getSortedChildrenByOrganizationOrder(int $scheduleId): array
     {
         $childrenTable = TableRegistry::getTableLocator()->get('Children');
         
-        // Get all children on waitlist for this schedule
+        // Get schedule to find organization_id
+        $schedulesTable = TableRegistry::getTableLocator()->get('Schedules');
+        $schedule = $schedulesTable->get($scheduleId);
+        
+        // Get all children with organization_order (NOT NULL) for this organization
         $children = $childrenTable->find()
             ->where([
-                'schedule_id' => $scheduleId,
-                'waitlist_order IS NOT' => null
+                'organization_id' => $schedule->organization_id,
+                'organization_order IS NOT' => null
             ])
-            ->orderBy(['waitlist_order' => 'ASC'])
+            ->orderBy(['organization_order' => 'ASC'])
             ->all()
             ->toArray();
 
