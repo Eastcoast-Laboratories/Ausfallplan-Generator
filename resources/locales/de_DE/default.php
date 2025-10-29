@@ -105,6 +105,14 @@ return [
     'Permission denied' => 'Zugriff verweigert',
     'Invalid child ID' => 'Ungültige Kind-ID',
     'Failed to save' => 'Speichern fehlgeschlagen',
+    'In Organization Order' => 'In Organisations-Reihenfolge',
+    'Not in Order (Excluded from Reports)' => 'Nicht in Reihenfolge (Von Berichten ausgeschlossen)',
+    'Excluded' => 'Ausgeschlossen',
+    'Add to organization order' => 'Zur Sortierung hinzufügen',
+    'Child added to organization order' => 'Kind zur Organisations-Sortierung hinzugefügt',
+    'Failed to add to order' => 'Fehler beim Hinzufügen zur Sortierung',
+    'No children in organization order.' => 'Keine Kinder in Organisations-Reihenfolge.',
+    'All children are in organization order.' => 'Alle Kinder sind in Organisations-Reihenfolge.',
     
     // Waitlist
     'Children on Waitlist' => 'Kinder auf der Nachrückliste',
