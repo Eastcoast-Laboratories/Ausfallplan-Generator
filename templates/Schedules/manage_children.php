@@ -30,7 +30,55 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
     
     <div class="row" style="margin-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
         
-        <!-- Children in Organization Order (Sortable) -->
+        <!-- Children NOT in Organization Order (NULL) - LEFT SIDE -->
+        <div class="not-in-order-children">
+            <h4><?= __("Not in Order (Excluded from Reports)") ?></h4>
+            <div style="background: #ffebee; padding: 1rem; border-radius: 8px; min-height: 400px;">
+                <?php 
+                $notInOrderChildren = [];
+                foreach ($children as $child) {
+                    if ($child->organization_order === null) {
+                        $notInOrderChildren[] = $child;
+                    }
+                }
+                ?>
+                <?php if (!empty($notInOrderChildren)): ?>
+                    <?php foreach ($notInOrderChildren as $child): ?>
+                        <div class="child-item-excluded" data-child-id="<?= $child->id ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #f44336;">
+                            <div>
+                                <strong style="color: #999;"><?= h($child->name) ?></strong>
+                                <?php if ($child->is_integrative): ?>
+                                    <span style="background: #e3f2fd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
+                                        <?= __("Integrative") ?>
+                                    </span>
+                                <?php endif; ?>
+                                <?php if ($child->sibling_group_id): ?>
+                                    <span style="background: #fff3cd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
+                                        👨‍👩‍👧 <?= __("Sibling Group") ?>
+                                    </span>
+                                <?php endif; ?>
+                                <span style="background: #ffcdd2; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.75rem; margin-left: 0.5rem; color: #c62828;">
+                                    <?= __("Excluded") ?>
+                                </span>
+                            </div>
+                            <button 
+                                class="add-to-order" 
+                                data-child-id="<?= $child->id ?>"
+                                style="background: #4caf50; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.75rem;"
+                                title="<?= __("Add to organization order") ?>">
+                                +
+                            </button>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p style="color: #666; text-align: center; padding: 2rem;">
+                        <?= __("All children are in organization order.") ?>
+                    </p>
+                <?php endif; ?>
+            </div>
+        </div>
+        
+        <!-- Children in Organization Order (Sortable) - RIGHT SIDE -->
         <div class="in-order-children">
             <h4><?= __("In Organization Order") ?> 
                 <span style="font-size: 0.85rem; font-weight: normal; color: #666;">
@@ -79,54 +127,6 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                 <?php else: ?>
                     <p style="color: #666; text-align: center; padding: 2rem;">
                         <?= __("No children in organization order.") ?>
-                    </p>
-                <?php endif; ?>
-            </div>
-        </div>
-        
-        <!-- Children NOT in Organization Order (NULL) -->
-        <div class="not-in-order-children">
-            <h4><?= __("Not in Order (Excluded from Reports)") ?></h4>
-            <div style="background: #ffebee; padding: 1rem; border-radius: 8px; min-height: 400px;">
-                <?php 
-                $notInOrderChildren = [];
-                foreach ($children as $child) {
-                    if ($child->organization_order === null) {
-                        $notInOrderChildren[] = $child;
-                    }
-                }
-                ?>
-                <?php if (!empty($notInOrderChildren)): ?>
-                    <?php foreach ($notInOrderChildren as $child): ?>
-                        <div class="child-item-excluded" data-child-id="<?= $child->id ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #f44336;">
-                            <div>
-                                <strong style="color: #999;"><?= h($child->name) ?></strong>
-                                <?php if ($child->is_integrative): ?>
-                                    <span style="background: #e3f2fd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
-                                        <?= __("Integrative") ?>
-                                    </span>
-                                <?php endif; ?>
-                                <?php if ($child->sibling_group_id): ?>
-                                    <span style="background: #fff3cd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
-                                        👨‍👩‍👧 <?= __("Sibling Group") ?>
-                                    </span>
-                                <?php endif; ?>
-                                <span style="background: #ffcdd2; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.75rem; margin-left: 0.5rem; color: #c62828;">
-                                    <?= __("Excluded") ?>
-                                </span>
-                            </div>
-                            <button 
-                                class="add-to-order" 
-                                data-child-id="<?= $child->id ?>"
-                                style="background: #4caf50; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.75rem;"
-                                title="<?= __("Add to organization order") ?>">
-                                +
-                            </button>
-                        </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <p style="color: #666; text-align: center; padding: 2rem;">
-                        <?= __("All children are in organization order.") ?>
                     </p>
                 <?php endif; ?>
             </div>
