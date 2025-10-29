@@ -113,6 +113,8 @@ return [
     'Failed to add to order' => 'Fehler beim Hinzufügen zur Sortierung',
     'No children in organization order.' => 'Keine Kinder in Organisations-Reihenfolge.',
     'All children are in organization order.' => 'Alle Kinder sind in Organisations-Reihenfolge.',
+    'Children order updated' => 'Kinder-Reihenfolge aktualisiert',
+    'Invalid children data' => 'Ungültige Kinder-Daten',
     
     // Waitlist
     'Children on Waitlist' => 'Kinder auf der Nachrückliste',

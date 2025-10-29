@@ -50,16 +50,13 @@ test.describe('Manage Children - Sorting & Organization Order', () => {
         
         // 5. Remove child from organization order
         const removeButton = childInOrder.locator('.remove-from-order');
-        
-        page.once('dialog', async dialog => {
-            console.log('✓ Confirm dialog:', dialog.message());
-            await dialog.accept();
-        });
-        
+        // Click remove button (no confirm dialog anymore)
         await removeButton.click();
-        await page.waitForTimeout(1000);
         
-        console.log('✅ Clicked remove button');
+        // Wait for page to reload
+        await page.waitForLoadState('load', { timeout: 5000 });
+        
+        console.log('✅ Clicked remove button and page reloaded');
         
         // 6. Reload and verify child is now in right column (Excluded)
         await page.reload();
