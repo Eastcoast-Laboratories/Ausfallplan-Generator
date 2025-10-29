@@ -352,6 +352,13 @@ ALTER TABLE `sibling_groups`
   ADD CONSTRAINT `sibling_groups_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organizations` (`id`);
 COMMIT;
 
+--
+-- Default admin user
+--
+
+INSERT INTO `users` (`id`, `email`, `password`, `is_system_admin`, `created`, `modified`, `email_verified`, `email_token`, `status`, `approved_at`, `approved_by`) VALUES
+(31, 'admin@demo.kita', '$2y$12$S3CcPC2O6bAgAW5v6.CYq.vybYPG0xegueNsAKF84D6.2qJfsvlDS', 1, '2025-10-24 23:50:48', '2025-10-24 23:52:17', 1, NULL, 'active', NULL, NULL);
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

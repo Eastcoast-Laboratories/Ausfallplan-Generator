@@ -50,42 +50,32 @@ $this->disableAutoLayout();
         
         <h2>Angaben gemäß § 5 TMG</h2>
         <p>
-            z11 Media GmbH<br>
-            Musterstraße 123<br>
-            12345 Musterstadt<br>
+            Lalumo App - Musiklernen für Kinder<br>
+            Ruben Barkow-Kuder<br>
+            Knickweg 16<br>
+            24114 Kiel<br>
             Deutschland
-        </p>
-        
-        <h2>Vertreten durch</h2>
-        <p>
-            Geschäftsführer: Max Mustermann
         </p>
         
         <h2>Kontakt</h2>
         <p>
-            Telefon: +49 (0) 123 456789<br>
-            E-Mail: info@z11.de<br>
-            Website: www.z11.de
-        </p>
-        
-        <h2>Registereintrag</h2>
-        <p>
-            Eintragung im Handelsregister<br>
-            Registergericht: Amtsgericht Musterstadt<br>
-            Registernummer: HRB 12345
+            Telefon: Kiel-53687223<br>
+            E-Mail: lalumo-support@it.z11.de
         </p>
         
         <h2>Umsatzsteuer-ID</h2>
         <p>
-            Umsatzsteuer-Identifikationsnummer gemäß §27 a Umsatzsteuergesetz:<br>
-            DE123456789
+            Steuernummer: 19 222 22158<br>
+            Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz:<br>
+            DE235640206
         </p>
         
-        <h2>Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
+        <h2>Redaktionell verantwortlich</h2>
         <p>
-            Max Mustermann<br>
-            Musterstraße 123<br>
-            12345 Musterstadt
+            Ruben Barkow-Kuder<br>
+            Knickweg 16<br>
+            24114 Kiel<br>
+            Deutschland
         </p>
         
         <h2>Haftungsausschluss</h2>

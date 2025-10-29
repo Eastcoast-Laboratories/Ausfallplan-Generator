@@ -47,9 +47,10 @@ COPY . /var/www/html
 RUN composer install --optimize-autoloader --no-interaction
 
 # Create necessary directories with proper permissions
-RUN mkdir -p tmp/cache/models tmp/cache/persistent tmp/cache/views tmp/sessions tmp/tests logs \
-    && chmod -R 775 tmp logs \
-    && chown -R www-data:www-data tmp logs
+RUN mkdir -p tmp/cache/models tmp/cache/persistent tmp/cache/views tmp/sessions tmp/tests logs coverage \
+    && chmod -R 775 tmp logs coverage \
+    && chown -R www-data:www-data tmp logs coverage \
+    && ln -sf /var/www/html/coverage /var/www/html/webroot/coverage
 
 # Copy Apache vhost configuration
 COPY docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
