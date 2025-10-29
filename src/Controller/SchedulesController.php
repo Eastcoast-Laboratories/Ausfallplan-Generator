@@ -409,6 +409,58 @@ class SchedulesController extends AppController
     }
 
     /**
+     * Update children organization_order after drag & drop
+     *
+     * @param string|null $id Schedule id
+     * @return \Cake\Http\Response JSON response
+     */
+    public function updateChildrenOrder($id = null)
+    {
+        $this->request->allowMethod(['post']);
+        $this->viewBuilder()->setClassName('Json');
+        
+        $schedule = $this->Schedules->get($id);
+        
+        // Check permission
+        if (!$this->hasOrgRole($schedule->organization_id, 'editor')) {
+            $this->set([
+                'success' => false,
+                'message' => __('Permission denied'),
+                '_serialize' => ['success', 'message']
+            ]);
+            return $this->response->withType('application/json');
+        }
+        
+        $data = $this->request->getData();
+        $childrenIds = $data['children'] ?? [];
+        
+        if (!empty($childrenIds) && is_array($childrenIds)) {
+            $childrenTable = $this->fetchTable('Children');
+            
+            // Update organization_order for each child based on array position
+            foreach ($childrenIds as $index => $childId) {
+                $child = $childrenTable->get($childId);
+                $child->organization_order = $index + 1; // Start from 1
+                $childrenTable->save($child);
+            }
+            
+            $this->set([
+                'success' => true,
+                'message' => __('Children order updated'),
+                '_serialize' => ['success', 'message']
+            ]);
+        } else {
+            $this->set([
+                'success' => false,
+                'message' => __('Invalid children data'),
+                '_serialize' => ['success', 'message']
+            ]);
+        }
+        
+        return $this->response->withType('application/json');
+    }
+
+    /**
      * Assign child to schedule - Deprecated, redirect to Waitlist
      *
      * @return \Cake\Http\Response

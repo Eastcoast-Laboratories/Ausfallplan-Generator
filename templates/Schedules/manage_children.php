@@ -64,7 +64,7 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                             <button 
                                 class="add-to-order" 
                                 data-child-id="<?= $child->id ?>"
-                                style="background: #4caf50; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.75rem;"
+                                style="background: #4caf50; color: white; border: none; padding: 0.75rem 1rem; border-radius: 4px; cursor: pointer; font-size: 1.2rem; font-weight: bold;"
                                 title="<?= __("Add to organization order") ?>">
                                 +
                             </button>
@@ -114,7 +114,7 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                                 <button 
                                     class="remove-from-order" 
                                     data-child-id="<?= $child->id ?>"
-                                    style="background: #f44336; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.75rem;"
+                                    style="background: #f44336; color: white; border: none; padding: 0.75rem 1rem; border-radius: 4px; cursor: pointer; font-size: 1.2rem; font-weight: bold;"
                                     title="<?= __("Remove from organization order") ?>">
                                     ✕
                                 </button>
@@ -153,7 +153,7 @@ const sortable = Sortable.create(el, {
         });
         
         // Send AJAX request to update organization_order
-        fetch("<?= $this->Url->build(["action" => "manageChildren", $schedule->id]) ?>", {
+        fetch("<?= $this->Url->build(["action" => "updateChildrenOrder", $schedule->id]) ?>", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -163,18 +163,23 @@ const sortable = Sortable.create(el, {
                 children: childrenIds
             })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 console.log("Organization order updated successfully");
             } else {
-                console.error("Failed to update order");
-                location.reload();
+                console.error("Failed to update order:", data.message);
+                location.reload(); // Reload to show correct state
             }
         })
         .catch(error => {
             console.error("Error updating order:", error);
-            location.reload();
+            location.reload(); // Reload to show correct state
         });
     }
 });
@@ -194,38 +199,37 @@ document.querySelectorAll(".remove-from-order").forEach(button => {
     button.addEventListener("click", function(e) {
         e.stopPropagation();
         const childId = this.dataset.childId;
-        const childName = this.closest(".child-item").querySelector("strong").textContent;
         
-        if (confirm("<?= __("Remove {0} from organization order?", "") ?>" + childName)) {
-            // Send AJAX request to remove from order
-            fetch("<?= $this->Url->build(["action" => "removeFromOrder", $schedule->id]) ?>", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-Token": "<?= $this->request->getAttribute("csrfToken") ?>"
-                },
-                body: JSON.stringify({
-                    child_id: parseInt(childId)
-                })
+        // Send AJAX request to remove from order (no confirm dialog)
+        fetch("<?= $this->Url->build(["action" => "removeFromOrder", $schedule->id]) ?>", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-Token": "<?= $this->request->getAttribute("csrfToken") ?>"
+            },
+            body: JSON.stringify({
+                child_id: parseInt(childId)
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Remove item from DOM
-                    this.closest(".child-item").style.transition = "opacity 0.3s";
-                    this.closest(".child-item").style.opacity = "0";
-                    setTimeout(() => {
-                        this.closest(".child-item").remove();
-                    }, 300);
-                } else {
-                    alert("<?= __("Failed to remove from order") ?>");
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                alert("<?= __("An error occurred") ?>");
-            });
-        }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Reload page to show updated state
+                location.reload();
+            } else {
+                console.error('Failed to remove:', data.message);
+                location.reload(); // Reload anyway to show correct state
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            location.reload(); // Reload to show correct state
+        });
     });
 });
 
@@ -246,18 +250,24 @@ document.querySelectorAll(".add-to-order").forEach(button => {
                 child_id: parseInt(childId)
             })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 // Reload page to show updated order
                 location.reload();
             } else {
-                alert("<?= __("Failed to add to order") ?>");
+                console.error('Failed to add:', data.message);
+                location.reload(); // Reload anyway to show correct state
             }
         })
         .catch(error => {
             console.error("Error:", error);
-            alert("<?= __("An error occurred") ?>");
+            location.reload(); // Reload to show correct state
         });
     });
 });
