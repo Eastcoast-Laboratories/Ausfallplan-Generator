@@ -240,7 +240,10 @@ class SchedulesController extends AppController
         ]);
 
         // Check permission
-        $this->checkScheduleAccess($schedule, 'edit');
+        if (!$this->hasOrgRole($schedule->organization_id, 'editor')) {
+            $this->Flash->error(__('Sie haben keine Berechtigung Kinder zu verwalten.'));
+            return $this->redirect(['action' => 'index']);
+        }
 
         // Handle AJAX reorder request
         if ($this->request->is('post') && $this->request->is('ajax')) {
