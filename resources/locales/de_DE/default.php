@@ -97,6 +97,14 @@ return [
     'This order is used in reports. Use Waitlist for schedule assignments.' => 'Diese Reihenfolge wird in Berichten verwendet. Nutzen Sie die Nachrückliste für Ausfallplan-Zuweisungen.',
     'In Schedule' => 'Im Ausfallplan',
     'Change Language' => 'Sprache wechseln',
+    'Remove from organization order' => 'Aus Sortierung entfernen',
+    'Remove {0} from organization order?' => '{0} aus Organisations-Sortierung entfernen?',
+    'Child removed from organization order' => 'Kind aus Organisations-Sortierung entfernt',
+    'Failed to remove from order' => 'Fehler beim Entfernen aus der Sortierung',
+    'An error occurred' => 'Ein Fehler ist aufgetreten',
+    'Permission denied' => 'Zugriff verweigert',
+    'Invalid child ID' => 'Ungültige Kind-ID',
+    'Failed to save' => 'Speichern fehlgeschlagen',
     
     // Waitlist
     'Children on Waitlist' => 'Kinder auf der Nachrückliste',
