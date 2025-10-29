@@ -115,6 +115,8 @@ return [
     'All children are in organization order.' => 'Alle Kinder sind in Organisations-Reihenfolge.',
     'Children order updated' => 'Kinder-Reihenfolge aktualisiert',
     'Invalid children data' => 'Ungültige Kinder-Daten',
+    'Siblings' => 'Geschwister',
+    'Remove sibling group from organization order' => 'Geschwistergruppe aus Organisations-Reihenfolge entfernen',
     
     // Waitlist
     'Children on Waitlist' => 'Kinder auf der Nachrückliste',
