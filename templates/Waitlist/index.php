@@ -125,7 +125,29 @@ $this->assign('title', __('Waitlist'));
         
         <!-- Waitlist -->
         <div class="waitlist-children">
-            <h4><?= __('Children on Waitlist') ?> <span style="font-size: 0.9rem; color: #666;">(<?= __('Drag to reorder') ?>)</span></h4>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h4 style="margin: 0;"><?= __('Children on Waitlist') ?> <span style="font-size: 0.9rem; color: #666;">(<?= __('Drag to reorder') ?>)</span></h4>
+                <div style="display: flex; gap: 0.5rem;">
+                    <?= $this->Form->postLink(
+                        '📅 ' . __('Sort by Birthdate'),
+                        ['action' => 'sortBy', '?' => ['schedule_id' => $selectedSchedule->id, 'field' => 'birthdate']],
+                        [
+                            'class' => 'button button-small',
+                            'style' => 'background: #9C27B0; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; font-size: 0.85rem;',
+                            'title' => __('Sort waitlist by birthdate (oldest first)')
+                        ]
+                    ) ?>
+                    <?= $this->Form->postLink(
+                        '📍 ' . __('Sort by Postal Code'),
+                        ['action' => 'sortBy', '?' => ['schedule_id' => $selectedSchedule->id, 'field' => 'postal_code']],
+                        [
+                            'class' => 'button button-small',
+                            'style' => 'background: #00BCD4; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; font-size: 0.85rem;',
+                            'title' => __('Sort waitlist by postal code (ascending)')
+                        ]
+                    ) ?>
+                </div>
+            </div>
             <div id="waitlist-sortable" style="background: #fff3e0; padding: 1rem; border-radius: 8px; min-height: 300px;">
                 <?php if (!empty($waitlistChildren) && (is_countable($waitlistChildren) ? count($waitlistChildren) : $waitlistChildren->count()) > 0): ?>
                     <?php foreach ($waitlistChildren as $child): ?>
