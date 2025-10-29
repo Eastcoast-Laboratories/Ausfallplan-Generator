@@ -507,4 +507,45 @@ class WaitlistController extends AppController
         
         return $this->redirect(['action' => 'index', '?' => ['schedule_id' => $scheduleId]]);
     }
+
+    /**
+     * Sort waitlist by a specific field (Punkt 2)
+     *
+     * @return \Cake\Http\Response|null Redirects back to index
+     */
+    public function sortBy()
+    {
+        $this->request->allowMethod(['post']);
+        
+        $scheduleId = $this->request->getQuery('schedule_id');
+        $field = $this->request->getQuery('field');
+        
+        if (!$scheduleId || !in_array($field, ['birthdate', 'postal_code'])) {
+            $this->Flash->error(__('Invalid sort parameters.'));
+            return $this->redirect(['action' => 'index']);
+        }
+        
+        $childrenTable = $this->fetchTable('Children');
+        
+        // Get all children on waitlist for this schedule
+        $waitlistChildren = $childrenTable->find()
+            ->where([
+                'schedule_id' => $scheduleId,
+                'waitlist_order IS NOT' => null
+            ])
+            ->orderBy([$field => 'ASC'])
+            ->all();
+        
+        // Reorder based on sort field
+        $order = 1;
+        foreach ($waitlistChildren as $child) {
+            $child->waitlist_order = $order++;
+            $childrenTable->save($child);
+        }
+        
+        $fieldName = ($field === 'birthdate') ? __('birthdate') : __('postal code');
+        $this->Flash->success(__('Waitlist sorted by {0}.', $fieldName));
+        
+        return $this->redirect(['action' => 'index', '?' => ['schedule_id' => $scheduleId]]);
+    }
 }
