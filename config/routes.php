@@ -65,6 +65,7 @@ return function (RouteBuilder $routes): void {
         $builder->connect('/children', ['controller' => 'Children', 'action' => 'index']);
         $builder->connect('/sibling-groups', ['controller' => 'SiblingGroups', 'action' => 'index']);
         $builder->connect('/schedules', ['controller' => 'Schedules', 'action' => 'index']);
+        $builder->connect('/schedules/manage-children/:id', ['controller' => 'Schedules', 'action' => 'manageChildren'], ['pass' => ['id'], 'id' => '[0-9]+']);
         $builder->connect('/waitlist', ['controller' => 'Waitlist', 'action' => 'index']);
         $builder->connect('/forgot-password', ['controller' => 'Users', 'action' => 'forgotPassword']);
         $builder->connect('/reset-password', ['controller' => 'Users', 'action' => 'resetPassword']);
