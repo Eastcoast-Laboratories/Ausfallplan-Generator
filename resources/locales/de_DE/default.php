@@ -118,6 +118,12 @@ return [
     'Unknown' => 'Unbekannt',
     'Bitte wählen Sie eine Organisation aus.' => 'Bitte wählen Sie eine Organisation aus.',
     
+    // Report Grid
+    'Grid Info' => 'Tabellen-Info',
+    'Rows' => 'Zeilen',
+    'Columns' => 'Spalten',
+    'Days' => 'Tage',
+    
     // Common
     'Submit' => 'Absenden',
     'Save' => 'Speichern',
