@@ -66,10 +66,6 @@ $this->assign('title', __('Waitlist'));
                     </li>
                 <?php endforeach; ?>
             </ul>
-            <em style="font-size: 0.9rem; color: #856404;">
-                <?= __('Add them in') ?> 
-                <?= $this->Html->link(__('Manage Children'), '/schedules/manage-children/' . $selectedSchedule->id) ?>
-            </em>
         </div>
     <?php endif; ?>
     
