@@ -305,10 +305,11 @@ document.querySelectorAll(".delete-child").forEach(button => {
         }
         
         // Send AJAX request to delete child
-        fetch("<?= $this->Url->build(["controller" => "Children", "action" => "delete"]) ?>" + childId, {
+        fetch("<?= $this->Url->build(["controller" => "Children", "action" => "delete"]) ?>/" + childId, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                "X-Requested-With": "XMLHttpRequest",
                 "X-CSRF-Token": "<?= $this->request->getAttribute("csrfToken") ?>"
             }
         })
