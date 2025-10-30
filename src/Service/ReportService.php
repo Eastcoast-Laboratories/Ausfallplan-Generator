@@ -55,9 +55,8 @@ class ReportService
         // Generate day boxes using sorted children with sibling logic
         $days = $this->generateDaysWithSiblings($daysCount, $sortedChildren, $schedule->capacity_per_day ?? 9);
 
-        // Find "always at end" children
-        $allAssignedChildren = $this->getAssignedChildren($scheduleId);
-        $alwaysAtEnd = $this->findAlwaysAtEndChildren($allAssignedChildren, $sortedChildren);
+        // Find "always at end" children - those with schedule_id but NO waitlist_order
+        $alwaysAtEnd = $this->getAssignedChildren($scheduleId);
 
         // Calculate statistics
         $childStats = $this->calculateChildStats($sortedChildren, $days);
