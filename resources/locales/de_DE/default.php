@@ -117,6 +117,7 @@ return [
     'Invalid children data' => 'Ungültige Kinder-Daten',
     'Siblings' => 'Geschwister',
     'Remove sibling group from organization order' => 'Geschwistergruppe aus Organisations-Reihenfolge entfernen',
+    'Days' => 'Tage',
     
     // Waitlist
     'Children on Waitlist' => 'Kinder auf der Nachrückliste',

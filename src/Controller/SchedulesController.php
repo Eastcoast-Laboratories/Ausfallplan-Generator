@@ -274,15 +274,21 @@ class SchedulesController extends AppController
             }
         }
 
-        // Get children for this organization, sorted by organization_order
+        // Get all schedules for this organization (for dropdown)
+        $schedules = $this->Schedules->find()
+            ->where(['organization_id' => $schedule->organization_id])
+            ->orderBy(['created' => 'DESC'])
+            ->all();
+
+        // Get children for this specific schedule (via schedule_id assignment)
         $childrenTable = $this->fetchTable('Children');
         $children = $childrenTable->find()
-            ->where(['Children.organization_id' => $schedule->organization_id])
+            ->where(['Children.schedule_id' => $schedule->id])
             ->contain(['SiblingGroups'])
             ->orderBy(['Children.organization_order' => 'ASC', 'Children.id' => 'ASC'])
             ->all();
 
-        $this->set(compact('schedule', 'children'));
+        $this->set(compact('schedule', 'schedules', 'children'));
     }
 
     /**

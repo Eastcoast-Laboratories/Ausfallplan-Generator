@@ -2,6 +2,7 @@
 /**
  * @var \App\View\AppView $this
  * @var \App\Model\Entity\Schedule $schedule
+ * @var iterable<\App\Model\Entity\Schedule> $schedules
  * @var iterable<\App\Model\Entity\Child> $children
  */
 $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
@@ -26,6 +27,21 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
             ["controller" => "Children", "action" => "add"],
             ["class" => "button", "style" => "background: #4caf50; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; font-weight: bold;"]
         ) ?>
+    </div>
+    
+    <!-- Schedule Selector -->
+    <div class="schedule-selector" style="margin-bottom: 2rem; padding: 1rem; background: #f5f5f5; border-radius: 8px;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <label for="schedule-select" style="font-weight: bold;"><?= __('Select Schedule') ?>:</label>
+            <select id="schedule-select" onchange="window.location.href='/schedules/manage-children/' + this.value" style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ccc; min-width: 300px;">
+                <?php foreach ($schedules as $scheduleOption): ?>
+                    <option value="<?= $scheduleOption->id ?>" <?= $schedule->id == $scheduleOption->id ? 'selected' : '' ?>>
+                        <?= h($scheduleOption->title) ?>
+                        <?= $scheduleOption->days_count ? ' (' . $scheduleOption->days_count . ' ' . __('Days') . ')' : '' ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
     </div>
     
     <div class="row" style="margin-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
