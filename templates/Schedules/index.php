@@ -55,9 +55,20 @@ $this->assign('title', __('Schedules'));
                     <?php endif; ?>
                     <td><?= h($schedule->days_count) ?></td>
                     <td>
-                        <strong><?= isset($childrenCounts[$schedule->id]) ? h($childrenCounts[$schedule->id]) : 0 ?></strong>
+                        <strong><?php
+                        if(isset($childrenCounts[$schedule->id]) and $childrenCounts[$schedule->id] > 0) {
+                            echo h($childrenCounts[$schedule->id]);
+                        } ?></strong>
                         <?php if (isset($childrenCounts[$schedule->id]) && $childrenCounts[$schedule->id] > 0): ?>
-                            <span style="color: #4caf50;">✓</span>
+                            <span title="has children" style="color: #4caf50;">✓</span>
+                        <?php else: ?>
+                            <?php
+                            echo $this->Html->link(
+                                __('Add Child'), 
+                                '/schedules/manage-children/' . $schedule->id,
+                                ['class' => 'button', 'style' => 'background: #2196F3; color: white;']
+                            );
+                            ?>
                         <?php endif; ?>
                     </td>
                     <td><?= h($schedule->capacity_per_day) ?></td>
@@ -86,7 +97,6 @@ $this->assign('title', __('Schedules'));
 }
 
 .schedule-row:hover td {
-    font-weight: 500;
 }
 
 /* Don't override active schedule hover */

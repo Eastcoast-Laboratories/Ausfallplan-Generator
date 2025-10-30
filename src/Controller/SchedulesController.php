@@ -50,11 +50,11 @@ class SchedulesController extends AppController
         
         $childrenCounts = [];
         foreach ($schedules as $schedule) {
-            // Count children on waitlist for this schedule
+            // Count children with oranization_order for this schedule
             $count = $childrenTable->find()
                 ->where([
                     'schedule_id' => $schedule->id,
-                    'waitlist_order IS NOT' => null
+                    'organization_order IS NOT' => null
                 ])
                 ->count();
                 

@@ -16,7 +16,7 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
             <h3 style="margin: 0;"><?= __("Manage Children Organization Order") ?> - <?= h($schedule->organization->name) ?></h3>
             <p style="margin: 0.5rem 0 0 0;">
                 <?= $this->Html->link("← " . __("Back to Schedules"), ["action" => "index"]) ?>
-                <span style="color: #666; margin-left: 1rem;">
+                <span style="color: #3f3e3eff; margin-left: 1rem;">
                     <?= __("This order is used in reports. Use Waitlist for schedule assignments.") ?>
                 </span>
             </p>
@@ -54,7 +54,7 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                                 <?php endif; ?>
                                 <?php if ($child->sibling_group_id): ?>
                                     <span style="background: #fff3cd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
-                                        👨‍👩‍👧 <?= __("Sibling Group") ?>
+                                        👨‍👩‍👧 <?= $this->Html->link(__("Sibling Group"), ["controller" => "SiblingGroups", "action" => "view", $child->sibling_group_id]) ?>
                                     </span>
                                 <?php endif; ?>
                                 <span style="background: #ffcdd2; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.75rem; margin-left: 0.5rem; color: #c62828;">
@@ -156,7 +156,7 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                         ?>
                             <div class="sibling-group" data-child-ids="<?= implode(',', array_map(fn($c) => $c->id, $siblings)) ?>" style="background: #fff9c4; padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 4px; border-left: 4px solid #ffc107; cursor: move;">
                                 <div style="font-size: 0.85rem; color: #f57c00; font-weight: bold; margin-bottom: 0.5rem;">
-                                    👨‍👩‍👧 <?= __("Sibling Group") ?>
+                                    👨‍👩‍👧 <?= $this->Html->link(__("Sibling Group"), ["controller" => "SiblingGroups", "action" => "view", $siblings[0]->sibling_group_id]) ?>
                                 </div>
                                 <?php foreach ($siblings as $child): 
                                     $otherSiblings = array_filter($siblingNames, fn($n) => $n !== $child->name);
