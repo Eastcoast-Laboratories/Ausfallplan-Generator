@@ -83,14 +83,10 @@ class ReportService
     {
         $childrenTable = TableRegistry::getTableLocator()->get('Children');
         
-        // Get schedule to find organization_id
-        $schedulesTable = TableRegistry::getTableLocator()->get('Schedules');
-        $schedule = $schedulesTable->get($scheduleId);
-        
-        // Get all children with organization_order (NOT NULL) for this organization
+        // Get all children with organization_order (NOT NULL) for this schedule
         $children = $childrenTable->find()
             ->where([
-                'organization_id' => $schedule->organization_id,
+                'schedule_id' => $scheduleId,
                 'organization_order IS NOT' => null
             ])
             ->orderBy(['organization_order' => 'ASC'])
