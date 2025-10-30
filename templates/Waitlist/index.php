@@ -57,11 +57,11 @@ $this->assign('title', __('Waitlist'));
     <?php if (!empty($missingSiblings)): ?>
         <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
             <strong>⚠️ <?= __('Warning') ?>:</strong> 
-            <?= __('The following siblings are not assigned to this schedule') ?>:
+            <?= __('The following siblings are not assigned to this waitlist') ?>:
             <ul style="margin: 0.5rem 0 0 1.5rem;">
                 <?php foreach ($missingSiblings as $missing): ?>
                     <li>
-                        <strong><?= h($missing['name']) ?></strong> 
+                        <strong><?= $this->Html->link(h($missing['name']), ['controller' => 'Children', 'action' => 'view', $missing['id']]) ?></strong> 
                         (<?= __('Sibling of') ?> <?= h($missing['sibling_of']) ?>)
                     </li>
                 <?php endforeach; ?>
