@@ -171,23 +171,18 @@ class WaitlistController extends AppController
             }
         }
         
-        // Get available children (not on waitlist)
+        // Get available children (children with schedule_id but NOT on waitlist)
+        // These are the "Immer am Ende" children that can be added to waitlist
         $availableChildren = [];
         if ($scheduleId && $selectedSchedule) {
-            $availableChildrenQuery = $this->fetchTable('Children')->find()
+            $availableChildren = $this->fetchTable('Children')->find()
                 ->where([
-                    'Children.organization_id' => $selectedSchedule->organization_id,
+                    'Children.schedule_id' => $scheduleId,
+                    'Children.waitlist_order IS' => null,
                     'Children.is_active' => true,
                 ])
-                ->orderBy(['Children.name' => 'ASC']);
-            
-            if (!empty($childrenOnWaitlist)) {
-                $availableChildrenQuery->where([
-                    'Children.id NOT IN' => $childrenOnWaitlist
-                ]);
-            }
-            
-            $availableChildren = $availableChildrenQuery->all();
+                ->orderBy(['Children.name' => 'ASC'])
+                ->all();
         }
         
         $countNotOnWaitlist = count($availableChildren);
