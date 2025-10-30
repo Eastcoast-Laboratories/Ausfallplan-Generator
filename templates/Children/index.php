@@ -105,7 +105,13 @@ $this->assign('title', __('Children'));
                     <td><?= h($child->created) ?></td>
                     <td class="actions">
                         <?= $this->Html->link(__('Edit'), ['action' => 'edit', $child->id]) ?>
-                        <?= $this->Form->postLink(__('Delete'), ['action' => 'delete', $child->id], ['confirm' => __('Are you sure you want to delete # {0}?', $child->id)]) ?>
+                        <button 
+                            class="delete-child-btn" 
+                            data-child-id="<?= $child->id ?>"
+                            data-child-name="<?= h($child->name) ?>"
+                            style="background: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer; padding: 0.25rem 0.5rem;">
+                            <?= __('Delete') ?>
+                        </button>
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -115,6 +121,65 @@ $this->assign('title', __('Children'));
 </div>
 
 <script>
+// Handle delete child buttons with AJAX and transition
+document.querySelectorAll('.delete-child-btn').forEach(button => {
+    button.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const childId = this.dataset.childId;
+        const childName = this.dataset.childName;
+        const row = this.closest('tr');
+        
+        if (!confirm("<?= __('Are you sure you want to delete') ?> " + childName + "?")) {
+            return;
+        }
+        
+        // Send AJAX request to delete child
+        fetch("<?= $this->Url->build(['controller' => 'Children', 'action' => 'delete']) ?>/" + childId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-Token': '<?= $this->request->getAttribute("csrfToken") ?>'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Animate removal with transition
+                if (row) {
+                    row.style.transition = 'all 0.3s ease';
+                    row.style.opacity = '0';
+                    row.style.transform = 'translateX(-100%)';
+                    
+                    setTimeout(() => {
+                        row.remove();
+                        
+                        // Check if table is now empty
+                        const tbody = document.querySelector('.children tbody');
+                        if (tbody && tbody.querySelectorAll('tr').length === 0) {
+                            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem; color: #666;"><?= __("No children found.") ?></td></tr>';
+                        }
+                    }, 300);
+                }
+            } else {
+                console.error('Failed to delete:', data.message);
+                alert("<?= __('Error deleting child') ?>");
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("<?= __('Error deleting child') ?>");
+        });
+    });
+});
+
 // Auto-focus "New Child" button after saving a child (when success message is present)
 document.addEventListener('DOMContentLoaded', function() {
     const successMessage = document.querySelector('.message.success');
