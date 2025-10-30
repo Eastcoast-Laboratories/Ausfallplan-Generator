@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Quick Test: Manage Children Organization Order
+ * Quick Test: Children on Schedule
  * 
  * Tests the /schedules/manage-children/:id endpoint:
  * - Login as admin
