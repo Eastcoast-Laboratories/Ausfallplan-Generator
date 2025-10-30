@@ -2,6 +2,7 @@
 /**
  * @var \App\View\AppView $this
  * @var iterable<\App\Model\Entity\Schedule> $schedules
+ * @var array $missingSiblingsPerSchedule
  */
 $this->assign('title', __('Schedules'));
 ?>
@@ -10,6 +11,27 @@ $this->assign('title', __('Schedules'));
     <div class="actions">
         <?= $this->Html->link(__('New Schedule'), ['action' => 'add'], ['class' => 'button float-right']) ?>
     </div>
+    
+    <?php if (!empty($missingSiblingsPerSchedule)): ?>
+        <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
+            <strong>⚠️ <?= __('Warning') ?>:</strong> 
+            <?= __('Siblings in different schedules detected') ?>:
+            <?php foreach ($missingSiblingsPerSchedule as $scheduleId => $missingSiblings): ?>
+                <div style="margin-top: 0.5rem;">
+                    <strong>Schedule #<?= $scheduleId ?>:</strong>
+                    <ul style="margin: 0.5rem 0 0 1.5rem;">
+                        <?php foreach ($missingSiblings as $missing): ?>
+                            <li>
+                                <strong><?= $this->Html->link(h($missing['name']), '/schedules/manage-children/' . $missing['schedule_id']) ?></strong> 
+                                (<?= __('Sibling of') ?> <?= h($missing['sibling_of']) ?>)
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+    
     <div class="table-responsive">
         <table>
             <thead>
@@ -55,9 +77,20 @@ $this->assign('title', __('Schedules'));
                     <?php endif; ?>
                     <td><?= h($schedule->days_count) ?></td>
                     <td>
-                        <strong><?= isset($childrenCounts[$schedule->id]) ? h($childrenCounts[$schedule->id]) : 0 ?></strong>
+                        <strong><?php
+                        if(isset($childrenCounts[$schedule->id]) and $childrenCounts[$schedule->id] > 0) {
+                            echo h($childrenCounts[$schedule->id]);
+                        } ?></strong>
                         <?php if (isset($childrenCounts[$schedule->id]) && $childrenCounts[$schedule->id] > 0): ?>
-                            <span style="color: #4caf50;">✓</span>
+                            <span title="has children" style="color: #4caf50;">✓</span>
+                        <?php else: ?>
+                            <?php
+                            echo $this->Html->link(
+                                __('Add Child'), 
+                                '/schedules/manage-children/' . $schedule->id,
+                                ['class' => 'button', 'style' => 'background: #2196F3; color: white;']
+                            );
+                            ?>
                         <?php endif; ?>
                     </td>
                     <td><?= h($schedule->capacity_per_day) ?></td>
@@ -65,7 +98,7 @@ $this->assign('title', __('Schedules'));
                     <td class="actions">
                         <?= $this->Html->link(__('Generate List'), ['action' => 'generateReport', $schedule->id], ['class' => 'button', 'style' => 'background: #2196F3; color: white;']) ?>
                         <?= $this->Html->link(__('Export CSV'), ['action' => 'exportCsv', $schedule->id], ['class' => 'button', 'style' => 'background: #4CAF50; color: white;']) ?>
-                        <?= $this->Html->link(__('Manage Children'), ['action' => 'manageChildren', $schedule->id], ['class' => 'button']) ?>
+                        <?= $this->Html->link(__('Manage Children'), '/schedules/manage-children/' . $schedule->id, ['class' => 'button']) ?>
                         <?= $this->Html->link(__('Edit'), ['action' => 'edit', $schedule->id]) ?>
                         <?= $this->Form->postLink(__('Delete'), ['action' => 'delete', $schedule->id], ['confirm' => __('Are you sure you want to delete # {0}?', $schedule->id)]) ?>
                     </td>
@@ -86,7 +119,6 @@ $this->assign('title', __('Schedules'));
 }
 
 .schedule-row:hover td {
-    font-weight: 500;
 }
 
 /* Don't override active schedule hover */

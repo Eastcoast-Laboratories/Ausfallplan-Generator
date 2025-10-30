@@ -125,10 +125,16 @@ class ChildrenController extends AppController
                 $data['is_integrative'] = false;
             }
             
-            // Auto-assign to active schedule and set orders
-            $activeScheduleId = $this->request->getSession()->read('activeScheduleId');
-            if ($activeScheduleId) {
-                $data['schedule_id'] = $activeScheduleId;
+            // Auto-assign to selected schedule (from form or session)
+            if (!empty($data['schedule_id'])) {
+                // Use schedule_id from form if provided
+                $data['schedule_id'] = (int)$data['schedule_id'];
+            } else {
+                // Fallback to active schedule from session
+                $activeScheduleId = $this->request->getSession()->read('activeScheduleId');
+                if ($activeScheduleId) {
+                    $data['schedule_id'] = $activeScheduleId;
+                }
             }
             
             // Set organization_order (max + 1 for this organization)
@@ -161,7 +167,14 @@ class ChildrenController extends AppController
             ->where(['SiblingGroups.organization_id' => $primaryOrg ? $primaryOrg->id : 0])
             ->all();
         
-        $this->set(compact('child', 'siblingGroups'));
+        // Get schedules for the primary organization
+        $schedulesTable = $this->fetchTable('Schedules');
+        $schedules = $schedulesTable->find('list')
+            ->where(['organization_id' => $primaryOrg ? $primaryOrg->id : 0])
+            ->orderBy(['created' => 'DESC'])
+            ->all();
+        
+        $this->set(compact('child', 'siblingGroups', 'schedules'));
     }
 
     /**
