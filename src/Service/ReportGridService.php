@@ -48,7 +48,12 @@ class ReportGridService
             }
         }
         
-        $rowsPerDay = max($maxChildrenPerDay + 3, 10); // Min 10 rows per day (children + leaving + sum)
+        // Calculate minimum rows needed
+        $minRowsForWaitlist = count($waitlist) + 2; // waitlist children + header + 1 empty row
+        $minRowsForAlwaysAtEnd = !empty($alwaysAtEnd) ? count($alwaysAtEnd) + 1 : 0; // always at end children + label
+        $minRowsForRightColumn = $minRowsForWaitlist + $minRowsForAlwaysAtEnd;
+        
+        $rowsPerDay = max($maxChildrenPerDay + 3, 10, $minRowsForRightColumn); // Ensure enough rows for right column
         $waitlistWidth = 5; // Waitlist columns on right
         
         // Build grid row by row
@@ -110,10 +115,12 @@ class ReportGridService
                 }
             }
             
-            // Add waitlist column
+            // Add waitlist column (right side)
             if ($dayRow == 0) {
+                // Header
                 $row[] = $this->createCell(self::CELL_LABEL, 'Nachrückliste', ['style' => 'bold']);
             } elseif ($dayRow > 0 && $dayRow - 1 < count($waitlist)) {
+                // Waitlist children
                 $waitlistChild = $waitlist[$dayRow - 1];
                 $row[] = $this->createCell(
                     self::CELL_WAITLIST,
@@ -124,6 +131,26 @@ class ReportGridService
                         'is_integrative' => $waitlistChild->is_integrative
                     ]
                 );
+            } elseif ($dayRow == count($waitlist) + 1 && !empty($alwaysAtEnd)) {
+                // "Immer am Ende" label (after waitlist children + 1 empty row)
+                $row[] = $this->createCell(self::CELL_LABEL, 'Immer am Ende:', ['style' => 'bold']);
+            } elseif ($dayRow > count($waitlist) + 1 && !empty($alwaysAtEnd)) {
+                // "Immer am Ende" children
+                $alwaysAtEndIndex = $dayRow - count($waitlist) - 2;
+                if ($alwaysAtEndIndex < count($alwaysAtEnd)) {
+                    $alwaysAtEndChild = $alwaysAtEnd[$alwaysAtEndIndex];
+                    $row[] = $this->createCell(
+                        self::CELL_CHILD,
+                        $alwaysAtEndChild['child']->name,
+                        [
+                            'child_id' => $alwaysAtEndChild['child']->id,
+                            'is_integrative' => $alwaysAtEndChild['weight'] == 2,
+                            'always_at_end' => true
+                        ]
+                    );
+                } else {
+                    $row[] = $this->createCell(self::CELL_EMPTY, '');
+                }
             } else {
                 $row[] = $this->createCell(self::CELL_EMPTY, '');
             }
@@ -132,13 +159,7 @@ class ReportGridService
             $rowIndex++;
         }
         
-        // Always at end section
-        if (!empty($alwaysAtEnd)) {
-            $grid[] = $this->buildSeparatorRow(count($days) + $waitlistWidth);
-            $grid[] = $this->buildAlwaysAtEndSection($alwaysAtEnd, count($days), $waitlistWidth);
-        }
-        
-        // Statistics section
+        // Statistics section (always at end is now in right column)
         $grid[] = $this->buildSeparatorRow(count($days) + $waitlistWidth);
         $grid = array_merge($grid, $this->buildStatsSection($childStats, $days, $waitlist, count($days), $waitlistWidth));
         

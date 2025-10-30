@@ -141,6 +141,128 @@ class ReportServiceTest extends TestCase
     }
 
     /**
+     * Test "Always at End" children - those with schedule_id but NO waitlist_order
+     */
+    public function testAlwaysAtEndChildren(): void
+    {
+        $schedulesTable = $this->getTableLocator()->get('Schedules');
+        $schedule = $schedulesTable->newEntity([
+            'organization_id' => 1,
+            'title' => 'Test Schedule Always At End',
+            'starts_on' => '2025-01-01',
+            'ends_on' => '2025-12-31',
+            'days_count' => 3,
+            'state' => 'draft',
+            'capacity_per_day' => 9,
+            'user_id' => 1,
+        ]);
+        $schedulesTable->save($schedule);
+        
+        $childrenTable = $this->getTableLocator()->get('Children');
+        
+        // Create children WITH waitlist_order (normal)
+        $normalChild1 = $childrenTable->newEntity([
+            'organization_id' => 1,
+            'name' => 'Normal Child 1',
+            'is_integrative' => false,
+            'is_active' => true,
+            'schedule_id' => $schedule->id,
+            'waitlist_order' => 1,
+        ]);
+        $childrenTable->save($normalChild1);
+        
+        $normalChild2 = $childrenTable->newEntity([
+            'organization_id' => 1,
+            'name' => 'Normal Child 2',
+            'is_integrative' => false,
+            'is_active' => true,
+            'schedule_id' => $schedule->id,
+            'waitlist_order' => 2,
+        ]);
+        $childrenTable->save($normalChild2);
+        
+        // Create children WITHOUT waitlist_order but WITH schedule_id (should be "Always at End")
+        $alwaysAtEndChild1 = $childrenTable->newEntity([
+            'organization_id' => 1,
+            'name' => 'Always At End Child 1',
+            'is_integrative' => false,
+            'is_active' => true,
+            'schedule_id' => $schedule->id,
+            'waitlist_order' => null, // NO waitlist order
+            'organization_order' => null,
+        ]);
+        $childrenTable->save($alwaysAtEndChild1);
+        
+        $alwaysAtEndChild2 = $childrenTable->newEntity([
+            'organization_id' => 1,
+            'name' => 'Always At End Child 2',
+            'is_integrative' => true,
+            'is_active' => true,
+            'schedule_id' => $schedule->id,
+            'waitlist_order' => null, // NO waitlist order
+            'organization_order' => null,
+        ]);
+        $childrenTable->save($alwaysAtEndChild2);
+        
+        // Generate report
+        $result = $this->service->generateReportData($schedule->id, 3);
+        
+        // Verify alwaysAtEnd contains the correct children
+        $this->assertArrayHasKey('alwaysAtEnd', $result);
+        $this->assertIsArray($result['alwaysAtEnd']);
+        $this->assertCount(2, $result['alwaysAtEnd'], 'Should have exactly 2 "Always at End" children');
+        
+        // Extract child IDs from alwaysAtEnd
+        $alwaysAtEndIds = [];
+        foreach ($result['alwaysAtEnd'] as $childData) {
+            $alwaysAtEndIds[] = $childData['child']->id;
+        }
+        
+        // Verify correct children are in alwaysAtEnd
+        $this->assertContains($alwaysAtEndChild1->id, $alwaysAtEndIds, 'Always At End Child 1 should be in alwaysAtEnd');
+        $this->assertContains($alwaysAtEndChild2->id, $alwaysAtEndIds, 'Always At End Child 2 should be in alwaysAtEnd');
+        
+        // Verify normal children are NOT in alwaysAtEnd
+        $this->assertNotContains($normalChild1->id, $alwaysAtEndIds, 'Normal Child 1 should NOT be in alwaysAtEnd');
+        $this->assertNotContains($normalChild2->id, $alwaysAtEndIds, 'Normal Child 2 should NOT be in alwaysAtEnd');
+        
+        // Also test Grid generation to ensure "Always at End" appear in right column
+        $gridService = new \App\Service\ReportGridService();
+        $gridData = $gridService->generateGrid($result);
+        
+        $this->assertIsArray($gridData);
+        $this->assertArrayHasKey('grid', $gridData);
+        
+        $grid = $gridData['grid'];
+        
+        // Find "Immer am Ende:" label in right column
+        $foundLabel = false;
+        $foundChild1 = false;
+        $foundChild2 = false;
+        
+        foreach ($grid as $rowIndex => $row) {
+            // Right column is the last cell in each row
+            $rightCell = end($row);
+            
+            if ($rightCell['type'] === 'label' && $rightCell['value'] === 'Immer am Ende:') {
+                $foundLabel = true;
+            }
+            
+            if ($rightCell['type'] === 'child' && $rightCell['value'] === 'Always At End Child 1') {
+                $foundChild1 = true;
+            }
+            
+            if ($rightCell['type'] === 'child' && $rightCell['value'] === 'Always At End Child 2') {
+                $foundChild2 = true;
+            }
+        }
+        
+        $this->assertTrue($foundLabel, '"Immer am Ende:" label should appear in right column');
+        $this->assertTrue($foundChild1, 'Always At End Child 1 should appear in right column');
+        $this->assertTrue($foundChild2, 'Always At End Child 2 should appear in right column');
+    }
+
+    /**
      * Helper: Create a test schedule with waitlist
      */
     private function createScheduleWithWaitlist(): int
