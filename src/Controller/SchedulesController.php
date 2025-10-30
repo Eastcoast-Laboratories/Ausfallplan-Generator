@@ -280,15 +280,28 @@ class SchedulesController extends AppController
             ->orderBy(['created' => 'DESC'])
             ->all();
 
-        // Get children for this specific schedule (via schedule_id assignment)
+        // Get children for this specific schedule (for right column - with organization_order)
         $childrenTable = $this->fetchTable('Children');
-        $children = $childrenTable->find()
-            ->where(['Children.schedule_id' => $schedule->id])
+        $childrenInOrder = $childrenTable->find()
+            ->where([
+                'Children.schedule_id' => $schedule->id,
+                'Children.organization_order IS NOT' => null
+            ])
             ->contain(['SiblingGroups'])
             ->orderBy(['Children.organization_order' => 'ASC', 'Children.id' => 'ASC'])
             ->all();
 
-        $this->set(compact('schedule', 'schedules', 'children'));
+        // Get all children of organization without organization_order (for left column - excluded)
+        $childrenNotInOrder = $childrenTable->find()
+            ->where([
+                'Children.organization_id' => $schedule->organization_id,
+                'Children.organization_order IS' => null
+            ])
+            ->contain(['SiblingGroups'])
+            ->orderBy(['Children.name' => 'ASC'])
+            ->all();
+
+        $this->set(compact('schedule', 'schedules', 'childrenInOrder', 'childrenNotInOrder'));
     }
 
     /**
@@ -389,6 +402,7 @@ class SchedulesController extends AppController
             
             $nextOrder = $maxOrderResult ? (int)$maxOrderResult->organization_order + 1 : 1;
             $child->organization_order = $nextOrder;
+            $child->schedule_id = $schedule->id; // Set schedule_id when adding to order
             
             if ($childrenTable->save($child)) {
                 $this->set([
