@@ -3,7 +3,8 @@
  * @var \App\View\AppView $this
  * @var \App\Model\Entity\Schedule $schedule
  * @var iterable<\App\Model\Entity\Schedule> $schedules
- * @var iterable<\App\Model\Entity\Child> $children
+ * @var iterable<\App\Model\Entity\Child> $childrenInOrder
+ * @var iterable<\App\Model\Entity\Child> $childrenNotInOrder
  */
 $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
 ?>
@@ -50,16 +51,8 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
         <div class="not-in-order-children">
             <h4><?= __("Not in Order (Excluded from Reports)") ?></h4>
             <div style="background: #ffebee; padding: 1rem; border-radius: 8px; min-height: 400px;">
-                <?php 
-                $notInOrderChildren = [];
-                foreach ($children as $child) {
-                    if ($child->organization_order === null) {
-                        $notInOrderChildren[] = $child;
-                    }
-                }
-                ?>
-                <?php if (!empty($notInOrderChildren)): ?>
-                    <?php foreach ($notInOrderChildren as $child): ?>
+                <?php if (!empty($childrenNotInOrder)): ?>
+                    <?php foreach ($childrenNotInOrder as $child): ?>
                         <div class="child-item-excluded" data-child-id="<?= $child->id ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #f44336;">
                             <div>
                                 <strong style="color: #999;"><?= h($child->name) ?></strong>
@@ -103,16 +96,9 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
             </h4>
             <div id="children-sortable" style="background: #e8f5e9; padding: 1rem; border-radius: 8px; min-height: 400px;">
                 <?php 
-                $inOrderChildren = [];
-                foreach ($children as $child) {
-                    if ($child->organization_order !== null) {
-                        $inOrderChildren[] = $child;
-                    }
-                }
-                
                 // Group children by sibling_group_id
                 $siblingGroups = [];
-                foreach ($inOrderChildren as $child) {
+                foreach ($childrenInOrder as $child) {
                     if ($child->sibling_group_id) {
                         if (!isset($siblingGroups[$child->sibling_group_id])) {
                             $siblingGroups[$child->sibling_group_id] = [];
@@ -121,11 +107,11 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                     }
                 }
                 
-                // Build ordered list - iterate through inOrderChildren (already sorted by organization_order)
+                // Build ordered list - iterate through childrenInOrder (already sorted by organization_order)
                 $processedGroups = [];
                 $orderedItems = [];
                 
-                foreach ($inOrderChildren as $child) {
+                foreach ($childrenInOrder as $child) {
                     if ($child->sibling_group_id) {
                         // If first sibling in group, add whole group
                         if (!in_array($child->sibling_group_id, $processedGroups)) {
@@ -209,7 +195,7 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
     </div>
 </div>
 
-<?php if (!empty($children) && (is_countable($children) ? count($children) : $children->count()) > 0): ?>
+<?php if (!empty($childrenInOrder) || !empty($childrenNotInOrder)): ?>
 <script>
 // Initialize Sortable.js for drag & drop
 const el = document.getElementById("children-sortable");
