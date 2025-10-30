@@ -31,7 +31,7 @@ $this->assign('title', __('Waitlist'));
             </div>
             <?php if ($selectedSchedule): ?>
                 <?= $this->Html->link(
-                    '📊 ' . __('Generate Report'),
+                    '📊 ' . __('Generate Schedule'),
                     ['controller' => 'Schedules', 'action' => 'generateReport', $selectedSchedule->id],
                     [
                         'class' => 'button',

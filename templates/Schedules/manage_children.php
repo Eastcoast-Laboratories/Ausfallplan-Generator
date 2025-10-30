@@ -16,14 +16,24 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
 <div class="manage-children content">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
         <div>
-            <h3 style="margin: 0;"><?= __("Manage Children Organization Order") ?> - <?= h($schedule->organization->name) ?></h3>
+            <h3 style="margin: 0;"><?= __("Children on Schedule") ?> - <?= h($schedule->organization->name) ?></h3>
             <p style="margin: 0.5rem 0 0 0;">
                 <?= $this->Html->link("← " . __("Back to Schedules"), ["action" => "index"]) ?>
                 <span style="color: #3f3e3eff; margin-left: 1rem;">
-                    <?= __("This order is used in reports. Use Waitlist for schedule assignments.") ?>
+                    <?= __("This order is used on the shchedule.") ?>
                 </span>
             </p>
         </div>
+        <?php
+        echo $this->Html->link( __("Generate Schedule"),
+            ["controller" => "Schedules", "action" => "generate-report", $schedule->id],
+            ["class" => "button", "style" => "background: #4caf50; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; font-weight: bold;"]
+        );
+        echo $this->Html->link( __("Waitlist"),
+            ["controller" => "Waitlist", "action" => "?schedule_id=".$schedule->id],
+            ["class" => "button", "style" => "background: #4caf50; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; font-weight: bold;"]
+        );
+        ?>
         <?= $this->Html->link(
             "+ " . __("Add Child"),
             ["controller" => "Children", "action" => "add"],
@@ -65,7 +75,7 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
         
         <!-- Children NOT in Organization Order (NULL) - LEFT SIDE -->
         <div class="not-in-order-children">
-            <h4><?= __("Not in Order (Excluded from Reports)") ?></h4>
+            <h4><?= __("Not on schedule") ?></h4>
             <div style="background: #ffebee; padding: 1rem; border-radius: 8px; min-height: 400px;">
                 <?php if (!empty($childrenNotInOrder)): ?>
                     <?php foreach ($childrenNotInOrder as $child): ?>
@@ -105,7 +115,7 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
         
         <!-- Children in Organization Order (Sortable) - RIGHT SIDE -->
         <div class="in-order-children">
-            <h4><?= __("In Organization Order") ?> 
+            <h4><?= __("Order on Schedule") ?> 
                 <span style="font-size: 0.85rem; font-weight: normal; color: #666;">
                     (<?= __("Drag to reorder") ?>)
                 </span>

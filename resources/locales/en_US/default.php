@@ -93,7 +93,7 @@ return [
     'Back to Schedules' => 'Back to Schedules',
     'Manage Children' => 'Manage Children',
     'Change Language' => 'Change Language',
-    'Generate Report' => 'Generate Report',
+    'Generate Schedule' => 'Generate Schedule',
     
     // Waitlist
     'Children on Waitlist' => 'Children on Waitlist',

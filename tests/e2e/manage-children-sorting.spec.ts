@@ -39,7 +39,7 @@ test.describe('Manage Children - Sorting & Organization Order', () => {
         await page.goto('http://localhost:8080/schedules/manage-children/1');
         await page.waitForSelector('h3:has-text("Organisations-Reihenfolge")', { timeout: 10000 });
         
-        // 4. Verify child is in left column (In Organization Order)
+        // 4. Verify child is in left column (Order on Schedule)
         const leftColumn = page.locator('.in-order-children');
         const rightColumn = page.locator('.not-in-order-children');
         

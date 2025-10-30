@@ -90,7 +90,7 @@ Dieser Test verifiziert, dass alle deutschen Übersetzungen im Browser korrekt a
 ## Kritische Punkte
 
 ### ❌ KEIN ENGLISCH erlaubt:
-- ❌ "Generate List" oder "Generate Report"
+- ❌ "Generate List" oder "Generate Schedule"
 - ❌ "Waitlist" 
 - ❌ "Children"
 - ❌ "New Child"

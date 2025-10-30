@@ -31,8 +31,7 @@ test.describe('Schedules - Manage Children (Organization Order)', () => {
         await page.goto(`http://localhost:8080/schedules/manage-children/${scheduleId}`);
         
         // Check page loaded
-        await expect(page.locator('h3:has-text("Organisations-Reihenfolge verwalten")')).toBeVisible({ timeout: 10000 });
-        await expect(page.locator('text=Diese Reihenfolge wird in Berichten verwendet')).toBeVisible();
+        await expect(page.locator('h3:has-text("Reihenfolge der Kinder auf dem Ausfallplan")')).toBeVisible({ timeout: 10000 });
     });
 
     test('should show organization children in sortable list', async ({ page }) => {

@@ -44,7 +44,7 @@ test.describe('Manage Children - Complete Functionality', () => {
         await page.goto('http://localhost:8080/schedules/manage-children/1');
         await page.waitForSelector('h3:has-text("Organisations-Reihenfolge")', { timeout: 10000 });
         
-        // Verify both children are in left column (In Organization Order)
+        // Verify both children are in left column (Order on Schedule)
         const leftColumn = page.locator('.in-order-children');
         await expect(leftColumn.locator('.child-item').filter({ hasText: child1Name })).toBeVisible({ timeout: 5000 });
         await expect(leftColumn.locator('.child-item').filter({ hasText: child2Name })).toBeVisible({ timeout: 5000 });

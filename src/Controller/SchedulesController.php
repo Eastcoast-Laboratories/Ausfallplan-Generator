@@ -755,6 +755,72 @@ class SchedulesController extends AppController
     }
 
     /**
+     * Debug: Show "always at end" children for a schedule
+     *
+     * @param string|null $id Schedule id
+     * @return \Cake\Http\Response
+     */
+    public function debugAlwaysAtEnd($id = null)
+    {
+        $schedule = $this->Schedules->get($id);
+        
+        $childrenTable = $this->fetchTable('Children');
+        
+        // All children with this schedule_id
+        $allChildren = $childrenTable->find()
+            ->where(['schedule_id' => $schedule->id])
+            ->all()
+            ->toArray();
+        
+        // Children WITH waitlist_order
+        $withWaitlist = $childrenTable->find()
+            ->where([
+                'schedule_id' => $schedule->id,
+                'waitlist_order IS NOT' => null
+            ])
+            ->all()
+            ->toArray();
+        
+        // Children WITHOUT waitlist_order (should be "always at end")
+        $withoutWaitlist = $childrenTable->find()
+            ->where([
+                'schedule_id' => $schedule->id,
+                'waitlist_order IS' => null
+            ])
+            ->all()
+            ->toArray();
+        
+        $debug = [
+            'schedule_id' => $schedule->id,
+            'schedule_title' => $schedule->title,
+            'all_children_count' => count($allChildren),
+            'with_waitlist_count' => count($withWaitlist),
+            'without_waitlist_count' => count($withoutWaitlist),
+            'all_children' => array_map(fn($c) => [
+                'id' => $c->id,
+                'name' => $c->name,
+                'schedule_id' => $c->schedule_id,
+                'waitlist_order' => $c->waitlist_order,
+                'organization_order' => $c->organization_order
+            ], $allChildren),
+            'with_waitlist' => array_map(fn($c) => [
+                'id' => $c->id,
+                'name' => $c->name,
+                'waitlist_order' => $c->waitlist_order
+            ], $withWaitlist),
+            'without_waitlist' => array_map(fn($c) => [
+                'id' => $c->id,
+                'name' => $c->name,
+                'waitlist_order' => $c->waitlist_order
+            ], $withoutWaitlist)
+        ];
+        
+        return $this->response
+            ->withType('application/json')
+            ->withStringBody(json_encode($debug, JSON_PRETTY_PRINT));
+    }
+
+    /**
      * Reorder children via AJAX - Deprecated, redirect to Waitlist
      *
      * @return \Cake\Http\Response
