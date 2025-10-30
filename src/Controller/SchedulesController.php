@@ -605,7 +605,7 @@ class SchedulesController extends AppController
     }
 
     /**
-     * Export CSV
+     * Export CSV (using grid-based export)
      *
      * @param string|null $id Schedule id.
      * @return \Cake\Http\Response|null
@@ -633,10 +633,14 @@ class SchedulesController extends AppController
         
         $daysCount = $schedule->days_count ?? $assignedChildrenCount;
         
+        // Use SAME grid generation as HTML view
         $reportService = new \App\Service\ReportService();
         $reportData = $reportService->generateReportData((int)$id, $daysCount);
         
-        // Build CSV content
+        $gridService = new \App\Service\ReportGridService();
+        $gridData = $gridService->generateGrid($reportData);
+        
+        // Convert grid to CSV
         $csv = [];
         
         // Header
@@ -644,48 +648,27 @@ class SchedulesController extends AppController
         $csv[] = ['Organisation', $schedule->organization->name];
         $csv[] = [''];
         
-        // Days header
-        $header = ['Tag'];
-        for ($i = 1; $i <= $daysCount; $i++) {
-            $header[] = $reportData['days'][$i-1]['name'] ?? "Tag $i";
-        }
-        $csv[] = $header;
-        
-        // Child rows
-        $allChildren = [];
-        foreach ($reportData['days'] as $day) {
-            foreach ($day['children'] as $child) {
-                if (!isset($allChildren[$child->id])) {
-                    $allChildren[$child->id] = [
-                        'name' => $child->display_name,
-                        'days' => []
-                    ];
+        // Grid rows - iterate through grid
+        foreach ($gridData['grid'] as $row) {
+            $csvRow = [];
+            foreach ($row as $cell) {
+                $value = $cell['value'];
+                
+                // Add special markers based on cell type
+                switch ($cell['type']) {
+                    case \App\Service\ReportGridService::CELL_CHILD:
+                        if (isset($cell['metadata']['is_integrative']) && $cell['metadata']['is_integrative']) {
+                            $value .= ' (I)';
+                        }
+                        break;
+                    case \App\Service\ReportGridService::CELL_LEAVING:
+                        $value = '→ ' . str_replace('→ ', '', $value);
+                        break;
                 }
-                $allChildren[$child->id]['days'][] = $day['name'];
+                
+                $csvRow[] = $value;
             }
-        }
-        
-        foreach ($allChildren as $childData) {
-            $row = [$childData['name']];
-            for ($i = 1; $i <= $daysCount; $i++) {
-                $dayName = $reportData['days'][$i-1]['name'] ?? "Tag $i";
-                $row[] = in_array($dayName, $childData['days']) ? 'X' : '';
-            }
-            $csv[] = $row;
-        }
-        
-        // Statistics
-        $csv[] = [''];
-        $csv[] = ['Statistik'];
-        foreach ($reportData['childStats'] as $childId => $stats) {
-            $childName = '';
-            foreach ($allChildren as $id => $data) {
-                if ($id == $childId) {
-                    $childName = $data['name'];
-                    break;
-                }
-            }
-            $csv[] = [$childName, 'Zuweisungen: ' . $stats['assignments']];
+            $csv[] = $csvRow;
         }
         
         // Convert to CSV string
