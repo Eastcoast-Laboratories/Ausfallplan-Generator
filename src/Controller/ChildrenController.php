@@ -232,6 +232,26 @@ class ChildrenController extends AppController
             return $this->redirect(['action' => 'index']);
         }
 
+        // Check if AJAX request
+        if ($this->request->is('ajax')) {
+            if ($this->Children->delete($child)) {
+                $response = [
+                    'success' => true,
+                    'message' => __('The child has been deleted.')
+                ];
+            } else {
+                $response = [
+                    'success' => false,
+                    'message' => __('The child could not be deleted. Please try again.')
+                ];
+            }
+            
+            return $this->response
+                ->withType('application/json')
+                ->withStringBody(json_encode($response));
+        }
+
+        // Non-AJAX delete (redirect)
         if ($this->Children->delete($child)) {
             $this->Flash->success(__('The child has been deleted.'));
         } else {
