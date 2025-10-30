@@ -20,7 +20,7 @@ class ReportGridService
     public const CELL_WAITLIST = 'waitlist';
     public const CELL_CHECKSUM = 'checksum';
     public const CELL_LABEL = 'label';
-    public const CELL_LEAVING = 'leaving';
+    public const CELL_FIRSTONWAITLIST = 'firstOnWaitlist';
     public const CELL_STATS = 'stats';
 
     /**
@@ -84,14 +84,14 @@ class ReportGridService
                     );
                 } elseif ($dayRow == count($dayChildren)) {
                     // Leaving child row
-                    $leavingChild = $day['leavingChild'] ?? null;
-                    if ($leavingChild) {
+                    $firstOnWaitlistChild = $day['firstOnWaitlistChild'] ?? null;
+                    if ($firstOnWaitlistChild) {
                         $row[] = $this->createCell(
-                            self::CELL_LEAVING,
-                            '→ ' . $leavingChild['child']->name,
+                            self::CELL_FIRSTONWAITLIST,
+                            '→ ' . $firstOnWaitlistChild['child']->name,
                             [
-                                'child_id' => $leavingChild['child']->id,
-                                'is_integrative' => $leavingChild['is_integrative']
+                                'child_id' => $firstOnWaitlistChild['child']->id,
+                                'is_integrative' => $firstOnWaitlistChild['is_integrative']
                             ]
                         );
                     } else {
@@ -275,7 +275,7 @@ class ReportGridService
                 $row = [];
                 $row[] = $this->createCell(self::CELL_STATS, $child->name, ['child_id' => $child->id]);
                 $row[] = $this->createCell(self::CELL_STATS, $stats['daysCount']);
-                $row[] = $this->createCell(self::CELL_STATS, $stats['leavingCount']);
+                $row[] = $this->createCell(self::CELL_STATS, $stats['firstOnWaitlistCount']);
                 for ($i = 3; $i < $daysCount + $waitlistWidth; $i++) {
                     $row[] = $this->createCell(self::CELL_EMPTY, '');
                 }

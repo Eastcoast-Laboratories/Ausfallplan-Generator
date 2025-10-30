@@ -85,7 +85,7 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
             font-weight: bold;
         }
 
-        .leaving-child {
+        .firstOnWaitlist-child {
             margin-top: auto;
             padding-top: 8px;
             border-top: 1px solid #ccc;
@@ -198,9 +198,9 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
                     <div class="day-sum" style="margin-top: 0; padding-top: 5px; border-top: 1px solid #ccc; font-size: 9px; text-align: right; color:#666">
                         <?= h($day['countingChildrenSum']) ?>
                     </div>
-                    <?php if ($day['leavingChild']): ?>
-                        <div class="leaving-child">
-                            <?= h($day['leavingChild']['child']->name) ?> <span class="flag-icon">⬇️</span>
+                    <?php if ($day['firstOnWaitlistChild']): ?>
+                        <div class="firstOnWaitlist-child">
+                            <?= h($day['firstOnWaitlistChild']['child']->name) ?> <span class="flag-icon">⬇️</span>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -222,12 +222,12 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
                             
                             $count = $child->is_integrative ? 2 : 1;
                             $childId = $child->id;
-                            $stats = isset($childStats[$childId]) ? $childStats[$childId] : ['daysCount' => 0, 'leavingCount' => 0];
+                            $stats = isset($childStats[$childId]) ? $childStats[$childId] : ['daysCount' => 0, 'firstOnWaitlistCount' => 0];
                         ?>
                             <div style="padding: 2px 0;"><?= h($child->name) ?></div>
                             <div style="background: #e3f2fd; padding: 2px 6px; border-radius: 3px; font-weight: bold; text-align: center;"><?= h($count) ?></div>
                             <div style="color: #999; text-align: center;"><?= h($stats['daysCount']) ?></div>
-                            <div style="color: #999; text-align: center;"><?= h($stats['leavingCount']) ?></div>
+                            <div style="color: #999; text-align: center;"><?= h($stats['firstOnWaitlistCount']) ?></div>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <div style="grid-column: 1 / -1; color: #666; text-align: center; padding: 2rem;">

@@ -64,7 +64,7 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
             background: #fff3e0;
         }
 
-        .cell-leaving {
+        .cell-firstOnWaitlist {
             background: #ffebee;
             font-style: italic;
         }
@@ -135,8 +135,8 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
                         $cellContent .= ' <span class="integrative-badge">I</span>';
                     }
                     
-                    // Special formatting for leaving children
-                    if ($type === 'leaving') {
+                    // Special formatting for firstOnWaitlist children
+                    if ($type === 'firstOnWaitlist') {
                         $cellContent = '→ ' . $cellContent;
                     }
                 ?>

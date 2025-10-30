@@ -99,7 +99,7 @@ Files still need organization_users pattern:
 
 **3. Service/Logic Tests (~15 tests)**
 Need business logic updates:
-- ReportServiceTest (distribution, capacity, leaving child)
+- ReportServiceTest (distribution, capacity, firstOnWaitlist child)
 - WaitlistServiceTest (capacity, integrative weight)
 - ScheduleBuilderTest (capacity, integrative children)
 - RulesServiceTest
