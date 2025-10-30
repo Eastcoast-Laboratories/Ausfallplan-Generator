@@ -185,7 +185,7 @@ class ReportService
     {
         $days = [];
         $currentIndex = 0;
-        $leavingIndex = 0;
+        $firstOnWaitlistIndex = 0;
         $skippedUnits = []; // Units that didn't fit (priority for next day)
 
         for ($i = 0; $i < $daysCount; $i++) {
@@ -237,14 +237,14 @@ class ReportService
                 }
             }
             
-            // Find leaving unit (not in this day)
+            // Find firstOnWaitlist unit (not in this day)
             // ONLY from children with waitlist_order != NULL (exclude "always at end")
-            $leavingChild = null;
-            $leavingAttempts = 0;
-            while ($leavingAttempts < count($childUnits) && !$leavingChild) {
-                $candidateUnit = $childUnits[$leavingIndex % count($childUnits)];
-                $leavingIndex++;
-                $leavingAttempts++;
+            $firstOnWaitlistChild = null;
+            $firstOnWaitlistAttempts = 0;
+            while ($firstOnWaitlistAttempts < count($childUnits) && !$firstOnWaitlistChild) {
+                $candidateUnit = $childUnits[$firstOnWaitlistIndex % count($childUnits)];
+                $firstOnWaitlistIndex++;
+                $firstOnWaitlistAttempts++;
                 
                 // Check if unit has waitlist_order (not "always at end")
                 $hasWaitlistOrder = false;
@@ -263,9 +263,9 @@ class ReportService
                 if (!$this->isUnitInDay($candidateUnit, $dayChildren)) {
                     // Return first child of unit for display
                     if ($candidateUnit['type'] === 'sibling_group') {
-                        $leavingChild = $candidateUnit['siblings'][0];
+                        $firstOnWaitlistChild = $candidateUnit['siblings'][0];
                     } else {
-                        $leavingChild = [
+                        $firstOnWaitlistChild = [
                             'child' => $candidateUnit['child'],
                             'is_integrative' => $candidateUnit['is_integrative'],
                         ];
@@ -279,7 +279,7 @@ class ReportService
                 'animalName' => $animalName,
                 'title' => sprintf('%s-Tag %d', $animalName, $i + 1),
                 'children' => $dayChildren,
-                'leavingChild' => $leavingChild,
+                'firstOnWaitlistChild' => $firstOnWaitlistChild,
                 'countingChildrenSum' => $countingSum,
             ];
         }
@@ -399,10 +399,10 @@ class ReportService
         foreach ($sortedUnits as $unit) {
             if ($unit['type'] === 'sibling_group') {
                 foreach ($unit['siblings'] as $sibling) {
-                    $stats[$sibling['child']->id] = ['daysCount' => 0, 'leavingCount' => 0];
+                    $stats[$sibling['child']->id] = ['daysCount' => 0, 'firstOnWaitlistCount' => 0];
                 }
             } else {
-                $stats[$unit['child']->id] = ['daysCount' => 0, 'leavingCount' => 0];
+                $stats[$unit['child']->id] = ['daysCount' => 0, 'firstOnWaitlistCount' => 0];
             }
         }
         
@@ -417,10 +417,10 @@ class ReportService
                 }
             }
             
-            if (isset($day['leavingChild']) && $day['leavingChild']) {
-                $leavingChildId = $day['leavingChild']['child']->id;
-                if (isset($stats[$leavingChildId])) {
-                    $stats[$leavingChildId]['leavingCount']++;
+            if (isset($day['firstOnWaitlistChild']) && $day['firstOnWaitlistChild']) {
+                $firstOnWaitlistChildId = $day['firstOnWaitlistChild']['child']->id;
+                if (isset($stats[$firstOnWaitlistChildId])) {
+                    $stats[$firstOnWaitlistChildId]['firstOnWaitlistCount']++;
                 }
             }
         }

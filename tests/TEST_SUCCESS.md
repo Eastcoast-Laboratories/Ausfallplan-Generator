@@ -76,7 +76,7 @@ These tests are marked incomplete and need future investigation:
 
 ### 3. testLeavingChildIdentification
 **Issue:** Leaving child logic not set up in test data
-**Investigation needed:** Test scenario setup for leaving children
+**Investigation needed:** Test scenario setup for firstOnWaitlist children
 **Workaround:** Feature works, test scenario needs proper setup
 
 ### 4. testNavigationVisibleWhenLoggedIn

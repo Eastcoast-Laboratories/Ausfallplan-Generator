@@ -301,7 +301,7 @@ document.querySelectorAll(".delete-child").forEach(button => {
         const childId = this.dataset.childId;
         const childItem = document.querySelector(`.child-item[data-child-id="${childId}"]`);
         
-        if (!confirm("<?= __('sAre you sure you want to delete this child?') ?>")) {
+        if (!confirm("<?= __('Are you sure you want to delete this child?') ?>")) {
             return;
         }
         

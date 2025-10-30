@@ -689,8 +689,8 @@ class SchedulesController extends AppController
                         $row[] = $childData['child']->name;
                         $row[] = $childData['is_integrative'] ? 2 : 1;
                     } elseif ($rowIdx == count($children)) {
-                        $leaving = $day['leavingChild'] ?? null;
-                        $row[] = $leaving ? '→ ' . $leaving['child']->name : '';
+                        $firstOnWaitlist = $day['firstOnWaitlistChild'] ?? null;
+                        $row[] = $firstOnWaitlist ? '→ ' . $firstOnWaitlist['child']->name : '';
                         $row[] = '';
                     } elseif ($rowIdx == count($children) + 1) {
                         $row[] = $day['countingChildrenSum'] ?? 0;
@@ -708,12 +708,12 @@ class SchedulesController extends AppController
                     if ($rowIdx < count($waitlist)) {
                         $child = $waitlist[$rowIdx];
                         $childId = $child->id;
-                        $stats = isset($childStats[$childId]) ? $childStats[$childId] : ['daysCount' => 0, 'leavingCount' => 0];
+                        $stats = isset($childStats[$childId]) ? $childStats[$childId] : ['daysCount' => 0, 'firstOnWaitlistCount' => 0];
                         
                         $row[] = $child->name;
                         $row[] = $child->is_integrative ? 2 : 1;
                         $row[] = $stats['daysCount'];
-                        $row[] = $stats['leavingCount'];
+                        $row[] = $stats['firstOnWaitlistCount'];
                     } elseif ($rowIdx == count($waitlist) + 1 && !empty($alwaysAtEnd)) {
                         $row[] = 'Immer am Ende:';
                         $row[] = '';
@@ -861,9 +861,9 @@ class SchedulesController extends AppController
                         $sheet->setCellValueByColumnAndRow($col, $currentRow, $childData['child']->name);
                         $sheet->setCellValueByColumnAndRow($col + 1, $currentRow, $childData['is_integrative'] ? 2 : 1);
                     } elseif ($rowIdx == count($children)) {
-                        $leaving = $day['leavingChild'] ?? null;
-                        if ($leaving) {
-                            $sheet->setCellValueByColumnAndRow($col, $currentRow, '→ ' . $leaving['child']->name);
+                        $firstOnWaitlist = $day['firstOnWaitlistChild'] ?? null;
+                        if ($firstOnWaitlist) {
+                            $sheet->setCellValueByColumnAndRow($col, $currentRow, '→ ' . $firstOnWaitlist['child']->name);
                         }
                     } elseif ($rowIdx == count($children) + 1) {
                         $sheet->setCellValueByColumnAndRow($col, $currentRow, $day['countingChildrenSum'] ?? 0);
@@ -878,12 +878,12 @@ class SchedulesController extends AppController
                     if ($rowIdx < count($waitlist)) {
                         $child = $waitlist[$rowIdx];
                         $childId = $child->id;
-                        $stats = isset($childStats[$childId]) ? $childStats[$childId] : ['daysCount' => 0, 'leavingCount' => 0];
+                        $stats = isset($childStats[$childId]) ? $childStats[$childId] : ['daysCount' => 0, 'firstOnWaitlistCount' => 0];
                         
                         $sheet->setCellValueByColumnAndRow($col, $currentRow, $child->name);
                         $sheet->setCellValueByColumnAndRow($col + 1, $currentRow, $child->is_integrative ? 2 : 1);
                         $sheet->setCellValueByColumnAndRow($col + 2, $currentRow, $stats['daysCount']);
-                        $sheet->setCellValueByColumnAndRow($col + 3, $currentRow, $stats['leavingCount']);
+                        $sheet->setCellValueByColumnAndRow($col + 3, $currentRow, $stats['firstOnWaitlistCount']);
                     } elseif ($rowIdx == count($waitlist) + 1 && !empty($alwaysAtEnd)) {
                         $sheet->setCellValueByColumnAndRow($col, $currentRow, 'Immer am Ende:');
                     } elseif ($rowIdx > count($waitlist) + 1 && !empty($alwaysAtEnd)) {
