@@ -282,4 +282,5 @@ return [
     // Admin & Permissions
     'Access denied. System admin privileges required.' => 'Zugriff verweigert. Systemadministrator-Rechte erforderlich.',
     'Access denied. Please login.' => 'Zugriff verweigert. Bitte melden Sie sich an.',
+    'You do not have permission to perform actions. (Viewer role is read-only)' => 'Sie haben keine Berechtigung Aktionen auszuführen. (Viewer-Rolle ist nur lesend)',
 ];

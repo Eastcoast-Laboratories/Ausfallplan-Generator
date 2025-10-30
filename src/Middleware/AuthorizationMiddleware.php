@@ -10,6 +10,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
+use function Cake\I18n\__;
+
 /**
  * Authorization Middleware
  * 
@@ -56,17 +58,17 @@ class AuthorizationMiddleware implements MiddlewareInterface
         
         // Viewer: Only read actions allowed
         if ($role === 'viewer') {
-            $allowedActions = ['index', 'view'];
+            $allowedActions = ['index', 'view', 'generateReport'];
             
             if (!in_array($action, $allowedActions)) {
-                // Redirect with flash message (German)
+                // Redirect with flash message (info, not error)
                 $session = $request->getAttribute('session');
                 $session->write('Flash.flash', [
                     [
-                        'message' => 'Sie haben keine Berechtigung Aktionen auszuführen. (Viewer-Rolle ist nur lesend)',
+                        'message' => __('You do not have permission to perform actions. (Viewer role is read-only)'),
                         'key' => 'flash',
-                        'element' => 'Flash/error',
-                        'params' => ['class' => 'error']
+                        'element' => 'Flash/info',
+                        'params' => ['class' => 'info']
                     ]
                 ]);
                 
