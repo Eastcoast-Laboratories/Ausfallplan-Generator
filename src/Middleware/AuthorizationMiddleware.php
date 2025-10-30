@@ -63,7 +63,7 @@ class AuthorizationMiddleware implements MiddlewareInterface
                 $session = $request->getAttribute('session');
                 $session->write('Flash.flash', [
                     [
-                        'message' => 'Sie haben keine Berechtigung, diese Aktion auszuführen. (Viewer-Rolle ist nur lesend)',
+                        'message' => 'Sie haben keine Berechtigung Aktionen auszuführen. (Viewer-Rolle ist nur lesend)',
                         'key' => 'flash',
                         'element' => 'Flash/error',
                         'params' => ['class' => 'error']

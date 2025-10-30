@@ -156,7 +156,7 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                         <?php if ($item['type'] === 'single'): 
                             $child = $item['child'];
                         ?>
-                            <div class="child-item" data-child-id="<?= $child->id ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #4caf50; cursor: move;">
+                            <div class="child-item" data-child-id="<?= $child->id ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #4caf50; cursor: move; transition: all 0.3s ease;">
                                 <div>
                                     <strong><?= h($child->name) ?></strong>
                                     <?php if ($child->is_integrative): ?>
@@ -166,6 +166,13 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                                     <?php endif; ?>
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <button 
+                                        class="delete-child" 
+                                        data-child-id="<?= $child->id ?>"
+                                        style="background: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; font-weight: bold; padding: 0.4rem 0.6rem;"
+                                        title="<?= __("Delete child") ?>">
+                                        🗑️
+                                    </button>
                                     <button 
                                         class="remove-from-order" 
                                         data-child-id="<?= $child->id ?>"
@@ -285,6 +292,69 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// Handle delete child buttons with AJAX and transition
+document.querySelectorAll(".delete-child").forEach(button => {
+    button.addEventListener("click", function(e) {
+        e.stopPropagation();
+        const childId = this.dataset.childId;
+        const childItem = document.querySelector(`.child-item[data-child-id="${childId}"]`);
+        
+        if (!confirm("<?= __('Are you sure you want to delete this child?') ?>")) {
+            return;
+        }
+        
+        // Send AJAX request to delete child
+        fetch("<?= $this->Url->build(["controller" => "Children", "action" => "delete"]) ?>" + childId, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-Token": "<?= $this->request->getAttribute("csrfToken") ?>"
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Animate removal with transition
+                if (childItem) {
+                    childItem.style.opacity = "0";
+                    childItem.style.transform = "translateX(-100%)";
+                    childItem.style.marginBottom = "0";
+                    childItem.style.height = childItem.offsetHeight + "px";
+                    
+                    setTimeout(() => {
+                        childItem.style.height = "0";
+                        childItem.style.padding = "0";
+                        childItem.style.margin = "0";
+                    }, 50);
+                    
+                    // Remove from DOM after animation
+                    setTimeout(() => {
+                        childItem.remove();
+                        
+                        // Check if list is now empty
+                        const sortable = document.getElementById("children-sortable");
+                        if (sortable && sortable.querySelectorAll(".child-item, .sibling-group").length === 0) {
+                            sortable.innerHTML = '<p style="color: #666; text-align: center; padding: 2rem;"><?= __("No children in organization order.") ?></p>';
+                        }
+                    }, 300);
+                }
+            } else {
+                console.error('Failed to delete:', data.message);
+                alert("<?= __('Error deleting child') ?>");
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("<?= __('Error deleting child') ?>");
+        });
+    });
+});
 
 // Handle remove from order buttons
 document.querySelectorAll(".remove-from-order").forEach(button => {
