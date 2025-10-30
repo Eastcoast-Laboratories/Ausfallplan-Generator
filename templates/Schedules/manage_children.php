@@ -296,6 +296,7 @@ document.head.appendChild(style);
 // Handle delete child buttons with AJAX and transition
 document.querySelectorAll(".delete-child").forEach(button => {
     button.addEventListener("click", function(e) {
+        e.preventDefault();
         e.stopPropagation();
         const childId = this.dataset.childId;
         const childItem = document.querySelector(`.child-item[data-child-id="${childId}"]`);
