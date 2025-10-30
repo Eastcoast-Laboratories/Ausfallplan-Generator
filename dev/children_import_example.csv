@@ -1,0 +1,16 @@
+;;Mama;Mama Handy;Mama E-Mail;Papa;Papa Handy;Papa E-Mail;Geburtstag;Geschwister;WhatsApp;Signal;Straße;Plz;i
+;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;
+Valentina;Schmidt;Ella;0123 2342442;test@example.com.com;Bernd;;;14.02.19;Noah;;x;;23930;2
+Amadeus;Mozart;Kathrin;;test@example.com.de;Joe;;test@example.com.de;05.09.19;;;x;;23967;2
+Jannis;Meier;Johanna;;test@example.com.com;;;test@example.com.com;31.12.19;;;x;;23937;1
+Zaphod;Beeblebrox;Stefanie;;Johanna.example@example.com.com ;Markus;;;16.01.20;Hans;;x;;23937;2
+Aaron;von Oben;Anna;;-;;;;28.03.20;;;;;;1
+Timo;;;;example@example.com.com;;;example@example.com.com;21.04.20;;;;;23938;1
+Lene;Neumann;;;example@example.com.de;;;example@example.com.de;07.08.20;;;;;23929;1
+Ezra;Schmidt;;;example@example.com.de;;;example@example.com.de;03.10.20;;;x;;23927;1
+Levin;Schlicht;;;example@example.com.de;;;-;17.07.21;;;;;23969;1
+Bo;Renner;;;clara.test@example.com.fr;;;Luca.test@example.com-online.de;01.07.21;;;;;23927;1
+Noah;Mozart;;;test@example.com.de;;;test@example.com.de;03.07.21;Valentina;;x;;23930;1
+Zoe;Musterfrau;;;Christina.test@example.com.com;;;;30.05.21;;;x;;23967;1
+Hans;Beeblebrox;;;Johanna.test@example.com.com ;;;;05.01.22;Zaphod;                 ;x;;23937;1

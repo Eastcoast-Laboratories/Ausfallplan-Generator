@@ -97,6 +97,17 @@ class ReportService
             return [];
         }
 
+        return $this->groupChildrenIntoUnits($children);
+    }
+
+    /**
+     * Group children into units (singles or sibling groups)
+     * 
+     * @param array $children Array of child entities
+     * @return array Array of child units
+     */
+    private function groupChildrenIntoUnits(array $children): array
+    {
         // Create a map for quick access
         $childrenMap = [];
         foreach ($children as $child) {
@@ -104,7 +115,6 @@ class ReportService
         }
 
         // Group by sibling_group_id
-        $siblingGroups = [];
         $processedIds = [];
         $result = [];
 
@@ -228,12 +238,27 @@ class ReportService
             }
             
             // Find leaving unit (not in this day)
+            // ONLY from children with waitlist_order != NULL (exclude "always at end")
             $leavingChild = null;
             $leavingAttempts = 0;
             while ($leavingAttempts < count($childUnits) && !$leavingChild) {
                 $candidateUnit = $childUnits[$leavingIndex % count($childUnits)];
                 $leavingIndex++;
                 $leavingAttempts++;
+                
+                // Check if unit has waitlist_order (not "always at end")
+                $hasWaitlistOrder = false;
+                if ($candidateUnit['type'] === 'sibling_group') {
+                    // Check first sibling
+                    $hasWaitlistOrder = $candidateUnit['siblings'][0]['child']->waitlist_order !== null;
+                } else {
+                    $hasWaitlistOrder = $candidateUnit['child']->waitlist_order !== null;
+                }
+                
+                // Skip if "always at end" (waitlist_order = NULL)
+                if (!$hasWaitlistOrder) {
+                    continue;
+                }
                 
                 if (!$this->isUnitInDay($candidateUnit, $dayChildren)) {
                     // Return first child of unit for display

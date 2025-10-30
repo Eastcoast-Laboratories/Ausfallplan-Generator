@@ -34,6 +34,7 @@ class CsvImportService
 
         $children = [];
         $usedAnimals = [];
+        $siblingNameMap = []; // Map sibling names to indices for detection
         $addressGroups = []; // Group children by address for sibling detection
 
         // Skip header row
@@ -49,6 +50,7 @@ class CsvImportService
             $firstName = trim($data[0] ?? '');
             $lastName = trim($data[1] ?? '');
             $birthDateStr = trim($data[8] ?? '');
+            $siblingName = trim($data[9] ?? ''); // Geschwister column
             $address = trim($data[12] ?? ''); // Street
             $postalCode = trim($data[13] ?? ''); // PLZ
             $integrative = (int)trim($data[14] ?? '0'); // i column
@@ -79,10 +81,15 @@ class CsvImportService
                 'is_integrative' => $integrative >= 2,
                 'address' => $address,
                 'postal_code' => $postalCode,
+                'sibling_name' => $siblingName,
                 'animal_name' => $animalName,
                 'initial_animal' => substr($firstName, 0, 1) . '. ' . $animalName,
                 'sibling_group_id' => null, // Will be set below
             ];
+
+            // Map this child's name for sibling detection
+            $nameKey = mb_strtolower($firstName);
+            $siblingNameMap[$nameKey] = count($children);
 
             // Group by address for sibling detection
             if (!empty($address)) {
@@ -98,16 +105,61 @@ class CsvImportService
 
         fclose($handle);
 
-        // Detect siblings based on same address
+        // Detect siblings based on sibling_name column
         $siblingGroupId = 1;
+        $processedGroups = [];
+        
+        foreach ($children as $index => $child) {
+            // Skip if already in a group
+            if ($child['sibling_group_id'] !== null) {
+                continue;
+            }
+            
+            $siblingName = $child['sibling_name'];
+            if (empty($siblingName)) {
+                continue;
+            }
+            
+            // Find sibling by name
+            $siblingKey = mb_strtolower($siblingName);
+            if (isset($siblingNameMap[$siblingKey])) {
+                $siblingIndex = $siblingNameMap[$siblingKey];
+                
+                // Create group key to avoid duplicates
+                $groupKey = min($index, $siblingIndex) . '-' . max($index, $siblingIndex);
+                
+                if (!isset($processedGroups[$groupKey])) {
+                    // Assign both children to same sibling group
+                    $children[$index]['sibling_group_id'] = $siblingGroupId;
+                    $children[$siblingIndex]['sibling_group_id'] = $siblingGroupId;
+                    $children[$index]['sibling_count'] = 2;
+                    $children[$siblingIndex]['sibling_count'] = 2;
+                    
+                    $processedGroups[$groupKey] = $siblingGroupId;
+                    $siblingGroupId++;
+                }
+            }
+        }
+
+        // Detect siblings based on same address (for children without sibling_name)
         foreach ($addressGroups as $addressKey => $childIndices) {
             if (count($childIndices) > 1) {
                 // Multiple children at same address = siblings
+                // Only group if not already in a sibling group
+                $ungroupedIndices = [];
                 foreach ($childIndices as $index) {
-                    $children[$index]['sibling_group_id'] = $siblingGroupId;
-                    $children[$index]['sibling_count'] = count($childIndices);
+                    if ($children[$index]['sibling_group_id'] === null) {
+                        $ungroupedIndices[] = $index;
+                    }
                 }
-                $siblingGroupId++;
+                
+                if (count($ungroupedIndices) > 1) {
+                    foreach ($ungroupedIndices as $index) {
+                        $children[$index]['sibling_group_id'] = $siblingGroupId;
+                        $children[$index]['sibling_count'] = count($ungroupedIndices);
+                    }
+                    $siblingGroupId++;
+                }
             }
         }
 

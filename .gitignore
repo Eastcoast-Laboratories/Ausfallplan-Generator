@@ -10,7 +10,6 @@
 /config/Migrations/schema-dump-*.lock
 
 # Dev files with sensitive data
-/dev/*.csv
 /dev/*.xlsx
 
 # Playwright
