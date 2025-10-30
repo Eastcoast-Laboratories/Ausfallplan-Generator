@@ -277,7 +277,6 @@ return [
     'Warning' => 'Warnung',
     'The following siblings are not assigned to this waitlist' => 'Die folgenden Geschwister sind dieser Nachrückliste nicht zugewiesen',
     'Sibling of' => 'Geschwister von',
-    'Add them in' => 'Füge sie hinzu in',
     
     // Admin & Permissions
     'Access denied. System admin privileges required.' => 'Zugriff verweigert. Systemadministrator-Rechte erforderlich.',

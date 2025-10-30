@@ -212,7 +212,7 @@ class WaitlistController extends AppController
                 $siblings = $this->fetchTable('Children')->find()
                     ->where([
                         'sibling_group_id' => $child->sibling_group_id,
-                        'id !=' => $child->id
+                        'id !=' => $child->id,
                     ])
                     ->orderBy(['name' => 'ASC'])
                     ->all();
@@ -221,14 +221,14 @@ class WaitlistController extends AppController
                 foreach ($siblings as $sib) {
                     $names[] = $sib->name;
                     
-                    if (!in_array($sib->id, $childrenOnWaitlist)) {
+                    // Show warning if sibling is assigned to a DIFFERENT schedule
+                    if ($sib->schedule_id != null && 
+                        $sib->schedule_id != $selectedSchedule->id) {
                         $missingSiblings[] = [
                             'id' => $sib->id,
                             'name' => $sib->name,
                             'sibling_of' => $child->name,
-                            'sibling_group_id' => $child->sibling_group_id,
-                            'organization_id' => $child->organization_id,
-                            'schedule_id' => $child->schedule_id,
+                            'schedule_id' => $sib->schedule_id, // Sibling's schedule (where they currently are)
                         ];
                     }
                 }
