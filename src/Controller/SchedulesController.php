@@ -633,14 +633,11 @@ class SchedulesController extends AppController
         
         $daysCount = $schedule->days_count ?? $assignedChildrenCount;
         
-        // Use SAME grid generation as HTML view
+        // Generate report data
         $reportService = new \App\Service\ReportService();
         $reportData = $reportService->generateReportData((int)$id, $daysCount);
         
-        $gridService = new \App\Service\ReportGridService();
-        $gridData = $gridService->generateGrid($reportData);
-        
-        // Convert grid to CSV
+        // Build CSV with 4-day blocks
         $csv = [];
         
         // Header
@@ -648,27 +645,95 @@ class SchedulesController extends AppController
         $csv[] = ['Organisation', $schedule->organization->name];
         $csv[] = [''];
         
-        // Grid rows - iterate through grid
-        foreach ($gridData['grid'] as $row) {
-            $csvRow = [];
-            foreach ($row as $cell) {
-                $value = $cell['value'];
+        // Split days into 4-day blocks
+        $days = $reportData['days'];
+        $waitlist = $reportData['waitlist'];
+        $alwaysAtEnd = $reportData['alwaysAtEnd'];
+        $dayBlocks = array_chunk($days, 4, true);
+        
+        // Calculate max rows needed
+        $maxChildrenPerDay = 0;
+        foreach ($days as $day) {
+            $maxChildrenPerDay = max($maxChildrenPerDay, count($day['children'] ?? []));
+        }
+        $rowsPerBlock = max($maxChildrenPerDay + 3, 10);
+        
+        // Build each 4-day block
+        foreach ($dayBlocks as $blockIndex => $blockDays) {
+            $isFirstBlock = ($blockIndex === 0);
+            
+            // Block header
+            $headerRow = [];
+            foreach ($blockDays as $day) {
+                $headerRow[] = $day['animalName'] . '-Tag ' . $day['number'];
+            }
+            if ($isFirstBlock) {
+                $headerRow[] = ''; // Spacer
+                $headerRow[] = 'Nachrückliste';
+            }
+            $csv[] = $headerRow;
+            
+            // Block content rows
+            for ($rowIdx = 0; $rowIdx < $rowsPerBlock; $rowIdx++) {
+                $row = [];
                 
-                // Add special markers based on cell type
-                switch ($cell['type']) {
-                    case \App\Service\ReportGridService::CELL_CHILD:
-                        if (isset($cell['metadata']['is_integrative']) && $cell['metadata']['is_integrative']) {
-                            $value .= ' (I)';
+                // Day columns
+                foreach ($blockDays as $day) {
+                    $children = $day['children'] ?? [];
+                    if ($rowIdx < count($children)) {
+                        $childData = $children[$rowIdx];
+                        $name = $childData['child']->name;
+                        if ($childData['is_integrative']) {
+                            $name .= ' (I)';
                         }
-                        break;
-                    case \App\Service\ReportGridService::CELL_LEAVING:
-                        $value = '→ ' . str_replace('→ ', '', $value);
-                        break;
+                        $row[] = $name;
+                    } elseif ($rowIdx == count($children)) {
+                        $leaving = $day['leavingChild'] ?? null;
+                        $row[] = $leaving ? '→ ' . $leaving['child']->name : '';
+                    } elseif ($rowIdx == count($children) + 1) {
+                        $row[] = $day['countingChildrenSum'] ?? 0;
+                    } else {
+                        $row[] = '';
+                    }
                 }
                 
-                $csvRow[] = $value;
+                // Waitlist column (only first block)
+                if ($isFirstBlock) {
+                    $row[] = ''; // Spacer
+                    
+                    if ($rowIdx < count($waitlist)) {
+                        $child = $waitlist[$rowIdx];
+                        $name = $child->name;
+                        if ($child->is_integrative) {
+                            $name .= ' (I)';
+                        }
+                        $row[] = $name;
+                    } elseif ($rowIdx == count($waitlist) + 1 && !empty($alwaysAtEnd)) {
+                        $row[] = 'Immer am Ende:';
+                    } elseif ($rowIdx > count($waitlist) + 1 && !empty($alwaysAtEnd)) {
+                        $alwaysAtEndIdx = $rowIdx - count($waitlist) - 2;
+                        if ($alwaysAtEndIdx < count($alwaysAtEnd)) {
+                            $childData = $alwaysAtEnd[$alwaysAtEndIdx];
+                            $name = $childData['child']->name;
+                            if ($childData['weight'] == 2) {
+                                $name .= ' (I)';
+                            }
+                            $row[] = $name;
+                        } else {
+                            $row[] = '';
+                        }
+                    } else {
+                        $row[] = '';
+                    }
+                }
+                
+                $csv[] = $row;
             }
-            $csv[] = $csvRow;
+            
+            // Empty row between blocks
+            if ($blockIndex < count($dayBlocks) - 1) {
+                $csv[] = [];
+            }
         }
         
         // Convert to CSV string
