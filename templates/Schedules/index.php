@@ -2,6 +2,7 @@
 /**
  * @var \App\View\AppView $this
  * @var iterable<\App\Model\Entity\Schedule> $schedules
+ * @var array $missingSiblingsPerSchedule
  */
 $this->assign('title', __('Schedules'));
 ?>
@@ -10,6 +11,27 @@ $this->assign('title', __('Schedules'));
     <div class="actions">
         <?= $this->Html->link(__('New Schedule'), ['action' => 'add'], ['class' => 'button float-right']) ?>
     </div>
+    
+    <?php if (!empty($missingSiblingsPerSchedule)): ?>
+        <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
+            <strong>⚠️ <?= __('Warning') ?>:</strong> 
+            <?= __('Siblings in different schedules detected') ?>:
+            <?php foreach ($missingSiblingsPerSchedule as $scheduleId => $missingSiblings): ?>
+                <div style="margin-top: 0.5rem;">
+                    <strong>Schedule #<?= $scheduleId ?>:</strong>
+                    <ul style="margin: 0.5rem 0 0 1.5rem;">
+                        <?php foreach ($missingSiblings as $missing): ?>
+                            <li>
+                                <strong><?= $this->Html->link(h($missing['name']), '/schedules/manage-children/' . $missing['schedule_id']) ?></strong> 
+                                (<?= __('Sibling of') ?> <?= h($missing['sibling_of']) ?>)
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+    
     <div class="table-responsive">
         <table>
             <thead>

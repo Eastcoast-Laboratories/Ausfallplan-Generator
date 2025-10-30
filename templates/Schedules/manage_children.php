@@ -5,6 +5,7 @@
  * @var iterable<\App\Model\Entity\Schedule> $schedules
  * @var iterable<\App\Model\Entity\Child> $childrenInOrder
  * @var iterable<\App\Model\Entity\Child> $childrenNotInOrder
+ * @var array $missingSiblings
  */
 $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
 ?>
@@ -44,6 +45,21 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
             </select>
         </div>
     </div>
+    
+    <?php if (!empty($missingSiblings)): ?>
+        <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
+            <strong>⚠️ <?= __('Warning') ?>:</strong> 
+            <?= __('The following siblings are not assigned to this waitlist') ?>:
+            <ul style="margin: 0.5rem 0 0 1.5rem;">
+                <?php foreach ($missingSiblings as $missing): ?>
+                    <li>
+                        <strong><?= $this->Html->link(h($missing['name']), '/schedules/manage-children/' . $missing['schedule_id']) ?></strong> 
+                        (<?= __('Sibling of') ?> <?= h($missing['sibling_of']) ?>)
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
     
     <div class="row" style="margin-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
         

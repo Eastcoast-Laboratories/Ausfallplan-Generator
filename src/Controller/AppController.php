@@ -219,4 +219,62 @@ class AppController extends Controller
         
         return $orgUser ? $orgUser->role : null;
     }
+
+    /**
+     * Find siblings assigned to different schedules
+     * 
+     * @param iterable $children Children with sibling_group_id
+     * @param int $currentScheduleId Current schedule ID to compare against
+     * @return array Array of missing siblings
+     */
+    protected function findMissingSiblings($children, int $currentScheduleId): array
+    {
+        $missingSiblings = [];
+        $processedGroups = [];
+        
+        foreach ($children as $child) {
+            if (!$child->sibling_group_id) {
+                continue; // No siblings
+            }
+            
+            // Skip if we already processed this sibling group
+            if (in_array($child->sibling_group_id, $processedGroups)) {
+                continue;
+            }
+            $processedGroups[] = $child->sibling_group_id;
+            
+            // Check if there are actually multiple children in this group
+            $totalInGroup = $this->fetchTable('Children')->find()
+                ->where(['sibling_group_id' => $child->sibling_group_id])
+                ->count();
+            
+            if ($totalInGroup <= 1) {
+                continue; // Skip single-child groups
+            }
+            
+            // Find all siblings in this group
+            $siblings = $this->fetchTable('Children')->find()
+                ->where([
+                    'sibling_group_id' => $child->sibling_group_id,
+                    'id !=' => $child->id,
+                ])
+                ->orderBy(['name' => 'ASC'])
+                ->all();
+            
+            foreach ($siblings as $sib) {
+                // Show warning if sibling is assigned to a DIFFERENT schedule
+                if ($sib->schedule_id != null && 
+                    $sib->schedule_id != $currentScheduleId) {
+                    $missingSiblings[] = [
+                        'id' => $sib->id,
+                        'name' => $sib->name,
+                        'sibling_of' => $child->name,
+                        'schedule_id' => $sib->schedule_id, // Sibling's schedule (where they currently are)
+                    ];
+                }
+            }
+        }
+        
+        return $missingSiblings;
+    }
 }
