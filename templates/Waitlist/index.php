@@ -61,14 +61,14 @@ $this->assign('title', __('Waitlist'));
             <ul style="margin: 0.5rem 0 0 1.5rem;">
                 <?php foreach ($missingSiblings as $missing): ?>
                     <li>
-                        <strong><?= $this->Html->link(h($missing['name']), ['controller' => 'Children', 'action' => 'view', $missing['id']]) ?></strong> 
+                        <strong><?= $this->Html->link(h($missing['name']), '/schedules/manage-children/' . $missing['schedule_id']) ?></strong> 
                         (<?= __('Sibling of') ?> <?= h($missing['sibling_of']) ?>)
                     </li>
                 <?php endforeach; ?>
             </ul>
             <em style="font-size: 0.9rem; color: #856404;">
                 <?= __('Add them in') ?> 
-                <?= $this->Html->link(__('Manage Children'), ['controller' => 'Schedules', 'action' => 'manageChildren', $selectedSchedule->id]) ?>
+                <?= $this->Html->link(__('Manage Children'), '/schedules/manage-children/' . $selectedSchedule->id) ?>
             </em>
         </div>
     <?php endif; ?>
