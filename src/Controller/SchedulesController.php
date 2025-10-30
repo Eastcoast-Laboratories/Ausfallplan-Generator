@@ -662,14 +662,18 @@ class SchedulesController extends AppController
         foreach ($dayBlocks as $blockIndex => $blockDays) {
             $isFirstBlock = ($blockIndex === 0);
             
-            // Block header
+            // Block header - each day gets 2 columns (Name + Weight)
             $headerRow = [];
             foreach ($blockDays as $day) {
                 $headerRow[] = $day['animalName'] . '-Tag ' . $day['number'];
+                $headerRow[] = 'Z'; // Zählkinder (Gewichtung)
             }
             if ($isFirstBlock) {
                 $headerRow[] = ''; // Spacer
                 $headerRow[] = 'Nachrückliste';
+                $headerRow[] = 'Z'; // Gewichtung
+                $headerRow[] = 'D'; // Tage
+                $headerRow[] = '⬇️'; // Nachrücken
             }
             $csv[] = $headerRow;
             
@@ -677,52 +681,62 @@ class SchedulesController extends AppController
             for ($rowIdx = 0; $rowIdx < $rowsPerBlock; $rowIdx++) {
                 $row = [];
                 
-                // Day columns
+                // Day columns (each day: Name + Weight)
                 foreach ($blockDays as $day) {
                     $children = $day['children'] ?? [];
                     if ($rowIdx < count($children)) {
                         $childData = $children[$rowIdx];
-                        $name = $childData['child']->name;
-                        if ($childData['is_integrative']) {
-                            $name .= ' (I)';
-                        }
-                        $row[] = $name;
+                        $row[] = $childData['child']->name;
+                        $row[] = $childData['is_integrative'] ? 2 : 1;
                     } elseif ($rowIdx == count($children)) {
                         $leaving = $day['leavingChild'] ?? null;
                         $row[] = $leaving ? '→ ' . $leaving['child']->name : '';
+                        $row[] = '';
                     } elseif ($rowIdx == count($children) + 1) {
                         $row[] = $day['countingChildrenSum'] ?? 0;
+                        $row[] = '';
                     } else {
+                        $row[] = '';
                         $row[] = '';
                     }
                 }
                 
-                // Waitlist column (only first block)
+                // Waitlist columns (only first block: Name + Weight + Days + Leaving)
                 if ($isFirstBlock) {
                     $row[] = ''; // Spacer
                     
                     if ($rowIdx < count($waitlist)) {
                         $child = $waitlist[$rowIdx];
-                        $name = $child->name;
-                        if ($child->is_integrative) {
-                            $name .= ' (I)';
-                        }
-                        $row[] = $name;
+                        $childId = $child->id;
+                        $stats = isset($childStats[$childId]) ? $childStats[$childId] : ['daysCount' => 0, 'leavingCount' => 0];
+                        
+                        $row[] = $child->name;
+                        $row[] = $child->is_integrative ? 2 : 1;
+                        $row[] = $stats['daysCount'];
+                        $row[] = $stats['leavingCount'];
                     } elseif ($rowIdx == count($waitlist) + 1 && !empty($alwaysAtEnd)) {
                         $row[] = 'Immer am Ende:';
+                        $row[] = '';
+                        $row[] = '';
+                        $row[] = '';
                     } elseif ($rowIdx > count($waitlist) + 1 && !empty($alwaysAtEnd)) {
                         $alwaysAtEndIdx = $rowIdx - count($waitlist) - 2;
                         if ($alwaysAtEndIdx < count($alwaysAtEnd)) {
                             $childData = $alwaysAtEnd[$alwaysAtEndIdx];
-                            $name = $childData['child']->name;
-                            if ($childData['weight'] == 2) {
-                                $name .= ' (I)';
-                            }
-                            $row[] = $name;
+                            $row[] = $childData['child']->name;
+                            $row[] = $childData['weight'];
+                            $row[] = '';
+                            $row[] = '';
                         } else {
+                            $row[] = '';
+                            $row[] = '';
+                            $row[] = '';
                             $row[] = '';
                         }
                     } else {
+                        $row[] = '';
+                        $row[] = '';
+                        $row[] = '';
                         $row[] = '';
                     }
                 }
