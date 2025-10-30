@@ -223,6 +223,7 @@ class WaitlistController extends AppController
                     
                     if (!in_array($sib->id, $childrenOnWaitlist)) {
                         $missingSiblings[] = [
+                            'id' => $sib->id,
                             'name' => $sib->name,
                             'sibling_of' => $child->name,
                         ];

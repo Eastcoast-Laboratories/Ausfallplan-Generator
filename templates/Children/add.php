@@ -3,6 +3,7 @@
  * @var \App\View\AppView $this
  * @var \App\Model\Entity\Child $child
  * @var array $siblingGroups
+ * @var array $schedules
  */
 $this->assign('title', __('Add Child'));
 ?>
@@ -40,6 +41,12 @@ $this->assign('title', __('Add Child'));
                 'options' => $siblingGroups,
                 'empty' => __('(No Sibling Group)'),
                 'label' => __('Sibling Group'),
+            ]);
+            echo $this->Form->control('schedule_id', [
+                'options' => $schedules,
+                'empty' => __('(Select Schedule)'),
+                'label' => __('Schedule (Ausfallplan)'),
+                'help' => __('Select the schedule this child will be assigned to'),
             ]);
         ?>
     </fieldset>

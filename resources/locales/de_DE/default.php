@@ -116,7 +116,10 @@ return [
     'Children order updated' => 'Kinder-Reihenfolge aktualisiert',
     'Invalid children data' => 'Ungültige Kinder-Daten',
     'Siblings' => 'Geschwister',
-    'Remove sibling group from organization order' => 'Geschwistergruppe aus Organisations-Reihenfolge entfernen',
+    'Switch between schedules to manage different organization orders' => 'Zwischen Ausfallplänen wechseln, um verschiedene Organisations-Reihenfolgen zu verwalten',
+    'Schedule (Ausfallplan)' => 'Ausfallplan',
+    'Select the schedule this child will be assigned to' => 'Wähle den Ausfallplan, dem dieses Kind zugeordnet werden soll',
+    '(Select Schedule)' => '(Ausfallplan wählen)',
     'Days' => 'Tage',
     
     // Waitlist
@@ -272,7 +275,7 @@ return [
     
     // Waitlist sibling warnings
     'Warning' => 'Warnung',
-    'The following siblings are not assigned to this schedule' => 'Die folgenden Geschwister sind diesem Ausfallplan nicht zugewiesen',
+    'The following siblings are not assigned to this waitlist' => 'Die folgenden Geschwister sind dieser Nachrückliste nicht zugewiesen',
     'Sibling of' => 'Geschwister von',
     'Add them in' => 'Füge sie hinzu in',
     
