@@ -1,0 +1,54 @@
+Ausfallplan;zweiter
+Organisation;"Demo Kita"
+
+"Ameisen-Tag 1";Z;"Bienen-Tag 2";Z;"Chamäleon-Tag 3";Z;"Dachse-Tag 4";Z;;Nachrückliste;Z;D;⬇️
+Aaron;1;Jannis;1;Hans;1;Levin;1;;Aaron;1;0;0
+Bo;1;Lene;1;Zaphod;2;Timo;1;;Bo;1;0;0
+Hans;1;Levin;1;Ezra;1;Zoe;1;;Ezra;1;0;0
+Zaphod;2;Timo;1;Noah;1;Amadeus;2;;Noah;1;0;0
+Ezra;1;Zoe;1;Valentina;2;Aaron;1;;Valentina;2;0;0
+Noah;1;Amadeus;2;Jannis;1;Bo;1;;Jannis;1;0;0
+Valentina;2;Aaron;1;Lene;1;Ezra;1;;Lene;1;0;0
+"→ Jannis";;Bo;1;"→ Levin";;Jannis;1;;Levin;1;0;0
+9;;"→ Hans";;9;;"→ Hans";;;Timo;1;0;0
+;;9;;;;9;;;Zoe;1;0;0
+;;;;;;;;;Amadeus;2;0;0
+
+"Esel-Tag 5";Z;"Fisch-Tag 6";Z;"Gnu-Tag 7";Z;"Hirsche-Tag 8";Z
+Hans;1;Zoe;1;Noah;1;Amadeus;2
+Zaphod;2;Amadeus;2;Valentina;2;Bo;1
+Noah;1;Aaron;1;Jannis;1;Hans;1
+Valentina;2;Bo;1;Lene;1;Zaphod;2
+Lene;1;Hans;1;Levin;1;Ezra;1
+Levin;1;Zaphod;2;Timo;1;Jannis;1
+Timo;1;Ezra;1;Zoe;1;Lene;1
+"→ Ezra";;"→ Noah";;Aaron;1;"→ Aaron";
+9;;9;;"→ Amadeus";;9;
+;;;;9;;;
+;;;;;;;
+
+"Insekten-Tag 9";Z;"Jaguar-Tag 10";Z;"Kamele-Tag 11";Z;"Luchse-Tag 12";Z
+Noah;1;Bo;1;Lene;1;Hans;1
+Valentina;2;Hans;1;Levin;1;Zaphod;2
+Levin;1;Zaphod;2;Timo;1;Noah;1
+Timo;1;Ezra;1;Zoe;1;Valentina;2
+Zoe;1;Noah;1;Amadeus;2;Jannis;1
+Amadeus;2;Valentina;2;Aaron;1;Lene;1
+Aaron;1;Jannis;1;Bo;1;Levin;1
+"→ Bo";;"→ Lene";;Ezra;1;"→ Ezra";
+9;;9;;"→ Hans";;9;
+;;;;9;;;
+;;;;;;;
+
+"Marabu-Tag 13";Z;"Nashörner-Tag 14";Z
+Timo;1;Ezra;1
+Zoe;1;Noah;1
+Amadeus;2;Valentina;2
+Aaron;1;Jannis;1
+Bo;1;Lene;1
+Hans;1;Levin;1
+Zaphod;2;Timo;1
+"→ Noah";;Zoe;1
+9;;"→ Amadeus";
+;;9;
+;;;

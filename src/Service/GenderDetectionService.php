@@ -20,7 +20,7 @@ class GenderDetectionService
         'daniel', 'david', 'dennis',
         'elias', 'eleutherius', 'emil', 'eric', 'ezra',
         'felix', 'finn', 'florian', 'franz',
-        'hannes', 'henrik',
+        'hannes', 'henrik', 'hans',
         'jakob', 'jan', 'jannis', 'jonas', 'julian',
         'karl', 'konstantin',
         'lars', 'lennard', 'leon', 'levin', 'liam', 'linus', 'louis', 'luca', 'lukas',
@@ -30,9 +30,10 @@ class GenderDetectionService
         'paul', 'peter', 'philipp',
         'richard', 'robert', 'robin', 'ruben',
         'samuel', 'sebastian', 'simon', 'stefan', 'steffen',
-        'theo', 'thomas', 'tim', 'timotheus', 'tobias', 'tom',
+        'theo', 'thomas', 'tim', 'timo', 'timotheus', 'tobias', 'tom',
         'vincent',
         'wilhelm',
+        'zaphod'
     ];
 
     /**
