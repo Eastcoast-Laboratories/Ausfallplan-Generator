@@ -2,7 +2,10 @@
 /**
  * @var \App\View\AppView $this
  * @var \App\Model\Entity\Schedule $schedule
- * @var iterable<\App\Model\Entity\Child> $children
+ * @var iterable<\App\Model\Entity\Schedule> $schedules
+ * @var iterable<\App\Model\Entity\Child> $childrenInOrder
+ * @var iterable<\App\Model\Entity\Child> $childrenNotInOrder
+ * @var array $missingSiblings
  */
 $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
 ?>
@@ -16,7 +19,7 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
             <h3 style="margin: 0;"><?= __("Manage Children Organization Order") ?> - <?= h($schedule->organization->name) ?></h3>
             <p style="margin: 0.5rem 0 0 0;">
                 <?= $this->Html->link("← " . __("Back to Schedules"), ["action" => "index"]) ?>
-                <span style="color: #666; margin-left: 1rem;">
+                <span style="color: #3f3e3eff; margin-left: 1rem;">
                     <?= __("This order is used in reports. Use Waitlist for schedule assignments.") ?>
                 </span>
             </p>
@@ -28,21 +31,47 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
         ) ?>
     </div>
     
-    <div class="row" style="margin-top: 1rem;">
+    <!-- Schedule Selector -->
+    <div class="schedule-selector" style="margin-bottom: 2rem; padding: 1rem; background: #f5f5f5; border-radius: 8px;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <label for="schedule-select" style="font-weight: bold;"><?= __('Select Schedule') ?>:</label>
+            <select id="schedule-select" onchange="window.location.href='/schedules/manage-children/' + this.value" style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ccc; min-width: 300px;">
+                <?php foreach ($schedules as $scheduleOption): ?>
+                    <option value="<?= $scheduleOption->id ?>" <?= $schedule->id == $scheduleOption->id ? 'selected' : '' ?>>
+                        <?= h($scheduleOption->title) ?>
+                        <?= $scheduleOption->days_count ? ' (' . $scheduleOption->days_count . ' ' . __('Days') . ')' : '' ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+    </div>
+    
+    <?php if (!empty($missingSiblings)): ?>
+        <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
+            <strong>⚠️ <?= __('Warning') ?>:</strong> 
+            <?= __('The following siblings are not assigned to this waitlist') ?>:
+            <ul style="margin: 0.5rem 0 0 1.5rem;">
+                <?php foreach ($missingSiblings as $missing): ?>
+                    <li>
+                        <strong><?= $this->Html->link(h($missing['name']), '/schedules/manage-children/' . $missing['schedule_id']) ?></strong> 
+                        (<?= __('Sibling of') ?> <?= h($missing['sibling_of']) ?>)
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
+    
+    <div class="row" style="margin-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
         
-        <!-- Children (Sortable) -->
-        <div class="organization-children">
-            <h4><?= __("Organization Children") ?> 
-                <span style="font-size: 0.85rem; font-weight: normal; color: #666;">
-                    (<?= __("Drag to reorder") ?>)
-                </span>
-            </h4>
-            <div id="children-sortable" style="background: #e8f5e9; padding: 1rem; border-radius: 8px; min-height: 300px;">
-                <?php if (!empty($children) && (is_countable($children) ? count($children) : $children->count()) > 0): ?>
-                    <?php foreach ($children as $child): ?>
-                        <div class="child-item" data-child-id="<?= $child->id ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #4caf50; cursor: move;">
+        <!-- Children NOT in Organization Order (NULL) - LEFT SIDE -->
+        <div class="not-in-order-children">
+            <h4><?= __("Not in Order (Excluded from Reports)") ?></h4>
+            <div style="background: #ffebee; padding: 1rem; border-radius: 8px; min-height: 400px;">
+                <?php if (!empty($childrenNotInOrder)): ?>
+                    <?php foreach ($childrenNotInOrder as $child): ?>
+                        <div class="child-item-excluded" data-child-id="<?= $child->id ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #f44336;">
                             <div>
-                                <strong><?= h($child->name) ?></strong>
+                                <strong style="color: #999;"><?= h($child->name) ?></strong>
                                 <?php if ($child->is_integrative): ?>
                                     <span style="background: #e3f2fd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
                                         <?= __("Integrative") ?>
@@ -50,32 +79,130 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                                 <?php endif; ?>
                                 <?php if ($child->sibling_group_id): ?>
                                     <span style="background: #fff3cd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
-                                        👨‍👩‍👧 <?= __("Sibling Group") ?>
+                                        👨‍👩‍👧 <?= $this->Html->link(__("Sibling Group"), ["controller" => "SiblingGroups", "action" => "view", $child->sibling_group_id]) ?>
                                     </span>
                                 <?php endif; ?>
-                                <?php if ($child->schedule_id): ?>
-                                    <span style="background: #c8e6c9; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
-                                        📅 <?= __("In Schedule") ?>
-                                    </span>
-                                <?php endif; ?>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <button 
-                                    class="remove-from-order" 
-                                    data-child-id="<?= $child->id ?>"
-                                    style="background: #f44336; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.75rem;"
-                                    title="<?= __("Remove from organization order") ?>">
-                                    ✕
-                                </button>
-                                <span style="color: #666; font-size: 0.9rem; cursor: move;">
-                                    ⋮⋮
+                                <span style="background: #ffcdd2; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.75rem; margin-left: 0.5rem; color: #c62828;">
+                                    <?= __("Excluded") ?>
                                 </span>
                             </div>
+                            <button 
+                                class="add-to-order" 
+                                data-child-id="<?= $child->id ?>"
+                                style="background: #4caf50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1.2rem; font-weight: bold;"
+                                title="<?= __("Add to organization order") ?>">
+                                +
+                            </button>
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <p style="color: #666; text-align: center; padding: 2rem;">
-                        <?= __("No children assigned to this schedule.") ?>
+                        <?= __("All children are in organization order.") ?>
+                    </p>
+                <?php endif; ?>
+            </div>
+        </div>
+        
+        <!-- Children in Organization Order (Sortable) - RIGHT SIDE -->
+        <div class="in-order-children">
+            <h4><?= __("In Organization Order") ?> 
+                <span style="font-size: 0.85rem; font-weight: normal; color: #666;">
+                    (<?= __("Drag to reorder") ?>)
+                </span>
+            </h4>
+            <div id="children-sortable" style="background: #e8f5e9; padding: 1rem; border-radius: 8px; min-height: 400px;">
+                <?php 
+                // Group children by sibling_group_id
+                $siblingGroups = [];
+                foreach ($childrenInOrder as $child) {
+                    if ($child->sibling_group_id) {
+                        if (!isset($siblingGroups[$child->sibling_group_id])) {
+                            $siblingGroups[$child->sibling_group_id] = [];
+                        }
+                        $siblingGroups[$child->sibling_group_id][] = $child;
+                    }
+                }
+                
+                // Build ordered list - iterate through childrenInOrder (already sorted by organization_order)
+                $processedGroups = [];
+                $orderedItems = [];
+                
+                foreach ($childrenInOrder as $child) {
+                    if ($child->sibling_group_id) {
+                        // If first sibling in group, add whole group
+                        if (!in_array($child->sibling_group_id, $processedGroups)) {
+                            $orderedItems[] = ['type' => 'group', 'group_id' => $child->sibling_group_id, 'siblings' => $siblingGroups[$child->sibling_group_id]];
+                            $processedGroups[] = $child->sibling_group_id;
+                        }
+                        // Skip other siblings (already added in group)
+                    } else {
+                        // Single child (no siblings)
+                        $orderedItems[] = ['type' => 'single', 'child' => $child];
+                    }
+                }
+                ?>
+                <?php if (!empty($orderedItems)): ?>
+                    <?php foreach ($orderedItems as $item): ?>
+                        <?php if ($item['type'] === 'single'): 
+                            $child = $item['child'];
+                        ?>
+                            <div class="child-item" data-child-id="<?= $child->id ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #4caf50; cursor: move;">
+                                <div>
+                                    <strong><?= h($child->name) ?></strong>
+                                    <?php if ($child->is_integrative): ?>
+                                        <span style="background: #e3f2fd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
+                                            <?= __("Integrative") ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <button 
+                                        class="remove-from-order" 
+                                        data-child-id="<?= $child->id ?>"
+                                        style="background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1.2rem; font-weight: bold;"
+                                        title="<?= __("Remove from organization order") ?>">
+                                        ✕
+                                    </button>
+                                    <span style="color: #666; font-size: 0.9rem; cursor: move;">
+                                        ⋮⋮
+                                    </span>
+                                </div>
+                            </div>
+                        <?php else: // group
+                            $siblings = $item['siblings'];
+                            $siblingNames = array_map(fn($s) => $s->name, $siblings);
+                        ?>
+                            <div class="sibling-group" data-child-ids="<?= implode(',', array_map(fn($c) => $c->id, $siblings)) ?>" style="background: #fff9c4; padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 4px; border-left: 4px solid #ffc107; cursor: move;">
+                                <div style="font-size: 0.85rem; color: #f57c00; font-weight: bold; margin-bottom: 0.5rem;">
+                                    👨‍👩‍👧 <?= $this->Html->link(__("Sibling Group"), ["controller" => "SiblingGroups", "action" => "view", $siblings[0]->sibling_group_id]) ?>
+                                </div>
+                                <?php foreach ($siblings as $child): 
+                                    $otherSiblings = array_filter($siblingNames, fn($n) => $n !== $child->name);
+                                ?>
+                                    <div style="background: white; padding: 0.75rem; margin-bottom: 0.25rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                                        <div>
+                                            <strong title="<?= __("Siblings") ?>: <?= implode(', ', $otherSiblings) ?>"><?= h($child->name) ?></strong>
+                                            <?php if ($child->is_integrative): ?>
+                                                <span style="background: #e3f2fd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
+                                                    <?= __("Integrative") ?>
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
+                                        <button 
+                                            class="remove-sibling-group" 
+                                            data-child-ids="<?= implode(',', array_map(fn($c) => $c->id, $siblings)) ?>"
+                                            style="background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1.2rem; font-weight: bold;"
+                                            title="<?= __("Remove sibling group from organization order") ?>">
+                                            ✕
+                                        </button>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p style="color: #666; text-align: center; padding: 2rem;">
+                        <?= __("No children in organization order.") ?>
                     </p>
                 <?php endif; ?>
             </div>
@@ -84,25 +211,31 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
     </div>
 </div>
 
-<?php if (!empty($children) && (is_countable($children) ? count($children) : $children->count()) > 0): ?>
+<?php if (!empty($childrenInOrder) || !empty($childrenNotInOrder)): ?>
 <script>
 // Initialize Sortable.js for drag & drop
 const el = document.getElementById("children-sortable");
 const sortable = Sortable.create(el, {
     animation: 150,
     ghostClass: "sortable-ghost",
-    handle: ".child-item",
     onEnd: function (evt) {
-        // Get new order - extract child IDs
-        const items = el.querySelectorAll(".child-item");
+        // Get new order - extract child IDs from both single items and sibling groups
+        const items = el.querySelectorAll(".child-item, .sibling-group");
         const childrenIds = [];
         
         items.forEach(item => {
-            childrenIds.push(parseInt(item.dataset.childId));
+            if (item.classList.contains('sibling-group')) {
+                // Sibling group - add all child IDs in group
+                const ids = item.dataset.childIds.split(',').map(id => parseInt(id));
+                childrenIds.push(...ids);
+            } else {
+                // Single child
+                childrenIds.push(parseInt(item.dataset.childId));
+            }
         });
         
         // Send AJAX request to update organization_order
-        fetch("<?= $this->Url->build(["action" => "manageChildren", $schedule->id]) ?>", {
+        fetch("<?= $this->Url->build(["action" => "updateChildrenOrder", $schedule->id]) ?>", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -112,18 +245,23 @@ const sortable = Sortable.create(el, {
                 children: childrenIds
             })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 console.log("Organization order updated successfully");
             } else {
-                console.error("Failed to update order");
-                location.reload();
+                console.error("Failed to update order:", data.message);
+                location.reload(); // Reload to show correct state
             }
         })
         .catch(error => {
             console.error("Error updating order:", error);
-            location.reload();
+            location.reload(); // Reload to show correct state
         });
     }
 });
@@ -143,38 +281,107 @@ document.querySelectorAll(".remove-from-order").forEach(button => {
     button.addEventListener("click", function(e) {
         e.stopPropagation();
         const childId = this.dataset.childId;
-        const childName = this.closest(".child-item").querySelector("strong").textContent;
         
-        if (confirm("<?= __("Remove {0} from organization order?", "") ?>" + childName)) {
-            // Send AJAX request to remove from order
-            fetch("<?= $this->Url->build(["action" => "removeFromOrder", $schedule->id]) ?>", {
+        // Send AJAX request to remove from order (no confirm dialog)
+        fetch("<?= $this->Url->build(["action" => "removeFromOrder", $schedule->id]) ?>", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-Token": "<?= $this->request->getAttribute("csrfToken") ?>"
+            },
+            body: JSON.stringify({
+                child_id: parseInt(childId)
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Reload page to show updated state
+                location.reload();
+            } else {
+                console.error('Failed to remove:', data.message);
+                location.reload(); // Reload anyway to show correct state
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            location.reload(); // Reload to show correct state
+        });
+    });
+});
+
+// Handle remove sibling group from order buttons
+document.querySelectorAll(".remove-sibling-group").forEach(button => {
+    button.addEventListener("click", function(e) {
+        e.stopPropagation();
+        const childIds = this.dataset.childIds.split(',').map(id => parseInt(id));
+        
+        // Send AJAX request to remove all siblings from order
+        const removePromises = childIds.map(childId => {
+            return fetch("<?= $this->Url->build(["action" => "removeFromOrder", $schedule->id]) ?>", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRF-Token": "<?= $this->request->getAttribute("csrfToken") ?>"
                 },
                 body: JSON.stringify({
-                    child_id: parseInt(childId)
+                    child_id: childId
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Remove item from DOM
-                    this.closest(".child-item").style.transition = "opacity 0.3s";
-                    this.closest(".child-item").style.opacity = "0";
-                    setTimeout(() => {
-                        this.closest(".child-item").remove();
-                    }, 300);
-                } else {
-                    alert("<?= __("Failed to remove from order") ?>");
-                }
+            });
+        });
+        
+        Promise.all(removePromises)
+            .then(() => {
+                location.reload();
             })
             .catch(error => {
                 console.error("Error:", error);
-                alert("<?= __("An error occurred") ?>");
+                location.reload();
             });
-        }
+    });
+});
+
+// Handle add to order buttons
+document.querySelectorAll(".add-to-order").forEach(button => {
+    button.addEventListener("click", function(e) {
+        e.stopPropagation();
+        const childId = this.dataset.childId;
+        
+        // Send AJAX request to add to order
+        fetch("<?= $this->Url->build(["action" => "addToOrder", $schedule->id]) ?>", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-Token": "<?= $this->request->getAttribute("csrfToken") ?>"
+            },
+            body: JSON.stringify({
+                child_id: parseInt(childId)
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Reload page to show updated order
+                location.reload();
+            } else {
+                console.error('Failed to add:', data.message);
+                location.reload(); // Reload anyway to show correct state
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            location.reload(); // Reload to show correct state
+        });
     });
 });
 </script>

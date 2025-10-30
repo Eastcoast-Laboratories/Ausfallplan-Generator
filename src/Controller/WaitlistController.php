@@ -192,27 +192,21 @@ class WaitlistController extends AppController
         
         $countNotOnWaitlist = count($availableChildren);
         
+        // Find siblings assigned to different schedules
+        $missingSiblings = $this->findMissingSiblings($waitlistChildren, $selectedSchedule->id);
+        
         // Build sibling groups map and load sibling names
         $siblingGroupsMap = [];
         $siblingNames = [];
-        $missingSiblings = [];
         
         foreach ($waitlistChildren as $child) {
             if ($child->sibling_group_id) {
-                $totalInGroup = $this->fetchTable('Children')->find()
-                    ->where(['sibling_group_id' => $child->sibling_group_id])
-                    ->count();
-                
-                if ($totalInGroup <= 1) {
-                    continue; // Skip single-child groups
-                }
-                
                 $siblingGroupsMap[$child->id] = $child->sibling_group_id;
                 
                 $siblings = $this->fetchTable('Children')->find()
                     ->where([
                         'sibling_group_id' => $child->sibling_group_id,
-                        'id !=' => $child->id
+                        'id !=' => $child->id,
                     ])
                     ->orderBy(['name' => 'ASC'])
                     ->all();
@@ -220,13 +214,6 @@ class WaitlistController extends AppController
                 $names = [];
                 foreach ($siblings as $sib) {
                     $names[] = $sib->name;
-                    
-                    if (!in_array($sib->id, $childrenOnWaitlist)) {
-                        $missingSiblings[] = [
-                            'name' => $sib->name,
-                            'sibling_of' => $child->name,
-                        ];
-                    }
                 }
                 
                 if (!empty($names)) {

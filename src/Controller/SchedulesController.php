@@ -49,19 +49,34 @@ class SchedulesController extends AppController
         $childrenTable = $this->fetchTable('Children');
         
         $childrenCounts = [];
+        $missingSiblingsPerSchedule = [];
+        
         foreach ($schedules as $schedule) {
-            // Count children on waitlist for this schedule
+            // Count children with organization_order for this schedule
             $count = $childrenTable->find()
                 ->where([
                     'schedule_id' => $schedule->id,
-                    'waitlist_order IS NOT' => null
+                    'organization_order IS NOT' => null
                 ])
                 ->count();
                 
             $childrenCounts[$schedule->id] = $count;
+            
+            // Find missing siblings for this schedule
+            $childrenInSchedule = $childrenTable->find()
+                ->where([
+                    'schedule_id' => $schedule->id,
+                    'organization_order IS NOT' => null
+                ])
+                ->all();
+            
+            $missingSiblings = $this->findMissingSiblings($childrenInSchedule, $schedule->id);
+            if (!empty($missingSiblings)) {
+                $missingSiblingsPerSchedule[$schedule->id] = $missingSiblings;
+            }
         }
 
-        $this->set(compact('schedules', 'user', 'activeScheduleId', 'childrenCounts'));
+        $this->set(compact('schedules', 'user', 'activeScheduleId', 'childrenCounts', 'missingSiblingsPerSchedule'));
     }
 
     /**
@@ -274,15 +289,37 @@ class SchedulesController extends AppController
             }
         }
 
-        // Get children for this organization, sorted by organization_order
+        // Get all schedules for this organization (for dropdown)
+        $schedules = $this->Schedules->find()
+            ->where(['organization_id' => $schedule->organization_id])
+            ->orderBy(['created' => 'DESC'])
+            ->all();
+
+        // Get children for this specific schedule (for right column - with organization_order)
         $childrenTable = $this->fetchTable('Children');
-        $children = $childrenTable->find()
-            ->where(['Children.organization_id' => $schedule->organization_id])
+        $childrenInOrder = $childrenTable->find()
+            ->where([
+                'Children.schedule_id' => $schedule->id,
+                'Children.organization_order IS NOT' => null
+            ])
             ->contain(['SiblingGroups'])
             ->orderBy(['Children.organization_order' => 'ASC', 'Children.id' => 'ASC'])
             ->all();
 
-        $this->set(compact('schedule', 'children'));
+        // Get all children of organization without organization_order (for left column - excluded)
+        $childrenNotInOrder = $childrenTable->find()
+            ->where([
+                'Children.organization_id' => $schedule->organization_id,
+                'Children.organization_order IS' => null
+            ])
+            ->contain(['SiblingGroups'])
+            ->orderBy(['Children.name' => 'ASC'])
+            ->all();
+
+        // Find siblings assigned to different schedules
+        $missingSiblings = $this->findMissingSiblings($childrenInOrder, $schedule->id);
+
+        $this->set(compact('schedule', 'schedules', 'childrenInOrder', 'childrenNotInOrder', 'missingSiblings'));
     }
 
     /**
@@ -335,6 +372,125 @@ class SchedulesController extends AppController
             $this->set([
                 'success' => false,
                 'message' => __('Invalid child ID'),
+                '_serialize' => ['success', 'message']
+            ]);
+        }
+        
+        return $this->response->withType('application/json');
+    }
+
+    /**
+     * Add child to organization order (assign next order number)
+     *
+     * @param string|null $id Schedule id
+     * @return \Cake\Http\Response JSON response
+     */
+    public function addToOrder($id = null)
+    {
+        $this->request->allowMethod(['post']);
+        $this->viewBuilder()->setClassName('Json');
+        
+        $schedule = $this->Schedules->get($id);
+        
+        // Check permission
+        if (!$this->hasOrgRole($schedule->organization_id, 'editor')) {
+            $this->set([
+                'success' => false,
+                'message' => __('Permission denied'),
+                '_serialize' => ['success', 'message']
+            ]);
+            return $this->response->withType('application/json');
+        }
+        
+        $data = $this->request->getData();
+        $childId = $data['child_id'] ?? null;
+        
+        if ($childId) {
+            $childrenTable = $this->fetchTable('Children');
+            $child = $childrenTable->get($childId);
+            
+            // Find max organization_order and assign next number
+            $maxOrderResult = $childrenTable->find()
+                ->where([
+                    'organization_id' => $schedule->organization_id,
+                    'organization_order IS NOT' => null
+                ])
+                ->orderBy(['organization_order' => 'DESC'])
+                ->first();
+            
+            $nextOrder = $maxOrderResult ? (int)$maxOrderResult->organization_order + 1 : 1;
+            $child->organization_order = $nextOrder;
+            $child->schedule_id = $schedule->id; // Set schedule_id when adding to order
+            
+            if ($childrenTable->save($child)) {
+                $this->set([
+                    'success' => true,
+                    'message' => __('Child added to organization order'),
+                    '_serialize' => ['success', 'message']
+                ]);
+            } else {
+                $this->set([
+                    'success' => false,
+                    'message' => __('Failed to save'),
+                    '_serialize' => ['success', 'message']
+                ]);
+            }
+        } else {
+            $this->set([
+                'success' => false,
+                'message' => __('Invalid child ID'),
+                '_serialize' => ['success', 'message']
+            ]);
+        }
+        
+        return $this->response->withType('application/json');
+    }
+
+    /**
+     * Update children organization_order after drag & drop
+     *
+     * @param string|null $id Schedule id
+     * @return \Cake\Http\Response JSON response
+     */
+    public function updateChildrenOrder($id = null)
+    {
+        $this->request->allowMethod(['post']);
+        $this->viewBuilder()->setClassName('Json');
+        
+        $schedule = $this->Schedules->get($id);
+        
+        // Check permission
+        if (!$this->hasOrgRole($schedule->organization_id, 'editor')) {
+            $this->set([
+                'success' => false,
+                'message' => __('Permission denied'),
+                '_serialize' => ['success', 'message']
+            ]);
+            return $this->response->withType('application/json');
+        }
+        
+        $data = $this->request->getData();
+        $childrenIds = $data['children'] ?? [];
+        
+        if (!empty($childrenIds) && is_array($childrenIds)) {
+            $childrenTable = $this->fetchTable('Children');
+            
+            // Update organization_order for each child based on array position
+            foreach ($childrenIds as $index => $childId) {
+                $child = $childrenTable->get($childId);
+                $child->organization_order = $index + 1; // Start from 1
+                $childrenTable->save($child);
+            }
+            
+            $this->set([
+                'success' => true,
+                'message' => __('Children order updated'),
+                '_serialize' => ['success', 'message']
+            ]);
+        } else {
+            $this->set([
+                'success' => false,
+                'message' => __('Invalid children data'),
                 '_serialize' => ['success', 'message']
             ]);
         }

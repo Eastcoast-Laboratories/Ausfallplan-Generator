@@ -105,6 +105,22 @@ return [
     'Permission denied' => 'Zugriff verweigert',
     'Invalid child ID' => 'Ungültige Kind-ID',
     'Failed to save' => 'Speichern fehlgeschlagen',
+    'In Organization Order' => 'In Organisations-Reihenfolge',
+    'Not in Order (Excluded from Reports)' => 'Nicht in Reihenfolge (Von Berichten ausgeschlossen)',
+    'Excluded' => 'Ausgeschlossen',
+    'Add to organization order' => 'Zur Sortierung hinzufügen',
+    'Child added to organization order' => 'Kind zur Organisations-Sortierung hinzugefügt',
+    'Failed to add to order' => 'Fehler beim Hinzufügen zur Sortierung',
+    'No children in organization order.' => 'Keine Kinder in Organisations-Reihenfolge.',
+    'All children are in organization order.' => 'Alle Kinder sind in Organisations-Reihenfolge.',
+    'Children order updated' => 'Kinder-Reihenfolge aktualisiert',
+    'Invalid children data' => 'Ungültige Kinder-Daten',
+    'Siblings' => 'Geschwister',
+    'Switch between schedules to manage different organization orders' => 'Zwischen Ausfallplänen wechseln, um verschiedene Organisations-Reihenfolgen zu verwalten',
+    'Schedule (Ausfallplan)' => 'Ausfallplan',
+    'Select the schedule this child will be assigned to' => 'Wähle den Ausfallplan, dem dieses Kind zugeordnet werden soll',
+    '(Select Schedule)' => '(Ausfallplan wählen)',
+    'Days' => 'Tage',
     
     // Waitlist
     'Children on Waitlist' => 'Kinder auf der Nachrückliste',
@@ -259,9 +275,9 @@ return [
     
     // Waitlist sibling warnings
     'Warning' => 'Warnung',
-    'The following siblings are not assigned to this schedule' => 'Die folgenden Geschwister sind diesem Ausfallplan nicht zugewiesen',
+    'The following siblings are not assigned to this waitlist' => 'Die folgenden Geschwister sind dieser Nachrückliste nicht zugewiesen',
+    'Siblings in different schedules detected' => 'Geschwister in verschiedenen Ausfallplänen erkannt',
     'Sibling of' => 'Geschwister von',
-    'Add them in' => 'Füge sie hinzu in',
     
     // Admin & Permissions
     'Access denied. System admin privileges required.' => 'Zugriff verweigert. Systemadministrator-Rechte erforderlich.',

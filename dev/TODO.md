@@ -71,6 +71,8 @@ Den report neu strukturieren, als eine große Tabelle mit dem HTML table, Befehl
 man kann die kinder nicht mehr gesondert sortieren für den schedule, das leitet jetzt um zur waitlist, das soll unter http://localhost:8080/schedules/manage-children/1 die kinder wieder sortieren können, wie gehabt, dies gilt dann nur für organization_order, die in dem report für die reihenfoolge in den listen genutzt werden soll, nur für die nachrückliste rechts soll die waitlist_order genutzt werden
 
 
+
+
 # weitere TODOs
 
 - erstelle in jedem vorhandenen playwright test im head eine Beschreibung, was der test genau tut, wenn der noch nicht da ist. wenn sich dabei herausstellt , dass der test etwas testet, was die neue organisation betrifft, dann aktualisiere diese tests bis sie erfolgreich durchlaufen. ergänze auch in jedem test die git commit id und die commit message als einzeiler, wobei der erstellt wurde höre nicht auf, bevor nicht alle spec.js aktualisiert sind im repository

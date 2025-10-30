@@ -342,7 +342,6 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
         /* Content */
         .content {
             padding: 2rem;
-            max-width: 1400px;
         }
         
         /* Mobile Responsive */
