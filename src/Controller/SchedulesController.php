@@ -49,8 +49,10 @@ class SchedulesController extends AppController
         $childrenTable = $this->fetchTable('Children');
         
         $childrenCounts = [];
+        $missingSiblingsPerSchedule = [];
+        
         foreach ($schedules as $schedule) {
-            // Count children with oranization_order for this schedule
+            // Count children with organization_order for this schedule
             $count = $childrenTable->find()
                 ->where([
                     'schedule_id' => $schedule->id,
@@ -59,9 +61,22 @@ class SchedulesController extends AppController
                 ->count();
                 
             $childrenCounts[$schedule->id] = $count;
+            
+            // Find missing siblings for this schedule
+            $childrenInSchedule = $childrenTable->find()
+                ->where([
+                    'schedule_id' => $schedule->id,
+                    'organization_order IS NOT' => null
+                ])
+                ->all();
+            
+            $missingSiblings = $this->findMissingSiblings($childrenInSchedule, $schedule->id);
+            if (!empty($missingSiblings)) {
+                $missingSiblingsPerSchedule[$schedule->id] = $missingSiblings;
+            }
         }
 
-        $this->set(compact('schedules', 'user', 'activeScheduleId', 'childrenCounts'));
+        $this->set(compact('schedules', 'user', 'activeScheduleId', 'childrenCounts', 'missingSiblingsPerSchedule'));
     }
 
     /**
@@ -301,7 +316,10 @@ class SchedulesController extends AppController
             ->orderBy(['Children.name' => 'ASC'])
             ->all();
 
-        $this->set(compact('schedule', 'schedules', 'childrenInOrder', 'childrenNotInOrder'));
+        // Find siblings assigned to different schedules
+        $missingSiblings = $this->findMissingSiblings($childrenInOrder, $schedule->id);
+
+        $this->set(compact('schedule', 'schedules', 'childrenInOrder', 'childrenNotInOrder', 'missingSiblings'));
     }
 
     /**

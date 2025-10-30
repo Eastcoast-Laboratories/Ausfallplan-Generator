@@ -276,6 +276,7 @@ return [
     // Waitlist sibling warnings
     'Warning' => 'Warnung',
     'The following siblings are not assigned to this waitlist' => 'Die folgenden Geschwister sind dieser Nachrückliste nicht zugewiesen',
+    'Siblings in different schedules detected' => 'Geschwister in verschiedenen Ausfallplänen erkannt',
     'Sibling of' => 'Geschwister von',
     
     // Admin & Permissions
