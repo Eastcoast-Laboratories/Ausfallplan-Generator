@@ -769,6 +769,173 @@ class SchedulesController extends AppController
     }
 
     /**
+     * Export schedule as Excel (XLS) with checksums
+     *
+     * @param string|null $id Schedule id.
+     * @return \Cake\Http\Response|null
+     */
+    public function exportXls($id = null)
+    {
+        $schedule = $this->Schedules->get($id, contain: ['Organizations']);
+        
+        if (!$schedule) {
+            $this->Flash->error(__('Schedule not found.'));
+            return $this->redirect(['action' => 'index']);
+        }
+        
+        $childrenTable = $this->fetchTable('Children');
+        $assignedChildrenCount = $childrenTable->find()
+            ->where([
+                'schedule_id' => $schedule->id,
+                'waitlist_order IS NOT' => null
+            ])
+            ->count();
+        
+        $daysCount = $schedule->days_count ?? $assignedChildrenCount;
+        
+        // Generate report data
+        $reportService = new \App\Service\ReportService();
+        $reportData = $reportService->generateReportData((int)$id, $daysCount);
+        
+        $days = $reportData['days'];
+        $waitlist = $reportData['waitlist'];
+        $alwaysAtEnd = $reportData['alwaysAtEnd'];
+        $childStats = $reportData['childStats'];
+        $dayBlocks = array_chunk($days, 4, true);
+        
+        // Create Excel file
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Ausfallplan');
+        
+        // Header
+        $sheet->setCellValue('A1', 'Ausfallplan');
+        $sheet->setCellValue('B1', $schedule->title);
+        $sheet->setCellValue('A2', 'Organisation');
+        $sheet->setCellValue('B2', $schedule->organization->name);
+        
+        $currentRow = 4;
+        
+        // Build each 4-day block
+        foreach ($dayBlocks as $blockIndex => $blockDays) {
+            $isFirstBlock = ($blockIndex === 0);
+            $col = 1; // Column A
+            
+            // Block header - each day gets 2 columns (Name + Weight)
+            foreach ($blockDays as $day) {
+                $sheet->setCellValueByColumnAndRow($col, $currentRow, $day['animalName'] . '-Tag ' . $day['number']);
+                $sheet->setCellValueByColumnAndRow($col + 1, $currentRow, 'Z');
+                $col += 2;
+            }
+            
+            if ($isFirstBlock) {
+                $col++; // Spacer
+                $sheet->setCellValueByColumnAndRow($col, $currentRow, 'Nachrückliste');
+                $sheet->setCellValueByColumnAndRow($col + 1, $currentRow, 'Z');
+                $sheet->setCellValueByColumnAndRow($col + 2, $currentRow, 'D');
+                $sheet->setCellValueByColumnAndRow($col + 3, $currentRow, '⬇️');
+                
+                // Checksums header (right side)
+                $checksumCol = $col + 5;
+                $sheet->setCellValueByColumnAndRow($checksumCol, $currentRow, 'Prüfsummen');
+            }
+            
+            $currentRow++;
+            
+            // Calculate max rows
+            $maxChildrenPerDay = 0;
+            foreach ($blockDays as $day) {
+                $maxChildrenPerDay = max($maxChildrenPerDay, count($day['children'] ?? []));
+            }
+            $rowsPerBlock = max($maxChildrenPerDay + 3, 10);
+            
+            // Block content rows
+            for ($rowIdx = 0; $rowIdx < $rowsPerBlock; $rowIdx++) {
+                $col = 1;
+                
+                // Day columns (each day: Name + Weight)
+                foreach ($blockDays as $dayIdx => $day) {
+                    $children = $day['children'] ?? [];
+                    if ($rowIdx < count($children)) {
+                        $childData = $children[$rowIdx];
+                        $sheet->setCellValueByColumnAndRow($col, $currentRow, $childData['child']->name);
+                        $sheet->setCellValueByColumnAndRow($col + 1, $currentRow, $childData['is_integrative'] ? 2 : 1);
+                    } elseif ($rowIdx == count($children)) {
+                        $leaving = $day['leavingChild'] ?? null;
+                        if ($leaving) {
+                            $sheet->setCellValueByColumnAndRow($col, $currentRow, '→ ' . $leaving['child']->name);
+                        }
+                    } elseif ($rowIdx == count($children) + 1) {
+                        $sheet->setCellValueByColumnAndRow($col, $currentRow, $day['countingChildrenSum'] ?? 0);
+                    }
+                    $col += 2;
+                }
+                
+                // Waitlist columns (only first block: Name + Weight + Days + Leaving)
+                if ($isFirstBlock) {
+                    $col++; // Spacer
+                    
+                    if ($rowIdx < count($waitlist)) {
+                        $child = $waitlist[$rowIdx];
+                        $childId = $child->id;
+                        $stats = isset($childStats[$childId]) ? $childStats[$childId] : ['daysCount' => 0, 'leavingCount' => 0];
+                        
+                        $sheet->setCellValueByColumnAndRow($col, $currentRow, $child->name);
+                        $sheet->setCellValueByColumnAndRow($col + 1, $currentRow, $child->is_integrative ? 2 : 1);
+                        $sheet->setCellValueByColumnAndRow($col + 2, $currentRow, $stats['daysCount']);
+                        $sheet->setCellValueByColumnAndRow($col + 3, $currentRow, $stats['leavingCount']);
+                    } elseif ($rowIdx == count($waitlist) + 1 && !empty($alwaysAtEnd)) {
+                        $sheet->setCellValueByColumnAndRow($col, $currentRow, 'Immer am Ende:');
+                    } elseif ($rowIdx > count($waitlist) + 1 && !empty($alwaysAtEnd)) {
+                        $alwaysAtEndIdx = $rowIdx - count($waitlist) - 2;
+                        if ($alwaysAtEndIdx < count($alwaysAtEnd)) {
+                            $childData = $alwaysAtEnd[$alwaysAtEndIdx];
+                            $sheet->setCellValueByColumnAndRow($col, $currentRow, $childData['child']->name);
+                            $sheet->setCellValueByColumnAndRow($col + 1, $currentRow, $childData['weight']);
+                        }
+                    }
+                    
+                    // Checksums (right side) - sum of weights for each row across all 4 days
+                    $checksumCol = $col + 5;
+                    $rowSum = 0;
+                    $colCheck = 2; // Start at column B (weight column of first day)
+                    for ($d = 0; $d < count($blockDays); $d++) {
+                        $cellValue = $sheet->getCellByColumnAndRow($colCheck, $currentRow)->getValue();
+                        if (is_numeric($cellValue)) {
+                            $rowSum += $cellValue;
+                        }
+                        $colCheck += 2; // Skip to next weight column
+                    }
+                    if ($rowSum > 0) {
+                        $sheet->setCellValueByColumnAndRow($checksumCol, $currentRow, $rowSum);
+                    }
+                }
+                
+                $currentRow++;
+            }
+            
+            $currentRow++; // Empty row between blocks
+        }
+        
+        // Auto-size columns
+        foreach (range(1, $col + 5) as $columnIndex) {
+            $sheet->getColumnDimensionByColumn($columnIndex)->setAutoSize(true);
+        }
+        
+        // Create Excel file
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xls($spreadsheet);
+        $filename = 'ausfallplan_' . $schedule->id . '.xls';
+        
+        // Output to browser
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+        
+        $writer->save('php://output');
+        exit;
+    }
+
+    /**
      * Debug: Show "always at end" children for a schedule
      *
      * @param string|null $id Schedule id

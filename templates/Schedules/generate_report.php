@@ -164,9 +164,13 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
 <body>
     <div class="no-print" style="margin-bottom: 20px;">
         <?= $this->Html->link('← ' . __('Back to Schedules'), ['action' => 'index'], ['class' => 'button']) ?>
-        <button onclick="window.print()" class="button" style="float: right; background: #2196F3; color: white;">
-            🖨️ <?= __('Print') ?>
-        </button>
+        <div style="float: right; display: flex; gap: 10px;">
+            <?= $this->Html->link('📊 CSV', ['action' => 'export-csv', $schedule->id], ['class' => 'button', 'style' => 'background: #4caf50; color: white;']) ?>
+            <?= $this->Html->link('📈 Excel', ['action' => 'export-xls', $schedule->id], ['class' => 'button', 'style' => 'background: #2e7d32; color: white;']) ?>
+            <button onclick="window.print()" class="button" style="background: #2196F3; color: white;">
+                🖨️ <?= __('Print') ?>
+            </button>
+        </div>
     </div>
 
     <div class="header">
