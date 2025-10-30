@@ -226,6 +226,9 @@ class WaitlistController extends AppController
                             'id' => $sib->id,
                             'name' => $sib->name,
                             'sibling_of' => $child->name,
+                            'sibling_group_id' => $child->sibling_group_id,
+                            'organization_id' => $child->organization_id,
+                            'schedule_id' => $child->schedule_id,
                         ];
                     }
                 }
