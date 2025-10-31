@@ -190,12 +190,25 @@ class ReportService
         $skippedUnits = []; // Units that didn't fit (priority for next day)
         
         // Build list of units with waitlist_order for round-robin firstOnWaitlist
+        // IMPORTANT: Filter and sort by waitlist_order (not organization_order!)
         $waitlistUnits = array_filter($childUnits, function($unit) {
             if ($unit['type'] === 'sibling_group') {
                 return $unit['siblings'][0]['child']->waitlist_order !== null;
             }
             return $unit['child']->waitlist_order !== null;
         });
+        
+        // Sort by waitlist_order ASC
+        usort($waitlistUnits, function($a, $b) {
+            $aOrder = $a['type'] === 'sibling_group' 
+                ? $a['siblings'][0]['child']->waitlist_order 
+                : $a['child']->waitlist_order;
+            $bOrder = $b['type'] === 'sibling_group' 
+                ? $b['siblings'][0]['child']->waitlist_order 
+                : $b['child']->waitlist_order;
+            return $aOrder <=> $bOrder;
+        });
+        
         $waitlistUnits = array_values($waitlistUnits); // Re-index
         $firstOnWaitlistIndex = 0;
         $firstOnWaitlistQueue = []; // Queue for children that were in day (try again next day)
