@@ -17,40 +17,60 @@ class SiblingGroupsController extends AppController
      */
     public function index()
     {
-        // Get current user's organization
+        // Get current user
         $user = $this->Authentication->getIdentity();
         
-        // System admins can see all sibling groups
+        // Get user's organizations
+        $userOrgs = $this->getUserOrganizations();
+        $hasMultipleOrgs = count($userOrgs) > 1;
+        
+        // Get selected organization from query or session
+        $selectedOrgId = $this->request->getQuery('organization_id');
+        if ($selectedOrgId) {
+            $this->request->getSession()->write('selectedOrgId', $selectedOrgId);
+        } else {
+            $selectedOrgId = $this->request->getSession()->read('selectedOrgId');
+        }
+        
+        // If no selection and user has only one org, use it
+        if (!$selectedOrgId && count($userOrgs) === 1) {
+            $selectedOrgId = $userOrgs[0]->id;
+        }
+        
+        // System admin sees all sibling groups (with optional filter)
         if ($user && $user->is_system_admin) {
-            $siblingGroups = $this->SiblingGroups->find()
+            $query = $this->SiblingGroups->find()
                 ->contain(['Organizations', 'Children'])
-                ->orderBy(['SiblingGroups.label' => 'ASC'])
-                ->all();
+                ->orderBy(['SiblingGroups.label' => 'ASC']);
             
-            // Mark groups with only 1 child as errors
-            $errorGroups = [];
-            foreach ($siblingGroups as $group) {
-                if (count($group->children) <= 1) {
-                    $errorGroups[] = $group->id;
-                }
+            // Filter by organization if selected
+            if ($selectedOrgId) {
+                $query->where(['SiblingGroups.organization_id' => $selectedOrgId]);
             }
             
-            $this->set(compact('siblingGroups', 'errorGroups'));
-            return;
+            $siblingGroups = $query->all();
+        } else {
+            // Regular users see sibling groups from their organization(s)
+            $orgIds = array_map(fn($org) => $org->id, $userOrgs);
+            
+            if (empty($orgIds)) {
+                $this->Flash->info(__('Sie sind noch keiner Organisation zugeordnet. Bitte erstellen Sie eine Organisation.'));
+                return $this->redirect(['controller' => 'Admin/Organizations', 'action' => 'index']);
+            }
+            
+            $query = $this->SiblingGroups->find()
+                ->contain(['Organizations', 'Children'])
+                ->orderBy(['SiblingGroups.label' => 'ASC']);
+            
+            // Filter by selected org or all user's orgs
+            if ($selectedOrgId && in_array($selectedOrgId, $orgIds)) {
+                $query->where(['SiblingGroups.organization_id' => $selectedOrgId]);
+            } else {
+                $query->where(['SiblingGroups.organization_id IN' => $orgIds]);
+            }
+            
+            $siblingGroups = $query->all();
         }
-        
-        // Get user's primary organization
-        $primaryOrg = $this->getPrimaryOrganization();
-        if (!$primaryOrg) {
-            $this->Flash->info(__('Sie sind noch keiner Organisation zugeordnet. Bitte erstellen Sie eine Organisation.'));
-            return $this->redirect(['controller' => 'Admin/Organizations', 'action' => 'index']);
-        }
-        
-        $siblingGroups = $this->SiblingGroups->find()
-            ->where(['SiblingGroups.organization_id' => $primaryOrg->id])
-            ->contain(['Organizations', 'Children'])
-            ->orderBy(['SiblingGroups.label' => 'ASC'])
-            ->all();
         
         // Mark groups with only 1 child as errors
         $errorGroups = [];
@@ -60,7 +80,7 @@ class SiblingGroupsController extends AppController
             }
         }
 
-        $this->set(compact('siblingGroups', 'errorGroups'));
+        $this->set(compact('siblingGroups', 'errorGroups', 'userOrgs', 'hasMultipleOrgs', 'selectedOrgId'));
     }
 
     /**

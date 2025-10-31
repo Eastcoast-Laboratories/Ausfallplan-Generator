@@ -10,6 +10,25 @@ $this->assign('title', __('Sibling Groups'));
     <div class="actions">
         <?= $this->Html->link(__('New Sibling Group'), ['action' => 'add'], ['class' => 'button float-right']) ?>
     </div>
+    
+    <?php if ($hasMultipleOrgs || ($this->request->getAttribute('identity') && $this->request->getAttribute('identity')->is_system_admin)): ?>
+        <div style="margin-bottom: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;">
+            <form method="get" action="<?= $this->Url->build(['action' => 'index']) ?>" style="display: flex; align-items: center; gap: 1rem;">
+                <label for="organization-filter" style="margin: 0; font-weight: bold;">
+                    <?= __('Organization') ?>:
+                </label>
+                <select name="organization_id" id="organization-filter" onchange="this.form.submit()" style="flex: 1; max-width: 300px;">
+                    <option value=""><?= __('Alle Organisationen') ?></option>
+                    <?php foreach ($userOrgs as $org): ?>
+                        <option value="<?= $org->id ?>" <?= $selectedOrgId == $org->id ? 'selected' : '' ?>>
+                            <?= h($org->name) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </form>
+        </div>
+    <?php endif; ?>
+    
     <div class="table-responsive">
         <table>
             <thead>
