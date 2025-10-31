@@ -1,3 +1,17 @@
+/**
+ * Online Login Test
+ * 
+ * Tests:
+ * - Login to production server (https://ausfallplan-generator.z11.de)
+ * - Navigation to /schedules page
+ * - Navigation to /children page
+ * - Verify user is logged in (logout link visible)
+ * - Support for German and English page titles
+ * 
+ * Run command:
+ * npx playwright test tests/e2e/online-login.spec.ts --project=chromium --headed
+ */
+
 import { test, expect } from '@playwright/test';
 
 test.describe('Online Login Test', () => {

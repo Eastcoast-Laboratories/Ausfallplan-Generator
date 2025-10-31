@@ -125,6 +125,12 @@ class WaitlistController extends AppController
                 $scheduleId = $selectedSchedule->id;
                 $this->request->getSession()->write('activeScheduleId', (int)$scheduleId);
             }
+            
+            // If no schedules exist, redirect to schedules page
+            if (!$selectedSchedule || $schedules->count() === 0) {
+                $this->Flash->info(__('Bitte erstellen Sie zuerst einen Ausfallplan.'));
+                return $this->redirect(['controller' => 'Schedules', 'action' => 'index']);
+            }
         }
         
         // Get children on waitlist (NEW: from children table)
