@@ -12,6 +12,24 @@ $this->assign('title', __('Schedules'));
         <?= $this->Html->link(__('New Schedule'), ['action' => 'add'], ['class' => 'button float-right']) ?>
     </div>
     
+    <?php if ($hasMultipleOrgs || ($user && $user->is_system_admin)): ?>
+        <div style="margin-bottom: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;">
+            <form method="get" action="<?= $this->Url->build(['action' => 'index']) ?>" style="display: flex; align-items: center; gap: 1rem;">
+                <label for="organization-filter" style="margin: 0; font-weight: bold;">
+                    <?= __('Organization') ?>:
+                </label>
+                <select name="organization_id" id="organization-filter" onchange="this.form.submit()" style="flex: 1; max-width: 300px;">
+                    <option value=""><?= __('Alle Organisationen') ?></option>
+                    <?php foreach ($userOrgs as $org): ?>
+                        <option value="<?= $org->id ?>" <?= $selectedOrgId == $org->id ? 'selected' : '' ?>>
+                            <?= h($org->name) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </form>
+        </div>
+    <?php endif; ?>
+    
     <?php if (!empty($missingSiblingsPerSchedule)): ?>
         <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
             <strong>⚠️ <?= __('Warning') ?>:</strong> 
@@ -39,6 +57,8 @@ $this->assign('title', __('Schedules'));
                     <th><?= __('Title') ?></th>
                     <?php if (isset($user) && $user->is_system_admin): ?>
                         <th><?= __('User') ?></th>
+                    <?php endif; ?>
+                    <?php if ($hasMultipleOrgs || (isset($user) && $user->is_system_admin)): ?>
                         <th><?= __('Organization') ?></th>
                     <?php endif; ?>
                     <th><?= __('Days') ?></th>
@@ -64,6 +84,8 @@ $this->assign('title', __('Schedules'));
                     </td>
                     <?php if (isset($user) && $user->is_system_admin): ?>
                         <td><?= h($schedule->user->email ?? $schedule->organization->name ?? '-') ?></td>
+                    <?php endif; ?>
+                    <?php if ($hasMultipleOrgs || (isset($user) && $user->is_system_admin)): ?>
                         <td>
                             <?php if ($schedule->has('organization') && isset($schedule->organization->id)): ?>
                                 <?= $this->Html->link(

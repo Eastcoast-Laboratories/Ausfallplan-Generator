@@ -10,6 +10,20 @@ $this->assign('title', __('Edit Schedule'));
     <fieldset>
         <legend><?= __('Edit Schedule') ?></legend>
         <?php
+            // Show organization (read-only) if user has multiple orgs or is system_admin
+            $identity = $this->request->getAttribute('identity');
+            $userOrgs = $this->request->getAttribute('userOrgs') ?? [];
+            $hasMultipleOrgs = count($userOrgs) > 1;
+            
+            if ($hasMultipleOrgs || ($identity && $identity->is_system_admin)) {
+                if ($schedule->has('organization') && $schedule->organization) {
+                    echo '<div class="input text"><label>' . __('Organization') . '</label>';
+                    echo '<div style="padding: 0.5rem; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px;">';
+                    echo h($schedule->organization->name);
+                    echo '</div></div>';
+                }
+            }
+            
             echo $this->Form->control('title', ['required' => true]);
             echo $this->Form->control('starts_on', ['type' => 'date', 'required' => true]);
             echo $this->Form->control('ends_on', [
