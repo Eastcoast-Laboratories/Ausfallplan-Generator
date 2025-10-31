@@ -159,7 +159,13 @@ class OrganizationsController extends AppController
                         'is_primary' => true,
                         'joined_at' => new \DateTime()
                     ]);
-                    $orgUsersTable->save($orgUser);
+                    
+                    if ($orgUsersTable->save($orgUser)) {
+                        \Cake\Log\Log::debug('User ' . $user->id . ' added to org ' . $organization->id . ' as org_admin');
+                    } else {
+                        \Cake\Log\Log::error('Failed to add user ' . $user->id . ' to org ' . $organization->id);
+                        \Cake\Log\Log::error('Errors: ' . json_encode($orgUser->getErrors()));
+                    }
                     
                     $this->Flash->success(__('Die Organisation wurde erfolgreich erstellt.'));
                     return $this->redirect(['action' => 'index']);
@@ -193,7 +199,7 @@ class OrganizationsController extends AppController
             'valueField' => 'name'
         ])->orderBy(['name' => 'ASC'])->toArray();
 
-        $this->set(compact('organization', 'organizationsList'));
+        $this->set(compact('organization', 'organizationsList', 'user'));
     }
 
     /**
