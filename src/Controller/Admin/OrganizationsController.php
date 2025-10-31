@@ -62,27 +62,27 @@ class OrganizationsController extends AppController
             }
             
             if (empty($userOrgs)) {
-                $this->Flash->info(__('Sie sind kein Administrator einer Organisation.'));
-                return $this->redirect(['_name' => 'dashboard']);
+                // User has no organizations - show empty list with option to create one
+                $organizations = [];
+            } else {
+                $organizations = $this->Organizations->find()
+                    ->where(['Organizations.id IN' => $userOrgs])
+                    ->select([
+                        'Organizations.id',
+                        'Organizations.name',
+                        'Organizations.is_active',
+                        'Organizations.contact_email',
+                        'Organizations.contact_phone',
+                        'Organizations.created',
+                        'user_count' => $this->Organizations->find()->func()->count('DISTINCT organization_users.user_id'),
+                        'children_count' => $this->Organizations->find()->func()->count('DISTINCT Children.id'),
+                    ])
+                    ->leftJoin('organization_users', ['organization_users.organization_id = Organizations.id'])
+                    ->leftJoinWith('Children')
+                    ->group(['Organizations.id'])
+                    ->orderBy(['Organizations.name' => 'ASC'])
+                    ->all();
             }
-            
-            $organizations = $this->Organizations->find()
-                ->where(['Organizations.id IN' => $userOrgs])
-                ->select([
-                    'Organizations.id',
-                    'Organizations.name',
-                    'Organizations.is_active',
-                    'Organizations.contact_email',
-                    'Organizations.contact_phone',
-                    'Organizations.created',
-                    'user_count' => $this->Organizations->find()->func()->count('DISTINCT organization_users.user_id'),
-                    'children_count' => $this->Organizations->find()->func()->count('DISTINCT Children.id'),
-                ])
-                ->leftJoin('organization_users', ['organization_users.organization_id = Organizations.id'])
-                ->leftJoinWith('Children')
-                ->group(['Organizations.id'])
-                ->orderBy(['Organizations.name' => 'ASC'])
-                ->all();
         }
 
         $this->set(compact('organizations'));

@@ -12,6 +12,7 @@ return [
     'Sie sind kein Administrator einer Organisation.' => 'Sie sind kein Administrator einer Organisation.',
     'Sie haben keine Berechtigung, diese Organisation zu bearbeiten.' => 'Sie haben keine Berechtigung, diese Organisation zu bearbeiten.',
     'Sie haben keine Berechtigung, diese Organisation zu löschen.' => 'Sie haben keine Berechtigung, diese Organisation zu löschen.',
+    'Sie sind noch keiner Organisation zugeordnet. Bitte erstellen Sie eine Organisation.' => 'Sie sind noch keiner Organisation zugeordnet. Bitte erstellen Sie eine Organisation.',
     'Reports' => 'Berichte',
     'Number of Days' => 'Anzahl Tage',
     'Number of days for the schedule (default: number of assigned children)' => 'Anzahl der Tage für den Ausfallplan (Vorschlag: Anzahl zugeordneter Kinder)',
