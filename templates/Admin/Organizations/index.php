@@ -43,8 +43,37 @@ $this->assign('title', __('Organization Management'));
                     <td><?= h($organization->created->format('Y-m-d H:i')) ?></td>
                     <td class="actions">
                         <?= $this->Html->link(__('Ansehen'), ['action' => 'view', $organization->id]) ?>
-                        <?= $this->Html->link(__('Bearbeiten'), ['action' => 'edit', $organization->id]) ?>
-                        <?php if ($organization->name !== 'keine organisation'): ?>
+                        <?php 
+                        // Check permissions for edit and delete
+                        $canEdit = false;
+                        $canDelete = false;
+                        $identity = $this->request->getAttribute('identity');
+                        if ($identity) {
+                            if ($identity->is_system_admin) {
+                                $canEdit = true;
+                                $canDelete = true;
+                            } else {
+                                // Check if user is org_admin of this organization
+                                $orgUsersTable = \Cake\ORM\TableRegistry::getTableLocator()->get('OrganizationUsers');
+                                $isOrgAdmin = $orgUsersTable->find()
+                                    ->where([
+                                        'user_id' => $identity->id,
+                                        'organization_id' => $organization->id,
+                                        'role' => 'org_admin'
+                                    ])
+                                    ->count() > 0;
+                                
+                                if ($isOrgAdmin) {
+                                    $canEdit = true;
+                                    $canDelete = true;
+                                }
+                            }
+                        }
+                        ?>
+                        <?php if ($canEdit): ?>
+                            <?= $this->Html->link(__('Bearbeiten'), ['action' => 'edit', $organization->id]) ?>
+                        <?php endif; ?>
+                        <?php if ($canDelete && $organization->name !== 'keine organisation'): ?>
                             <?= $this->Form->postLink(
                                 __('Löschen'), 
                                 ['action' => 'delete', $organization->id], 
