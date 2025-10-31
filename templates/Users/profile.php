@@ -86,6 +86,21 @@ $this->assign('title', __('Profile Settings'));
 
         <?= $this->Form->end() ?>
     </div>
+
+    <!-- Danger Zone -->
+    <div class="danger-zone">
+        <h2><?= __('Danger Zone') ?></h2>
+        <p><?= __('Once you delete your account, there is no going back. Please be certain.') ?></p>
+        
+        <?= $this->Form->postLink(
+            __('Delete My Account'),
+            ['action' => 'delete', $userEntity->id],
+            [
+                'class' => 'btn-danger',
+                'confirm' => __('Are you sure you want to delete your account? This action cannot be undone.')
+            ]
+        ) ?>
+    </div>
 </div>
 
 <style>
@@ -237,6 +252,42 @@ $this->assign('title', __('Profile Settings'));
 
     .btn-secondary:hover {
         background: #d5dbdb;
+    }
+
+    .danger-zone {
+        margin-top: 3rem;
+        padding: 2rem;
+        background: #fff5f5;
+        border: 2px solid #fee;
+        border-radius: 8px;
+    }
+
+    .danger-zone h2 {
+        color: #e74c3c;
+        font-size: 1.3rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .danger-zone p {
+        color: #c0392b;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-danger {
+        background: #e74c3c;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: background 0.2s;
+    }
+
+    .btn-danger:hover {
+        background: #c0392b;
     }
 
     @media (max-width: 600px) {

@@ -14,12 +14,12 @@ class OrganizationsController extends AppController
 {
     /**
      * Index method - List all organizations with stats
+     * System admins see all, editors see their own organizations
      *
      * @return \Cake\Http\Response|null|void
      */
     public function index()
     {
-        // Only system admin can access
         $identity = $this->Authentication->getIdentity();
         if (!$identity) {
             $this->Flash->error(__('Access denied. Please login.'));
@@ -27,27 +27,59 @@ class OrganizationsController extends AppController
         }
         
         $user = $identity->getOriginalData(); // Get User entity from Identity
-        if (!$user->isSystemAdmin()) {
-            $this->Flash->error(__('Access denied. System admin privileges required.'));
-            return $this->redirect(['_name' => 'dashboard']);
+        
+        // System admin sees all organizations
+        if ($user->isSystemAdmin()) {
+            $organizations = $this->Organizations->find()
+                ->select([
+                    'Organizations.id',
+                    'Organizations.name',
+                    'Organizations.is_active',
+                    'Organizations.contact_email',
+                    'Organizations.contact_phone',
+                    'Organizations.created',
+                    'user_count' => $this->Organizations->find()->func()->count('DISTINCT organization_users.user_id'),
+                    'children_count' => $this->Organizations->find()->func()->count('DISTINCT Children.id'),
+                ])
+                ->leftJoin('organization_users', ['organization_users.organization_id = Organizations.id'])
+                ->leftJoinWith('Children')
+                ->group(['Organizations.id'])
+                ->orderBy(['Organizations.name' => 'ASC'])
+                ->all();
+        } else {
+            // Editor sees only their organizations where they are org_admin
+            $orgUsersTable = $this->fetchTable('OrganizationUsers');
+            $userOrgs = $orgUsersTable->find()
+                ->where([
+                    'user_id' => $user->id,
+                    'role' => 'org_admin'
+                ])
+                ->extract('organization_id')
+                ->toArray();
+            
+            if (empty($userOrgs)) {
+                $this->Flash->info(__('Sie sind kein Administrator einer Organisation.'));
+                return $this->redirect(['_name' => 'dashboard']);
+            }
+            
+            $organizations = $this->Organizations->find()
+                ->where(['Organizations.id IN' => $userOrgs])
+                ->select([
+                    'Organizations.id',
+                    'Organizations.name',
+                    'Organizations.is_active',
+                    'Organizations.contact_email',
+                    'Organizations.contact_phone',
+                    'Organizations.created',
+                    'user_count' => $this->Organizations->find()->func()->count('DISTINCT organization_users.user_id'),
+                    'children_count' => $this->Organizations->find()->func()->count('DISTINCT Children.id'),
+                ])
+                ->leftJoin('organization_users', ['organization_users.organization_id = Organizations.id'])
+                ->leftJoinWith('Children')
+                ->group(['Organizations.id'])
+                ->orderBy(['Organizations.name' => 'ASC'])
+                ->all();
         }
-
-        $organizations = $this->Organizations->find()
-            ->select([
-                'Organizations.id',
-                'Organizations.name',
-                'Organizations.is_active',
-                'Organizations.contact_email',
-                'Organizations.contact_phone',
-                'Organizations.created',
-                'user_count' => $this->Organizations->find()->func()->count('DISTINCT organization_users.user_id'),
-                'children_count' => $this->Organizations->find()->func()->count('DISTINCT Children.id'),
-            ])
-            ->leftJoin('organization_users', ['organization_users.organization_id = Organizations.id'])
-            ->leftJoinWith('Children')
-            ->group(['Organizations.id'])
-            ->orderBy(['Organizations.name' => 'ASC'])
-            ->all();
 
         $this->set(compact('organizations'));
     }

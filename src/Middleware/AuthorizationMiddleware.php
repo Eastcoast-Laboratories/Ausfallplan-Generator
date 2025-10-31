@@ -81,7 +81,8 @@ class AuthorizationMiddleware implements MiddlewareInterface
         
         // Editor: Can edit own organization data
         if ($role === 'editor') {
-            // Editor cannot access admin user management
+            // Editor CAN access admin/organizations (to manage their own orgs)
+            // But CANNOT access admin user management
             if ($controller === 'Users' && in_array($action, ['index', 'add', 'edit', 'delete', 'approve'])) {
                 // Redirect with flash message
                 $session = $request->getAttribute('session');
@@ -99,6 +100,9 @@ class AuthorizationMiddleware implements MiddlewareInterface
                     ->withStatus(302)
                     ->withHeader('Location', '/');
             }
+            
+            // Editor can access organizations (to manage their own)
+            // No restriction needed for Admin/Organizations controller
         }
         
         return $handler->handle($request);
