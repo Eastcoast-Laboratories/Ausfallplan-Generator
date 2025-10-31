@@ -102,7 +102,40 @@ class SchedulesTable extends Table
             ->integer('days_count')
             ->requirePresence('days_count', 'create')
             ->notEmptyString('days_count')
-            ->greaterThan('days_count', 0, __('Anzahl Tage muss größer als 0 sein'));
+            ->greaterThan('days_count', 0, __('Anzahl Tage muss größer als 0 sein'))
+            ->add('days_count', 'validDaysCount', [
+                'rule' => function ($value, $context) {
+                    // Max 24 days
+                    if ($value > 24) {
+                        return __('Anzahl Tage darf maximal 24 sein');
+                    }
+                    
+                    // If editing existing schedule, check against children count
+                    if (!empty($context['data']['id'])) {
+                        $scheduleId = $context['data']['id'];
+                        $childrenTable = $this->getTableLocator()->get('Children');
+                        $childrenCount = $childrenTable->find()
+                            ->where(['schedule_id' => $scheduleId])
+                            ->count();
+                        
+                        if ($childrenCount > 0 && $value > $childrenCount) {
+                            return __('Anzahl Tage darf maximal {0} sein (Anzahl Kinder im Plan)', $childrenCount);
+                        }
+                    }
+                    
+                    // Recommend multiple of capacity_per_day
+                    if (!empty($context['data']['capacity_per_day']) && $context['data']['capacity_per_day'] > 0) {
+                        $capacityPerDay = $context['data']['capacity_per_day'];
+                        if ($value % $capacityPerDay !== 0) {
+                            // This is just a warning, not an error - return true but could add notice
+                            // For now, we allow it but could add a flash message in controller
+                        }
+                    }
+                    
+                    return true;
+                },
+                'message' => __('Ungültige Anzahl Tage')
+            ]);
 
         return $validator;
     }
