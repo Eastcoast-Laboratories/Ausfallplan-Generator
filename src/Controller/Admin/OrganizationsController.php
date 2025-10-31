@@ -120,8 +120,8 @@ class OrganizationsController extends AppController
     }
 
     /**
-     * Add method - Create new organization
-     * System admins and editors can create organizations
+     * Add method - Create new organization OR join existing one
+     * System admins and editors can create organizations or request to join existing ones
      *
      * @return \Cake\Http\Response|null|void
      */
@@ -139,34 +139,61 @@ class OrganizationsController extends AppController
         $organization = $this->Organizations->newEmptyEntity();
 
         if ($this->request->is('post')) {
-            $organization = $this->Organizations->patchEntity($organization, $this->request->getData());
+            $data = $this->request->getData();
+            $choice = $data['organization_choice'] ?? 'new';
             
-            // Set default values
-            if (!isset($organization->is_active)) {
-                $organization->is_active = true;
-            }
-            
-            if ($this->Organizations->save($organization)) {
-                // If user is not system admin, make them org_admin of the new organization
-                if (!$user->isSystemAdmin()) {
+            if ($choice === 'new') {
+                // Create new organization
+                $organization = $this->Organizations->patchEntity($organization, [
+                    'name' => $data['organization_name'],
+                    'is_active' => true
+                ]);
+                
+                if ($this->Organizations->save($organization)) {
+                    // Make user org_admin of the new organization
                     $orgUsersTable = $this->fetchTable('OrganizationUsers');
                     $orgUser = $orgUsersTable->newEntity([
                         'organization_id' => $organization->id,
                         'user_id' => $user->id,
                         'role' => 'org_admin',
-                        'is_primary' => false,
+                        'is_primary' => true,
                         'joined_at' => new \DateTime()
                     ]);
                     $orgUsersTable->save($orgUser);
+                    
+                    $this->Flash->success(__('Die Organisation wurde erfolgreich erstellt.'));
+                    return $this->redirect(['action' => 'index']);
                 }
+                $this->Flash->error(__('The organization could not be saved. Please, try again.'));
+            } else {
+                // Join existing organization
+                $orgId = (int)$choice;
+                $requestedRole = $data['requested_role'] ?? 'editor';
                 
-                $this->Flash->success(__('The organization has been created.'));
-                return $this->redirect(['action' => 'view', $organization->id]);
+                $orgUsersTable = $this->fetchTable('OrganizationUsers');
+                $orgUser = $orgUsersTable->newEntity([
+                    'organization_id' => $orgId,
+                    'user_id' => $user->id,
+                    'role' => $requestedRole,
+                    'is_primary' => false,
+                    'joined_at' => new \DateTime()
+                ]);
+                
+                if ($orgUsersTable->save($orgUser)) {
+                    $this->Flash->success(__('Ihre Anfrage wurde gesendet. Ein Administrator wird sie prüfen.'));
+                    return $this->redirect(['action' => 'index']);
+                }
+                $this->Flash->error(__('Die Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut.'));
             }
-            $this->Flash->error(__('The organization could not be saved. Please, try again.'));
         }
 
-        $this->set(compact('organization'));
+        // Get list of all organizations for selection
+        $organizationsList = $this->Organizations->find('list', [
+            'keyField' => 'id',
+            'valueField' => 'name'
+        ])->orderBy(['name' => 'ASC'])->toArray();
+
+        $this->set(compact('organization', 'organizationsList'));
     }
 
     /**

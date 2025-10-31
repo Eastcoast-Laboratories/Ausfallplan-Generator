@@ -12,26 +12,10 @@
         <p><?= __('Create your account to start managing your Kita schedules.') ?></p>
         
         <?php
-            // Organization selector
-            echo $this->Form->control('organization_choice', [
-                'type' => 'select',
-                'options' => [
-                    'new' => '➕ ' . __('Neue Organisation anlegen'),
-                    'divider' => '─────────────────────',
-                ] + $organizationsList,
-                'empty' => false,
-                'label' => __('Organization'),
-                'id' => 'organization-choice',
-                'required' => true
-            ]);
-            
-            // Organization name input (only for new orgs)
-            echo $this->Form->control('organization_name', [
-                'type' => 'text',
-                'label' => __('Name der neuen Organisation'),
-                'id' => 'organization-name-input',
-                'required' => false,
-                'style' => 'display:none;'
+            // Organization selector (reusable element)
+            echo $this->element('organization_selector', [
+                'organizationsList' => $organizationsList,
+                'showRoleSelector' => false // Will be added separately below
             ]);
             
             echo $this->Form->control('email', [
@@ -78,55 +62,6 @@
     <?= $this->Form->end() ?>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const orgChoice = document.getElementById('organization-choice');
-    const orgNameInput = document.getElementById('organization-name-input');
-    const roleSelector = document.getElementById('role-selector');
-    const roleContainer = roleSelector.closest('.input');
-    
-    function updateFormBasedOnChoice() {
-        const choice = orgChoice.value;
-        
-        if (choice === 'new') {
-            // New organization
-            orgNameInput.style.display = 'block';
-            orgNameInput.required = true;
-            orgNameInput.closest('.input').style.display = 'block';
-            
-            // Hide role selector
-            roleContainer.style.display = 'none';
-            roleSelector.required = false;
-            roleSelector.value = 'org_admin'; // Auto-select org_admin
-            
-        } else if (choice === 'divider') {
-            // Divider selected - reset to "new"
-            orgChoice.value = 'new';
-            updateFormBasedOnChoice();
-            
-        } else {
-            // Existing organization
-            orgNameInput.style.display = 'none';
-            orgNameInput.required = false;
-            orgNameInput.closest('.input').style.display = 'none';
-            orgNameInput.value = ''; // Clear the name input
-            
-            // Show role selector
-            roleContainer.style.display = 'block';
-            roleSelector.required = true;
-            
-            // Set organization_name to the selected org's name for controller
-            orgNameInput.value = orgChoice.options[orgChoice.selectedIndex].text;
-        }
-    }
-    
-    // Initial setup
-    updateFormBasedOnChoice();
-    
-    // Listen for changes
-    orgChoice.addEventListener('change', updateFormBasedOnChoice);
-});
-</script>
 
 <style>
 .users.form {
@@ -162,13 +97,5 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .form-actions .button {
     flex: 1;
-}
-
-/* Disable divider option */
-#organization-choice option[value="divider"] {
-    color: #999;
-    background: #f5f5f5;
-    font-weight: bold;
-    cursor: default;
 }
 </style>
