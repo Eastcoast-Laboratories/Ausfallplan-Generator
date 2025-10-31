@@ -49,13 +49,17 @@ class OrganizationsController extends AppController
         } else {
             // Editor sees only their organizations where they are org_admin
             $orgUsersTable = $this->fetchTable('OrganizationUsers');
-            $userOrgs = $orgUsersTable->find()
+            $userOrgEntities = $orgUsersTable->find()
                 ->where([
                     'user_id' => $user->id,
                     'role' => 'org_admin'
                 ])
-                ->extract('organization_id')
-                ->toArray();
+                ->all();
+            
+            $userOrgs = [];
+            foreach ($userOrgEntities as $orgUser) {
+                $userOrgs[] = $orgUser->organization_id;
+            }
             
             if (empty($userOrgs)) {
                 $this->Flash->info(__('Sie sind kein Administrator einer Organisation.'));
@@ -117,6 +121,7 @@ class OrganizationsController extends AppController
 
     /**
      * Add method - Create new organization
+     * System admins and editors can create organizations
      *
      * @return \Cake\Http\Response|null|void
      */
@@ -128,10 +133,8 @@ class OrganizationsController extends AppController
         }
         
         $user = $identity->getOriginalData();
-        if (!$user->isSystemAdmin()) {
-            $this->Flash->error(__('Access denied. System admin privileges required.'));
-            return $this->redirect(['_name' => 'dashboard']);
-        }
+        // Allow system admins and editors (they will become org_admin of the new org)
+        // Viewers are blocked by AuthorizationMiddleware
 
         $organization = $this->Organizations->newEmptyEntity();
 
@@ -144,6 +147,19 @@ class OrganizationsController extends AppController
             }
             
             if ($this->Organizations->save($organization)) {
+                // If user is not system admin, make them org_admin of the new organization
+                if (!$user->isSystemAdmin()) {
+                    $orgUsersTable = $this->fetchTable('OrganizationUsers');
+                    $orgUser = $orgUsersTable->newEntity([
+                        'organization_id' => $organization->id,
+                        'user_id' => $user->id,
+                        'role' => 'org_admin',
+                        'is_primary' => false,
+                        'joined_at' => new \DateTime()
+                    ]);
+                    $orgUsersTable->save($orgUser);
+                }
+                
                 $this->Flash->success(__('The organization has been created.'));
                 return $this->redirect(['action' => 'view', $organization->id]);
             }
