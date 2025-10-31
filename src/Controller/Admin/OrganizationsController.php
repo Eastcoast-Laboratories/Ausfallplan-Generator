@@ -185,7 +185,7 @@ class OrganizationsController extends AppController
         
         $user = $identity->getOriginalData();
         
-        // Check if user has permission to edit this organization
+        // Only system admins and org_admins can edit (not editors)
         if (!$user->isSystemAdmin()) {
             // Check if user is org_admin of this organization
             $orgUsersTable = $this->fetchTable('OrganizationUsers');
@@ -193,7 +193,7 @@ class OrganizationsController extends AppController
                 ->where([
                     'user_id' => $user->id,
                     'organization_id' => $id,
-                    'role' => 'org_admin'
+                    'role' => 'org_admin'  // Only org_admin, not editor
                 ])
                 ->count() > 0;
             
@@ -230,6 +230,7 @@ class OrganizationsController extends AppController
 
     /**
      * Delete method - Delete organization with all associated data
+     * System admins can delete all, org_admins can delete their own organizations
      *
      * @param string|null $id Organization id
      * @return \Cake\Http\Response|null
@@ -242,9 +243,23 @@ class OrganizationsController extends AppController
         }
         
         $user = $identity->getOriginalData();
+        
+        // Check if user has permission to delete this organization
         if (!$user->isSystemAdmin()) {
-            $this->Flash->error(__('Zugriff verweigert.'));
-            return $this->redirect(['_name' => 'dashboard']);
+            // Check if user is org_admin of this organization
+            $orgUsersTable = $this->fetchTable('OrganizationUsers');
+            $hasPermission = $orgUsersTable->find()
+                ->where([
+                    'user_id' => $user->id,
+                    'organization_id' => $id,
+                    'role' => 'org_admin'
+                ])
+                ->count() > 0;
+            
+            if (!$hasPermission) {
+                $this->Flash->error(__('Sie haben keine Berechtigung, diese Organisation zu löschen.'));
+                return $this->redirect(['action' => 'index']);
+            }
         }
 
         $this->request->allowMethod(['post', 'delete']);

@@ -11,6 +11,7 @@ return [
     'Bitte erstellen Sie zuerst einen Ausfallplan.' => 'Bitte erstellen Sie zuerst einen Ausfallplan.',
     'Sie sind kein Administrator einer Organisation.' => 'Sie sind kein Administrator einer Organisation.',
     'Sie haben keine Berechtigung, diese Organisation zu bearbeiten.' => 'Sie haben keine Berechtigung, diese Organisation zu bearbeiten.',
+    'Sie haben keine Berechtigung, diese Organisation zu löschen.' => 'Sie haben keine Berechtigung, diese Organisation zu löschen.',
     'Reports' => 'Berichte',
     'Number of Days' => 'Anzahl Tage',
     'Number of days for the schedule (default: number of assigned children)' => 'Anzahl der Tage für den Ausfallplan (Vorschlag: Anzahl zugeordneter Kinder)',
