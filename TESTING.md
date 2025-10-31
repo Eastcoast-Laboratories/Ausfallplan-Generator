@@ -215,4 +215,16 @@ Example GitHub Actions:
 
 - Full test status: See `TEST_STATUS.md`
 - Playwright best practices: See `README_Playwright.md`
-- Test coverage: Run PHPUnit with `--coverage-html` flag
+
+### Test Coverage
+
+Generate HTML coverage report:
+```bash
+docker compose -f docker/docker-compose.yml exec -T app vendor/bin/phpunit --coverage-html coverage
+```
+
+The coverage report is generated in the `coverage/` directory and is accessible via:
+- **URL:** http://localhost:8080/coverage/index.html
+- **Local path:** `/var/www/Ausfallplan-Generator/coverage/index.html`
+
+The `coverage/` directory is mapped through the Docker volume and served by the web server, making it directly accessible in your browser.
