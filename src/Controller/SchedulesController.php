@@ -207,6 +207,11 @@ class SchedulesController extends AppController
                 // Set this as the active schedule in session
                 $this->request->getSession()->write('activeScheduleId', $schedule->id);
                 
+                // Check if days_count is a multiple of capacity_per_day (recommendation)
+                if ($schedule->capacity_per_day > 0 && $schedule->days_count % $schedule->capacity_per_day !== 0) {
+                    $this->Flash->warning(__('Empfehlung: Anzahl Tage sollte ein Vielfaches von "Max. Kinder pro Tag" ({0}) sein für optimale Verteilung.', $schedule->capacity_per_day));
+                }
+                
                 $this->Flash->success(__('Schedule created successfully.'));
                 return $this->redirect(['action' => 'view', $schedule->id]);
             }
@@ -250,6 +255,11 @@ class SchedulesController extends AppController
             if ($this->Schedules->save($schedule)) {
                 // Set this as the active schedule in session
                 $this->request->getSession()->write('activeScheduleId', $schedule->id);
+                
+                // Check if days_count is a multiple of capacity_per_day (recommendation)
+                if ($schedule->capacity_per_day > 0 && $schedule->days_count % $schedule->capacity_per_day !== 0) {
+                    $this->Flash->warning(__('Empfehlung: Anzahl Tage sollte ein Vielfaches von "Max. Kinder pro Tag" ({0}) sein für optimale Verteilung.', $schedule->capacity_per_day));
+                }
                 
                 $this->Flash->success(__('Schedule updated successfully.'));
                 return $this->redirect(['action' => 'view', $schedule->id]);
