@@ -30,6 +30,7 @@
     </table>
     <div class="actions">
         <?= $this->Html->link(__('Edit'), ['action' => 'edit', $schedule->id], ['class' => 'button']) ?>
+        <?= $this->Html->link(__('Generate Report'), ['action' => 'generate-report', $schedule->id], ['class' => 'button']) ?>
         <?= $this->Form->postLink(__('Delete'), ['action' => 'delete', $schedule->id], ['confirm' => __('Are you sure?'), 'class' => 'button']) ?>
         <?= $this->Html->link(__('List Schedules'), ['action' => 'index'], ['class' => 'button']) ?>
     </div>

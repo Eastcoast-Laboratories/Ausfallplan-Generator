@@ -42,11 +42,13 @@ class ReportService
         $sortedChildren = $this->getSortedChildrenByOrganizationOrder($scheduleId);
         
         // Get waitlist children for display
+        // Only children with organization_order (exclude children without org_order)
         $childrenTable = TableRegistry::getTableLocator()->get('Children');
         $waitlist = $childrenTable->find()
             ->where([
                 'schedule_id' => $scheduleId,
-                'waitlist_order IS NOT' => null
+                'waitlist_order IS NOT' => null,
+                'organization_order IS NOT' => null
             ])
             ->orderBy(['waitlist_order' => 'ASC'])
             ->all()
