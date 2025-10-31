@@ -23,6 +23,8 @@ return [
     'Die Organisation wurde erfolgreich erstellt.' => 'Die Organisation wurde erfolgreich erstellt.',
     'Ihre Anfrage wurde gesendet. Ein Administrator wird sie prüfen.' => 'Ihre Anfrage wurde gesendet. Ein Administrator wird sie prüfen.',
     'Die Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut.' => 'Die Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut.',
+    'Als System-Administrator können Sie Organisationen erstellen, ohne selbst Mitglied zu werden.' => 'Als System-Administrator können Sie Organisationen erstellen, ohne selbst Mitglied zu werden.',
+    'Sie haben automatisch Zugriff auf alle Organisationen.' => 'Sie haben automatisch Zugriff auf alle Organisationen.',
     'Reports' => 'Berichte',
     'Number of Days' => 'Anzahl Tage',
     'Number of days for the schedule (default: number of assigned children)' => 'Anzahl der Tage für den Ausfallplan (Vorschlag: Anzahl zugeordneter Kinder)',
