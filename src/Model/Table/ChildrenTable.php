@@ -5,6 +5,7 @@ namespace App\Model\Table;
 
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
+use Cake\Event\EventInterface;
 
 /**
  * Children Model
@@ -87,5 +88,24 @@ class ChildrenTable extends Table
             ->allowEmptyString('sibling_group_id');
 
         return $validator;
+    }
+
+    /**
+     * Before save callback
+     * 
+     * If organization_order is set to NULL, also set waitlist_order to NULL
+     * 
+     * @param \Cake\Event\EventInterface $event The event
+     * @param \Cake\Datasource\EntityInterface $entity The entity
+     * @param \ArrayObject $options Options
+     * @return void
+     */
+    public function beforeSave(EventInterface $event, $entity, $options)
+    {
+        // If organization_order is being set to NULL
+        if ($entity->isDirty('organization_order') && $entity->organization_order === null) {
+            // Also set waitlist_order to NULL
+            $entity->waitlist_order = null;
+        }
     }
 }
