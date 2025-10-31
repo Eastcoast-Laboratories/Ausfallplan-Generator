@@ -46,8 +46,9 @@ class DashboardController extends AppController
         // Get user's primary organization
         $primaryOrg = $this->getPrimaryOrganization();
         if (!$primaryOrg) {
-            $this->Flash->error(__('Sie sind keiner Organisation zugeordnet. Bitte kontaktieren Sie den Administrator.'));
-            return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
+            // User has no organization - redirect to organizations page to create one
+            $this->Flash->info(__('Sie sind noch keiner Organisation zugeordnet. Bitte erstellen Sie eine Organisation.'));
+            return $this->redirect(['controller' => 'Admin/Organizations', 'action' => 'index']);
         }
         
         // Regular users see their organization stats
