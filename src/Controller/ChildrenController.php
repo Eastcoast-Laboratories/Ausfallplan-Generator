@@ -103,19 +103,37 @@ class ChildrenController extends AppController
     {
         $child = $this->Children->newEmptyEntity();
         
+        // Get user's organizations
+        $userOrgs = $this->getUserOrganizations();
+        
+        // Get selected organization from session (set by filter)
+        $selectedOrgId = $this->request->getSession()->read('selectedOrgId');
+        
+        // If no selection and user has only one org, use it
+        if (!$selectedOrgId && count($userOrgs) === 1) {
+            $selectedOrgId = $userOrgs[0]->id;
+        }
+        
+        // Default to first org if still no selection
+        if (!$selectedOrgId && !empty($userOrgs)) {
+            $selectedOrgId = $userOrgs[0]->id;
+        }
+        
         if ($this->request->is('post')) {
             $data = $this->request->getData();
             
-            // Set organization from user's primary organization
+            // Set organization from form or selected org
             $user = $this->Authentication->getIdentity();
             
-            $primaryOrg = $this->getPrimaryOrganization();
-            if (!$primaryOrg) {
+            if (empty($userOrgs)) {
                 $this->Flash->error(__('Sie müssen einer Organisation angehören, um Kinder zu erstellen.'));
                 return $this->redirect(['action' => 'index']);
             }
             
-            $data['organization_id'] = $primaryOrg->id;
+            // Use organization_id from form if provided, otherwise use selected org
+            if (empty($data['organization_id'])) {
+                $data['organization_id'] = $selectedOrgId;
+            }
             
             // Set defaults
             if (!isset($data['is_active'])) {
@@ -139,14 +157,14 @@ class ChildrenController extends AppController
             
             // Set organization_order (max + 1 for this organization)
             $maxOrgOrder = $this->Children->find()
-                ->where(['organization_id' => $primaryOrg->id])
+                ->where(['organization_id' => $data['organization_id']])
                 ->select(['max_order' => 'MAX(organization_order)'])
                 ->first();
             $data['organization_order'] = ($maxOrgOrder && $maxOrgOrder->max_order) ? $maxOrgOrder->max_order + 1 : 1;
             
             // Set waitlist_order (max + 1 for this organization)
             $maxWaitlistOrder = $this->Children->find()
-                ->where(['organization_id' => $primaryOrg->id])
+                ->where(['organization_id' => $data['organization_id']])
                 ->select(['max_order' => 'MAX(waitlist_order)'])
                 ->first();
             $data['waitlist_order'] = ($maxWaitlistOrder && $maxWaitlistOrder->max_order) ? $maxWaitlistOrder->max_order + 1 : 1;
@@ -161,20 +179,19 @@ class ChildrenController extends AppController
             $this->Flash->error(__('The child could not be saved. Please try again.'));
         }
         
-        // Get sibling groups from user's primary organization
-        $primaryOrg = $this->getPrimaryOrganization();
+        // Get sibling groups from selected organization
         $siblingGroups = $this->Children->SiblingGroups->find('list')
-            ->where(['SiblingGroups.organization_id' => $primaryOrg ? $primaryOrg->id : 0])
+            ->where(['SiblingGroups.organization_id' => $selectedOrgId ?: 0])
             ->all();
         
-        // Get schedules for the primary organization
+        // Get schedules for the selected organization
         $schedulesTable = $this->fetchTable('Schedules');
         $schedules = $schedulesTable->find('list')
-            ->where(['organization_id' => $primaryOrg ? $primaryOrg->id : 0])
+            ->where(['organization_id' => $selectedOrgId ?: 0])
             ->orderBy(['created' => 'DESC'])
             ->all();
         
-        $this->set(compact('child', 'siblingGroups', 'schedules'));
+        $this->set(compact('child', 'siblingGroups', 'schedules', 'selectedOrgId', 'userOrgs'));
     }
 
     /**

@@ -156,10 +156,29 @@ class SchedulesController extends AppController
         $schedule = $this->Schedules->newEmptyEntity();
         $user = $this->Authentication->getIdentity();
         
-        // Get user's organizations for dropdown
-        $organizations = collection($this->getUserOrganizations())
+        // Get user's organizations
+        $userOrgs = $this->getUserOrganizations();
+        $organizations = collection($userOrgs)
             ->combine('id', 'name')
             ->toArray();
+        
+        // Get selected organization from session (set by filter)
+        $selectedOrgId = $this->request->getSession()->read('selectedOrgId');
+        
+        // If no selection and user has only one org, use it
+        if (!$selectedOrgId && count($userOrgs) === 1) {
+            $selectedOrgId = $userOrgs[0]->id;
+        }
+        
+        // Default to first org if still no selection
+        if (!$selectedOrgId && !empty($userOrgs)) {
+            $selectedOrgId = $userOrgs[0]->id;
+        }
+        
+        // Pre-select organization in form
+        if ($selectedOrgId && !$schedule->organization_id) {
+            $schedule->organization_id = $selectedOrgId;
+        }
         
         // Can select organization if system admin or has multiple orgs
         $canSelectOrganization = $user->is_system_admin || count($organizations) > 1;
