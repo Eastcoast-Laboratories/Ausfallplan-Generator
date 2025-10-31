@@ -171,6 +171,7 @@ class OrganizationsController extends AppController
 
     /**
      * Edit method - Edit organization
+     * System admins can edit all, editors can edit their own organizations
      *
      * @param string|null $id Organization id
      * @return \Cake\Http\Response|null|void
@@ -183,9 +184,23 @@ class OrganizationsController extends AppController
         }
         
         $user = $identity->getOriginalData();
+        
+        // Check if user has permission to edit this organization
         if (!$user->isSystemAdmin()) {
-            $this->Flash->error(__('Access denied. System admin privileges required.'));
-            return $this->redirect(['_name' => 'dashboard']);
+            // Check if user is org_admin of this organization
+            $orgUsersTable = $this->fetchTable('OrganizationUsers');
+            $hasPermission = $orgUsersTable->find()
+                ->where([
+                    'user_id' => $user->id,
+                    'organization_id' => $id,
+                    'role' => 'org_admin'
+                ])
+                ->count() > 0;
+            
+            if (!$hasPermission) {
+                $this->Flash->error(__('Sie haben keine Berechtigung, diese Organisation zu bearbeiten.'));
+                return $this->redirect(['action' => 'index']);
+            }
         }
 
         $organization = $this->Organizations->get($id, [
