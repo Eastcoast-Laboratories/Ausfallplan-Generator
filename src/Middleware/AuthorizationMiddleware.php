@@ -38,7 +38,7 @@ class AuthorizationMiddleware implements MiddlewareInterface
         $action = $request->getParam('action');
         
         // Always allow these safe actions for all authenticated users
-        $alwaysAllowed = ['logout', 'login', 'register', 'display'];
+        $alwaysAllowed = ['logout', 'login', 'register', 'display', 'profile', 'account', 'deleteAccount'];
         if (in_array($action, $alwaysAllowed)) {
             return $handler->handle($request);
         }
