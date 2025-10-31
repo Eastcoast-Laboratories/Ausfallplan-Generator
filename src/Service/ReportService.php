@@ -256,11 +256,19 @@ class ReportService
             // 3. If child is in day, add to queue for next day and try next child
             // 4. Only increment index when we use a child from the main list (not from queue)
             $firstOnWaitlistChild = null;
+            $debugLog = []; // Debug info for this day
             
             if (!empty($waitlistUnits)) {
+                $debugLog[] = "=== Tag " . ($i + 1) . " ===";
+                $debugLog[] = "Index: $firstOnWaitlistIndex";
+                $debugLog[] = "Queue: " . $this->formatQueue($firstOnWaitlistQueue);
                 // FIRST: Try children from queue (were in day before)
                 if (!empty($firstOnWaitlistQueue)) {
                     $queueUnit = array_shift($firstOnWaitlistQueue);
+                    $queueChildName = $queueUnit['type'] === 'sibling_group' 
+                        ? $queueUnit['siblings'][0]['child']->name 
+                        : $queueUnit['child']->name;
+                    $debugLog[] = "Queue-Versuch: $queueChildName";
                     
                     // Check if unit is NOT in this day
                     if (!$this->isUnitInDay($queueUnit, $dayChildren)) {
@@ -273,15 +281,21 @@ class ReportService
                                 'is_integrative' => $queueUnit['is_integrative'],
                             ];
                         }
+                        $debugLog[] = "✓ Verwendet (aus Queue, Index bleibt $firstOnWaitlistIndex)";
                     } else {
                         // Still in day, put back in queue
                         $firstOnWaitlistQueue[] = $queueUnit;
+                        $debugLog[] = "✗ Im Tag, zurück in Queue";
                     }
                 }
                 
                 // SECOND: If no child from queue, try current index
                 if (!$firstOnWaitlistChild) {
                     $candidateUnit = $waitlistUnits[$firstOnWaitlistIndex % count($waitlistUnits)];
+                    $candidateChildName = $candidateUnit['type'] === 'sibling_group' 
+                        ? $candidateUnit['siblings'][0]['child']->name 
+                        : $candidateUnit['child']->name;
+                    $debugLog[] = "Index-Versuch: $candidateChildName (Index $firstOnWaitlistIndex)";
                     
                     // Check if unit is NOT in this day
                     if (!$this->isUnitInDay($candidateUnit, $dayChildren)) {
@@ -296,6 +310,7 @@ class ReportService
                         }
                         // Increment index for next day
                         $firstOnWaitlistIndex++;
+                        $debugLog[] = "✓ Verwendet (Index → $firstOnWaitlistIndex)";
                     } else {
                         // Child is in day, add to queue (only if not already in queue) and increment index
                         $alreadyInQueue = false;
@@ -307,13 +322,21 @@ class ReportService
                         }
                         if (!$alreadyInQueue) {
                             $firstOnWaitlistQueue[] = $candidateUnit;
+                            $debugLog[] = "→ In Queue: $candidateChildName";
+                        } else {
+                            $debugLog[] = "→ Schon in Queue: $candidateChildName";
                         }
                         $firstOnWaitlistIndex++;
+                        $debugLog[] = "Index → $firstOnWaitlistIndex";
                         
                         // Try to find another child for this day (not in day and not in queue)
+                        $debugLog[] = "Suche Alternative...";
                         for ($attempt = 0; $attempt < count($waitlistUnits); $attempt++) {
                             $nextIndex = ($firstOnWaitlistIndex + $attempt) % count($waitlistUnits);
                             $nextUnit = $waitlistUnits[$nextIndex];
+                            $nextChildName = $nextUnit['type'] === 'sibling_group' 
+                                ? $nextUnit['siblings'][0]['child']->name 
+                                : $nextUnit['child']->name;
                             
                             // Skip if already in queue
                             $inQueue = false;
@@ -334,7 +357,10 @@ class ReportService
                                         'is_integrative' => $nextUnit['is_integrative'],
                                     ];
                                 }
+                                $debugLog[] = "✓ Alternative gefunden: $nextChildName";
                                 break;
+                            } else {
+                                $debugLog[] = "  - $nextChildName: " . ($inQueue ? "in Queue" : "im Tag");
                             }
                         }
                     }
@@ -348,6 +374,7 @@ class ReportService
                 'children' => $dayChildren,
                 'firstOnWaitlistChild' => $firstOnWaitlistChild,
                 'countingChildrenSum' => $countingSum,
+                'debugLog' => $debugLog,
             ];
         }
 
@@ -377,6 +404,25 @@ class ReportService
             'child' => $unit['child'],
             'is_integrative' => $unit['is_integrative'],
         ]];
+    }
+
+    /**
+     * Format queue for debug output
+     */
+    private function formatQueue(array $queue): string
+    {
+        if (empty($queue)) {
+            return "[]";
+        }
+        
+        $names = array_map(function($unit) {
+            if ($unit['type'] === 'sibling_group') {
+                return $unit['siblings'][0]['child']->name;
+            }
+            return $unit['child']->name;
+        }, $queue);
+        
+        return "[" . implode(", ", $names) . "]";
     }
 
     /**

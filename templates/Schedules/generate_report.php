@@ -203,6 +203,14 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
                             <?= h($day['firstOnWaitlistChild']['child']->name) ?> <span class="flag-icon">⬇️</span>
                         </div>
                     <?php endif; ?>
+                    
+                    <?php if (!empty($day['debugLog'])): ?>
+                        <div style="margin-top: 8px; padding: 4px; background: #fffacd; border: 1px solid #ffd700; font-size: 8px; font-family: monospace;">
+                            <?php foreach ($day['debugLog'] as $logLine): ?>
+                                <?= h($logLine) ?><br>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
             <?php endforeach; ?>
         </div>
