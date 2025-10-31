@@ -20,23 +20,47 @@ class SchedulesController extends AppController
         // Get current user
         $user = $this->Authentication->getIdentity();
         
+        // Get user's organizations
+        $userOrgs = $this->getUserOrganizations();
+        $hasMultipleOrgs = count($userOrgs) > 1;
+        
+        // Get selected organization from query or session
+        $selectedOrgId = $this->request->getQuery('organization_id');
+        if ($selectedOrgId) {
+            $this->request->getSession()->write('selectedOrgId', $selectedOrgId);
+        } else {
+            $selectedOrgId = $this->request->getSession()->read('selectedOrgId');
+        }
+        
         // System admin sees all schedules with user info
         if ($user && $user->is_system_admin) {
-            $schedules = $this->Schedules->find()
+            $query = $this->Schedules->find()
                 ->contain(['Organizations', 'Users'])
-                ->orderBy(['Schedules.created' => 'DESC'])
-                ->all();
+                ->orderBy(['Schedules.created' => 'DESC']);
+            
+            // Filter by organization if selected
+            if ($selectedOrgId) {
+                $query->where(['Schedules.organization_id' => $selectedOrgId]);
+            }
+            
+            $schedules = $query->all();
         } else {
             // Regular users see schedules from their organization(s)
-            $userOrgs = $this->getUserOrganizations();
             $orgIds = array_map(fn($org) => $org->id, $userOrgs);
             
             if (!empty($orgIds)) {
-                $schedules = $this->Schedules->find()
-                    ->where(['Schedules.organization_id IN' => $orgIds])
+                $query = $this->Schedules->find()
                     ->contain(['Organizations', 'Users'])
-                    ->orderBy(['Schedules.created' => 'DESC'])
-                    ->all();
+                    ->orderBy(['Schedules.created' => 'DESC']);
+                
+                // Filter by selected org or all user's orgs
+                if ($selectedOrgId && in_array($selectedOrgId, $orgIds)) {
+                    $query->where(['Schedules.organization_id' => $selectedOrgId]);
+                } else {
+                    $query->where(['Schedules.organization_id IN' => $orgIds]);
+                }
+                
+                $schedules = $query->all();
             } else {
                 $schedules = [];
             }
@@ -76,7 +100,7 @@ class SchedulesController extends AppController
             }
         }
 
-        $this->set(compact('schedules', 'user', 'activeScheduleId', 'childrenCounts', 'missingSiblingsPerSchedule'));
+        $this->set(compact('schedules', 'user', 'activeScheduleId', 'childrenCounts', 'missingSiblingsPerSchedule', 'userOrgs', 'hasMultipleOrgs', 'selectedOrgId'));
     }
 
     /**
@@ -181,7 +205,7 @@ class SchedulesController extends AppController
      */
     public function edit($id = null)
     {
-        $schedule = $this->Schedules->get($id, contain: []);
+        $schedule = $this->Schedules->get($id, contain: ['Organizations']);
         $user = $this->Authentication->getIdentity();
         
         // Permission check: User must be member of schedule's organization
@@ -190,8 +214,9 @@ class SchedulesController extends AppController
             return $this->redirect(['action' => 'index']);
         }
         
-        // Get user's organizations for dropdown
-        $organizations = collection($this->getUserOrganizations())
+        // Get user's organizations
+        $userOrgs = $this->getUserOrganizations();
+        $organizations = collection($userOrgs)
             ->combine('id', 'name')
             ->toArray();
         
@@ -213,7 +238,7 @@ class SchedulesController extends AppController
             $this->Flash->error(__('Could not save schedule. Please try again.'));
         }
         
-        $this->set(compact('schedule', 'organizations'));
+        $this->set(compact('schedule', 'organizations', 'userOrgs'));
     }
 
     /**

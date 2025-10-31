@@ -25,6 +25,7 @@ return [
     'Die Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut.' => 'Die Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut.',
     'Als System-Administrator können Sie Organisationen erstellen, ohne selbst Mitglied zu werden.' => 'Als System-Administrator können Sie Organisationen erstellen, ohne selbst Mitglied zu werden.',
     'Sie haben automatisch Zugriff auf alle Organisationen.' => 'Sie haben automatisch Zugriff auf alle Organisationen.',
+    'Alle Organisationen' => 'Alle Organisationen',
     'Reports' => 'Berichte',
     'Number of Days' => 'Anzahl Tage',
     'Number of days for the schedule (default: number of assigned children)' => 'Anzahl der Tage für den Ausfallplan (Vorschlag: Anzahl zugeordneter Kinder)',
