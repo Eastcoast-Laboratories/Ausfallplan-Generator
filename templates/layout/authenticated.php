@@ -26,7 +26,6 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
     <?= $this->Html->css(['normalize.min', 'milligram.min']) ?>
     <!-- Force reload CSS with cache busting -->
     <link rel="stylesheet" href="/css/cake.css?v=<?= time() ?>">
-    <link rel="stylesheet" href="/css/authenticated.css?v=<?= time() ?>">
     <?= $this->fetch('meta') ?>
     <?= $this->fetch('css') ?>
     
@@ -421,19 +420,22 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
             </a>
             
             <?php 
-            // Show Organizations link for system admins OR users in multiple organizations
+            // Show Organizations link for system admins OR org_admins OR editors
             $showOrganizationsLink = false;
             if ($user) {
                 // System admin can always see it
                 if ($user->is_system_admin ?? false) {
                     $showOrganizationsLink = true;
                 } else {
-                    // Check if user belongs to multiple organizations
+                    // Check if user is org_admin or editor in any organization
                     $orgUsersTable = \Cake\Datasource\FactoryLocator::get('Table')->get('OrganizationUsers');
-                    $orgCount = $orgUsersTable->find()
-                        ->where(['user_id' => $user->id])
+                    $hasAdminRole = $orgUsersTable->find()
+                        ->where([
+                            'user_id' => $user->id,
+                            'role IN' => ['org_admin', 'editor']
+                        ])
                         ->count();
-                    if ($orgCount > 1) {
+                    if ($hasAdminRole > 0) {
                         $showOrganizationsLink = true;
                     }
                 }
