@@ -13,64 +13,39 @@
 
 ## Backlog
 
-- Erstelle mir eine möglichkeit die db mit phpmyadmin zugreifen
-
-1. children/add soll auch das geschlecht und Geburtsdatum festgelegt werden können (neues Feld in der DB beide optional)
-2. http://localhost:8080/sibling-groups/delete/1 geht noch nicht (loeschen)
-3. eine Organisation kann mehrere Admins haben
 4. der Admin einer Organisation hat folgende Featres:
     - [ ] Email-Bestätigung: Admin einer Organisation bekommt Mail wen sich ein neuer User in seiner Organisation registriert
         - [ ] Admin einer Organisation kann Users seiner Organisation freischalten über den link in der mail
     - [ ] der Admin der Organisation kann den Namen der eigenen Organisation bearbeiten
-5. Editor kann nur eigene Organisations-Daten bearbeiten (filter implementieren für Kinder, Schedules, Waitlist)
-  - Permission-Check:
-    - Viewer/Editor: Nur eigene Schedules
-    - Admin: Alle Schedules
-
-6. erstelle eine neue join tabelle, die die user den organisationen zuordnen kann un dworin die rollle in der organisation definierrt wird, dazu müssen auch alle anzeigen aktualisiert werden, organisation index, view und edit, beiedit auch der bereich benutzer verwalten  @USER_RIGHTS.md#L1-581 
+    
 
 ----
 
+- Find firstOnWaitlist unit (not in this day)
+ - Strategy: 
+   1. First try queue (children that were skipped because they were in day)
+   2. If queue empty, use current index from waitlist
+   3. If child is in day, add to queue for next day and try next child
+   4. Only increment index when we use a child from the main list (not from queue) or if we put the child in the queue
 
-- @production-e2e.spec.ts#L211-212 wann kommt diese meldung? abhängig von erfolg der tests? oder immer, auch wenn die tests teileweise fehlschlagen?
-
-bei http://localhost:8080/sibling-groups/view/5  bei jedem Kind einnen "Kind löschen" link mit confirm
-
-- alle externen scripts, wie z.b. https://cdn.jsdelivr.net lokal vorhalten
-
-- datenschutzerklärung und Impressum generieren und in der navigation ganz unten verlinken: Eastcoast Laboratories, Ruben Barkow-Mozart, Knickweg 16, 24114 Kiel, Kontakt: ausfallplan-generator-kontakt@it.z11.de
-
-- npx playwright test test_import_gender_birthdate.spec.js --project=chromium 2>&1 | tail -50
-
-
-bei http://localhost:8080/schedules/add muss eine selectbox, die nur sichtbar ist, wenn man mehreren organisationen angehört oder sysadmin ist um die organisation auszuwählen für die der neue plan sein soll
-
-- registrierung:
- - beim eingeben der organisation soll das ayax weg, stattdessen eine selectbox mit der auswahl der organisationen die existieren bei denen man sich anmelden kann und als errste option in der selectbox: "neu organisation anlegen". wenn man eine existierende organisation auswählt, dann wird die selectbox unten mit den rollen "Viewer" und "Editor" und "Organization adminn" angezeigt
- - wenn man bei der registrierung eine neue organisation errstellt, dann müssen die anderen optionen "Viewer" und "Editor" in der selectbox untenversteckt werden und automatisch  "Orga-admin" ausgewählt werden
- - "Viewer" und "Editor" und "Organization adminn" und "Requested Role in Organization" muss noch auf deutsch
- 
- 
-- @database_structure.sql#L358-361 passe hier das passwort an mit dem @SCREENSHOT_TESTING.md#L33-34 
-
-lege in dem @database_structure.sql#L358-361 auch eine default Organisation, einen default editor und einen default viewer an, die auf die organisation zugreifen können, auch im initial migration ergänzen und dann lösche die db und führe die iinitial migration mit den usern neu aus
-
-2.
-bei den Kindern in der nachrückliste sollen Buttons zum Sortieren der kinder nach geb. oder nach PLZ
+- datenschutzerklärung und Impressum verbessern
 
 3.
-Wenn noch keine Kinder in der Nachrückliste, dann alle in der selben Reihenfolge wie im schedule aufnehmen. 
+Wenn noch keine Kinder in der Nachrückliste, dann alle in der selben Reihenfolge wie im schedule aufnehmen. (wahrscheinlich feritg)
 
 4.
-Neue Kinder immer gleich in den aktiven schedule und im die Nachrückliste aufnehmen
-
-5.
-Den report neu strukturieren, als eine große Tabelle mit dem HTML table, Befehl und TD und tr. Erzeugen. Zuerst ein zweidimensionales Array mit den Daten für die tabellenzellen, wobei jede Zelle als Eigenschaft den Inhalt, den Typ der Zelle (Kind, Nachrückliste, leer, nachrückliste rechts, checksumme, ...) damit man diese Daten sowohl für die HTML Anzeige, als auch für einen Export verwenden kann, als CSV oder Excel Tabelle mit weiteren checksummen Prüfungen über die gesamte Liste als Formeln in Excel
-
-6. 
-man kann die kinder nicht mehr gesondert sortieren für den schedule, das leitet jetzt um zur waitlist, das soll unter http://localhost:8080/schedules/manage-children/1 die kinder wieder sortieren können, wie gehabt, dies gilt dann nur für organization_order, die in dem report für die reihenfoolge in den listen genutzt werden soll, nur für die nachrückliste rechts soll die waitlist_order genutzt werden
+Neue Kinder immer gleich in den aktiven schedule und im die Nachrückliste aufnehmen (wahrscheinlich feritg)
 
 
+2.
+unter https://ausfallplan-generator.z11.de/profile muss ein punkt sein, lösche mein konto
+
+3.
+wenn man noch keinen ausfallplan erstellt hat, dann darf http://localhost:8080/waitlist kein error anzeigen sondern umleiten zu schedules
+
+4.
+ein editor muss immer zugang zum Punkt Organisatinen haben und darf auch http://localhost:8080/admin/organizations/add aufrufen
+um eine neue orga zu erstellen. und die zu löschen wo er roga-admin ist
 
 
 # weitere TODOs

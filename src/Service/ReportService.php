@@ -189,29 +189,40 @@ class ReportService
         $currentIndex = 0;
         $skippedUnits = []; // Units that didn't fit (priority for next day)
         
-        // Build list of units with waitlist_order for round-robin firstOnWaitlist
-        // IMPORTANT: Filter and sort by waitlist_order (not organization_order!)
-        $waitlistUnits = array_filter($childUnits, function($unit) {
+        // Build flat list of individual children for firstOnWaitlist round-robin
+        // Flatten sibling groups into individual children
+        $waitlistChildren = [];
+        foreach ($childUnits as $unit) {
             if ($unit['type'] === 'sibling_group') {
-                return $unit['siblings'][0]['child']->waitlist_order !== null;
+                // Add each sibling individually
+                foreach ($unit['siblings'] as $sib) {
+                    if ($sib['child']->waitlist_order !== null) {
+                        $waitlistChildren[] = [
+                            'child' => $sib['child'],
+                            'is_integrative' => $sib['is_integrative'],
+                            'sibling_group_id' => $sib['child']->sibling_group_id,
+                        ];
+                    }
+                }
+            } else {
+                // Single child
+                if ($unit['child']->waitlist_order !== null) {
+                    $waitlistChildren[] = [
+                        'child' => $unit['child'],
+                        'is_integrative' => $unit['is_integrative'],
+                        'sibling_group_id' => $unit['child']->sibling_group_id,
+                    ];
+                }
             }
-            return $unit['child']->waitlist_order !== null;
-        });
+        }
         
         // Sort by waitlist_order ASC
-        usort($waitlistUnits, function($a, $b) {
-            $aOrder = $a['type'] === 'sibling_group' 
-                ? $a['siblings'][0]['child']->waitlist_order 
-                : $a['child']->waitlist_order;
-            $bOrder = $b['type'] === 'sibling_group' 
-                ? $b['siblings'][0]['child']->waitlist_order 
-                : $b['child']->waitlist_order;
-            return $aOrder <=> $bOrder;
+        usort($waitlistChildren, function($a, $b) {
+            return $a['child']->waitlist_order <=> $b['child']->waitlist_order;
         });
         
-        $waitlistUnits = array_values($waitlistUnits); // Re-index
         $firstOnWaitlistIndex = 0;
-        $firstOnWaitlistQueue = []; // Queue for children that were in day (try again next day)
+        $firstOnWaitlistQueueIds = []; // Queue for child IDs that were in day
 
         for ($i = 0; $i < $daysCount; $i++) {
             $animalName = self::ANIMAL_NAMES[$i % count(self::ANIMAL_NAMES)];
@@ -262,118 +273,116 @@ class ReportService
                 }
             }
             
-            // Find firstOnWaitlist unit (not in this day)
-            // Strategy: 
-            // 1. First try queue (children that were skipped because they were in day)
-            // 2. If queue empty, use current index from waitlist
-            // 3. If child is in day, add to queue for next day and try next child
-            // 4. Only increment index when we use a child from the main list (not from queue)
+            // Find firstOnWaitlist child (not in this day)
+            // Simple round-robin through flat list of individual children
             $firstOnWaitlistChild = null;
             $debugLog = []; // Debug info for this day
             
-            if (!empty($waitlistUnits)) {
+            if (!empty($waitlistChildren)) {
                 $debugLog[] = "=== Tag " . ($i + 1) . " ===";
                 $debugLog[] = "Index: $firstOnWaitlistIndex";
-                $debugLog[] = "Queue: " . $this->formatQueue($firstOnWaitlistQueue);
+                $debugLog[] = "Queue IDs: [" . implode(", ", $firstOnWaitlistQueueIds) . "]";
+                
                 // FIRST: Try children from queue (were in day before)
-                if (!empty($firstOnWaitlistQueue)) {
-                    $queueUnit = array_shift($firstOnWaitlistQueue);
-                    $queueChildName = $queueUnit['type'] === 'sibling_group' 
-                        ? $queueUnit['siblings'][0]['child']->name 
-                        : $queueUnit['child']->name;
-                    $debugLog[] = "Queue-Versuch: $queueChildName";
+                if (!empty($firstOnWaitlistQueueIds)) {
+                    $queueChildId = array_shift($firstOnWaitlistQueueIds);
                     
-                    // Check if unit is NOT in this day
-                    if (!$this->isUnitInDay($queueUnit, $dayChildren)) {
-                        // Use it! (don't increment index - this was from queue)
-                        if ($queueUnit['type'] === 'sibling_group') {
-                            $firstOnWaitlistChild = $queueUnit['siblings'][0];
-                        } else {
-                            $firstOnWaitlistChild = [
-                                'child' => $queueUnit['child'],
-                                'is_integrative' => $queueUnit['is_integrative'],
-                            ];
+                    // Find child in flat list
+                    $queueChild = null;
+                    foreach ($waitlistChildren as $wc) {
+                        if ($wc['child']->id == $queueChildId) {
+                            $queueChild = $wc;
+                            break;
                         }
-                        $debugLog[] = "✓ Verwendet (aus Queue, Index bleibt $firstOnWaitlistIndex)";
-                    } else {
-                        // Still in day, put back in queue
-                        $firstOnWaitlistQueue[] = $queueUnit;
-                        $debugLog[] = "✗ Im Tag, zurück in Queue";
+                    }
+                    
+                    if ($queueChild) {
+                        $debugLog[] = "Queue-Versuch: " . $queueChild['child']->name . " (ID $queueChildId)";
+                        
+                        // Check if child is NOT in this day
+                        $isInDay = false;
+                        foreach ($dayChildren as $dc) {
+                            if ($dc['child']->id == $queueChild['child']->id) {
+                                $isInDay = true;
+                                break;
+                            }
+                        }
+                        
+                        if (!$isInDay) {
+                            // Use it! (don't increment index - this was from queue)
+                            $firstOnWaitlistChild = $queueChild;
+                            $debugLog[] = "✓ Verwendet (aus Queue, Index bleibt $firstOnWaitlistIndex)";
+                        } else {
+                            // Still in day, put back in queue
+                            $firstOnWaitlistQueueIds[] = $queueChildId;
+                            $debugLog[] = "✗ Im Tag, zurück in Queue";
+                        }
                     }
                 }
                 
                 // SECOND: If no child from queue, try current index
                 if (!$firstOnWaitlistChild) {
-                    $candidateUnit = $waitlistUnits[$firstOnWaitlistIndex % count($waitlistUnits)];
-                    $candidateChildName = $candidateUnit['type'] === 'sibling_group' 
-                        ? $candidateUnit['siblings'][0]['child']->name 
-                        : $candidateUnit['child']->name;
-                    $debugLog[] = "Index-Versuch: $candidateChildName (Index $firstOnWaitlistIndex)";
+                    $candidateChild = $waitlistChildren[$firstOnWaitlistIndex % count($waitlistChildren)];
+                    $debugLog[] = "Index-Versuch: " . $candidateChild['child']->name . " (Index $firstOnWaitlistIndex)";
                     
-                    // Check if unit is NOT in this day
-                    if (!$this->isUnitInDay($candidateUnit, $dayChildren)) {
-                        // Use it and increment index
-                        if ($candidateUnit['type'] === 'sibling_group') {
-                            $firstOnWaitlistChild = $candidateUnit['siblings'][0];
-                        } else {
-                            $firstOnWaitlistChild = [
-                                'child' => $candidateUnit['child'],
-                                'is_integrative' => $candidateUnit['is_integrative'],
-                            ];
+                    // Check if child is NOT in this day
+                    $isInDay = false;
+                    foreach ($dayChildren as $dc) {
+                        if ($dc['child']->id == $candidateChild['child']->id) {
+                            $isInDay = true;
+                            break;
                         }
-                        // Increment index for next day
+                    }
+                    
+                    if (!$isInDay) {
+                        // Use it and increment index
+                        $firstOnWaitlistChild = $candidateChild;
                         $firstOnWaitlistIndex++;
                         $debugLog[] = "✓ Verwendet (Index → $firstOnWaitlistIndex)";
                     } else {
-                        // Child is in day, add to queue (only if not already in queue) and increment index
-                        $alreadyInQueue = false;
-                        foreach ($firstOnWaitlistQueue as $qUnit) {
-                            if ($this->isSameUnit($qUnit, $candidateUnit)) {
-                                $alreadyInQueue = true;
-                                break;
-                            }
-                        }
-                        if (!$alreadyInQueue) {
-                            $firstOnWaitlistQueue[] = $candidateUnit;
-                            $debugLog[] = "→ In Queue: $candidateChildName";
+                        // Child is in day, add to queue and try next
+                        $childId = $candidateChild['child']->id;
+                        if (!in_array($childId, $firstOnWaitlistQueueIds)) {
+                            $firstOnWaitlistQueueIds[] = $childId;
+                            $debugLog[] = "→ In Queue: " . $candidateChild['child']->name . " (ID $childId)";
                         } else {
-                            $debugLog[] = "→ Schon in Queue: $candidateChildName";
+                            $debugLog[] = "→ Schon in Queue: " . $candidateChild['child']->name;
                         }
                         $firstOnWaitlistIndex++;
                         $debugLog[] = "Index → $firstOnWaitlistIndex";
                         
                         // Try to find another child for this day (not in day and not in queue)
                         $debugLog[] = "Suche Alternative...";
-                        for ($attempt = 0; $attempt < count($waitlistUnits); $attempt++) {
-                            $nextIndex = ($firstOnWaitlistIndex + $attempt) % count($waitlistUnits);
-                            $nextUnit = $waitlistUnits[$nextIndex];
-                            $nextChildName = $nextUnit['type'] === 'sibling_group' 
-                                ? $nextUnit['siblings'][0]['child']->name 
-                                : $nextUnit['child']->name;
+                        for ($attempt = 0; $attempt < count($waitlistChildren); $attempt++) {
+                            $nextIndex = ($firstOnWaitlistIndex + $attempt) % count($waitlistChildren);
+                            $nextChild = $waitlistChildren[$nextIndex];
                             
                             // Skip if already in queue
-                            $inQueue = false;
-                            foreach ($firstOnWaitlistQueue as $qUnit) {
-                                if ($this->isSameUnit($qUnit, $nextUnit)) {
-                                    $inQueue = true;
+                            if (in_array($nextChild['child']->id, $firstOnWaitlistQueueIds)) {
+                                $debugLog[] = "  - " . $nextChild['child']->name . ": in Queue";
+                                continue;
+                            }
+                            
+                            // Check if in day
+                            $nextIsInDay = false;
+                            foreach ($dayChildren as $dc) {
+                                if ($dc['child']->id == $nextChild['child']->id) {
+                                    $nextIsInDay = true;
                                     break;
                                 }
                             }
                             
-                            if (!$inQueue && !$this->isUnitInDay($nextUnit, $dayChildren)) {
+                            if (!$nextIsInDay) {
                                 // Found one!
-                                if ($nextUnit['type'] === 'sibling_group') {
-                                    $firstOnWaitlistChild = $nextUnit['siblings'][0];
-                                } else {
-                                    $firstOnWaitlistChild = [
-                                        'child' => $nextUnit['child'],
-                                        'is_integrative' => $nextUnit['is_integrative'],
-                                    ];
-                                }
-                                $debugLog[] = "✓ Alternative gefunden: $nextChildName";
+                                $firstOnWaitlistChild = $nextChild;
+                                $firstOnWaitlistIndex++;
+                                $debugLog[] = "✓ Alternative gefunden: " . $nextChild['child']->name;
+                                $debugLog[] = "Index → $firstOnWaitlistIndex";
                                 break;
                             } else {
-                                $debugLog[] = "  - $nextChildName: " . ($inQueue ? "in Queue" : "im Tag");
+                                // Add to queue
+                                $firstOnWaitlistQueueIds[] = $nextChild['child']->id;
+                                $debugLog[] = "  - " . $nextChild['child']->name . ": im Tag → Queue (ID " . $nextChild['child']->id . ")";
                             }
                         }
                     }
@@ -417,43 +426,6 @@ class ReportService
             'child' => $unit['child'],
             'is_integrative' => $unit['is_integrative'],
         ]];
-    }
-
-    /**
-     * Format queue for debug output
-     */
-    private function formatQueue(array $queue): string
-    {
-        if (empty($queue)) {
-            return "[]";
-        }
-        
-        $names = array_map(function($unit) {
-            if ($unit['type'] === 'sibling_group') {
-                return $unit['siblings'][0]['child']->name;
-            }
-            return $unit['child']->name;
-        }, $queue);
-        
-        return "[" . implode(", ", $names) . "]";
-    }
-
-    /**
-     * Check if two units are the same
-     */
-    private function isSameUnit(array $unit1, array $unit2): bool
-    {
-        if ($unit1['type'] !== $unit2['type']) {
-            return false;
-        }
-        
-        if ($unit1['type'] === 'sibling_group') {
-            // Compare by sibling group ID (first sibling's child ID)
-            return $unit1['siblings'][0]['child']->id === $unit2['siblings'][0]['child']->id;
-        }
-        
-        // Compare single children
-        return $unit1['child']->id === $unit2['child']->id;
     }
 
     /**
