@@ -4,7 +4,7 @@
 
 ### 1. Clone Repository
 ```bash
-cd /var/kunden/webs/ruben/www/ausfallplan-generator.z11.de
+cd /var/kunden/webs/ruben/www/fairnestplan.z11.de
 git clone git@github.com:Eastcoast-Laboratories/Ausfallplan-Generator.git .
 ```
 
@@ -61,14 +61,14 @@ sudo systemctl restart apache2
 
 ### 7. Test Deployment
 ```bash
-curl http://ausfallplan-generator.z11.de
+curl http://fairnestplan.z11.de
 ```
 
 ## Regular Deployments
 
 For regular deployments, simply run:
 ```bash
-cd /var/kunden/webs/ruben/www/ausfallplan-generator.z11.de
+cd /var/kunden/webs/ruben/www/fairnestplan.z11.de
 ./deploy.sh
 ```
 

@@ -21,7 +21,7 @@ $this->assign('title', __('Impressum'));
     <h3><?= __('Kontakt') ?></h3>
     <p>
         Telefon: 0431-5368723<br>
-        E-Mail: <a href="mailto:ausfallplan-generator-kontakt@it.z11.de">ausfallplan-generator-kontakt@it.z11.de</a>
+        E-Mail: <a href="mailto:fairnestplan-kontakt@it.z11.de">fairnestplan-kontakt@it.z11.de</a>
     </p>
     
     <h3><?= __('Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV') ?></h3>

@@ -1,7 +1,7 @@
 # Implementation Checklist — Complete Task List
 
 > **Project:** Ausfallplan-Generator  
-> **Target:** https://ausfallplan-generator.z11.de  
+> **Target:** https://fairnestplan.z11.de  
 > **Local:** http://ausfallplan-local  
 > **Status:** Concept phase complete, ready for implementation
 
@@ -426,7 +426,7 @@
 - [ ] Clone repository to `/var/www/ausfallplan`
 - [ ] Copy production `.env` file
 - [ ] Run `bash deploy/post-deploy.sh`
-- [ ] Test: Visit https://ausfallplan-generator.z11.de
+- [ ] Test: Visit https://fairnestplan.z11.de
 - [ ] Verify: All features work
 
 ### 10.5 Monitoring & Backups
@@ -460,15 +460,15 @@ open http://ausfallplan-local
 ### Production Testing
 ```bash
 # After first deploy
-ssh user@ausfallplan-generator.z11.de
+ssh user@fairnestplan.z11.de
 cd /var/www/ausfallplan
 bash deploy/post-deploy.sh
 
 # Health check
-curl https://ausfallplan-generator.z11.de/health
+curl https://fairnestplan.z11.de/health
 
 # Manual testing
-open https://ausfallplan-generator.z11.de
+open https://fairnestplan.z11.de
 ```
 
 ---
@@ -480,7 +480,7 @@ open https://ausfallplan-generator.z11.de
 - [ ] PHPStan level 8 passes with 0 errors
 - [ ] Code coverage >85%
 - [ ] Local environment runs at http://ausfallplan-local
-- [ ] Production environment runs at https://ausfallplan-generator.z11.de
+- [ ] Production environment runs at https://fairnestplan.z11.de
 - [ ] Database auto-migrates on deploy
 - [ ] PDF export works
 - [ ] PNG export works

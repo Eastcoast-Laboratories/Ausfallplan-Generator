@@ -160,7 +160,7 @@ class EmailDebugService
             $mailer = new Mailer('default');
             
             // Set sender
-            $mailer->setFrom(['noreply@ausfallplan-generator.z11.de' => 'Ausfallplan Generator']);
+            $mailer->setFrom(['noreply@fairnestplan.z11.de' => 'Ausfallplan Generator']);
             
             // Set recipient
             $mailer->setTo($email['to']);

@@ -1,6 +1,6 @@
 <?php
 /**
- * Ausfallplan-Generator Landing Page
+ * Fairnestplan Landing Page
  *
  * @var \App\View\AppView $this
  */
@@ -12,7 +12,7 @@ $this->disableAutoLayout();
 <head>
     <?= $this->Html->charset() ?>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Ausfallplan-Generator - Kita Scheduling Made Easy</title>
+    <title>Fairnestplan - Kita Scheduling Made Easy</title>
     <?= $this->Html->meta('icon') ?>
     <?= $this->Html->css(['normalize.min', 'milligram.min', 'home']) ?>
     <style>
@@ -107,7 +107,7 @@ $this->disableAutoLayout();
 </head>
 <body>
     <nav class="header-nav">
-        <div class="logo">🌟 Ausfallplan-Generator</div>
+        <div class="logo">🌟 Fairnestplan</div>
         <div class="nav-links">
             <a href="#features">Features</a>
             <a href="#pricing">Preise</a>
@@ -118,9 +118,9 @@ $this->disableAutoLayout();
 
     <div class="hero">
         <div class="container">
-            <h1>🌟 Ausfallplan-Generator</h1>
-            <p>Einfache und faire Planung für Kitas und Kindergärten</p>
-            <p>Verwalten Sie Kinder, erstellen Sie Zeitpläne und exportieren Sie wunderschöne PDFs</p>
+            <h1>🌟 Fairnestplan</h1>
+            <p>Einfache und faire Planung im Falle von Ausfällen für Kitas und Kindergärten</p>
+            <p>Verwalten Sie Kinder, erstellen Sie eine Liste, welche Kinder an welchen Tagen kommen mit intelligentem Nachrücklisten-System</p>
             <div style="margin-top: 2rem;">
                 <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'register']) ?>" class="btn-primary" style="margin-right: 1rem;">Kostenlos registrieren</a>
                 <a href="#features" class="btn-secondary">Mehr erfahren</a>
@@ -237,7 +237,7 @@ $this->disableAutoLayout();
 
     <footer style="padding: 2rem; text-align: center; background: #f8f9fa;">
         <div class="container">
-            <p>&copy; <?= date('Y') ?> Ausfallplan-Generator. Alle Rechte vorbehalten.</p>
+            <p>&copy; <?= date('Y') ?> Fairnestplan. Alle Rechte vorbehalten.</p>
             <p>
                 <a href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'display', 'imprint']) ?>">Impressum</a> | 
                 <a href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'display', 'privacy']) ?>">Datenschutz</a> | 

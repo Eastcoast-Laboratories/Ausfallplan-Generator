@@ -2,7 +2,7 @@
 
 > **Created:** Oct 22, 2025 06:17  
 > **Status:** Concept Phase  
-> **Goal:** Full implementation with Docker, tests, DB setup and deployment to https://ausfallplan-generator.z11.de
+> **Goal:** Full implementation with Docker, tests, DB setup and deployment to https://fairnestplan.z11.de
 
 ---
 
@@ -18,7 +18,7 @@
 
 **Deployment Targets:**
 - **Local:** `http://ausfallplan-local` (Docker)
-- **Production:** `https://ausfallplan-generator.z11.de`
+- **Production:** `https://fairnestplan.z11.de`
 
 ---
 
@@ -254,7 +254,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: appleboy/ssh-action@master
         with:
-          host: ausfallplan-generator.z11.de
+          host: fairnestplan.z11.de
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: cd /var/www/ausfallplan && bash deploy/deploy.sh
@@ -412,7 +412,7 @@ REDIS_URL="redis://localhost:6379"
 SECURITY_SALT="generate-with-cake-console"
 SMTP_HOST="smtp.z11.de"
 SMTP_PORT=587
-SMTP_USERNAME="noreply@ausfallplan-generator.z11.de"
+SMTP_USERNAME="noreply@fairnestplan.z11.de"
 SMTP_PASSWORD="smtp_password"
 STRIPE_SECRET_KEY="sk_live_..."
 ```
@@ -531,7 +531,7 @@ bash deploy/post-deploy.sh        # First-time DB setup
 
 This concept provides a complete roadmap for implementing the Ausfallplan-Generator with:
 - ✅ Docker-based local development (`ausfallplan-local`)
-- ✅ Production deployment to `ausfallplan-generator.z11.de`
+- ✅ Production deployment to `fairnestplan.z11.de`
 - ✅ Automated DB migrations + initialization
 - ✅ Comprehensive testing (90+ unit, 30+ integration)
 - ✅ CI/CD pipeline (GitHub Actions)

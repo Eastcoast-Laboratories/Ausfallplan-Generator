@@ -38,7 +38,7 @@ Neue Kinder immer gleich in den aktiven schedule und im die Nachrückliste aufne
 
 
 2.
-unter https://ausfallplan-generator.z11.de/profile muss ein punkt sein, lösche mein konto
+unter https://fairnestplan.z11.de/profile muss ein punkt sein, lösche mein konto
 
 3.
 wenn man noch keinen ausfallplan erstellt hat, dann darf http://localhost:8080/waitlist kein error anzeigen sondern umleiten zu schedules

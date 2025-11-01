@@ -1,5 +1,5 @@
 {
-  "name": "ausfallplan-generator",
+  "name": "fairnestplan",
   "version": "1.0.0",
   "description": "> A multi-tenant web application for Kitas (childcare organizations) to create and manage **Schedules** (absence/day plans) for children with automatic distribution, waitlist management, and PDF/PNG export capabilities.",
   "main": "index.js",

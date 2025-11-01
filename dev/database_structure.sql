@@ -367,6 +367,7 @@ INSERT INTO `users` (`id`, `email`, `password`, `is_system_admin`, `created`, `m
 (1, 'admin@demo.kita', '$2y$12$aa8WQuZBRhtVemDoA7DgTOxyryszPgabWRE1jvIZYMCX.k.cl2B7O', 1, NOW(), NOW(), 1, NULL, 'active', NOW(), NULL),
 (2, 'editor@demo.kita', '$2y$12$aa8WQuZBRhtVemDoA7DgTOxyryszPgabWRE1jvIZYMCX.k.cl2B7O', 0, NOW(), NOW(), 1, NULL, 'active', NOW(), 1),
 (3, 'viewer@demo.kita', '$2y$12$aa8WQuZBRhtVemDoA7DgTOxyryszPgabWRE1jvIZYMCX.k.cl2B7O', 0, NOW(), NOW(), 1, NULL, 'active', NOW(), 1);
+(4, 'org_admin@demo.kita', '$2y$12$aa8WQuZBRhtVemDoA7DgTOxyryszPgabWRE1jvIZYMCX.k.cl2B7O', 0, NOW(), NOW(), 1, NULL, 'active', NOW(), 1);
 
 --
 -- Link Users to Organization
@@ -376,6 +377,7 @@ INSERT INTO `organization_users` (`id`, `organization_id`, `user_id`, `role`, `i
 (1, 1, 1, 'admin', 1, NOW(), NULL, NOW(), NOW()),
 (2, 1, 2, 'editor', 0, NOW(), 1, NOW(), NOW()),
 (3, 1, 3, 'viewer', 0, NOW(), 1, NOW(), NOW());
+(4, 1, 4, 'org_admin', 0, NOW(), 1, NOW(), NOW());
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
