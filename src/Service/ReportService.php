@@ -279,20 +279,48 @@ class ReportService
         };
         
         // STEP 1: Generate days with children (without firstOnWaitlist yet)
+        // Use proper round-robin with overflow queue
+        $overflowQueue = []; // Units that didn't fit in previous day
+        
         for ($i = 0; $i < $daysCount; $i++) {
             $animalName = self::ANIMAL_NAMES[$i % count(self::ANIMAL_NAMES)];
             
             $dayChildren = [];
             $countingSum = 0;
+            $newOverflowQueue = [];
             
-            // Fill day with units (simple round-robin)
+            // First, try to add units from overflow queue
+            foreach ($overflowQueue as $unit) {
+                if ($this->isUnitInDay($unit, $dayChildren)) {
+                    continue; // Already in day
+                }
+                
+                $unitCapacity = $this->getUnitCapacity($unit);
+                if ($countingSum + $unitCapacity <= $capacity) {
+                    $dayChildren = array_merge($dayChildren, $this->expandUnitToChildren($unit));
+                    $countingSum += $unitCapacity;
+                } else {
+                    $newOverflowQueue[] = $unit; // Still doesn't fit, keep in overflow
+                }
+            }
+            
+            // Then, continue with normal round-robin
             $attempts = 0;
             $maxAttempts = count($childUnits) * 2;
+            $triedUnitsThisDay = []; // Track which units we already tried this day
             
             while ($countingSum < $capacity && $attempts < $maxAttempts && !empty($childUnits)) {
-                $unit = $childUnits[$currentIndex % count($childUnits)];
+                $unitIndex = $currentIndex % count($childUnits);
+                $unit = $childUnits[$unitIndex];
                 $currentIndex++;
                 $attempts++;
+                
+                // Skip if already tried this unit today
+                $unitKey = $this->getUnitKey($unit);
+                if (isset($triedUnitsThisDay[$unitKey])) {
+                    continue;
+                }
+                $triedUnitsThisDay[$unitKey] = true;
                 
                 // Skip if already in day
                 if ($this->isUnitInDay($unit, $dayChildren)) {
@@ -304,8 +332,15 @@ class ReportService
                 if ($countingSum + $unitCapacity <= $capacity) {
                     $dayChildren = array_merge($dayChildren, $this->expandUnitToChildren($unit));
                     $countingSum += $unitCapacity;
+                } else {
+                    // Doesn't fit - add to overflow queue for next day
+                    if (!in_array($unit, $newOverflowQueue, true)) {
+                        $newOverflowQueue[] = $unit;
+                    }
                 }
             }
+            
+            $overflowQueue = $newOverflowQueue;
             
             $days[] = [
                 'number' => $i + 1,
@@ -432,6 +467,18 @@ class ReportService
             'child' => $unit['child'],
             'is_integrative' => $unit['is_integrative'],
         ]];
+    }
+
+    /**
+     * Get unique key for a unit (for tracking)
+     */
+    private function getUnitKey(array $unit): string
+    {
+        if ($unit['type'] === 'sibling_group') {
+            return 'sibling_' . $unit['sibling_group_id'];
+        } else {
+            return 'single_' . $unit['child']->id;
+        }
     }
 
     /**
