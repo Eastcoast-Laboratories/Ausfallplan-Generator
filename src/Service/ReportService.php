@@ -14,6 +14,11 @@ use Cake\ORM\TableRegistry;
 class ReportService
 {
     /**
+     * Enable debug logging for waitlist
+     */
+    private const DEBUG_WAITLIST = true;
+    
+    /**
      * Animal names for days (German)
      */
     private const ANIMAL_NAMES = [
@@ -187,7 +192,6 @@ class ReportService
     {
         $days = [];
         $currentIndex = 0;
-        $skippedUnits = []; // Units that didn't fit (priority for next day)
         
         // Build flat list of individual children for firstOnWaitlist round-robin
         // Flatten sibling groups into individual children
@@ -221,8 +225,60 @@ class ReportService
             return $a['child']->waitlist_order <=> $b['child']->waitlist_order;
         });
         
-        $firstOnWaitlistIndex = 0;
-        $firstOnWaitlistQueueIds = []; // Queue for child IDs that were in day
+        // Analyze: Find consecutive sibling groups in waitlist
+        $consecutiveSiblings = []; // [sibling_group_id => [child_ids]]
+        for ($idx = 0; $idx < count($waitlistChildren); $idx++) {
+            $child = $waitlistChildren[$idx];
+            if (!$child['sibling_group_id']) continue;
+            
+            $siblingGroupId = $child['sibling_group_id'];
+            if (isset($consecutiveSiblings[$siblingGroupId])) continue;
+            
+            // Collect consecutive siblings from this group
+            $groupChildren = [$child['child']->id];
+            $j = $idx + 1;
+            while ($j < count($waitlistChildren)) {
+                $nextChild = $waitlistChildren[$j];
+                if ($nextChild['sibling_group_id'] == $siblingGroupId) {
+                    $groupChildren[] = $nextChild['child']->id;
+                    $j++;
+                } else {
+                    break;
+                }
+            }
+            
+            if (count($groupChildren) > 1) {
+                $consecutiveSiblings[$siblingGroupId] = $groupChildren;
+            }
+        }
+        
+        // Helper function to refill queue with all children
+        $refillQueue = function() use ($waitlistChildren, $consecutiveSiblings) {
+            $queue = [];
+            $skipUntilIndex = -1;
+            for ($idx = 0; $idx < count($waitlistChildren); $idx++) {
+                if ($idx <= $skipUntilIndex) continue;
+                
+                $child = $waitlistChildren[$idx];
+                $siblingGroupId = $child['sibling_group_id'];
+                
+                if ($siblingGroupId && isset($consecutiveSiblings[$siblingGroupId])) {
+                    $groupChildren = $consecutiveSiblings[$siblingGroupId];
+                    $firstChildId = $groupChildren[0];
+                    // Add first child N times (N = number of siblings)
+                    foreach ($groupChildren as $sibId) {
+                        $queue[] = $firstChildId;
+                    }
+                    $skipUntilIndex = $idx + count($groupChildren) - 1;
+                } else {
+                    $queue[] = $child['child']->id;
+                }
+            }
+            return $queue;
+        };
+        
+        // Initialize queue
+        $firstOnWaitlistQueue = $refillQueue();
 
         for ($i = 0; $i < $daysCount; $i++) {
             $animalName = self::ANIMAL_NAMES[$i % count(self::ANIMAL_NAMES)];
@@ -230,34 +286,16 @@ class ReportService
             $dayChildren = [];
             $countingSum = 0;
             
-            // FIRST: Try to add skipped units from previous day
-            $remainingSkipped = [];
-            foreach ($skippedUnits as $unit) {
-                $unitCapacity = $this->getUnitCapacity($unit);
-                
-                if ($countingSum + $unitCapacity <= $capacity) {
-                    $dayChildren = array_merge($dayChildren, $this->expandUnitToChildren($unit));
-                    $countingSum += $unitCapacity;
-                } else {
-                    $remainingSkipped[] = $unit;
-                }
-            }
-            $skippedUnits = $remainingSkipped;
-            
-            // THEN: Continue with normal round-robin
+            // Fill day with units (simple round-robin)
             $attempts = 0;
-            $maxAttempts = count($childUnits) * 3;
+            $maxAttempts = count($childUnits) * 2;
             
-            while ($countingSum < $capacity && $attempts < $maxAttempts) {
-                if (empty($childUnits)) {
-                    break;
-                }
-                
+            while ($countingSum < $capacity && $attempts < $maxAttempts && !empty($childUnits)) {
                 $unit = $childUnits[$currentIndex % count($childUnits)];
                 $currentIndex++;
                 $attempts++;
                 
-                // Check if unit already in day
+                // Skip if already in day
                 if ($this->isUnitInDay($unit, $dayChildren)) {
                     continue;
                 }
@@ -267,128 +305,128 @@ class ReportService
                 if ($countingSum + $unitCapacity <= $capacity) {
                     $dayChildren = array_merge($dayChildren, $this->expandUnitToChildren($unit));
                     $countingSum += $unitCapacity;
-                } else {
-                    // Doesn't fit - skip for next day
-                    $skippedUnits[] = $unit;
                 }
             }
             
             // Find firstOnWaitlist child (not in this day)
-            // Simple round-robin through flat list of individual children
+            // Work through queue until we find one that fits
             $firstOnWaitlistChild = null;
             $debugLog = []; // Debug info for this day
             
             if (!empty($waitlistChildren)) {
                 $debugLog[] = "=== Tag " . ($i + 1) . " ===";
-                $debugLog[] = "Index: $firstOnWaitlistIndex";
-                $debugLog[] = "Queue IDs: [" . implode(", ", $firstOnWaitlistQueueIds) . "]";
                 
-                // FIRST: Try children from queue (were in day before)
-                if (!empty($firstOnWaitlistQueueIds)) {
-                    $queueChildId = array_shift($firstOnWaitlistQueueIds);
-                    
-                    // Find child in flat list
-                    $queueChild = null;
+                // Show queue with names
+                $queueNames = [];
+                foreach ($firstOnWaitlistQueue as $qid) {
                     foreach ($waitlistChildren as $wc) {
-                        if ($wc['child']->id == $queueChildId) {
-                            $queueChild = $wc;
+                        if ($wc['child']->id == $qid) {
+                            $queueNames[] = $wc['child']->name;
+                            break;
+                        }
+                    }
+                }
+                $debugLog[] = "Queue: [" . implode(", ", $queueNames) . "]";
+                
+                // Try each child in queue until we find one that fits
+                $triedCount = 0;
+                $queueSize = count($firstOnWaitlistQueue);
+                
+                while ($triedCount < $queueSize && !$firstOnWaitlistChild) {
+                    $childId = $firstOnWaitlistQueue[$triedCount]; // Read from queue (don't remove yet)
+                    $triedCount++;
+                    
+                    // Find child data
+                    $candidate = null;
+                    foreach ($waitlistChildren as $wc) {
+                        if ($wc['child']->id == $childId) {
+                            $candidate = $wc;
                             break;
                         }
                     }
                     
-                    if ($queueChild) {
-                        $debugLog[] = "Queue-Versuch: " . $queueChild['child']->name . " (ID $queueChildId)";
-                        
-                        // Check if child is NOT in this day
-                        $isInDay = false;
-                        foreach ($dayChildren as $dc) {
-                            if ($dc['child']->id == $queueChild['child']->id) {
-                                $isInDay = true;
-                                break;
-                            }
-                        }
-                        
-                        if (!$isInDay) {
-                            // Use it! (don't increment index - this was from queue)
-                            $firstOnWaitlistChild = $queueChild;
-                            $debugLog[] = "✓ Verwendet (aus Queue, Index bleibt $firstOnWaitlistIndex)";
-                        } else {
-                            // Still in day, put back in queue
-                            $firstOnWaitlistQueueIds[] = $queueChildId;
-                            $debugLog[] = "✗ Im Tag, zurück in Queue";
-                        }
-                    }
-                }
-                
-                // SECOND: If no child from queue, try current index
-                if (!$firstOnWaitlistChild) {
-                    $candidateChild = $waitlistChildren[$firstOnWaitlistIndex % count($waitlistChildren)];
-                    $debugLog[] = "Index-Versuch: " . $candidateChild['child']->name . " (Index $firstOnWaitlistIndex)";
+                    if (!$candidate) continue;
                     
-                    // Check if child is NOT in this day
+                    $debugLog[] = "Versuch: " . $candidate['child']->name;
+                    
+                    // Check if child is in this day
                     $isInDay = false;
                     foreach ($dayChildren as $dc) {
-                        if ($dc['child']->id == $candidateChild['child']->id) {
+                        if ($dc['child']->id == $candidate['child']->id) {
                             $isInDay = true;
                             break;
                         }
                     }
                     
                     if (!$isInDay) {
-                        // Use it and increment index
-                        $firstOnWaitlistChild = $candidateChild;
-                        $firstOnWaitlistIndex++;
-                        $debugLog[] = "✓ Verwendet (Index → $firstOnWaitlistIndex)";
-                    } else {
-                        // Child is in day, add to queue and try next
-                        $childId = $candidateChild['child']->id;
-                        if (!in_array($childId, $firstOnWaitlistQueueIds)) {
-                            $firstOnWaitlistQueueIds[] = $childId;
-                            $debugLog[] = "→ In Queue: " . $candidateChild['child']->name . " (ID $childId)";
-                        } else {
-                            $debugLog[] = "→ Schon in Queue: " . $candidateChild['child']->name;
-                        }
-                        $firstOnWaitlistIndex++;
-                        $debugLog[] = "Index → $firstOnWaitlistIndex";
+                        // Found one! Remove from queue now
+                        array_splice($firstOnWaitlistQueue, $triedCount - 1, 1);
+                        $firstOnWaitlistChild = $candidate;
+                        $debugLog[] = "✓ Verwendet: " . $candidate['child']->name . " (aus Queue entfernt)";
+                    }
+                }
+                
+                // If no child was found, refill queue and try again
+                if (!$firstOnWaitlistChild && $triedCount >= $queueSize) {
+                    $debugLog[] = "Kein Kind gefunden → Queue neu befüllen und nochmal versuchen";
+                    $newChildren = $refillQueue();
+                    foreach ($newChildren as $childId) {
+                        $firstOnWaitlistQueue[] = $childId;
+                    }
+                    
+                    // Try again with refilled queue
+                    $triedCount = 0;
+                    $queueSize = count($firstOnWaitlistQueue);
+                    while ($triedCount < $queueSize && !$firstOnWaitlistChild) {
+                        $childId = $firstOnWaitlistQueue[$triedCount];
+                        $triedCount++;
                         
-                        // Try to find another child for this day (not in day and not in queue)
-                        $debugLog[] = "Suche Alternative...";
-                        for ($attempt = 0; $attempt < count($waitlistChildren); $attempt++) {
-                            $nextIndex = ($firstOnWaitlistIndex + $attempt) % count($waitlistChildren);
-                            $nextChild = $waitlistChildren[$nextIndex];
-                            
-                            // Skip if already in queue
-                            if (in_array($nextChild['child']->id, $firstOnWaitlistQueueIds)) {
-                                $debugLog[] = "  - " . $nextChild['child']->name . ": in Queue";
-                                continue;
-                            }
-                            
-                            // Check if in day
-                            $nextIsInDay = false;
-                            foreach ($dayChildren as $dc) {
-                                if ($dc['child']->id == $nextChild['child']->id) {
-                                    $nextIsInDay = true;
-                                    break;
-                                }
-                            }
-                            
-                            if (!$nextIsInDay) {
-                                // Found one!
-                                $firstOnWaitlistChild = $nextChild;
-                                $firstOnWaitlistIndex++;
-                                $debugLog[] = "✓ Alternative gefunden: " . $nextChild['child']->name;
-                                $debugLog[] = "Index → $firstOnWaitlistIndex";
+                        $candidate = null;
+                        foreach ($waitlistChildren as $wc) {
+                            if ($wc['child']->id == $childId) {
+                                $candidate = $wc;
                                 break;
-                            } else {
-                                // Add to queue
-                                $firstOnWaitlistQueueIds[] = $nextChild['child']->id;
-                                $debugLog[] = "  - " . $nextChild['child']->name . ": im Tag → Queue (ID " . $nextChild['child']->id . ")";
                             }
+                        }
+                        
+                        if (!$candidate) continue;
+                        
+                        $debugLog[] = "Versuch (2. Runde): " . $candidate['child']->name;
+                        
+                        $isInDay = false;
+                        foreach ($dayChildren as $dc) {
+                            if ($dc['child']->id == $candidate['child']->id) {
+                                $isInDay = true;
+                                break;
+                            }
+                        }
+                        
+                        if (!$isInDay) {
+                            array_splice($firstOnWaitlistQueue, $triedCount - 1, 1);
+                            $firstOnWaitlistChild = $candidate;
+                            $debugLog[] = "✓ Verwendet: " . $candidate['child']->name . " (aus Queue entfernt)";
                         }
                     }
                 }
+                
+                // Show final queue state
+                if (self::DEBUG_WAITLIST) {
+                    $finalQueueNames = [];
+                    foreach ($firstOnWaitlistQueue as $qid) {
+                        foreach ($waitlistChildren as $wc) {
+                            if ($wc['child']->id == $qid) {
+                                $finalQueueNames[] = $wc['child']->name;
+                                break;
+                            }
+                        }
+                    }
+                    $debugLog[] = "Queue nach Tag: [" . implode(", ", $finalQueueNames) . "]";
+                }
             }
 
+            if(!self::DEBUG_WAITLIST) {
+                $debugLog = [];
+            }
             $days[] = [
                 'number' => $i + 1,
                 'animalName' => $animalName,
