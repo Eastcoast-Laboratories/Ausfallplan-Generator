@@ -357,6 +357,10 @@ class ReportService
             $days[$i]['firstOnWaitlistChild'] = $bestAssignments[$i] ?? null;
         }
         
+        // STEP 2.5: Balance sibling appearances
+        // If one sibling appears much more than another, try to swap
+        $days = $this->balanceSiblingAppearances($days, $waitlistChildren, $consecutiveSiblings);
+        
         // STEP 3: Generate debug logs (if enabled)
         if (self::DEBUG_WAITLIST) {
             // Regenerate with debug logging
@@ -699,5 +703,77 @@ class ReportService
         }
         
         return true;
+    }
+
+    /**
+     * Balance sibling appearances in firstOnWaitlist
+     * If one sibling appears much more than another from same group, try to swap
+     * 
+     * @param array $days Array of days with assignments
+     * @param array $waitlistChildren Flat list of waitlist children
+     * @param array $consecutiveSiblings Map of consecutive sibling groups
+     * @return array Modified days array
+     */
+    private function balanceSiblingAppearances(array $days, array $waitlistChildren, array $consecutiveSiblings): array
+    {
+        // Count appearances per child in firstOnWaitlist
+        $appearances = [];
+        foreach ($days as $day) {
+            if ($day['firstOnWaitlistChild']) {
+                $childId = $day['firstOnWaitlistChild']['child']->id;
+                $appearances[$childId] = ($appearances[$childId] ?? 0) + 1;
+            }
+        }
+        
+        // Find sibling groups with unbalanced appearances
+        foreach ($consecutiveSiblings as $siblingGroupId => $siblingIds) {
+            // Count appearances for each sibling in this group
+            $siblingCounts = [];
+            foreach ($siblingIds as $sibId) {
+                $siblingCounts[$sibId] = $appearances[$sibId] ?? 0;
+            }
+            
+            // Find max and min
+            $maxCount = max($siblingCounts);
+            $minCount = min($siblingCounts);
+            
+            // If difference > 1, try to balance
+            if ($maxCount - $minCount > 1) {
+                $maxSiblingId = array_search($maxCount, $siblingCounts);
+                $minSiblingId = array_search($minCount, $siblingCounts);
+                
+                // Find a day where maxSibling is firstOnWaitlist and minSibling is NOT in day
+                foreach ($days as $dayIdx => $day) {
+                    if (!$day['firstOnWaitlistChild']) continue;
+                    
+                    $currentChildId = $day['firstOnWaitlistChild']['child']->id;
+                    if ($currentChildId != $maxSiblingId) continue;
+                    
+                    // Check if minSibling is in this day
+                    $minSiblingInDay = false;
+                    foreach ($day['children'] as $dc) {
+                        if ($dc['child']->id == $minSiblingId) {
+                            $minSiblingInDay = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!$minSiblingInDay) {
+                        // Swap! Replace maxSibling with minSibling
+                        foreach ($waitlistChildren as $wc) {
+                            if ($wc['child']->id == $minSiblingId) {
+                                $days[$dayIdx]['firstOnWaitlistChild'] = $wc;
+                                if (self::DEBUG_WAITLIST) {
+                                    error_log("Balanced siblings: Replaced {$day['firstOnWaitlistChild']['child']->name} with {$wc['child']->name} on day " . ($dayIdx + 1));
+                                }
+                                break 2; // Exit both loops, one swap per group is enough
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return $days;
     }
 }
