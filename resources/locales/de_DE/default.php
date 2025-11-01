@@ -117,7 +117,7 @@ return [
     'Add Sibling Group' => 'Geschwistergruppe hinzufügen',
     
     // Navigation & Links
-    'Back to Schedules' => 'Zurück zu Ausfallplänen',
+    'Back to Schedules' => 'Zurück',
     'Manage Children' => 'Kinder verwalten',
     'Children on Schedule' => 'Reihenfolge der Kinder auf dem Ausfallplan',
     'Organization Children' => 'Organisations-Kinder',
