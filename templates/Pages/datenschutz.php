@@ -74,7 +74,7 @@ $this->assign('title', __('Datenschutzerklärung'));
         24114 Kiel<br>
         Deutschland<br><br>
         Telefon: 0431-5368723<br>
-        E-Mail: <a href="mailto:ausfallplan-generator-kontakt@it.z11.de">ausfallplan-generator-kontakt@it.z11.de</a>
+        E-Mail: <a href="mailto:fairnestplan-kontakt@it.z11.de">fairnestplan-kontakt@it.z11.de</a>
     </p>
     
     <h4><?= __('Speicherdauer') ?></h4>

@@ -57,7 +57,7 @@ Fixed UTF-8 encoding problems in `dev/README.md`:
 - Post-deploy database initialization
 
 ✅ **Production Deployment:**
-- Target: https://ausfallplan-generator.z11.de
+- Target: https://fairnestplan.z11.de
 - Nginx configuration planned
 - SSL with Let's Encrypt
 - MySQL + Redis setup
@@ -203,7 +203,7 @@ open http://ausfallplan-local
 
 ```bash
 # First deploy
-ssh user@ausfallplan-generator.z11.de
+ssh user@fairnestplan.z11.de
 cd /var/www/ausfallplan
 bash deploy/post-deploy.sh
 
@@ -293,7 +293,7 @@ git push origin v1.0.0
 - [ ] Drag & drop works smoothly
 
 ### Production
-- [ ] Deployed to https://ausfallplan-generator.z11.de
+- [ ] Deployed to https://fairnestplan.z11.de
 - [ ] Database auto-migrates on deploy
 - [ ] SSL certificate active
 - [ ] Backups configured

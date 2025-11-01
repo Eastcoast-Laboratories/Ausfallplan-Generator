@@ -2,7 +2,7 @@
  * Online Login Test
  * 
  * Tests:
- * - Login to production server (https://ausfallplan-generator.z11.de)
+ * - Login to production server (https://fairnestplan.z11.de)
  * - Navigation to /schedules page
  * - Navigation to /children page
  * - Verify user is logged in (logout link visible)
@@ -15,7 +15,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Online Login Test', () => {
-    const BASE_URL = 'https://ausfallplan-generator.z11.de';
+    const BASE_URL = 'https://fairnestplan.z11.de';
     
     test('should login successfully and access schedules', async ({ page }) => {
         // Navigate to login page

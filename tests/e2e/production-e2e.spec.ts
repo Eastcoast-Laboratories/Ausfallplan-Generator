@@ -27,7 +27,7 @@
 
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = 'https://ausfallplan-generator.z11.de';
+const BASE_URL = 'https://fairnestplan.z11.de';
 const TEST_TIMESTAMP = Date.now();
 const TEST_EMAIL = `e2e-test-${TEST_TIMESTAMP}@test.local`;
 const TEST_PASSWORD = 'Test84hbfUb_3dsf!';

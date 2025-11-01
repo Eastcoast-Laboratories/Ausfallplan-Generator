@@ -24,13 +24,13 @@ git push origin main
 
 # 2. Deploy to server
 echo "🌐 Step 2: Deploying to eclabs-vm06..."
-ssh eclabs-vm06 "cd /var/kunden/webs/ruben/www/ausfallplan-generator.z11.de && \
+ssh eclabs-vm06 "cd /var/kunden/webs/ruben/www/fairnestplan.z11.de && \
     git pull origin main && \
     rm -rf tmp/cache/* && \
     echo '✅ Deployment completed!'"
 
 echo ""
 echo "✅ Deployment successful!"
-echo "🔗 Check: https://ausfallplan-generator.z11.de/"
+echo "🔗 Check: https://fairnestplan.z11.de/"
 
 

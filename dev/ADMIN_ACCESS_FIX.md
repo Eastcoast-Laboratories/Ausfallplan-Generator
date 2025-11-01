@@ -81,10 +81,10 @@ bin/cake create_admin
 ## Testing
 
 ### Manual Test (Browser)
-1. Login: https://ausfallplan-generator.z11.de/login
+1. Login: https://fairnestplan.z11.de/login
    - Email: `admin@demo.kita`
    - Password: `84fhr38hf43iahfuX_2`
-2. Navigate to: https://ausfallplan-generator.z11.de/admin/organizations
+2. Navigate to: https://fairnestplan.z11.de/admin/organizations
 3. **Expected:** Organizations list with Demo Kita
 
 ### Playwright Test

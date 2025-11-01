@@ -19,12 +19,12 @@ Call to undefined method Authentication\Identity::isSystemAdmin()
 ```javascript
 // debug-admin-access.spec.js
 test('should login as system admin and access organizations', async ({ page }) => {
-    await page.goto('https://ausfallplan-generator.z11.de/login');
+    await page.goto('https://fairnestplan.z11.de/login');
     await page.fill('input[name="email"]', 'admin@demo.kita');
     await page.fill('input[name="password"]', '84fhr38hf43iahfuX_2');
     await page.click('button[type="submit"]');
     
-    await page.goto('https://ausfallplan-generator.z11.de/admin/organizations');
+    await page.goto('https://fairnestplan.z11.de/admin/organizations');
     
     // Check for success
     expect(orgPageText).toMatch(/Organizations|Organisationen/i);
@@ -41,12 +41,12 @@ test('should login as system admin and access organizations', async ({ page }) =
 
 ```javascript
 test('should login as system admin and access organizations', async ({ page }) => {
-    await page.goto('https://ausfallplan-generator.z11.de/login');
+    await page.goto('https://fairnestplan.z11.de/login');
     await page.fill('input[name="email"]', 'admin@demo.kita');
     await page.fill('input[name="password"]', '84fhr38hf43iahfuX_2');
     await page.click('button[type="submit"]');
     
-    await page.goto('https://ausfallplan-generator.z11.de/admin/organizations');
+    await page.goto('https://fairnestplan.z11.de/admin/organizations');
     
     const bodyText = await page.textContent('body');
     
