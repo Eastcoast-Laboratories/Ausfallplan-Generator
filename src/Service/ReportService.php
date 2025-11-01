@@ -581,4 +581,134 @@ class ReportService
         
         return $stats;
     }
+
+    /**
+     * Generate firstOnWaitlist assignments starting from a specific waitlist index
+     * 
+     * @param int $daysCount Number of days
+     * @param array $days Array of days with children
+     * @param array $waitlistChildren Flat list of waitlist children
+     * @param array $consecutiveSiblings Map of consecutive sibling groups
+     * @param int $startIndex Starting index in waitlist (0-based)
+     * @return array Array of firstOnWaitlistChild for each day
+     */
+    private function generateFirstOnWaitlistAssignments(
+        int $daysCount,
+        array $days,
+        array $waitlistChildren,
+        array $consecutiveSiblings,
+        int $startIndex
+    ): array {
+        // Helper function to refill queue with all children
+        $refillQueue = function() use ($waitlistChildren, $consecutiveSiblings, $startIndex) {
+            $queue = [];
+            $skipUntilIndex = -1;
+            
+            // Start from startIndex and wrap around
+            $totalChildren = count($waitlistChildren);
+            for ($offset = 0; $offset < $totalChildren; $offset++) {
+                $idx = ($startIndex + $offset) % $totalChildren;
+                
+                if ($idx <= $skipUntilIndex && $offset < $startIndex) continue;
+                
+                $child = $waitlistChildren[$idx];
+                $siblingGroupId = $child['sibling_group_id'];
+                
+                if ($siblingGroupId && isset($consecutiveSiblings[$siblingGroupId])) {
+                    $groupChildren = $consecutiveSiblings[$siblingGroupId];
+                    $firstChildId = $groupChildren[0];
+                    foreach ($groupChildren as $sibId) {
+                        $queue[] = $firstChildId;
+                    }
+                    $skipUntilIndex = $idx + count($groupChildren) - 1;
+                } else {
+                    $queue[] = $child['child']->id;
+                }
+            }
+            return $queue;
+        };
+        
+        $firstOnWaitlistQueue = $refillQueue();
+        $assignments = [];
+        
+        for ($i = 0; $i < $daysCount; $i++) {
+            $dayChildren = $days[$i]['children'] ?? [];
+            $firstOnWaitlistChild = null;
+            
+            if (!empty($waitlistChildren)) {
+                $triedCount = 0;
+                $queueSize = count($firstOnWaitlistQueue);
+                
+                while ($triedCount < $queueSize && !$firstOnWaitlistChild) {
+                    $childId = $firstOnWaitlistQueue[$triedCount];
+                    $triedCount++;
+                    
+                    $candidate = null;
+                    foreach ($waitlistChildren as $wc) {
+                        if ($wc['child']->id == $childId) {
+                            $candidate = $wc;
+                            break;
+                        }
+                    }
+                    
+                    if (!$candidate) continue;
+                    
+                    $isInDay = false;
+                    foreach ($dayChildren as $dc) {
+                        if ($dc['child']->id == $candidate['child']->id) {
+                            $isInDay = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!$isInDay) {
+                        array_splice($firstOnWaitlistQueue, $triedCount - 1, 1);
+                        $firstOnWaitlistChild = $candidate;
+                    }
+                }
+                
+                // If no child found, refill and try again
+                if (!$firstOnWaitlistChild && $triedCount >= $queueSize) {
+                    $newChildren = $refillQueue();
+                    foreach ($newChildren as $childId) {
+                        $firstOnWaitlistQueue[] = $childId;
+                    }
+                    
+                    $triedCount = 0;
+                    $queueSize = count($firstOnWaitlistQueue);
+                    while ($triedCount < $queueSize && !$firstOnWaitlistChild) {
+                        $childId = $firstOnWaitlistQueue[$triedCount];
+                        $triedCount++;
+                        
+                        $candidate = null;
+                        foreach ($waitlistChildren as $wc) {
+                            if ($wc['child']->id == $childId) {
+                                $candidate = $wc;
+                                break;
+                            }
+                        }
+                        
+                        if (!$candidate) continue;
+                        
+                        $isInDay = false;
+                        foreach ($dayChildren as $dc) {
+                            if ($dc['child']->id == $candidate['child']->id) {
+                                $isInDay = true;
+                                break;
+                            }
+                        }
+                        
+                        if (!$isInDay) {
+                            array_splice($firstOnWaitlistQueue, $triedCount - 1, 1);
+                            $firstOnWaitlistChild = $candidate;
+                        }
+                    }
+                }
+            }
+            
+            $assignments[] = $firstOnWaitlistChild;
+        }
+        
+        return $assignments;
+    }
 }
