@@ -277,9 +277,7 @@ class ReportService
             return $queue;
         };
         
-        // Initialize queue
-        $firstOnWaitlistQueue = $refillQueue();
-
+        // STEP 1: Generate days with children (without firstOnWaitlist yet)
         for ($i = 0; $i < $daysCount; $i++) {
             $animalName = self::ANIMAL_NAMES[$i % count(self::ANIMAL_NAMES)];
             
@@ -308,12 +306,64 @@ class ReportService
                 }
             }
             
-            // Find firstOnWaitlist child (not in this day)
-            // Work through queue until we find one that fits
-            $firstOnWaitlistChild = null;
-            $debugLog = []; // Debug info for this day
+            $days[] = [
+                'number' => $i + 1,
+                'animalName' => $animalName,
+                'title' => sprintf('%s-Tag %d', $animalName, $i + 1),
+                'children' => $dayChildren,
+                'firstOnWaitlistChild' => null, // Will be filled in step 2
+                'countingChildrenSum' => $countingSum,
+                'debugLog' => [],
+            ];
+        }
+        
+        // STEP 2: Generate firstOnWaitlist assignments
+        // Try different start indices until all non-sibling children appear
+        $bestAssignments = null;
+        for ($startIdx = 0; $startIdx < count($waitlistChildren); $startIdx++) {
+            $assignments = $this->generateFirstOnWaitlistAssignments(
+                $daysCount,
+                $days,
+                $waitlistChildren,
+                $consecutiveSiblings,
+                $startIdx
+            );
             
-            if (!empty($waitlistChildren)) {
+            if ($this->allNonSiblingChildrenAppear($assignments, $waitlistChildren)) {
+                $bestAssignments = $assignments;
+                if (self::DEBUG_WAITLIST) {
+                    error_log("Found valid assignment with startIndex=$startIdx");
+                }
+                break;
+            }
+        }
+        
+        // If no valid assignment found, use first attempt
+        if (!$bestAssignments) {
+            $bestAssignments = $this->generateFirstOnWaitlistAssignments(
+                $daysCount,
+                $days,
+                $waitlistChildren,
+                $consecutiveSiblings,
+                0
+            );
+            if (self::DEBUG_WAITLIST) {
+                error_log("No valid assignment found, using startIndex=0");
+            }
+        }
+        
+        // Apply assignments to days
+        foreach ($days as $i => $day) {
+            $days[$i]['firstOnWaitlistChild'] = $bestAssignments[$i] ?? null;
+        }
+        
+        // STEP 3: Generate debug logs (if enabled)
+        if (self::DEBUG_WAITLIST) {
+            // Regenerate with debug logging
+            $firstOnWaitlistQueue = $refillQueue();
+            
+            for ($i = 0; $i < $daysCount; $i++) {
+                $debugLog = [];
                 $debugLog[] = "=== Tag " . ($i + 1) . " ===";
                 
                 // Show queue with names
@@ -328,116 +378,20 @@ class ReportService
                 }
                 $debugLog[] = "Queue: [" . implode(", ", $queueNames) . "]";
                 
-                // Try each child in queue until we find one that fits
-                $triedCount = 0;
-                $queueSize = count($firstOnWaitlistQueue);
-                
-                while ($triedCount < $queueSize && !$firstOnWaitlistChild) {
-                    $childId = $firstOnWaitlistQueue[$triedCount]; // Read from queue (don't remove yet)
-                    $triedCount++;
-                    
-                    // Find child data
-                    $candidate = null;
-                    foreach ($waitlistChildren as $wc) {
-                        if ($wc['child']->id == $childId) {
-                            $candidate = $wc;
-                            break;
-                        }
-                    }
-                    
-                    if (!$candidate) continue;
-                    
-                    $debugLog[] = "Versuch: " . $candidate['child']->name;
-                    
-                    // Check if child is in this day
-                    $isInDay = false;
-                    foreach ($dayChildren as $dc) {
-                        if ($dc['child']->id == $candidate['child']->id) {
-                            $isInDay = true;
-                            break;
-                        }
-                    }
-                    
-                    if (!$isInDay) {
-                        // Found one! Remove from queue now
-                        array_splice($firstOnWaitlistQueue, $triedCount - 1, 1);
-                        $firstOnWaitlistChild = $candidate;
-                        $debugLog[] = "✓ Verwendet: " . $candidate['child']->name . " (aus Queue entfernt)";
+                if ($days[$i]['firstOnWaitlistChild']) {
+                    $debugLog[] = "✓ Verwendet: " . $days[$i]['firstOnWaitlistChild']['child']->name;
+                    // Remove from queue
+                    $usedId = $days[$i]['firstOnWaitlistChild']['child']->id;
+                    $key = array_search($usedId, $firstOnWaitlistQueue);
+                    if ($key !== false) {
+                        array_splice($firstOnWaitlistQueue, $key, 1);
                     }
                 }
                 
-                // If no child was found, refill queue and try again
-                if (!$firstOnWaitlistChild && $triedCount >= $queueSize) {
-                    $debugLog[] = "Kein Kind gefunden → Queue neu befüllen und nochmal versuchen";
-                    $newChildren = $refillQueue();
-                    foreach ($newChildren as $childId) {
-                        $firstOnWaitlistQueue[] = $childId;
-                    }
-                    
-                    // Try again with refilled queue
-                    $triedCount = 0;
-                    $queueSize = count($firstOnWaitlistQueue);
-                    while ($triedCount < $queueSize && !$firstOnWaitlistChild) {
-                        $childId = $firstOnWaitlistQueue[$triedCount];
-                        $triedCount++;
-                        
-                        $candidate = null;
-                        foreach ($waitlistChildren as $wc) {
-                            if ($wc['child']->id == $childId) {
-                                $candidate = $wc;
-                                break;
-                            }
-                        }
-                        
-                        if (!$candidate) continue;
-                        
-                        $debugLog[] = "Versuch (2. Runde): " . $candidate['child']->name;
-                        
-                        $isInDay = false;
-                        foreach ($dayChildren as $dc) {
-                            if ($dc['child']->id == $candidate['child']->id) {
-                                $isInDay = true;
-                                break;
-                            }
-                        }
-                        
-                        if (!$isInDay) {
-                            array_splice($firstOnWaitlistQueue, $triedCount - 1, 1);
-                            $firstOnWaitlistChild = $candidate;
-                            $debugLog[] = "✓ Verwendet: " . $candidate['child']->name . " (aus Queue entfernt)";
-                        }
-                    }
-                }
-                
-                // Show final queue state
-                if (self::DEBUG_WAITLIST) {
-                    $finalQueueNames = [];
-                    foreach ($firstOnWaitlistQueue as $qid) {
-                        foreach ($waitlistChildren as $wc) {
-                            if ($wc['child']->id == $qid) {
-                                $finalQueueNames[] = $wc['child']->name;
-                                break;
-                            }
-                        }
-                    }
-                    $debugLog[] = "Queue nach Tag: [" . implode(", ", $finalQueueNames) . "]";
-                }
+                $days[$i]['debugLog'] = $debugLog;
             }
-
-            if(!self::DEBUG_WAITLIST) {
-                $debugLog = [];
-            }
-            $days[] = [
-                'number' => $i + 1,
-                'animalName' => $animalName,
-                'title' => sprintf('%s-Tag %d', $animalName, $i + 1),
-                'children' => $dayChildren,
-                'firstOnWaitlistChild' => $firstOnWaitlistChild,
-                'countingChildrenSum' => $countingSum,
-                'debugLog' => $debugLog,
-            ];
         }
-
+        
         return $days;
     }
 
@@ -710,5 +664,40 @@ class ReportService
         }
         
         return $assignments;
+    }
+
+    /**
+     * Check if all non-sibling children appear at least once in assignments
+     * 
+     * @param array $assignments Array of firstOnWaitlistChild assignments
+     * @param array $waitlistChildren Flat list of waitlist children
+     * @return bool True if all non-sibling children appear at least once
+     */
+    private function allNonSiblingChildrenAppear(array $assignments, array $waitlistChildren): bool
+    {
+        // Get all non-sibling child IDs
+        $nonSiblingChildIds = [];
+        foreach ($waitlistChildren as $wc) {
+            if (!$wc['sibling_group_id']) {
+                $nonSiblingChildIds[] = $wc['child']->id;
+            }
+        }
+        
+        // Get all child IDs that appear in assignments
+        $appearingChildIds = [];
+        foreach ($assignments as $assignment) {
+            if ($assignment) {
+                $appearingChildIds[] = $assignment['child']->id;
+            }
+        }
+        
+        // Check if all non-sibling children appear
+        foreach ($nonSiblingChildIds as $childId) {
+            if (!in_array($childId, $appearingChildIds)) {
+                return false;
+            }
+        }
+        
+        return true;
     }
 }
