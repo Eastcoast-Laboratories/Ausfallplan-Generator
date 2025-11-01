@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Model\Table;
 
 use Cake\ORM\Table;
+use Cake\ORM\TableRegistry;
 use Cake\Validation\Validator;
 
 /**
@@ -113,7 +114,7 @@ class SchedulesTable extends Table
                     // If editing existing schedule, check against children count
                     if (!empty($context['data']['id'])) {
                         $scheduleId = $context['data']['id'];
-                        $childrenTable = $this->getTableLocator()->get('Children');
+                        $childrenTable = TableRegistry::getTableLocator()->get('Children');
                         $childrenCount = $childrenTable->find()
                             ->where(['schedule_id' => $scheduleId])
                             ->count();
