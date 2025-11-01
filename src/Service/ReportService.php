@@ -383,7 +383,16 @@ class ReportService
                 $debugLog[] = "Queue: [" . implode(", ", $queueNames) . "]";
                 
                 if ($days[$i]['firstOnWaitlistChild']) {
-                    $debugLog[] = "✓ Verwendet: " . $days[$i]['firstOnWaitlistChild']['child']->name;
+                    $usedName = $days[$i]['firstOnWaitlistChild']['child']->name;
+                    
+                    // Check if this was swapped
+                    if (isset($days[$i]['swappedSibling'])) {
+                        $swap = $days[$i]['swappedSibling'];
+                        $debugLog[] = "✓ Verwendet: " . $usedName . " (getauscht von " . $swap['from'] . " → " . $swap['to'] . " für Balance)";
+                    } else {
+                        $debugLog[] = "✓ Verwendet: " . $usedName;
+                    }
+                    
                     // Remove from queue
                     $usedId = $days[$i]['firstOnWaitlistChild']['child']->id;
                     $key = array_search($usedId, $firstOnWaitlistQueue);
@@ -760,11 +769,17 @@ class ReportService
                     
                     if (!$minSiblingInDay) {
                         // Swap! Replace maxSibling with minSibling
+                        $oldName = $day['firstOnWaitlistChild']['child']->name;
                         foreach ($waitlistChildren as $wc) {
                             if ($wc['child']->id == $minSiblingId) {
                                 $days[$dayIdx]['firstOnWaitlistChild'] = $wc;
+                                $days[$dayIdx]['swappedSibling'] = [
+                                    'from' => $oldName,
+                                    'to' => $wc['child']->name,
+                                    'reason' => 'balance'
+                                ];
                                 if (self::DEBUG_WAITLIST) {
-                                    error_log("Balanced siblings: Replaced {$day['firstOnWaitlistChild']['child']->name} with {$wc['child']->name} on day " . ($dayIdx + 1));
+                                    error_log("Balanced siblings: Replaced {$oldName} with {$wc['child']->name} on day " . ($dayIdx + 1));
                                 }
                                 break 2; // Exit both loops, one swap per group is enough
                             }
