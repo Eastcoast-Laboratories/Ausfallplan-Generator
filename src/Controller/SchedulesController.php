@@ -877,21 +877,21 @@ class SchedulesController extends AppController
             
             // Block header - each day gets 2 columns (Name + Weight)
             foreach ($blockDays as $day) {
-                $sheet->setCellValueByColumnAndRow($col, $currentRow, $day['animalName'] . '-Tag ' . $day['number']);
-                $sheet->setCellValueByColumnAndRow($col + 1, $currentRow, 'Z');
+                $sheet->getCellByColumnAndRow($col, $currentRow)->setValue($day['animalName'] . '-Tag ' . $day['number']);
+                $sheet->getCellByColumnAndRow($col + 1, $currentRow)->setValue('Z');
                 $col += 2;
             }
             
             if ($isFirstBlock) {
                 $col++; // Spacer
-                $sheet->setCellValueByColumnAndRow($col, $currentRow, 'Nachrückliste');
-                $sheet->setCellValueByColumnAndRow($col + 1, $currentRow, 'Z');
-                $sheet->setCellValueByColumnAndRow($col + 2, $currentRow, 'D');
-                $sheet->setCellValueByColumnAndRow($col + 3, $currentRow, '⬇️');
+                $sheet->getCellByColumnAndRow($col, $currentRow)->setValue('Nachrückliste');
+                $sheet->getCellByColumnAndRow($col + 1, $currentRow)->setValue('Z');
+                $sheet->getCellByColumnAndRow($col + 2, $currentRow)->setValue('D');
+                $sheet->getCellByColumnAndRow($col + 3, $currentRow)->setValue('⬇️');
                 
                 // Checksums header (right side)
                 $checksumCol = $col + 5;
-                $sheet->setCellValueByColumnAndRow($checksumCol, $currentRow, 'Prüfsummen');
+                $sheet->getCellByColumnAndRow($checksumCol, $currentRow)->setValue('Prüfsummen');
             }
             
             $currentRow++;
@@ -912,15 +912,15 @@ class SchedulesController extends AppController
                     $children = $day['children'] ?? [];
                     if ($rowIdx < count($children)) {
                         $childData = $children[$rowIdx];
-                        $sheet->setCellValueByColumnAndRow($col, $currentRow, $childData['child']->name);
-                        $sheet->setCellValueByColumnAndRow($col + 1, $currentRow, $childData['is_integrative'] ? 2 : 1);
+                        $sheet->getCellByColumnAndRow($col, $currentRow)->setValue($childData['child']->name);
+                        $sheet->getCellByColumnAndRow($col + 1, $currentRow)->setValue($childData['is_integrative'] ? 2 : 1);
                     } elseif ($rowIdx == count($children)) {
                         $firstOnWaitlist = $day['firstOnWaitlistChild'] ?? null;
                         if ($firstOnWaitlist) {
-                            $sheet->setCellValueByColumnAndRow($col, $currentRow, '→ ' . $firstOnWaitlist['child']->name);
+                            $sheet->getCellByColumnAndRow($col, $currentRow)->setValue('→ ' . $firstOnWaitlist['child']->name);
                         }
                     } elseif ($rowIdx == count($children) + 1) {
-                        $sheet->setCellValueByColumnAndRow($col, $currentRow, $day['countingChildrenSum'] ?? 0);
+                        $sheet->getCellByColumnAndRow($col, $currentRow)->setValue($day['countingChildrenSum'] ?? 0);
                     }
                     $col += 2;
                 }
@@ -934,12 +934,12 @@ class SchedulesController extends AppController
                         $childId = $child->id;
                         $stats = isset($childStats[$childId]) ? $childStats[$childId] : ['daysCount' => 0, 'firstOnWaitlistCount' => 0];
                         
-                        $sheet->setCellValueByColumnAndRow($col, $currentRow, $child->name);
-                        $sheet->setCellValueByColumnAndRow($col + 1, $currentRow, $child->is_integrative ? 2 : 1);
-                        $sheet->setCellValueByColumnAndRow($col + 2, $currentRow, $stats['daysCount']);
-                        $sheet->setCellValueByColumnAndRow($col + 3, $currentRow, $stats['firstOnWaitlistCount']);
+                        $sheet->getCellByColumnAndRow($col, $currentRow)->setValue($child->name);
+                        $sheet->getCellByColumnAndRow($col + 1, $currentRow)->setValue($child->is_integrative ? 2 : 1);
+                        $sheet->getCellByColumnAndRow($col + 2, $currentRow)->setValue($stats['daysCount']);
+                        $sheet->getCellByColumnAndRow($col + 3, $currentRow)->setValue($stats['firstOnWaitlistCount']);
                     } elseif ($rowIdx == count($waitlist) + 1 && !empty($alwaysAtEnd)) {
-                        $sheet->setCellValueByColumnAndRow($col, $currentRow, 'Immer am Ende:');
+                        $sheet->getCellByColumnAndRow($col, $currentRow)->setValue('Immer am Ende:');
                     } elseif ($rowIdx > count($waitlist) + 1 && !empty($alwaysAtEnd)) {
                         $alwaysAtEndIdx = $rowIdx - count($waitlist) - 2;
                         if ($alwaysAtEndIdx < count($alwaysAtEnd)) {
@@ -947,10 +947,10 @@ class SchedulesController extends AppController
                             $childId = $childData['child']->id;
                             $stats = isset($childStats[$childId]) ? $childStats[$childId] : ['daysCount' => 0, 'firstOnWaitlistCount' => 0];
                             
-                            $sheet->setCellValueByColumnAndRow($col, $currentRow, $childData['child']->name);
-                            $sheet->setCellValueByColumnAndRow($col + 1, $currentRow, $childData['weight']);
-                            $sheet->setCellValueByColumnAndRow($col + 2, $currentRow, $stats['daysCount']);
-                            $sheet->setCellValueByColumnAndRow($col + 3, $currentRow, $stats['firstOnWaitlistCount']);
+                            $sheet->getCellByColumnAndRow($col, $currentRow)->setValue($childData['child']->name);
+                            $sheet->getCellByColumnAndRow($col + 1, $currentRow)->setValue($childData['weight']);
+                            $sheet->getCellByColumnAndRow($col + 2, $currentRow)->setValue($stats['daysCount']);
+                            $sheet->getCellByColumnAndRow($col + 3, $currentRow)->setValue($stats['firstOnWaitlistCount']);
                         }
                     }
                     
@@ -966,7 +966,7 @@ class SchedulesController extends AppController
                         $colCheck += 2; // Skip to next weight column
                     }
                     if ($rowSum > 0) {
-                        $sheet->setCellValueByColumnAndRow($checksumCol, $currentRow, $rowSum);
+                        $sheet->getCellByColumnAndRow($checksumCol, $currentRow)->setValue($rowSum);
                     }
                 }
                 
