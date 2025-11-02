@@ -249,9 +249,15 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
                 <div class="box-title"><?= __('Immer am Ende') ?></div>
                 <?php if (!empty($alwaysAtEnd)): ?>
                     <?php foreach ($alwaysAtEnd as $childData): ?>
-                        <div class="waitlist-item">
+                        <?php 
+                        $childId = $childData['child']->id;
+                        $stats = isset($childStats[$childId]) ? $childStats[$childId] : ['daysCount' => 0, 'firstOnWaitlistCount' => 0];
+                        ?>
+                        <div class="waitlist-item always-end-child">
                             <span><?= h($childData['child']->name) ?></span>
                             <span class="priority-badge"><?= h($childData['weight']) ?></span>
+                            <span class="stats-badge" title="Anzahl Tage"><?= h($stats['daysCount']) ?></span>
+                            <span class="stats-badge" title="Erste auf Warteliste"><?= h($stats['firstOnWaitlistCount']) ?></span>
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>

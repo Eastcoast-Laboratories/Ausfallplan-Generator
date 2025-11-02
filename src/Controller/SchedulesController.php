@@ -877,21 +877,28 @@ class SchedulesController extends AppController
             
             // Block header - each day gets 2 columns (Name + Weight)
             foreach ($blockDays as $day) {
-                $sheet->getCellByColumnAndRow($col, $currentRow)->setValue($day['animalName'] . '-Tag ' . $day['number']);
-                $sheet->getCellByColumnAndRow($col + 1, $currentRow)->setValue('Z');
+                $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $currentRow;
+                $sheet->getCell($cellCoord)->setValue($day['animalName'] . '-Tag ' . $day['number']);
+                $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1) . $currentRow;
+                $sheet->getCell($cellCoord)->setValue('Z');
                 $col += 2;
             }
             
             if ($isFirstBlock) {
                 $col++; // Spacer
-                $sheet->getCellByColumnAndRow($col, $currentRow)->setValue('Nachrückliste');
-                $sheet->getCellByColumnAndRow($col + 1, $currentRow)->setValue('Z');
-                $sheet->getCellByColumnAndRow($col + 2, $currentRow)->setValue('D');
-                $sheet->getCellByColumnAndRow($col + 3, $currentRow)->setValue('⬇️');
+                $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $currentRow;
+                $sheet->getCell($cellCoord)->setValue('Nachrückliste');
+                $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1) . $currentRow;
+                $sheet->getCell($cellCoord)->setValue('Z');
+                $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 2) . $currentRow;
+                $sheet->getCell($cellCoord)->setValue('D');
+                $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 3) . $currentRow;
+                $sheet->getCell($cellCoord)->setValue('⬇️');
                 
                 // Checksums header (right side)
                 $checksumCol = $col + 5;
-                $sheet->getCellByColumnAndRow($checksumCol, $currentRow)->setValue('Prüfsummen');
+                $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($checksumCol) . $currentRow;
+                $sheet->getCell($cellCoord)->setValue('Prüfsummen');
             }
             
             $currentRow++;
@@ -912,15 +919,19 @@ class SchedulesController extends AppController
                     $children = $day['children'] ?? [];
                     if ($rowIdx < count($children)) {
                         $childData = $children[$rowIdx];
-                        $sheet->getCellByColumnAndRow($col, $currentRow)->setValue($childData['child']->name);
-                        $sheet->getCellByColumnAndRow($col + 1, $currentRow)->setValue($childData['is_integrative'] ? 2 : 1);
+                        $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $currentRow;
+                        $sheet->getCell($cellCoord)->setValue($childData['child']->name);
+                        $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1) . $currentRow;
+                        $sheet->getCell($cellCoord)->setValue($childData['is_integrative'] ? 2 : 1);
                     } elseif ($rowIdx == count($children)) {
                         $firstOnWaitlist = $day['firstOnWaitlistChild'] ?? null;
                         if ($firstOnWaitlist) {
-                            $sheet->getCellByColumnAndRow($col, $currentRow)->setValue('→ ' . $firstOnWaitlist['child']->name);
+                            $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $currentRow;
+                            $sheet->getCell($cellCoord)->setValue('→ ' . $firstOnWaitlist['child']->name);
                         }
                     } elseif ($rowIdx == count($children) + 1) {
-                        $sheet->getCellByColumnAndRow($col, $currentRow)->setValue($day['countingChildrenSum'] ?? 0);
+                        $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $currentRow;
+                        $sheet->getCell($cellCoord)->setValue($day['countingChildrenSum'] ?? 0);
                     }
                     $col += 2;
                 }
@@ -934,12 +945,17 @@ class SchedulesController extends AppController
                         $childId = $child->id;
                         $stats = isset($childStats[$childId]) ? $childStats[$childId] : ['daysCount' => 0, 'firstOnWaitlistCount' => 0];
                         
-                        $sheet->getCellByColumnAndRow($col, $currentRow)->setValue($child->name);
-                        $sheet->getCellByColumnAndRow($col + 1, $currentRow)->setValue($child->is_integrative ? 2 : 1);
-                        $sheet->getCellByColumnAndRow($col + 2, $currentRow)->setValue($stats['daysCount']);
-                        $sheet->getCellByColumnAndRow($col + 3, $currentRow)->setValue($stats['firstOnWaitlistCount']);
+                        $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $currentRow;
+                        $sheet->getCell($cellCoord)->setValue($child->name);
+                        $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1) . $currentRow;
+                        $sheet->getCell($cellCoord)->setValue($child->is_integrative ? 2 : 1);
+                        $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 2) . $currentRow;
+                        $sheet->getCell($cellCoord)->setValue($stats['daysCount']);
+                        $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 3) . $currentRow;
+                        $sheet->getCell($cellCoord)->setValue($stats['firstOnWaitlistCount']);
                     } elseif ($rowIdx == count($waitlist) + 1 && !empty($alwaysAtEnd)) {
-                        $sheet->getCellByColumnAndRow($col, $currentRow)->setValue('Immer am Ende:');
+                        $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $currentRow;
+                        $sheet->getCell($cellCoord)->setValue('Immer am Ende:');
                     } elseif ($rowIdx > count($waitlist) + 1 && !empty($alwaysAtEnd)) {
                         $alwaysAtEndIdx = $rowIdx - count($waitlist) - 2;
                         if ($alwaysAtEndIdx < count($alwaysAtEnd)) {
@@ -947,10 +963,14 @@ class SchedulesController extends AppController
                             $childId = $childData['child']->id;
                             $stats = isset($childStats[$childId]) ? $childStats[$childId] : ['daysCount' => 0, 'firstOnWaitlistCount' => 0];
                             
-                            $sheet->getCellByColumnAndRow($col, $currentRow)->setValue($childData['child']->name);
-                            $sheet->getCellByColumnAndRow($col + 1, $currentRow)->setValue($childData['weight']);
-                            $sheet->getCellByColumnAndRow($col + 2, $currentRow)->setValue($stats['daysCount']);
-                            $sheet->getCellByColumnAndRow($col + 3, $currentRow)->setValue($stats['firstOnWaitlistCount']);
+                            $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $currentRow;
+                            $sheet->getCell($cellCoord)->setValue($childData['child']->name);
+                            $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1) . $currentRow;
+                            $sheet->getCell($cellCoord)->setValue($childData['weight']);
+                            $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 2) . $currentRow;
+                            $sheet->getCell($cellCoord)->setValue($stats['daysCount']);
+                            $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 3) . $currentRow;
+                            $sheet->getCell($cellCoord)->setValue($stats['firstOnWaitlistCount']);
                         }
                     }
                     
@@ -959,14 +979,16 @@ class SchedulesController extends AppController
                     $rowSum = 0;
                     $colCheck = 2; // Start at column B (weight column of first day)
                     for ($d = 0; $d < count($blockDays); $d++) {
-                        $cellValue = $sheet->getCellByColumnAndRow($colCheck, $currentRow)->getValue();
+                        $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colCheck) . $currentRow;
+                        $cellValue = $sheet->getCell($cellCoord)->getValue();
                         if (is_numeric($cellValue)) {
                             $rowSum += $cellValue;
                         }
                         $colCheck += 2; // Skip to next weight column
                     }
                     if ($rowSum > 0) {
-                        $sheet->getCellByColumnAndRow($checksumCol, $currentRow)->setValue($rowSum);
+                        $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($checksumCol) . $currentRow;
+                        $sheet->getCell($cellCoord)->setValue($rowSum);
                     }
                 }
                 
@@ -997,7 +1019,8 @@ class SchedulesController extends AppController
         
         for ($row = 1; $row <= $highestRow; $row++) {
             for ($col = 1; $col <= $highestColumnIndex; $col++) {
-                $cell = $sheet->getCellByColumnAndRow($col, $row);
+                $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $row;
+                $cell = $sheet->getCell($cellCoord);
                 if ($cell->getValue() !== null && $cell->getValue() !== '') {
                     $cell->getStyle()->applyFromArray($borderStyle);
                 }
