@@ -944,8 +944,13 @@ class SchedulesController extends AppController
                         $alwaysAtEndIdx = $rowIdx - count($waitlist) - 2;
                         if ($alwaysAtEndIdx < count($alwaysAtEnd)) {
                             $childData = $alwaysAtEnd[$alwaysAtEndIdx];
+                            $childId = $childData['child']->id;
+                            $stats = isset($childStats[$childId]) ? $childStats[$childId] : ['daysCount' => 0, 'firstOnWaitlistCount' => 0];
+                            
                             $sheet->setCellValueByColumnAndRow($col, $currentRow, $childData['child']->name);
                             $sheet->setCellValueByColumnAndRow($col + 1, $currentRow, $childData['weight']);
+                            $sheet->setCellValueByColumnAndRow($col + 2, $currentRow, $stats['daysCount']);
+                            $sheet->setCellValueByColumnAndRow($col + 3, $currentRow, $stats['firstOnWaitlistCount']);
                         }
                     }
                     
@@ -974,6 +979,29 @@ class SchedulesController extends AppController
         // Auto-size columns
         foreach (range(1, $col + 5) as $columnIndex) {
             $sheet->getColumnDimensionByColumn($columnIndex)->setAutoSize(true);
+        }
+        
+        // Apply black borders to all cells with content
+        $highestRow = $sheet->getHighestRow();
+        $highestColumn = $sheet->getHighestColumn();
+        $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestColumn);
+        
+        $borderStyle = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ];
+        
+        for ($row = 1; $row <= $highestRow; $row++) {
+            for ($col = 1; $col <= $highestColumnIndex; $col++) {
+                $cell = $sheet->getCellByColumnAndRow($col, $row);
+                if ($cell->getValue() !== null && $cell->getValue() !== '') {
+                    $cell->getStyle()->applyFromArray($borderStyle);
+                }
+            }
         }
         
         // Create Excel file
