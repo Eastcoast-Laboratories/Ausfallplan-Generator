@@ -73,7 +73,8 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
         .child-item {
             display: flex;
             justify-content: space-between;
-            padding: 2px 0;
+            padding: 1px 0;
+            line-height: 1.2;
         }
 
         .child-name {
@@ -247,22 +248,29 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
 
             <div class="always-end-box">
                 <div class="box-title"><?= __('Immer am Ende') ?></div>
-                <?php if (!empty($alwaysAtEnd)): ?>
-                    <?php foreach ($alwaysAtEnd as $childData): ?>
-                        <?php 
-                        $childId = $childData['child']->id;
-                        $stats = isset($childStats[$childId]) ? $childStats[$childId] : ['daysCount' => 0, 'firstOnWaitlistCount' => 0];
-                        ?>
-                        <div class="waitlist-item always-end-child">
-                            <span><?= h($childData['child']->name) ?></span>
-                            <span class="priority-badge"><?= h($childData['weight']) ?></span>
-                            <span class="stats-badge" title="Anzahl Tage"><?= h($stats['daysCount']) ?></span>
-                            <span class="stats-badge" title="Erste auf Warteliste"><?= h($stats['firstOnWaitlistCount']) ?></span>
+                <div style="display: grid; grid-template-columns: 1fr auto auto auto; gap: 4px; font-size: 10px;">
+                    <div style="font-weight: bold; padding-bottom: 4px; border-bottom: 1px solid #ccc;">Name</div>
+                    <div style="font-weight: bold; padding-bottom: 4px; border-bottom: 1px solid #ccc; text-align: center;">Z</div>
+                    <div style="font-weight: bold; padding-bottom: 4px; border-bottom: 1px solid #ccc; color: #999; text-align: center;">D</div>
+                    <div style="font-weight: bold; padding-bottom: 4px; border-bottom: 1px solid #ccc; color: #999; text-align: center;">⬇️</div>
+                    
+                    <?php if (!empty($alwaysAtEnd)): ?>
+                        <?php foreach ($alwaysAtEnd as $childData): ?>
+                            <?php 
+                            $childId = $childData['child']->id;
+                            $stats = isset($childStats[$childId]) ? $childStats[$childId] : ['daysCount' => 0, 'firstOnWaitlistCount' => 0];
+                            ?>
+                            <div style="padding: 2px 0;"><?= h($childData['child']->name) ?></div>
+                            <div style="background: #e3f2fd; padding: 2px 6px; border-radius: 3px; font-weight: bold; text-align: center;"><?= h($childData['weight']) ?></div>
+                            <div style="color: #999; text-align: center;"><?= h($stats['daysCount']) ?></div>
+                            <div style="color: #999; text-align: center;"><?= h($stats['firstOnWaitlistCount']) ?></div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div style="grid-column: 1 / -1; color: #666; text-align: center; padding: 2rem;">
+                            <?= __('None') ?>
                         </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <p style="color: #666; font-size: 10px;"><?= __('None') ?></p>
-                <?php endif; ?>
+                    <?php endif; ?>
+                </div>
             </div>
             
             <?php
