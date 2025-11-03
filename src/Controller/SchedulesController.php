@@ -930,8 +930,12 @@ class SchedulesController extends AppController
                             $sheet->getCell($cellCoord)->setValue('→ ' . $firstOnWaitlist['child']->name);
                         }
                     } elseif ($rowIdx == count($children) + 1) {
+                        // Sum formula for day
+                        $weightCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1);
+                        $firstChildRow = $currentRow - count($children);
+                        $lastChildRow = $currentRow - 1;
                         $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $currentRow;
-                        $sheet->getCell($cellCoord)->setValue($day['countingChildrenSum'] ?? 0);
+                        $sheet->getCell($cellCoord)->setValue("=SUM({$weightCol}{$firstChildRow}:{$weightCol}{$lastChildRow})");
                     }
                     $col += 2;
                 }
@@ -949,10 +953,16 @@ class SchedulesController extends AppController
                         $sheet->getCell($cellCoord)->setValue($child->name);
                         $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1) . $currentRow;
                         $sheet->getCell($cellCoord)->setValue($child->is_integrative ? 2 : 1);
+                        // D-Spalte: COUNTIF formula for days count
+                        $nameCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
+                        $firstOnWaitlistCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 3);
                         $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 2) . $currentRow;
-                        $sheet->getCell($cellCoord)->setValue($stats['daysCount']);
+                        $sheet->getCell($cellCoord)->setValue("=COUNTIF(\$A\$1:\$K\$100,{$nameCol}{$currentRow})-{$firstOnWaitlistCol}{$currentRow}");
+                        
+                        // ⬇️-Spalte: COUNTIF formula for first on waitlist count
                         $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 3) . $currentRow;
-                        $sheet->getCell($cellCoord)->setValue($stats['firstOnWaitlistCount']);
+                        $firstOnWaitlistFormula = $this->buildFirstOnWaitlistFormula($nameCol . $currentRow, count($dayBlocks));
+                        $sheet->getCell($cellCoord)->setValue($firstOnWaitlistFormula);
                     } elseif ($rowIdx == count($waitlist) + 1 && !empty($alwaysAtEnd)) {
                         $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $currentRow;
                         $sheet->getCell($cellCoord)->setValue('Immer am Ende:');
@@ -967,10 +977,16 @@ class SchedulesController extends AppController
                             $sheet->getCell($cellCoord)->setValue($childData['child']->name);
                             $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1) . $currentRow;
                             $sheet->getCell($cellCoord)->setValue($childData['weight']);
+                            // D-Spalte: COUNTIF formula for days count
+                            $nameCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
+                            $firstOnWaitlistCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 3);
                             $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 2) . $currentRow;
-                            $sheet->getCell($cellCoord)->setValue($stats['daysCount']);
+                            $sheet->getCell($cellCoord)->setValue("=COUNTIF(\$A\$1:\$K\$100,{$nameCol}{$currentRow})-{$firstOnWaitlistCol}{$currentRow}");
+                            
+                            // ⬇️-Spalte: COUNTIF formula for first on waitlist count
                             $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 3) . $currentRow;
-                            $sheet->getCell($cellCoord)->setValue($stats['firstOnWaitlistCount']);
+                            $firstOnWaitlistFormula = $this->buildFirstOnWaitlistFormula($nameCol . $currentRow, count($dayBlocks));
+                            $sheet->getCell($cellCoord)->setValue($firstOnWaitlistFormula);
                         }
                     }
                     
@@ -1119,5 +1135,35 @@ class SchedulesController extends AppController
                 "success" => false,
                 "error" => "Please use the Waitlist controller to reorder children"
             ]));
+    }
+    
+    /**
+     * Build COUNTIF formula for first-on-waitlist count
+     * 
+     * @param string $nameCell Cell reference (e.g., "M5")
+     * @param int $blockCount Number of 4-day blocks
+     * @return string Excel formula
+     */
+    private function buildFirstOnWaitlistFormula(string $nameCell, int $blockCount): string
+    {
+        $formulas = [];
+        
+        // Each block has a first-on-waitlist row
+        // Block 1: row ~13 (after 7 children + 1 header + 1 first-on-waitlist + 1 sum = ~10 rows, starting at row 4 = row 13)
+        // Pattern: Each block starts 11 rows after the previous
+        
+        $baseRow = 5; // First child row
+        $rowsPerBlock = 11; // Approximate rows per block (7 children + header + first-on-waitlist + sum + spacer)
+        
+        for ($block = 0; $block < $blockCount; $block++) {
+            // First-on-waitlist row is at: baseRow + (block * rowsPerBlock) + 7 (children) + 1 (first-on-waitlist)
+            $firstOnWaitlistRow = $baseRow + ($block * $rowsPerBlock) + 8;
+            
+            // COUNTIF across columns A to J (days 1-4, each has 2 columns, but we only check name columns)
+            // Columns: A, C, E, G, I (but we use A:J to include all)
+            $formulas[] = "COUNTIF(\$A\${$firstOnWaitlistRow}:\$J\${$firstOnWaitlistRow},{$nameCell})";
+        }
+        
+        return "=" . implode("+", $formulas);
     }
 }
