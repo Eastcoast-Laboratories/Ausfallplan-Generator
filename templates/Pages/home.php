@@ -111,8 +111,13 @@ $this->disableAutoLayout();
         <div class="nav-links">
             <a href="#features">Features</a>
             <a href="#pricing">Preise</a>
-            <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'login']) ?>" class="btn-secondary">Login</a>
-            <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'register']) ?>" class="btn-primary">Registrieren</a>
+            <?php if ($this->Identity->isLoggedIn()): ?>
+                <a href="<?= $this->Url->build(['controller' => 'Schedules', 'action' => 'index']) ?>" class="btn-secondary">Meine Pläne</a>
+                <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'logout']) ?>" class="btn-primary">Logout</a>
+            <?php else: ?>
+                <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'login']) ?>" class="btn-secondary">Login</a>
+                <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'register']) ?>" class="btn-primary">Registrieren</a>
+            <?php endif; ?>
         </div>
     </nav>
 
