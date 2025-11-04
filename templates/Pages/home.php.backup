@@ -138,13 +138,13 @@ $lang = substr($locale, 0, 2); // de or en
                    class="<?= $locale === 'en_US' ? 'active' : '' ?>" title="English">🇬🇧</a>
             </div>
             <a href="#features"><?= __('Features') ?></a>
-            <a href="#pricing"><?= __('Pricing') ?></a>
+            <a href="#pricing"><?= __('Preise') ?></a>
             <?php if ($identity): ?>
-                <a href="<?= $this->Url->build(['controller' => 'Schedules', 'action' => 'index']) ?>" class="btn-secondary"><?= __('My Schedules') ?></a>
+                <a href="<?= $this->Url->build(['controller' => 'Schedules', 'action' => 'index']) ?>" class="btn-secondary"><?= __('Meine Pläne') ?></a>
                 <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'logout']) ?>" class="btn-primary"><?= __('Logout') ?></a>
             <?php else: ?>
                 <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'login']) ?>" class="btn-secondary"><?= __('Login') ?></a>
-                <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'register']) ?>" class="btn-primary"><?= __('Register') ?></a>
+                <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'register']) ?>" class="btn-primary"><?= __('Registrieren') ?></a>
             <?php endif; ?>
         </div>
     </nav>
@@ -152,36 +152,36 @@ $lang = substr($locale, 0, 2); // de or en
     <div class="hero">
         <div class="container">
             <h1>🌟 FairNestPlan</h1>
-            <p><?= __('Simple and fair planning in case of absences for daycare centers and kindergartens') ?></p>
-            <p><?= __('Manage children, create a list of which children come on which days with an intelligent substitute list system') ?></p>
+            <p><?= __('Einfache und faire Planung im Falle von Ausfällen für Kitas und Kindergärten') ?></p>
+            <p><?= __('Verwalten Sie Kinder, erstellen Sie eine Liste, welche Kinder an welchen Tagen kommen mit intelligentem Nachrücklisten-System') ?></p>
             <div style="margin-top: 2rem;">
-                <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'register']) ?>" class="btn-primary" style="margin-right: 1rem;"><?= __('Register for free') ?></a>
-                <a href="#features" class="btn-secondary"><?= __('Learn more') ?></a>
+                <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'register']) ?>" class="btn-primary" style="margin-right: 1rem;"><?= __('Kostenlos registrieren') ?></a>
+                <a href="#features" class="btn-secondary"><?= __('Mehr erfahren') ?></a>
             </div>
         </div>
     </div>
 
     <div id="features" class="features">
         <div class="container">
-            <h2 style="text-align: center; margin-bottom: 3rem;"><?= __('Key Features') ?></h2>
+            <h2 style="text-align: center; margin-bottom: 3rem;">Hauptfunktionen</h2>
             
             <div class="row">
                 <div class="column">
                     <div class="feature-card">
-                        <h3><?= __('Child Management') ?></h3>
-                        <p><?= __('Manage children with sibling groups, integration status and individual priorities.') ?></p>
+                        <h3>👶 Kinderverwaltung</h3>
+                        <p><?= __('Verwalten Sie Kinder mit integrativen Kindern und Geschwistergruppen. Automatische Gewichtung für faire Verteilung.</p>
                     </div>
                 </div>
                 <div class="column">
                     <div class="feature-card">
-                        <h3><?= __('Automatic Distribution') ?></h3>
-                        <p><?= __('Intelligent algorithms distribute children fairly across days, respecting capacities and sibling groups.') ?></p>
+                        <h3>📅 Automatische Verteilung</h3>
+                        <p>Intelligente Algorithmen verteilen Kinder fair über Tage, respektieren Kapazitäten und Geschwistergruppen.</p>
                     </div>
                 </div>
                 <div class="column">
                     <div class="feature-card">
-                        <h3><?= __('Substitute List') ?></h3>
-                        <p><?= __('If places become available, the substitute list helps with quick and fair filling.') ?></p>
+                        <h3>📋 Nachrückliste</h3>
+                        <p>Sollten Plätze frei werden, hilft die Nachrückliste beim schnellen und fairen Auffüllen.</p>
                     </div>
                 </div>
             </div>
@@ -189,20 +189,20 @@ $lang = substr($locale, 0, 2); // de or en
             <div class="row">
                 <div class="column">
                     <div class="feature-card">
-                        <h3><?= __('PDF/Excel Export') ?></h3>
-                        <p><?= __('Export beautiful, print-ready schedules as PDF for distribution or Excel format for editing.') ?></p>
+                        <h3>🖨️ PDF/Excel Export</h3>
+                        <p>Exportieren Sie schöne, druckfertige Pläne als PDF zur Verteilung oder Excel Format zum Nachbearbeiten.</p>
                     </div>
                 </div>
                 <div class="column">
                     <div class="feature-card">
-                        <h3><?= __('Multilingual') ?></h3>
-                        <p><?= __('Available in English and German. Easy language switching for international teams.') ?></p>
+                        <h3>🌍 Mehrsprachig</h3>
+                        <p>Verfügbar in Deutsch und Englisch. Einfacher Sprachwechsel für internationale Teams.</p>
                     </div>
                 </div>
                 <div class="column">
                     <div class="feature-card">
-                        <h3><?= __('Secure') ?></h3>
-                        <p><?= __('Role-based access control, secure authentication and GDPR compliant.') ?></p>
+                        <h3>🔒 Sicher</h3>
+                        <p>Rollenbasierte Zugriffskontrolle, sichere Authentifizierung und GDPR-konform.</p>
                     </div>
                 </div>
             </div>
@@ -211,20 +211,20 @@ $lang = substr($locale, 0, 2); // de or en
 
     <div class="pricing">
         <div class="container">
-            <h2 style="text-align: center; margin-bottom: 3rem;"><?= __('Pricing Plans') ?></h2>
+            <h2 style="text-align: center; margin-bottom: 3rem;">Preispläne</h2>
             
             <div class="row">
                 <div class="column">
                     <div class="price-card">
                         <h3>Test Plan</h3>
-                        <div class="price"><?= __('Free') ?></div>
+                        <div class="price">Kostenlos</div>
                         <ul style="text-align: left;">
-                            <li><?= __('1 Organization') ?></li>
-                            <li><?= __('1 active schedule') ?></li>
-                            <li><?= __('PDF Export') ?></li>
-                            <li><?= __('Community Support') ?></li>
+                            <li>1 Organisation</li>
+                            <li>1 aktiver Plan</li>
+                            <li>PDF Export</li>
+                            <li>Community Support</li>
                         </ul>
-                        <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'register']) ?>" class="btn-primary"><?= __('Get started') ?></a>
+                        <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'register']) ?>" class="btn-primary">Jetzt starten</a>
                     </div>
                 </div>
                 <div class="column">
@@ -232,25 +232,25 @@ $lang = substr($locale, 0, 2); // de or en
                         <h3>Pro</h3>
                         <div class="price">€5/Monat</div>
                         <ul style="text-align: left;">
-                            <li><?= __('Unlimited organizations') ?></li>
-                            <li><?= __('Unlimited schedules') ?></li>
-                            <li><?= __('PDF Export') ?></li>
-                            <li><?= __('Priority Support') ?></li>
+                            <li>Unbegrenzte Anzahl Organisationen</li>
+                            <li>Unbegrenzte Anzahl Pläne</li>
+                            <li>PDF Export</li>
+                            <li>Priority Support</li>
                         </ul>
-                        <a href="#" class="btn-primary"><?= __('Upgrade') ?></a>
+                        <a href="#" class="btn-primary">Upgrade</a>
                     </div>
                 </div>
                 <div class="column">
                     <div class="price-card">
                         <h3>Enterprise</h3>
-                        <div class="price"><?= __('On request') ?></div>
+                        <div class="price">Kontakt</div>
                         <ul style="text-align: left;">
-                            <li><?= __('SSO/SAML Integration') ?></li>
-                            <li><?= __('SLA Agreement') ?></li>
-                            <li><?= __('Dedicated Support') ?></li>
-                            <li><?= __('Custom Features') ?></li>
+                            <li>SSO/SAML Integration</li>
+                            <li>SLA Vereinbarung</li>
+                            <li>Dedicated Support</li>
+                            <li>Custom Features</li>
                         </ul>
-                        <a href="mailto:fairnestplan-kontakt@it.z11.de" class="btn-primary"><?= __('Contact') ?></a>
+                        <a href="mailto:fairnestplan-kontakt@it.z11.de" class="btn-primary">Kontakt</a>
                     </div>
                 </div>
             </div>
@@ -259,19 +259,19 @@ $lang = substr($locale, 0, 2); // de or en
 
     <div id="pricing" style="background: #667eea; color: white; padding: 2rem; text-align: center;">
         <div class="container">
-            <h3><?= __('Ready to get started?') ?></h3>
-            <p><?= __('Create your free account and try it out!') ?></p>
-            <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'register']) ?>" class="btn-primary" style="background: white; color: #667eea;"><?= __('Register for free') ?></a>
+            <h3>Bereit anzufangen?</h3>
+            <p>Erstellen Sie Ihren kostenlosen Account und probieren Sie es aus!</p>
+            <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'register']) ?>" class="btn-primary" style="background: white; color: #667eea;"><?= __('Kostenlos registrieren') ?></a>
         </div>
     </div>
 
     <footer style="padding: 2rem; text-align: center; background: #f8f9fa;">
         <div class="container">
-            <p>&copy; <?= date('Y') ?> FairNestPlan. <?= __('All rights reserved.') ?></p>
+            <p>&copy; <?= date('Y') ?> FairNestPlan. Alle Rechte vorbehalten.</p>
             <p>
-                <a href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'display', 'imprint']) ?>"><?= __('Imprint') ?></a> | 
-                <a href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'display', 'privacy']) ?>"><?= __('Privacy') ?></a> | 
-                <a href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'display', 'terms']) ?>"><?= __('Terms') ?></a>
+                <a href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'display', 'imprint']) ?>">Impressum</a> | 
+                <a href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'display', 'privacy']) ?>">Datenschutz</a> | 
+                <a href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'display', 'terms']) ?>">AGB</a>
             </p>
         </div>
     </footer>

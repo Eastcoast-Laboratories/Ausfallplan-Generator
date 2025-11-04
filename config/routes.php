@@ -69,6 +69,7 @@ return function (RouteBuilder $routes): void {
         $builder->connect('/waitlist', ['controller' => 'Waitlist', 'action' => 'index']);
         $builder->connect('/forgot-password', ['controller' => 'Users', 'action' => 'forgotPassword']);
         $builder->connect('/reset-password', ['controller' => 'Users', 'action' => 'resetPassword']);
+        $builder->connect('/set-language', ['controller' => 'Pages', 'action' => 'setLanguage']);
         
         // Admin Routes - Prefix scope automatically adds /admin/ to URLs
         $builder->prefix('Admin', function (RouteBuilder $routes) {

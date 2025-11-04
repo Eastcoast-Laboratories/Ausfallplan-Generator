@@ -42,7 +42,38 @@ class PagesController extends AppController
         parent::beforeFilter($event);
         
         // Allow public access to all static pages
-        $this->Authentication->addUnauthenticatedActions(['display']);
+        $this->Authentication->addUnauthenticatedActions(['display', 'home', 'setLanguage']);
+    }
+    
+    /**
+     * Homepage
+     */
+    public function home()
+    {
+        // Homepage is rendered with home.php template
+    }
+    
+    /**
+     * Set language
+     */
+    public function setLanguage()
+    {
+        $locale = $this->request->getQuery('locale', 'de_DE');
+        
+        // Validate locale
+        if (!in_array($locale, ['de_DE', 'en_US'])) {
+            $locale = 'de_DE';
+        }
+        
+        // Store in session
+        $this->request->getSession()->write('Config.language', $locale);
+        
+        // Redirect back to referrer or home
+        $referer = $this->request->referer(true);
+        if (!$referer) {
+            $referer = '/';
+        }
+        return $this->redirect($referer);
     }
 
     /**
