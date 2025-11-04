@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🐳 Starting Ausfallplan-Generator Docker Container..."
+echo "🐳 Starting FairNestPlan Docker Container..."
 echo ""
 
 # Change to project root directory
@@ -69,7 +69,7 @@ echo "🗄️  Running database migrations..."
 $DOCKER_COMPOSE -f docker/docker-compose.yml exec -T app bin/cake migrations migrate
 
 echo ""
-echo "✅ Ausfallplan-Generator is ready!"
+echo "✅ FairNestPlan is ready!"
 echo ""
 echo "📊 Access the application at: http://localhost:8080"
 echo ""

@@ -1,6 +1,6 @@
 <?php
 /**
- * Fairnestplan Landing Page
+ * FairNestPlan Landing Page
  *
  * @var \App\View\AppView $this
  */
@@ -12,7 +12,7 @@ $this->disableAutoLayout();
 <head>
     <?= $this->Html->charset() ?>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Fairnestplan - Kita Scheduling Made Easy</title>
+    <title>FairNestPlan - Kita Reduzierte Gruppenplanung</title>
     <?= $this->Html->meta('icon') ?>
     <?= $this->Html->css(['normalize.min', 'milligram.min', 'home']) ?>
     <style>
@@ -107,7 +107,7 @@ $this->disableAutoLayout();
 </head>
 <body>
     <nav class="header-nav">
-        <div class="logo">🌟 Fairnestplan</div>
+        <div class="logo">🌟 FairNestPlan</div>
         <div class="nav-links">
             <a href="#features">Features</a>
             <a href="#pricing">Preise</a>
@@ -118,7 +118,7 @@ $this->disableAutoLayout();
 
     <div class="hero">
         <div class="container">
-            <h1>🌟 Fairnestplan</h1>
+            <h1>🌟 FairNestPlan</h1>
             <p>Einfache und faire Planung im Falle von Ausfällen für Kitas und Kindergärten</p>
             <p>Verwalten Sie Kinder, erstellen Sie eine Liste, welche Kinder an welchen Tagen kommen mit intelligentem Nachrücklisten-System</p>
             <div style="margin-top: 2rem;">
@@ -148,7 +148,7 @@ $this->disableAutoLayout();
                 <div class="column">
                     <div class="feature-card">
                         <h3>📋 Nachrückliste</h3>
-                        <p>Sollten Plätze durch Krankheit, Termine o.ä. der Kinder nicht besetzt sein, können die Eltern diese anhand der Nachrückliste durch Absprechen in der WhatsApp-Gruppe füllen. Hierbei ist zu beachten, dass die Anzahl von X Zählkindern nicht überschritten wird. Die integrativ Kinder zählen hierbei doppelt.</p>
+                        <p>Sollten Plätze frei werden, hilft die Nachrückliste beim schnellen und fairen Auffüllen.</p>
                     </div>
                 </div>
             </div>
@@ -188,7 +188,6 @@ $this->disableAutoLayout();
                         <ul style="text-align: left;">
                             <li>1 Organisation</li>
                             <li>1 aktiver Plan</li>
-                            <li>Bis zu 25 Kinder</li>
                             <li>PDF Export</li>
                             <li>Community Support</li>
                         </ul>
@@ -198,13 +197,12 @@ $this->disableAutoLayout();
                 <div class="column">
                     <div class="price-card">
                         <h3>Pro</h3>
-                        <div class="price">€29/Monat</div>
+                        <div class="price">€5/Monat</div>
                         <ul style="text-align: left;">
-                            <li>Unbegrenzte Pläne</li>
-                            <li>Prioritäts-Nachrückliste</li>
-                            <li>CSV Import</li>
-                            <li>Custom PDF Themes</li>
+                            <li>Unbegrenzte Anzahl Pläne</li>
+                            <li>PDF Export</li>
                             <li>Priority Support</li>
+                            <li>Unbegrenzte Anzahl Organisationen</li>
                         </ul>
                         <a href="#" class="btn-primary">Upgrade</a>
                     </div>
@@ -216,11 +214,10 @@ $this->disableAutoLayout();
                         <ul style="text-align: left;">
                             <li>SSO/SAML Integration</li>
                             <li>SLA Vereinbarung</li>
-                            <li>Audit Logs</li>
                             <li>Dedicated Support</li>
                             <li>Custom Features</li>
                         </ul>
-                        <a href="#" class="btn-primary">Kontakt</a>
+                        <a href="mailto:fairnestplan-kontakt@it.z11.de" class="btn-primary">Kontakt</a>
                     </div>
                 </div>
             </div>
@@ -237,7 +234,7 @@ $this->disableAutoLayout();
 
     <footer style="padding: 2rem; text-align: center; background: #f8f9fa;">
         <div class="container">
-            <p>&copy; <?= date('Y') ?> Fairnestplan. Alle Rechte vorbehalten.</p>
+            <p>&copy; <?= date('Y') ?> FairNestPlan. Alle Rechte vorbehalten.</p>
             <p>
                 <a href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'display', 'imprint']) ?>">Impressum</a> | 
                 <a href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'display', 'privacy']) ?>">Datenschutz</a> | 

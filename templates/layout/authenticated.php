@@ -20,7 +20,7 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
     <?= $this->Html->charset() ?>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>
-        <?= $this->fetch('title', 'Ausfallplan-Generator') ?>
+        <?= $this->fetch('title', 'FairNestPlan') ?>
     </title>
     <?= $this->Html->meta('icon') ?>
     <?= $this->Html->css(['normalize.min', 'milligram.min']) ?>

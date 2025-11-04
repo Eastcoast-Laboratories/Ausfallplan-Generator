@@ -10,7 +10,7 @@ $this->disableAutoLayout();
 <head>
     <?= $this->Html->charset() ?>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Datenschutzerklärung - Ausfallplan-Generator</title>
+    <title>Datenschutzerklärung - FairNestPlan</title>
     <?= $this->Html->meta('icon') ?>
     <?= $this->Html->css(['normalize.min', 'milligram.min', 'home']) ?>
     <style>
@@ -39,7 +39,7 @@ $this->disableAutoLayout();
 </head>
 <body>
     <nav class="header-nav">
-        <a href="<?= $this->Url->build('/') ?>" class="logo">🌟 Ausfallplan-Generator</a>
+        <a href="<?= $this->Url->build('/') ?>" class="logo">🌟 FairNestPlan</a>
         <div>
             <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'login']) ?>">Login</a>
         </div>
@@ -59,7 +59,7 @@ $this->disableAutoLayout();
             Knickweg 16<br>
             24114 Kiel<br>
             Deutschland<br>
-            E-Mail: lalumo-support@it.z11.de<br>
+            E-Mail: fairnestplan-kontakt@it.z11.de<br>
             Tel: Kiel-53687223
         </p>
         
@@ -105,12 +105,13 @@ $this->disableAutoLayout();
         
         <h2>7. Hosting</h2>
         <p>Wir hosten die Inhalte unserer Website bei folgendem Anbieter:</p>
+        <p>Hetzner Online AG</p>
         <p>Die Server befinden sich in Deutschland und entsprechen den DSGVO-Anforderungen.</p>
         
         <h2>8. Kontakt zum Datenschutz</h2>
         <p>Wenn Sie Fragen zum Datenschutz haben, schreiben Sie uns bitte eine E-Mail an:</p>
         <p>
-            E-Mail: lalumo-support@it.z11.de<br>
+            E-Mail: fairnestplan-kontakt@it.z11.de<br>
             Telefon: Kiel-53687223
         </p>
         
@@ -119,7 +120,7 @@ $this->disableAutoLayout();
 
     <footer style="padding: 2rem; text-align: center; background: #f8f9fa; margin-top: 4rem;">
         <div class="container">
-            <p>&copy; <?= date('Y') ?> Ausfallplan-Generator. Alle Rechte vorbehalten.</p>
+            <p>&copy; <?= date('Y') ?> FairNestPlan. Alle Rechte vorbehalten.</p>
             <p>
                 <a href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'display', 'imprint']) ?>">Impressum</a> | 
                 <a href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'display', 'privacy']) ?>">Datenschutz</a> | 

@@ -38,7 +38,7 @@ class PagesControllerTest extends TestCase
         Configure::write('debug', true);
         $this->get('/pages/home');
         $this->assertResponseOk();
-        $this->assertResponseContains('Ausfallplan-Generator');
+        $this->assertResponseContains('FairNestPlan');
         $this->assertResponseContains('html');
     }
 

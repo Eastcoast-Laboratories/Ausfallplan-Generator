@@ -10,7 +10,7 @@ $this->disableAutoLayout();
 <head>
     <?= $this->Html->charset() ?>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Impressum - Ausfallplan-Generator</title>
+    <title>Impressum - FairNestPlan</title>
     <?= $this->Html->meta('icon') ?>
     <?= $this->Html->css(['normalize.min', 'milligram.min', 'home']) ?>
     <style>
@@ -39,7 +39,7 @@ $this->disableAutoLayout();
 </head>
 <body>
     <nav class="header-nav">
-        <a href="<?= $this->Url->build('/') ?>" class="logo">🌟 Ausfallplan-Generator</a>
+        <a href="<?= $this->Url->build('/') ?>" class="logo">🌟 FairNestPlan</a>
         <div>
             <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'login']) ?>">Login</a>
         </div>
@@ -50,7 +50,6 @@ $this->disableAutoLayout();
         
         <h2>Angaben gemäß § 5 TMG</h2>
         <p>
-            Lalumo App - Musiklernen für Kinder<br>
             Ruben Barkow-Kuder<br>
             Knickweg 16<br>
             24114 Kiel<br>
@@ -60,7 +59,7 @@ $this->disableAutoLayout();
         <h2>Kontakt</h2>
         <p>
             Telefon: Kiel-53687223<br>
-            E-Mail: lalumo-support@it.z11.de
+            E-Mail: fairnestplan-kontakt@it.z11.de
         </p>
         
         <h2>Umsatzsteuer-ID</h2>
@@ -102,7 +101,7 @@ $this->disableAutoLayout();
 
     <footer style="padding: 2rem; text-align: center; background: #f8f9fa; margin-top: 4rem;">
         <div class="container">
-            <p>&copy; <?= date('Y') ?> Ausfallplan-Generator. Alle Rechte vorbehalten.</p>
+            <p>&copy; <?= date('Y') ?> FairNestPlan. Alle Rechte vorbehalten.</p>
             <p>
                 <a href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'display', 'imprint']) ?>">Impressum</a> | 
                 <a href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'display', 'privacy']) ?>">Datenschutz</a> | 
