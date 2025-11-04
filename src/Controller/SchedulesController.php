@@ -870,6 +870,9 @@ class SchedulesController extends AppController
         
         $currentRow = 4;
         
+        // Track border information for each block
+        $blockBorderInfo = [];
+        
         // PRE-CALCULATE first-on-waitlist rows for ALL blocks (needed for formulas)
         $firstOnWaitlistRows = [];
         $tempRow = $currentRow;
@@ -892,6 +895,9 @@ class SchedulesController extends AppController
         foreach ($dayBlocks as $blockIndex => $blockDays) {
             $isFirstBlock = ($blockIndex === 0);
             $col = 1; // Column A
+            
+            // Track block start for border calculation
+            $blockStartRow = $currentRow;
             
             // Block header - each day gets 2 columns (Name + Weight)
             foreach ($blockDays as $day) {
@@ -1067,6 +1073,14 @@ class SchedulesController extends AppController
                 $currentRow++;
             }
             
+            // Store border info for this block
+            $blockBorderInfo[] = [
+                'startRow' => $blockStartRow,
+                'endRow' => $currentRow - 1, // Current row - 1 is the last row of content
+                'endCol' => count($blockDays) * 2,
+                'isFirstBlock' => $isFirstBlock,
+            ];
+            
             $currentRow++; // Empty row between blocks
         }
         
@@ -1086,40 +1100,22 @@ class SchedulesController extends AppController
             ],
         ];
         
-        // Apply border to each 4-day block and waitlist
-        $currentRow = 4;
-        foreach ($dayBlocks as $blockIndex => $blockDays) {
-            $isFirstBlock = ($blockIndex === 0);
-            
-            // Calculate block dimensions
-            $maxChildrenPerDay = 0;
-            foreach ($blockDays as $day) {
-                $maxChildrenPerDay = max($maxChildrenPerDay, count($day['children'] ?? []));
-            }
-            // Block rows: 1 header + maxChildrenPerDay children + 1 sum + 1 first-on-waitlist
-            $totalBlockRows = 1 + $maxChildrenPerDay + 2;
-            
-            // Border around 4-day block (columns A to last day weight column)
-            $blockStartRow = $currentRow;
-            $blockEndRow = $blockStartRow + $totalBlockRows - 1;
-            $blockEndCol = count($blockDays) * 2; // 2 columns per day
-            
-            $blockRange = 'A' . $blockStartRow . ':' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($blockEndCol) . $blockEndRow;
+        // Apply borders using tracked information
+        foreach ($blockBorderInfo as $borderInfo) {
+            // Border around 4-day block
+            $blockRange = 'A' . $borderInfo['startRow'] . ':' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($borderInfo['endCol']) . $borderInfo['endRow'];
             $sheet->getStyle($blockRange)->applyFromArray($outerBorderStyle);
             
             // Border around waitlist (only first block)
-            if ($isFirstBlock) {
-                $waitlistStartCol = $blockEndCol + 2; // After spacer
+            if ($borderInfo['isFirstBlock']) {
+                $waitlistStartCol = $borderInfo['endCol'] + 2; // After spacer
                 $waitlistEndCol = $waitlistStartCol + 3; // Name + Z + D + ⬇️
-                // Waitlist should be at least as high as the day block
-                $waitlistContentRows = count($waitlist) + count($alwaysAtEnd) + 2; // +2 for "Immer am Ende:" label and spacing
-                $waitlistEndRow = $blockStartRow + max($waitlistContentRows, $totalBlockRows) - 1;
+                // Waitlist border should match the actual content height
+                $waitlistEndRow = $borderInfo['endRow'];
                 
-                $waitlistRange = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($waitlistStartCol) . $blockStartRow . ':' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($waitlistEndCol) . $waitlistEndRow;
+                $waitlistRange = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($waitlistStartCol) . $borderInfo['startRow'] . ':' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($waitlistEndCol) . $waitlistEndRow;
                 $sheet->getStyle($waitlistRange)->applyFromArray($outerBorderStyle);
             }
-            
-            $currentRow = $blockEndRow + 2; // +1 for spacer row between blocks
         }
         
         // Create Excel file
