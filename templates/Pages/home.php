@@ -199,10 +199,10 @@ $this->disableAutoLayout();
                         <h3>Pro</h3>
                         <div class="price">€5/Monat</div>
                         <ul style="text-align: left;">
+                            <li>Unbegrenzte Anzahl Organisationen</li>
                             <li>Unbegrenzte Anzahl Pläne</li>
                             <li>PDF Export</li>
                             <li>Priority Support</li>
-                            <li>Unbegrenzte Anzahl Organisationen</li>
                         </ul>
                         <a href="#" class="btn-primary">Upgrade</a>
                     </div>

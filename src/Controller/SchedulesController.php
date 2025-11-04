@@ -934,6 +934,14 @@ class SchedulesController extends AppController
             // Total content rows: maxChildrenPerDay + 2
             $rowsPerBlock = $maxChildrenPerDay + 2;
             
+            // For first block: may need more rows for waitlist + "Immer am Ende" children
+            if ($isFirstBlock) {
+                $waitlistRows = count($waitlist);
+                $alwaysAtEndRows = !empty($alwaysAtEnd) ? count($alwaysAtEnd) + 2 : 0; // +2 for label and spacing
+                $totalWaitlistRows = $waitlistRows + $alwaysAtEndRows;
+                $rowsPerBlock = max($rowsPerBlock, $totalWaitlistRows);
+            }
+            
             // Calculate exact row numbers
             $firstChildRow = $currentRow;
             $lastChildRow = $currentRow + $maxChildrenPerDay - 1;
