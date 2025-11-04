@@ -724,7 +724,7 @@ class SchedulesController extends AppController
             }
             if ($isFirstBlock) {
                 $headerRow[] = ''; // Spacer
-                $headerRow[] = 'Nachrückliste';
+                $headerRow[] = __('Nachrückliste');
                 $headerRow[] = 'Z'; // Gewichtung
                 $headerRow[] = 'D'; // Tage
                 $headerRow[] = '⬇️'; // Nachrücken
@@ -863,9 +863,9 @@ class SchedulesController extends AppController
         $sheet->setTitle('Ausfallplan');
         
         // Header
-        $sheet->setCellValue('A1', 'Ausfallplan');
+        $sheet->setCellValue('A1', __('Ausfallplan'));
         $sheet->setCellValue('B1', $schedule->title);
-        $sheet->setCellValue('A2', 'Organisation');
+        $sheet->setCellValue('A2', __('Organization'));
         $sheet->setCellValue('B2', $schedule->organization->name);
         
         $currentRow = 4;
@@ -890,7 +890,7 @@ class SchedulesController extends AppController
             if ($isFirstBlock) {
                 $col++; // Spacer
                 $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $currentRow;
-                $sheet->getCell($cellCoord)->setValue('Nachrückliste');
+                $sheet->getCell($cellCoord)->setValue(__('Nachrückliste'));
                 $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1) . $currentRow;
                 $sheet->getCell($cellCoord)->setValue('Z');
                 $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 2) . $currentRow;
@@ -942,16 +942,20 @@ class SchedulesController extends AppController
                         }
                     } elseif ($rowIdx == $maxChildrenPerDay) {
                         // First on waitlist row - ALL in ONE row
+                        // Name in column 0, ⬇️ in column 1 (weight column)
                         $firstOnWaitlist = $day['firstOnWaitlistChild'] ?? null;
                         if ($firstOnWaitlist) {
                             $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $currentRow;
-                            $sheet->getCell($cellCoord)->setValue('→ ' . $firstOnWaitlist['child']->name);
+                            $sheet->getCell($cellCoord)->setValue($firstOnWaitlist['child']->name);
+                            // ⬇️ symbol in weight column
+                            $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1) . $currentRow;
+                            $sheet->getCell($cellCoord)->setValue('⬇️');
                         }
-                    } elseif ($rowIdx == $maxChildrenPerDay + 1) {
-                        // Sum row - use formula
+                    } elseif ($rowIdx == $maxChildrenPerDay - 1) {
+                        // Sum row - one row HIGHER (before first-on-waitlist) and one column to the RIGHT (weight column)
                         $weightCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1);
-                        $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $currentRow;
-                        $sheet->getCell($cellCoord)->setValue("=SUM({$weightCol}{$firstChildRow}:{$weightCol}" . ($firstChildRow + $maxChildrenPerDay - 1) . ")");
+                        $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1) . $currentRow;
+                        $sheet->getCell($cellCoord)->setValue("=SUM({$weightCol}{$firstChildRow}:{$weightCol}" . ($firstChildRow + $maxChildrenPerDay - 2) . ")");
                     }
                     $col += 2;
                 }
@@ -973,7 +977,7 @@ class SchedulesController extends AppController
                         $nameCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
                         $firstOnWaitlistCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 3);
                         $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 2) . $currentRow;
-                        $sheet->getCell($cellCoord)->setValue("=COUNTIF(\$A\$1:\$K\$100,{$nameCol}{$currentRow})-{$firstOnWaitlistCol}{$currentRow}");
+                        $sheet->getCell($cellCoord)->setValue("=COUNTIF(\$A\$1:\$G\$100,{$nameCol}{$currentRow})-{$firstOnWaitlistCol}{$currentRow}");
                         
                         // ⬇️-Spalte: COUNTIF formula for first on waitlist count
                         $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 3) . $currentRow;
@@ -986,7 +990,7 @@ class SchedulesController extends AppController
                         $sheet->getCell($cellCoord)->setValue($firstOnWaitlistFormula);
                     } elseif ($rowIdx == count($waitlist) + 1 && !empty($alwaysAtEnd)) {
                         $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $currentRow;
-                        $sheet->getCell($cellCoord)->setValue('Immer am Ende:');
+                        $sheet->getCell($cellCoord)->setValue(__('Immer am Ende') . ':');
                     } elseif ($rowIdx > count($waitlist) + 1 && !empty($alwaysAtEnd)) {
                         $alwaysAtEndIdx = $rowIdx - count($waitlist) - 2;
                         if ($alwaysAtEndIdx < count($alwaysAtEnd)) {
@@ -998,11 +1002,11 @@ class SchedulesController extends AppController
                             $sheet->getCell($cellCoord)->setValue($childData['child']->name);
                             $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1) . $currentRow;
                             $sheet->getCell($cellCoord)->setValue($childData['weight']);
-                            // D-Spalte: COUNTIF formula for days count
+                            // D-Spalte: COUNTIF formula for days count ("Always at end")
                             $nameCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
                             $firstOnWaitlistCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 3);
                             $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 2) . $currentRow;
-                            $sheet->getCell($cellCoord)->setValue("=COUNTIF(\$A\$1:\$K\$100,{$nameCol}{$currentRow})-{$firstOnWaitlistCol}{$currentRow}");
+                            $sheet->getCell($cellCoord)->setValue("=COUNTIF(\$A\$1:\$G\$100,{$nameCol}{$currentRow})-{$firstOnWaitlistCol}{$currentRow}");
                             
                             // ⬇️-Spalte: COUNTIF formula for first on waitlist count
                             $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 3) . $currentRow;

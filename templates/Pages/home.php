@@ -147,8 +147,8 @@ $this->disableAutoLayout();
                 </div>
                 <div class="column">
                     <div class="feature-card">
-                        <h3>📋 Nachrücklisten</h3>
-                        <p>Prioritätsbasierte Nachrücklisten mit fairem Rotationssystem. Füllen Sie freie Plätze automatisch.</p>
+                        <h3>📋 Nachrückliste</h3>
+                        <p>Sollten Plätze durch Krankheit, Termine o.ä. der Kinder nicht besetzt sein, können die Eltern diese anhand der Nachrückliste durch Absprechen in der WhatsApp-Gruppe füllen. Hierbei ist zu beachten, dass die Anzahl von X Zählkindern nicht überschritten wird. Die integrativ Kinder zählen hierbei doppelt.</p>
                     </div>
                 </div>
             </div>
@@ -156,8 +156,8 @@ $this->disableAutoLayout();
             <div class="row">
                 <div class="column">
                     <div class="feature-card">
-                        <h3>🖨️ PDF/PNG Export</h3>
-                        <p>Exportieren Sie schöne, druckfertige Pläne im PDF oder PNG Format. Perfekt für Aushänge.</p>
+                        <h3>🖨️ PDF/Excel Export</h3>
+                        <p>Exportieren Sie schöne, druckfertige Pläne als PDF zur Verteilung oder Excel Format zum Nachbearbeiten.</p>
                     </div>
                 </div>
                 <div class="column">
