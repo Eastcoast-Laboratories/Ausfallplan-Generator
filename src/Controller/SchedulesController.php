@@ -870,8 +870,23 @@ class SchedulesController extends AppController
         
         $currentRow = 4;
         
-        // Track first-on-waitlist rows for formula building
+        // PRE-CALCULATE first-on-waitlist rows for ALL blocks (needed for formulas)
         $firstOnWaitlistRows = [];
+        $tempRow = $currentRow;
+        foreach ($dayBlocks as $blockDays) {
+            // Calculate max children for this block
+            $maxChildrenPerDay = 0;
+            foreach ($blockDays as $day) {
+                $maxChildrenPerDay = max($maxChildrenPerDay, count($day['children'] ?? []));
+            }
+            // Block structure: header + children + sum + first-on-waitlist
+            $tempRow++; // Header row
+            $tempRow += $maxChildrenPerDay; // Children rows
+            $tempRow++; // Sum row
+            $firstOnWaitlistRows[] = $tempRow; // This is the first-on-waitlist row
+            $tempRow++; // Move to next row after first-on-waitlist
+            $tempRow++; // Spacer row between blocks
+        }
         
         // Build each 4-day block
         foreach ($dayBlocks as $blockIndex => $blockDays) {
@@ -911,17 +926,19 @@ class SchedulesController extends AppController
             foreach ($blockDays as $day) {
                 $maxChildrenPerDay = max($maxChildrenPerDay, count($day['children'] ?? []));
             }
-            // Fixed rows per block: children + 1 first-on-waitlist row + 1 sum row + 1 spacer
-            $rowsPerBlock = $maxChildrenPerDay + 3;
             
-            // Track row numbers for formulas
-            $blockStartRow = $currentRow;
+            // Block structure (after header row):
+            // 1. Children rows: maxChildrenPerDay rows (ALWAYS same height for all days)
+            // 2. Sum row: 1 row
+            // 3. First-on-waitlist row: 1 row
+            // Total content rows: maxChildrenPerDay + 2
+            $rowsPerBlock = $maxChildrenPerDay + 2;
+            
+            // Calculate exact row numbers
             $firstChildRow = $currentRow;
-            $firstOnWaitlistRowNum = $currentRow + $maxChildrenPerDay;
-            $sumRow = $firstOnWaitlistRowNum + 1;
-            
-            // Store first-on-waitlist row for this block
-            $firstOnWaitlistRows[] = $firstOnWaitlistRowNum;
+            $lastChildRow = $currentRow + $maxChildrenPerDay - 1;
+            $sumRowNum = $lastChildRow + 1;
+            $firstOnWaitlistRowNum = $sumRowNum + 1;
             
             // Block content rows
             for ($rowIdx = 0; $rowIdx < $rowsPerBlock; $rowIdx++) {
@@ -932,7 +949,7 @@ class SchedulesController extends AppController
                     $children = $day['children'] ?? [];
                     
                     if ($rowIdx < $maxChildrenPerDay) {
-                        // Children rows
+                        // Children rows (ALWAYS maxChildrenPerDay rows)
                         if ($rowIdx < count($children)) {
                             $childData = $children[$rowIdx];
                             $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $currentRow;
@@ -940,7 +957,13 @@ class SchedulesController extends AppController
                             $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1) . $currentRow;
                             $sheet->getCell($cellCoord)->setValue($childData['is_integrative'] ? 2 : 1);
                         }
+                        // Else: empty row (to keep all days same height)
                     } elseif ($rowIdx == $maxChildrenPerDay) {
+                        // Sum row - in weight column (col + 1)
+                        $weightCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1);
+                        $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1) . $currentRow;
+                        $sheet->getCell($cellCoord)->setValue("=SUM({$weightCol}{$firstChildRow}:{$weightCol}{$lastChildRow})");
+                    } elseif ($rowIdx == $maxChildrenPerDay + 1) {
                         // First on waitlist row - ALL in ONE row
                         // Name in column 0, ⬇️ in column 1 (weight column)
                         $firstOnWaitlist = $day['firstOnWaitlistChild'] ?? null;
@@ -951,11 +974,6 @@ class SchedulesController extends AppController
                             $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1) . $currentRow;
                             $sheet->getCell($cellCoord)->setValue('⬇️');
                         }
-                    } elseif ($rowIdx == $maxChildrenPerDay - 1) {
-                        // Sum row - one row HIGHER (before first-on-waitlist) and one column to the RIGHT (weight column)
-                        $weightCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1);
-                        $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1) . $currentRow;
-                        $sheet->getCell($cellCoord)->setValue("=SUM({$weightCol}{$firstChildRow}:{$weightCol}" . ($firstChildRow + $maxChildrenPerDay - 2) . ")");
                     }
                     $col += 2;
                 }
@@ -1070,11 +1088,12 @@ class SchedulesController extends AppController
             foreach ($blockDays as $day) {
                 $maxChildrenPerDay = max($maxChildrenPerDay, count($day['children'] ?? []));
             }
-            $rowsPerBlock = $maxChildrenPerDay + 3;
+            // Block rows: 1 header + maxChildrenPerDay children + 1 sum + 1 first-on-waitlist
+            $totalBlockRows = 1 + $maxChildrenPerDay + 2;
             
-            // Border around 4-day block (columns A to K, or A to I for 4 days)
+            // Border around 4-day block (columns A to last day weight column)
             $blockStartRow = $currentRow;
-            $blockEndRow = $currentRow + $rowsPerBlock;
+            $blockEndRow = $blockStartRow + $totalBlockRows - 1;
             $blockEndCol = count($blockDays) * 2; // 2 columns per day
             
             $blockRange = 'A' . $blockStartRow . ':' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($blockEndCol) . $blockEndRow;
@@ -1084,13 +1103,15 @@ class SchedulesController extends AppController
             if ($isFirstBlock) {
                 $waitlistStartCol = $blockEndCol + 2; // After spacer
                 $waitlistEndCol = $waitlistStartCol + 3; // Name + Z + D + ⬇️
-                $waitlistEndRow = $blockStartRow + max(count($waitlist) + count($alwaysAtEnd) + 2, $rowsPerBlock);
+                // Waitlist should be at least as high as the day block
+                $waitlistContentRows = count($waitlist) + count($alwaysAtEnd) + 2; // +2 for "Immer am Ende:" label and spacing
+                $waitlistEndRow = $blockStartRow + max($waitlistContentRows, $totalBlockRows) - 1;
                 
                 $waitlistRange = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($waitlistStartCol) . $blockStartRow . ':' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($waitlistEndCol) . $waitlistEndRow;
                 $sheet->getStyle($waitlistRange)->applyFromArray($outerBorderStyle);
             }
             
-            $currentRow = $blockEndRow + 1;
+            $currentRow = $blockEndRow + 2; // +1 for spacer row between blocks
         }
         
         // Create Excel file
