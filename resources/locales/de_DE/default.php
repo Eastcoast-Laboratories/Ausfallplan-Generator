@@ -7,7 +7,7 @@ return [
     'Ausfallplan' => 'FairNestPlan',
     'Ausfallplan Generator' => 'FairNestPlan',
     'Schedules' => 'Ausfallpläne',
-    'Waitlist' => 'Warteliste',
+    'Waitlist' => 'Nachrückliste',
     'Bitte erstellen Sie zuerst einen Ausfallplan.' => 'Bitte erstellen Sie zuerst einen Ausfallplan.',
     'Sie sind kein Administrator einer Organisation.' => 'Sie sind kein Administrator einer Organisation.',
     'Sie haben keine Berechtigung, diese Organisation zu bearbeiten.' => 'Sie haben keine Berechtigung, diese Organisation zu bearbeiten.',

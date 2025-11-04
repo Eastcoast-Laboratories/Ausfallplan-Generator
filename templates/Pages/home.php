@@ -6,6 +6,9 @@
  */
 
 $this->disableAutoLayout();
+
+// Check if user is logged in via request session
+$identity = $this->request->getAttribute('identity');
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -111,7 +114,7 @@ $this->disableAutoLayout();
         <div class="nav-links">
             <a href="#features">Features</a>
             <a href="#pricing">Preise</a>
-            <?php if ($this->Identity->isLoggedIn()): ?>
+            <?php if ($identity): ?>
                 <a href="<?= $this->Url->build(['controller' => 'Schedules', 'action' => 'index']) ?>" class="btn-secondary">Meine Pläne</a>
                 <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'logout']) ?>" class="btn-primary">Logout</a>
             <?php else: ?>

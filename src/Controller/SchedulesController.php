@@ -724,7 +724,7 @@ class SchedulesController extends AppController
             }
             if ($isFirstBlock) {
                 $headerRow[] = ''; // Spacer
-                $headerRow[] = __('Nachrückliste');
+                $headerRow[] = __('Waitlist');
                 $headerRow[] = 'Z'; // Gewichtung
                 $headerRow[] = 'D'; // Tage
                 $headerRow[] = '⬇️'; // Nachrücken
@@ -860,11 +860,10 @@ class SchedulesController extends AppController
         // Create Excel file
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Ausfallplan');
+        $sheet->setTitle(substr($schedule->title, 0, 31)); // Excel max 31 chars for sheet name
         
         // Header
-        $sheet->setCellValue('A1', __('Ausfallplan'));
-        $sheet->setCellValue('B1', $schedule->title);
+        $sheet->setCellValue('A1', $schedule->title);
         $sheet->setCellValue('A2', __('Organization'));
         $sheet->setCellValue('B2', $schedule->organization->name);
         
@@ -876,18 +875,35 @@ class SchedulesController extends AppController
         // PRE-CALCULATE first-on-waitlist rows for ALL blocks (needed for formulas)
         $firstOnWaitlistRows = [];
         $tempRow = $currentRow;
-        foreach ($dayBlocks as $blockDays) {
+        foreach ($dayBlocks as $blockIndex => $blockDays) {
+            $isFirstBlock = ($blockIndex === 0);
+            
             // Calculate max children for this block
             $maxChildrenPerDay = 0;
             foreach ($blockDays as $day) {
                 $maxChildrenPerDay = max($maxChildrenPerDay, count($day['children'] ?? []));
             }
+            
             // Block structure: header + children + sum + first-on-waitlist
             $tempRow++; // Header row
             $tempRow += $maxChildrenPerDay; // Children rows
             $tempRow++; // Sum row
             $firstOnWaitlistRows[] = $tempRow; // This is the first-on-waitlist row
             $tempRow++; // Move to next row after first-on-waitlist
+            
+            // For first block: account for extra waitlist rows if needed
+            if ($isFirstBlock) {
+                $waitlistRows = count($waitlist);
+                $alwaysAtEndRows = !empty($alwaysAtEnd) ? count($alwaysAtEnd) + 2 : 0;
+                $totalWaitlistRows = $waitlistRows + $alwaysAtEndRows;
+                $dayBlockRows = $maxChildrenPerDay + 2; // children + sum + first-on-waitlist
+                
+                // If waitlist needs more rows, add the difference
+                if ($totalWaitlistRows > $dayBlockRows) {
+                    $tempRow += ($totalWaitlistRows - $dayBlockRows);
+                }
+            }
+            
             $tempRow++; // Spacer row between blocks
         }
         
@@ -1016,7 +1032,7 @@ class SchedulesController extends AppController
                         // Build formula dynamically based on tracked rows
                         $formulaParts = [];
                         foreach ($firstOnWaitlistRows as $fowRow) {
-                            $formulaParts[] = "COUNTIF(\$A\${$fowRow}:\$J\${$fowRow},{$nameCol}{$currentRow})";
+                            $formulaParts[] = "COUNTIF(\$A\${$fowRow}:\$G\${$fowRow},{$nameCol}{$currentRow})";
                         }
                         $firstOnWaitlistFormula = "=" . implode("+", $formulaParts);
                         $sheet->getCell($cellCoord)->setValue($firstOnWaitlistFormula);
@@ -1045,7 +1061,7 @@ class SchedulesController extends AppController
                             // Build formula dynamically based on tracked rows
                             $formulaParts = [];
                             foreach ($firstOnWaitlistRows as $fowRow) {
-                                $formulaParts[] = "COUNTIF(\$A\${$fowRow}:\$J\${$fowRow},{$nameCol}{$currentRow})";
+                                $formulaParts[] = "COUNTIF(\$A\${$fowRow}:\$G\${$fowRow},{$nameCol}{$currentRow})";
                             }
                             $firstOnWaitlistFormula = "=" . implode("+", $formulaParts);
                             $sheet->getCell($cellCoord)->setValue($firstOnWaitlistFormula);
