@@ -25,6 +25,7 @@ git push origin main
 # 2. Deploy to server
 echo "🌐 Step 2: Deploying to eclabs-vm06..."
 ssh eclabs-vm06 "cd /var/kunden/webs/ruben/www/fairnestplan.z11.de && \
+    git reset --hard bff6ba2d && \
     git pull origin main && \
     rm -rf tmp/cache/* && \
     echo '✅ Deployment completed!'"
