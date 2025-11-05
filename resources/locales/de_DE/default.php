@@ -81,10 +81,10 @@ return [
     'Manage children with sibling groups, integration status and individual priorities.' => 'Verwalten Sie Kinder mit Geschwistergruppen, Integrations-Status und individuellen Prioritäten.',
     '🎲 Smart Distribution' => '🎲 Intelligente Verteilung',
     'Automatic, fair distribution of children across days considering all constraints.' => 'Automatische, faire Verteilung der Kinder über die Tage unter Berücksichtigung aller Constraints.',
-    '📅 Automatic Distribution' => '📅 Automatische Verteilung',
+    'Automatic Distribution' => 'Automatische Verteilung',
     'Intelligent algorithms distribute children fairly across days, respecting capacities and sibling groups.' => 'Intelligente Algorithmen verteilen Kinder fair über Tage, respektieren Kapazitäten und Geschwistergruppen.',
-    '📋 Substitute List' => '📋 Nachrückliste',
-    'If places become available, the substitute list helps with quick and fair filling.' => 'Sollten Plätze frei werden, hilft die Nachrückliste beim schnellen und fairen Auffüllen.',
+    'Waitlist' => 'Nachrückliste',
+    'If places become available, the waitlist helps with quick and fair filling.' => 'Sollten Plätze frei werden, hilft die Nachrückliste beim schnellen und fairen Auffüllen.',
     '🖨️ PDF/Excel Export' => '🖨️ PDF/Excel Export',
     'Export beautiful, print-ready schedules as PDF for distribution or Excel format for editing.' => 'Exportieren Sie schöne, druckfertige Pläne als PDF zur Verteilung oder Excel Format zum Nachbearbeiten.',
     '🌍 Multilingual' => '🌍 Mehrsprachig',
@@ -117,6 +117,8 @@ return [
     'Imprint' => 'Impressum',
     'Privacy' => 'Datenschutz',
     'Terms' => 'AGB',
+    'Ready to get started?' => 'Bereit anzufangen?',
+    'Create your free account and try it out!' => 'Erstellen Sie Ihren kostenlosen Account und probieren Sie es aus!',
 
 
     // Profile & Account

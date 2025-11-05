@@ -174,14 +174,14 @@ $lang = substr($locale, 0, 2); // de or en
                 </div>
                 <div class="column">
                     <div class="feature-card">
-                        <h3><?= __('Automatic Distribution') ?></h3>
+                        <h3>📅 <?= __('Automatic Distribution') ?></h3>
                         <p><?= __('Intelligent algorithms distribute children fairly across days, respecting capacities and sibling groups.') ?></p>
                     </div>
                 </div>
                 <div class="column">
                     <div class="feature-card">
-                        <h3><?= __('Substitute List') ?></h3>
-                        <p><?= __('If places become available, the substitute list helps with quick and fair filling.') ?></p>
+                        <h3>📋 <?= __('Waitlist') ?></h3>
+                        <p><?= __('If places become available, the waitlist helps with quick and fair filling.') ?></p>
                     </div>
                 </div>
             </div>
