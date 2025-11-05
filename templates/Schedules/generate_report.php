@@ -152,12 +152,12 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
         }
 
         .explanation {
-            margin-top: 20px;
             padding: 15px;
             background: #f5f5f5;
             border-radius: 8px;
             font-size: 10px;
             line-height: 1.5;
+            border: 2px solid #000;
         }
 
         .flag-icon {
@@ -196,6 +196,11 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
             // Calculate dynamic min-height based on capacity_per_day (15px per child)
             $capacityPerDay = $schedule->capacity_per_day ?? 9;
             $minHeight = $capacityPerDay * 15;
+            
+            // Calculate how many columns the explanation should span
+            $totalDays = count($days);
+            $daysInLastRow = $totalDays % 4; // 0 means full row (4 days)
+            $explanationColumns = $daysInLastRow === 0 ? 4 : (4 - $daysInLastRow);
             ?>
             <?php foreach ($days as $day): ?>
                 <div class="day-box">
@@ -228,6 +233,13 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
                     <?php endif; ?>
                 </div>
             <?php endforeach; ?>
+            
+            <!-- Explanation box - fills remaining columns in last row -->
+            <div class="explanation" style="grid-column: span <?= $explanationColumns ?>;">
+                <p>
+                    <?= __('If places become available due to illness, appointments, etc., parents can fill them via a chatgroup. Work through the waitlist from top to bottom, starting with the child at the bottom of the current day. When you reach the end, start again at the top. Important: The maximum number of counting children must not be exceeded – integrative children count double. If only one spot becomes available but the next child on the list requires two spots, the child after that moves up temporarily. If additional spots become available later, the order will be adjusted accordingly.') ?>
+                </p>
+            </div>
         </div>
 
         <div class="sidebar">
@@ -309,13 +321,6 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
                 <?= __('Summe aller Zählkinder') ?>: <?= h($totalCountingChildren) ?>
             </div>
         </div>
-    </div>
-
-    <div class="explanation">
-        <p><strong><?= __('Note for parents:') ?></strong></p>
-        <p>
-            <?= __('If places become available due to illness, appointments, etc., the parents can fill these spots by consulting the substitute list in order. The integrative children count double here.') ?>
-        </p>
     </div>
 </body>
 </html>
