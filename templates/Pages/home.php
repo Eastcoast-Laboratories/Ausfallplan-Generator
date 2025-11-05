@@ -125,12 +125,79 @@ $lang = substr($locale, 0, 2); // de or en
         .language-switcher a.active {
             opacity: 1;
         }
+        
+        /* Hamburger Menu */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            padding: 0.5rem;
+            z-index: 1001;
+        }
+        .hamburger span {
+            width: 25px;
+            height: 3px;
+            background: #667eea;
+            margin: 3px 0;
+            transition: 0.3s;
+            display: block;
+        }
+        
+        /* Mobile Navigation */
+        @media (max-width: 768px) {
+            .hamburger {
+                display: flex;
+            }
+            
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 70%;
+                height: 100vh;
+                background: white;
+                flex-direction: column;
+                padding: 4rem 2rem;
+                box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+                transition: right 0.3s ease;
+                z-index: 1000;
+            }
+            
+            .nav-links.active {
+                right: 0;
+            }
+            
+            .nav-links a {
+                margin: 1rem 0 !important;
+                display: block;
+            }
+            
+            .language-switcher {
+                margin: 1rem 0;
+            }
+            
+            /* Hamburger animation when active */
+            .hamburger.active span:nth-child(1) {
+                transform: rotate(-45deg) translate(-5px, 6px);
+            }
+            .hamburger.active span:nth-child(2) {
+                opacity: 0;
+            }
+            .hamburger.active span:nth-child(3) {
+                transform: rotate(45deg) translate(-5px, -6px);
+            }
+        }
     </style>
 </head>
 <body>
     <nav class="header-nav">
         <div class="logo">🌟 FairNestPlan</div>
-        <div class="nav-links">
+        <div class="hamburger" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div class="nav-links" id="navLinks">
             <div class="language-switcher">
                 <a href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'setLanguage', '?' => ['locale' => 'de_DE']]) ?>" 
                    class="<?= $locale === 'de_DE' ? 'active' : '' ?>" title="Deutsch">🇩🇪</a>
@@ -168,7 +235,7 @@ $lang = substr($locale, 0, 2); // de or en
             <div class="row">
                 <div class="column">
                     <div class="feature-card">
-                        <h3><?= __('Child Management') ?></h3>
+                        <h3>👥 <?= __('Child Management') ?></h3>
                         <p><?= __('Manage children with sibling groups, integration status and individual priorities.') ?></p>
                     </div>
                 </div>
@@ -189,19 +256,19 @@ $lang = substr($locale, 0, 2); // de or en
             <div class="row">
                 <div class="column">
                     <div class="feature-card">
-                        <h3><?= __('PDF/Excel Export') ?></h3>
+                        <h3>🖨️ <?= __('PDF/Excel Export') ?></h3>
                         <p><?= __('Export beautiful, print-ready schedules as PDF for distribution or Excel format for editing.') ?></p>
                     </div>
                 </div>
                 <div class="column">
                     <div class="feature-card">
-                        <h3><?= __('Multilingual') ?></h3>
-                        <p><?= __('Available in English and German. Easy language switching for international teams.') ?></p>
+                        <h3>🌍 <?= __('Multilingual') ?></h3>
+                        <p><?= __('Available in German and English. Easy language switching for international teams.') ?></p>
                     </div>
                 </div>
                 <div class="column">
                     <div class="feature-card">
-                        <h3><?= __('Secure') ?></h3>
+                        <h3>🔒 <?= __('Secure') ?></h3>
                         <p><?= __('Role-based access control, secure authentication and GDPR compliant.') ?></p>
                     </div>
                 </div>
@@ -275,5 +342,37 @@ $lang = substr($locale, 0, 2); // de or en
             </p>
         </div>
     </footer>
+    
+    <script>
+        function toggleMenu() {
+            const navLinks = document.getElementById('navLinks');
+            const hamburger = document.querySelector('.hamburger');
+            
+            navLinks.classList.toggle('active');
+            hamburger.classList.toggle('active');
+        }
+        
+        // Close menu when clicking on a link
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                const navLinks = document.getElementById('navLinks');
+                const hamburger = document.querySelector('.hamburger');
+                
+                navLinks.classList.remove('active');
+                hamburger.classList.remove('active');
+            });
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const navLinks = document.getElementById('navLinks');
+            const hamburger = document.querySelector('.hamburger');
+            
+            if (!navLinks.contains(e.target) && !hamburger.contains(e.target)) {
+                navLinks.classList.remove('active');
+                hamburger.classList.remove('active');
+            }
+        });
+    </script>
 </body>
 </html>

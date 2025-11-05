@@ -133,7 +133,6 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
         
         .hamburger {
             display: none;
-            background: none;
             border: none;
             font-size: 1.5rem;
             cursor: pointer;
