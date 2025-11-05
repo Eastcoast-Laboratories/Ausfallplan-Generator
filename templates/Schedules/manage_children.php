@@ -29,6 +29,16 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
             order: 2;
         }
         
+        /* Mobile: Stack header section vertically */
+        .manage-children-header {
+            flex-direction: column !important;
+            align-items: stretch !important;
+        }
+        
+        .manage-children-header > div {
+            width: 100%;
+        }
+        
         /* Mobile: Stack header buttons vertically */
         .manage-children .button {
             display: block;
@@ -46,7 +56,7 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
 </style>
 
 <div class="manage-children content">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <div class="manage-children-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
         <div>
             <h3 style="margin: 0;"><?= __("Children on Schedule") ?> - <?= h($schedule->organization->name) ?></h3>
             <p style="margin: 0.5rem 0 0 0;">

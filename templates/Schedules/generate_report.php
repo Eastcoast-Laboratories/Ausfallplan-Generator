@@ -68,6 +68,7 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
 
         .children-list {
             list-style: none;
+            flex: 1;
         }
 
         .child-item {
@@ -86,8 +87,20 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
             font-weight: bold;
         }
 
-        .firstOnWaitlist-child {
+        .day-footer {
             margin-top: auto;
+        }
+
+        .day-sum {
+            margin-top: 0;
+            padding-top: 5px;
+            border-top: 1px solid #ccc;
+            font-size: 9px;
+            text-align: right;
+            color: #666;
+        }
+
+        .firstOnWaitlist-child {
             padding-top: 8px;
             border-top: 1px solid #ccc;
             text-align: center;
@@ -95,7 +108,6 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
         }
 
         .sidebar {
-            width: 200px;
             display: flex;
             flex-direction: column;
             gap: 20px;
@@ -188,7 +200,7 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
             <?php foreach ($days as $day): ?>
                 <div class="day-box">
                     <div class="day-title"><?= h($day['title']) ?></div>
-                    <ul class="children-list" style="min-height: <?= $minHeight ?>px;">
+                    <ul class="children-list">
                         <?php foreach ($day['children'] as $childData): ?>
                             <li class="child-item">
                                 <span class="child-name"><?= h($childData['child']->name) ?></span>
@@ -196,14 +208,16 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
                             </li>
                         <?php endforeach; ?>
                     </ul>
-                    <div class="day-sum" style="margin-top: 0; padding-top: 5px; border-top: 1px solid #ccc; font-size: 9px; text-align: right; color:#666">
-                        <?= h($day['countingChildrenSum']) ?>
-                    </div>
-                    <?php if ($day['firstOnWaitlistChild']): ?>
-                        <div class="firstOnWaitlist-child">
-                            <?= h($day['firstOnWaitlistChild']['child']->name) ?> <span class="flag-icon">⬇️</span>
+                    <div class="day-footer">
+                        <div class="day-sum">
+                            <?= h($day['countingChildrenSum']) ?>
                         </div>
-                    <?php endif; ?>
+                        <?php if ($day['firstOnWaitlistChild']): ?>
+                            <div class="firstOnWaitlist-child">
+                                <?= h($day['firstOnWaitlistChild']['child']->name) ?> <span class="flag-icon">⬇️</span>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                     
                     <?php if (!empty($day['debugLog'])): ?>
                         <div style="margin-top: 8px; padding: 4px; background: #fffacd; border: 1px solid #ffd700; font-size: 8px; font-family: monospace;">
