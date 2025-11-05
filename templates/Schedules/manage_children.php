@@ -13,6 +13,38 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
 <!-- Include Sortable.js for drag & drop (local copy) -->
 <script src="<?= $this->Url->build('/js/Sortable.min.js') ?>"></script>
 
+<style>
+    @media (max-width: 768px) {
+        /* Mobile: Stack columns and reorder */
+        .manage-children-row {
+            grid-template-columns: 1fr !important;
+        }
+        
+        /* Order on Schedule first, Not on schedule second */
+        .in-order-children {
+            order: 1;
+        }
+        
+        .not-in-order-children {
+            order: 2;
+        }
+        
+        /* Mobile: Stack header buttons vertically */
+        .manage-children .button {
+            display: block;
+            width: 100%;
+            margin: 0.5rem 0 !important;
+            text-align: center;
+        }
+        
+        /* Mobile: Schedule selector full width */
+        .schedule-selector select {
+            min-width: 100% !important;
+            width: 100%;
+        }
+    }
+</style>
+
 <div class="manage-children content">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
         <div>
@@ -71,7 +103,7 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
         </div>
     <?php endif; ?>
     
-    <div class="row" style="margin-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+    <div class="row manage-children-row" style="margin-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
         
         <!-- Children NOT in Organization Order (NULL) - LEFT SIDE -->
         <div class="not-in-order-children">

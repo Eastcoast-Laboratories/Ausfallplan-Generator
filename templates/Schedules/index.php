@@ -6,6 +6,23 @@
  */
 $this->assign('title', __('Schedules'));
 ?>
+
+<style>
+    @media (max-width: 768px) {
+        /* Mobile: Allow table headers to wrap */
+        .schedules table th {
+            white-space: normal !important;
+            word-wrap: break-word;
+            min-width: 80px;
+        }
+        
+        /* Specific fix for "Max Children per Day" */
+        .schedules table th:nth-last-child(2) {
+            min-width: 100px;
+        }
+    }
+</style>
+
 <div class="schedules index content">
     <h3><?= __('Schedules') ?></h3>
     <div class="actions">

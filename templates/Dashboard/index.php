@@ -86,10 +86,39 @@ $this->assign('title', __('Dashboard'));
 
     <div class="recent-activity">
         <h2><?= __('Recent Activity') ?></h2>
-        <div class="activity-placeholder">
-            <p><?= __('No recent activity to display.') ?></p>
-            <p class="placeholder-hint"><?= __('Start by adding children or creating a schedule.') ?></p>
-        </div>
+        <?php if (!empty($recentActivities)): ?>
+            <div class="activity-list">
+                <?php foreach ($recentActivities as $activity): ?>
+                    <div class="activity-item">
+                        <div class="activity-icon"><?= $activity['icon'] ?></div>
+                        <div class="activity-content">
+                            <div class="activity-title">
+                                <?= $this->Html->link(
+                                    h($activity['title']),
+                                    $activity['url'],
+                                    ['class' => 'activity-link']
+                                ) ?>
+                            </div>
+                            <?php if (isset($user) && $user->is_system_admin): ?>
+                                <div class="activity-meta">
+                                    <?= h($activity['organization']) ?> • 
+                                    <?= $activity['time']->timeAgoInWords() ?>
+                                </div>
+                            <?php else: ?>
+                                <div class="activity-meta">
+                                    <?= $activity['time']->timeAgoInWords() ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <div class="activity-placeholder">
+                <p><?= __('No recent activity to display.') ?></p>
+                <p class="placeholder-hint"><?= __('Start by adding children or creating a schedule.') ?></p>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -229,6 +258,59 @@ $this->assign('title', __('Dashboard'));
     .placeholder-hint {
         font-size: 0.9rem;
         font-style: italic;
+    }
+
+    .activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #3498db;
+        transition: all 0.2s;
+    }
+
+    .activity-item:hover {
+        background: #e3f2fd;
+        transform: translateX(4px);
+    }
+
+    .activity-icon {
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .activity-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .activity-title {
+        font-weight: 500;
+        color: #2c3e50;
+        margin-bottom: 0.25rem;
+    }
+
+    .activity-link {
+        color: #2c3e50;
+        text-decoration: none;
+    }
+
+    .activity-link:hover {
+        color: #3498db;
+        text-decoration: underline;
+    }
+
+    .activity-meta {
+        font-size: 0.85rem;
+        color: #7f8c8d;
     }
 
     @media (max-width: 600px) {

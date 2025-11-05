@@ -50,21 +50,22 @@ echo ""
 
 # Check if word exists in history
 echo "Checking if word exists in history..."
-if git log --all --grep="${SEARCH_WORD}" --oneline | head -1 > /dev/null 2>&1; then
-    FOUND_COUNT=$(git log --all --grep="${SEARCH_WORD}" --oneline | wc -l)
-    echo -e "${GREEN}Found ${FOUND_COUNT} commit(s) containing '${SEARCH_WORD}'${NC}"
-    echo ""
-    echo "Commits that will be affected:"
-    git log --all --grep="${SEARCH_WORD}" --oneline | head -10
-    if [ "$FOUND_COUNT" -gt 10 ]; then
-        echo "... and $((FOUND_COUNT - 10)) more"
-    fi
-    echo ""
-else
+FOUND_COUNT=$(git log --all --grep="${SEARCH_WORD}" --oneline | wc -l)
+
+if [ "$FOUND_COUNT" -eq 0 ]; then
     echo -e "${YELLOW}No commits found containing '${SEARCH_WORD}'${NC}"
-    echo "Nothing to do."
+    echo "Nothing to do. Aborting."
     exit 0
 fi
+
+echo -e "${GREEN}Found ${FOUND_COUNT} commit(s) containing '${SEARCH_WORD}'${NC}"
+echo ""
+echo "Commits that will be affected:"
+git log --all --grep="${SEARCH_WORD}" --oneline | head -10
+if [ "$FOUND_COUNT" -gt 10 ]; then
+    echo "... and $((FOUND_COUNT - 10)) more"
+fi
+echo ""
 
 # Ask for confirmation
 read -p "Do you want to proceed? (yes/no): " CONFIRM

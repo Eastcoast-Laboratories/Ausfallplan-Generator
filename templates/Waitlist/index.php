@@ -12,6 +12,48 @@ $this->assign('title', __('Waitlist'));
 <!-- Include Sortable.js for drag & drop (local copy) -->
 <script src="<?= $this->Url->build('/js/Sortable.min.js') ?>"></script>
 
+<style>
+    @media (max-width: 768px) {
+        /* Mobile: Stack columns vertically and reorder */
+        .waitlist-row {
+            grid-template-columns: 1fr !important;
+        }
+        
+        /* Waitlist first, Available Children second */
+        .waitlist-children {
+            order: 1;
+        }
+        
+        .available-children {
+            order: 2;
+        }
+        
+        /* Mobile: Stack buttons vertically */
+        .schedule-selector {
+            flex-direction: column !important;
+            align-items: stretch !important;
+        }
+        
+        .schedule-selector > div {
+            flex-direction: column !important;
+            width: 100%;
+        }
+        
+        .schedule-selector select {
+            margin-left: 0 !important;
+            margin-top: 0.5rem;
+            width: 100%;
+        }
+        
+        .schedule-selector .button {
+            margin-left: 0 !important;
+            margin-top: 0.5rem !important;
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>
+
 <div class="waitlist index content">
     <h3><?= __('Waitlist') ?></h3>
     
@@ -69,7 +111,7 @@ $this->assign('title', __('Waitlist'));
         </div>
     <?php endif; ?>
     
-    <div class="row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+    <div class="row waitlist-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
         
         <!-- Available Children -->
         <div class="available-children">
