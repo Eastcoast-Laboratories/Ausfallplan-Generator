@@ -1,63 +1,123 @@
-# Ausfallplan-Generator
+# Ausfallplan-Generator / FairnestPlan
 
-> A multi-tenant web application for Kitas (childcare organizations) to create and manage **Schedules** (absence/day plans) for children with automatic distribution, waitlist management, and PDF/PNG export capabilities.
+> A production-ready multi-tenant web application for Kitas (childcare organizations) to create and manage fair absence/day plans (Ausfallpläne) with automatic distribution, waitlist management, and export capabilities.
 
-## Status
+🌐 **Live Demo**: [fairnestplan.z11.de](https://fairnestplan.z11.de/)
 
-✅ **Completed**:
-- CakePHP 5 application structure with migrations
-- Domain models (Organizations, Users, Children, Schedules, Rules, WaitlistEntries, SiblingGroups)
-- Business logic services (RulesService, ScheduleBuilder)
-- Comprehensive unit tests (18 tests passing, 36 assertions)
-- Automatic distribution algorithm with capacity tracking
-- Sibling group support
-- Integrative children weighting (configurable, default 2x)
-- Landing page with feature overview
+## Status: ✅ Production Ready
 
-🚧 **In Progress**:
-- Waitlist management service
-- Authentication & authorization
-- Controllers and views
-- PDF/PNG export
-- Internationalization (DE/EN)
+**Fully Implemented**:
+- ✅ Multi-tenant architecture with organization management
+- ✅ Complete authentication & authorization system
+- ✅ User management with roles (System Admin, Org Admin, Editor, Viewer)
+- ✅ Children management with integrative support
+- ✅ Sibling group management
+- ✅ Schedule creation and management
+- ✅ Automatic fair distribution algorithm
+- ✅ Waitlist management with priority
+- ✅ Drag & drop interface for schedule ordering
+- ✅ PDF/Excel/CSV export
+- ✅ Internationalization (DE/EN)
+- ✅ Mobile-responsive design
+- ✅ Dashboard with recent activities
+- ✅ E2E browser tests (Playwright)
+- ✅ Comprehensive unit tests (PHPUnit)
 
 ## Features
 
+### 🏢 Multi-Tenant Architecture
+- Organization-based data isolation
+- System admins can manage all organizations
+- Organization admins manage their own org
+- Editors can create/edit schedules and children
+- Viewers have read-only access
+
 ### 👶 Children Management
-- Track active/inactive children
-- Support for integrative children (weighted assignments)
-- Sibling group management (atomic placement)
+- Add, edit, and delete children
+- Track active/inactive status
+- Support for integrative children (count double)
+- Sibling group management (placed together)
+- CSV import for bulk operations
 - Organization-scoped data
 
 ### 📅 Schedule Management
-- Create schedules with multiple days
-- Configure capacity per day
-- Automatic distribution algorithm
-- Manual override capability
-- Draft and final states
+- Create schedules with configurable days
+- Set capacity per day (max counting children)
+- Automatic fair distribution algorithm
+- Manual drag & drop reordering
+- Manage children on schedule
+- Active schedule selection
+- Generate reports (PDF/Excel/CSV)
 
-### 🎯 Smart Distribution
+### 🎯 Smart Distribution Algorithm
 - Fair round-robin distribution
-- Respects capacity limits
-- Integrative children use configurable weight
-- Sibling groups placed atomically
-- Max assignments per child
-- Always-last rules
+- Respects capacity limits per day
+- Integrative children count double
+- Sibling groups placed atomically (all or none)
+- "Always at end" children placed last
+- Tracks assignments per child
+- First-on-waitlist child shown per day
 
-### 📋 Rules System
-- Integrative weight (default: 2)
-- Always-last list
-- Max per child limit
-- Schedule-specific overrides
+### 📋 Waitlist Management
+- Priority-based waitlist per schedule
+- Drag & drop priority ordering
+- Move children between schedule and waitlist
+- Track waitlist statistics
+- First-on-waitlist indicator on reports
+
+### 📊 Reports & Export
+- Visual schedule grid (4 columns)
+- PDF export for printing
+- Excel export (.xlsx)
+- CSV export
+- Shows counting children sum per day
+- Displays first-on-waitlist child
+- Parent instructions included
+
+### 🌐 Internationalization
+- German (DE) - primary language
+- English (EN) - full translation
+- Language switcher in navigation
+- Persistent language preference
+
+### 📱 Mobile Responsive
+- Optimized for mobile devices
+- Hamburger menu on small screens
+- Touch-friendly drag & drop
+- Responsive tables and grids
+- Mobile-first design approach
 
 ## Quick Start
 
 ### Prerequisites
-- PHP 8.4
-- Composer
-- MySQL 8
+- PHP 8.3+
+- Composer 2.x
+- MySQL 8.0+ or MariaDB 10.5+
+- Node.js 18+ (for E2E tests)
+- Docker & Docker Compose (optional)
 
 ### Installation
+
+#### Option 1: Docker (Recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/Eastcoast-Laboratories/Ausfallplan-Generator.git
+cd Ausfallplan-Generator
+
+# Start Docker containers
+docker compose -f docker/docker-compose.yml up -d
+
+# Install dependencies
+docker compose -f docker/docker-compose.yml exec app composer install
+
+# Run migrations
+docker compose -f docker/docker-compose.yml exec app bin/cake migrations migrate
+
+# Visit http://localhost:8080
+```
+
+#### Option 2: Local Installation
 
 ```bash
 # Clone the repository
@@ -75,217 +135,394 @@ cp config/app_local.example.php config/app_local.php
 bin/cake migrations migrate
 
 # Start development server
-bin/cake server
+bin/cake server -p 8080
 
-# Visit http://localhost:8765
+# Visit http://localhost:8080
 ```
 
-### Running Tests
+### First Steps
 
-#### PHPUnit (Backend Tests)
+1. **Register an account** at `/users/register`
+2. **Create an organization** (auto-created on first login)
+3. **Add children** via "Children" menu
+4. **Create a schedule** via "Schedules" → "New Schedule"
+5. **Assign children** via "Manage Children" on schedule
+6. **Generate report** via "Generate Schedule" button
+
+## Running Tests
+
+### PHPUnit (Backend Tests)
 
 ```bash
+# Quick test (recommended for regular checks)
+docker compose -f docker/docker-compose.yml exec -T app vendor/bin/phpunit tests/TestCase/QuickTest.php
+
 # Run all tests
-vendor/bin/phpunit
+docker compose -f docker/docker-compose.yml exec -T app vendor/bin/phpunit
 
-# Run specific test suite
-vendor/bin/phpunit tests/TestCase/Service/RulesServiceTest.php
-vendor/bin/phpunit tests/TestCase/Service/ScheduleBuilderTest.php
-vendor/bin/phpunit tests/TestCase/Controller/UsersControllerTest.php
+# Run with coverage (for major changes)
+docker compose -f docker/docker-compose.yml exec -T app vendor/bin/phpunit --coverage-html coverage
 
-# Run tests in Docker container
-docker compose -f docker/docker-compose.yml exec app vendor/bin/phpunit
-docker compose -f docker/docker-compose.yml exec app vendor/bin/phpunit --testdox
-docker compose -f docker/docker-compose.yml exec app vendor/bin/phpunit tests/TestCase/Controller/UsersControllerTest.php
-
-# Run with coverage (requires Xdebug)
-vendor/bin/phpunit --coverage-html tmp/coverage
+# Run specific test
+docker compose -f docker/docker-compose.yml exec -T app vendor/bin/phpunit tests/TestCase/Service/RulesServiceTest.php
 ```
 
-#### Playwright (E2E Browser Tests)
+**Test Coverage:**
+- ✅ RulesService (7 tests)
+- ✅ ScheduleBuilder (2 tests)
+- ✅ UsersController (authentication, registration)
+- ✅ Application bootstrap tests
+- ✅ QuickTest (6 tests, 23 assertions, ~5 seconds)
 
-The project includes end-to-end browser tests using Playwright for testing user interactions, navigation, and visual components.
+### Playwright (E2E Browser Tests)
 
 ```bash
 # Install Playwright browsers (first time only)
 npx playwright install chromium
 
-# Run all E2E tests
-npm run test
+# Run all E2E tests (with timeout)
+timeout 120 npx playwright test --project=chromium
 
 # Run specific test file
-npm run test:screenshots        # Navigation tests with screenshots
-npx playwright test tests/e2e/navigation.spec.js
+timeout 60 npx playwright test tests/e2e/navigation.spec.js --project=chromium
 
-# Run tests with UI mode (interactive)
-npm run test:ui
+# Run with UI mode (interactive)
+npx playwright test --ui
 
-# Run tests in headed mode (see browser)
-npm run test:headed
-
-# Run specific browser
-npm run test:chromium
-npm run test:firefox
-npm run test:webkit
+# Run in headed mode (see browser)
+timeout 60 npx playwright test --project=chromium --headed
 
 # Debug mode
-npm run test:debug
+npx playwright test --debug
 ```
 
 **E2E Test Coverage:**
-- ✅ Navigation visibility (logged in vs public pages)
-- ✅ Mobile hamburger menu functionality
+- ✅ Navigation visibility (logged in vs public)
+- ✅ Mobile hamburger menu
 - ✅ User dropdown and logout
 - ✅ Language switcher (DE/EN)
-- ✅ Registration flow (user not auto-logged in)
-- 🚧 Schedule creation workflow (in progress)
+- ✅ Registration flow
+- ✅ Schedule creation workflow
+- ✅ Children management
+- ✅ Waitlist management
 
 Screenshots are saved to `screenshots/` directory (gitignored).
 
-**Test User Credentials:**
-- Email: `ausfallplan-sysadmin@it.z11.de`
-- Password: `84hbfUb_3dsf`
-
 ## Tech Stack
 
+### Backend
 - **Framework**: CakePHP 5.2
 - **Language**: PHP 8.3
-- **Database**: PostgreSQL/MySQL/SQLite
-- **Testing**: PHPUnit 12
-- **PDF Generation**: dompdf
+- **Database**: MySQL 8.0 / MariaDB 10.5
+- **ORM**: CakePHP ORM with migrations
 - **Authentication**: CakePHP Authentication 3.x
-- **Authorization**: CakePHP Authorization 3.x
+- **Authorization**: CakePHP Authorization 3.x (role-based)
+- **Testing**: PHPUnit 12
+
+### Frontend
+- **CSS Framework**: Custom CSS with Flexbox/Grid
+- **JavaScript**: Vanilla JS + Sortable.js (drag & drop)
+- **Icons**: Unicode emojis
+- **Responsive**: Mobile-first design
+
+### Export & Reports
+- **PDF**: Browser print (CSS @media print)
+- **Excel**: PhpSpreadsheet
+- **CSV**: CakePHP CSV Response
+
+### Development Tools
+- **Docker**: Multi-container setup (app, db, phpmyadmin)
+- **E2E Testing**: Playwright
+- **Version Control**: Git with git-filter-repo
+- **Deployment**: SSH-based deployment script
 
 ## Project Structure
 
 ```
 .
 ├── config/
-│   ├── Migrations/           # Database migrations
-│   ├── app.php              # Main configuration
-│   └── routes.php           # URL routing
+│   ├── Migrations/              # Database migrations (20+ files)
+│   ├── app.php                  # Main configuration
+│   ├── routes.php               # URL routing
+│   └── app_local.php            # Local config (gitignored)
 ├── src/
 │   ├── Model/
-│   │   ├── Entity/          # Domain entities (9 classes)
-│   │   └── Table/           # Table classes with associations (9 classes)
-│   ├── Service/             # Business logic services
+│   │   ├── Entity/              # Domain entities (10 classes)
+│   │   │   ├── Organization.php
+│   │   │   ├── User.php
+│   │   │   ├── Child.php
+│   │   │   ├── Schedule.php
+│   │   │   ├── ScheduleDay.php
+│   │   │   ├── Assignment.php
+│   │   │   ├── WaitlistEntry.php
+│   │   │   ├── SiblingGroup.php
+│   │   │   ├── Rule.php
+│   │   │   └── OrganizationUser.php
+│   │   └── Table/               # Table classes (10 classes)
+│   ├── Service/                 # Business logic
 │   │   ├── RulesService.php
 │   │   └── ScheduleBuilder.php
-│   ├── Controller/          # Controllers
-│   └── View/                # View layer
-├── templates/               # View templates
-│   └── Pages/home.php      # Landing page
+│   ├── Controller/              # Controllers (14 files)
+│   │   ├── AppController.php
+│   │   ├── UsersController.php
+│   │   ├── ChildrenController.php
+│   │   ├── SchedulesController.php
+│   │   ├── WaitlistController.php
+│   │   ├── SiblingGroupsController.php
+│   │   ├── DashboardController.php
+│   │   ├── PagesController.php
+│   │   └── Admin/
+│   │       ├── OrganizationsController.php
+│   │       └── DashboardController.php
+│   ├── Policy/                  # Authorization policies
+│   └── View/                    # View helpers
+├── templates/                   # View templates (59 files)
+│   ├── layout/
+│   │   ├── default.php          # Public layout
+│   │   └── authenticated.php    # Logged-in layout
+│   ├── Users/                   # Login, register, profile
+│   ├── Children/                # CRUD + import
+│   ├── Schedules/               # CRUD + reports
+│   ├── Waitlist/                # Waitlist management
+│   ├── SiblingGroups/           # Sibling management
+│   ├── Dashboard/               # Dashboard
+│   └── Admin/                   # Admin views
+├── resources/
+│   └── locales/                 # Translations (DE/EN)
+│       ├── de_DE/default.php
+│       └── en_US/default.php
 ├── tests/
-│   ├── Fixture/            # Test fixtures (7 fixtures)
-│   └── TestCase/           # Unit and integration tests
-│       └── Service/        # Service tests
-└── webroot/                # Public assets
+│   ├── Fixture/                 # Test fixtures
+│   ├── TestCase/                # PHPUnit tests
+│   └── e2e/                     # Playwright E2E tests
+├── webroot/                     # Public assets
+│   ├── css/
+│   ├── js/
+│   └── img/
+├── docker/                      # Docker setup
+│   └── docker-compose.yml
+└── dev/                         # Development tools
+    ├── deploy.sh                # Deployment script
+    ├── git-replace-in-history.sh
+    └── TODO.md
 ```
 
 ## Database Schema
 
 ### Tables
 - **organizations**: Multi-tenant organization data
-- **users**: Users with roles (admin/editor/viewer)
-- **children**: Child records with integrative flag
+- **users**: User accounts with email/password
+- **organizations_users**: Many-to-many with roles (system_admin, org_admin, editor, viewer)
+- **children**: Child records with integrative flag and organization_id
 - **sibling_groups**: Family/sibling groupings
-- **schedules**: Schedule periods
-- **schedule_days**: Individual days within schedules
-- **assignments**: Child assignments to days
-- **waitlist_entries**: Priority-based waitlist
-- **rules**: Schedule-specific configuration rules
+- **schedules**: Schedule periods with capacity_per_day
+- **schedule_days**: Individual days within schedules (title, date, order)
+- **assignments**: Child assignments to days (with order)
+- **waitlist_entries**: Priority-based waitlist per schedule
+- **rules**: Schedule-specific configuration (JSON values)
 
 ### Key Relationships
-- Organizations ← Users, Children, Schedules, SiblingGroups
-- Schedules ← WaitlistEntries, Rules
-- Children ← Assignments, WaitlistEntries
-- SiblingGroups ← Children
+```
+Organizations
+  ├─ has many Users (through organizations_users)
+  ├─ has many Children
+  ├─ has many Schedules
+  └─ has many SiblingGroups
+
+Schedules
+  ├─ belongs to Organization
+  ├─ has many ScheduleDays
+  ├─ has many WaitlistEntries
+  └─ has many Rules
+
+Children
+  ├─ belongs to Organization
+  ├─ belongs to SiblingGroup (optional)
+  ├─ has many Assignments
+  └─ has many WaitlistEntries
+
+ScheduleDays
+  ├─ belongs to Schedule
+  └─ has many Assignments
+```
+
+### Indexes
+- `organization_id` on all tenant-scoped tables
+- `schedule_id` on schedule-related tables
+- `child_id` on assignments and waitlist
+- Composite indexes for common queries
 
 ## Business Logic
 
 ### Automatic Distribution Algorithm
 
-1. **Preparation**
-   - Load active children from organization
-   - Separate "always_last" children
-   - Get schedule rules (integrative weight, max per child)
+The core algorithm ensures fair distribution of children across schedule days:
 
-2. **First Pass - Normal Children**
+1. **Preparation Phase**
+   - Load all active children assigned to schedule
+   - Separate "always_at_end" children (placed last)
+   - Load schedule rules (integrative weight, max per child)
+   - Initialize day capacity tracking
+
+2. **First Pass - Regular Children**
    - Round-robin placement across days
-   - Check capacity before placement
-   - Handle sibling groups atomically
-   - Track assignments per child
-   - Apply integrative weight (default 2x)
+   - Check capacity before each placement
+   - Integrative children count as 2 (configurable)
+   - Sibling groups placed atomically (all or none)
+   - Track assignments per child (respect max limit)
+   - Skip days that would exceed capacity
 
-3. **Second Pass - Always Last Children**
+3. **Second Pass - Always-at-End Children**
    - Same algorithm as first pass
    - Fills remaining capacity
+   - Ensures these children are distributed last
 
-4. **Capacity Tracking**
-   - Each day has configurable capacity
-   - Weight sums must not exceed capacity
-   - Integrative children count as configured weight
+4. **Capacity Management**
+   - Each day has `capacity_per_day` (e.g., 9)
+   - Sum of counting children must not exceed capacity
+   - Integrative children count double
+   - Capacity check before each placement
+
+5. **Waitlist Integration**
+   - First child on waitlist shown per day
+   - Indicates who moves up if spot becomes available
+   - Respects capacity limits
 
 ### Rules System
 
-Default rules:
-- `integrative_weight`: 2 (integrative children count double)
-- `always_last`: [] (empty list)
-- `max_per_child`: 10 (maximum assignments per child)
+**Default Rules:**
+```php
+[
+    'integrative_weight' => 2,      // Integrative children count double
+    'always_last' => [],            // Child IDs to place last
+    'max_per_child' => 10,          // Max assignments per child
+]
+```
 
-Rules can be overridden per schedule by creating Rule entities with JSON values.
+**Schedule-Specific Overrides:**
+Rules can be customized per schedule via the `rules` table with JSON values.
 
-## Testing
+### User Roles & Permissions
 
-The project includes comprehensive unit tests:
+| Role | Permissions |
+|------|-------------|
+| **System Admin** | Full access to all organizations, users, and data |
+| **Org Admin** | Manage own organization, users, children, schedules |
+| **Editor** | Create/edit children and schedules in own organization |
+| **Viewer** | Read-only access to own organization's data |
 
-- **RulesServiceTest**: 7 tests covering default values and custom overrides
-- **ScheduleBuilderTest**: 2 tests covering capacity limits and integrative weighting
-- **ApplicationTest**: CakePHP application bootstrap tests
-- **PagesControllerTest**: Controller tests
+**Authorization:**
+- Implemented via CakePHP Authorization plugin
+- Policy classes define resource-level permissions
+- Organization-scoped queries ensure data isolation
 
-All tests use SQLite in-memory database for speed.
+## Deployment
 
-## Development Roadmap
+### Production Deployment
 
-See [README_BLUEPRINT.md](./README_BLUEPRINT.md) for the complete feature specification.
+The project includes an automated deployment script:
 
-### Phase 1 (Completed ✅)
-- [x] CakePHP structure
-- [x] Database schema and migrations
-- [x] Domain models and entities
-- [x] Core business logic (RulesService, ScheduleBuilder)
-- [x] Unit tests for services
-- [x] Landing page
+```bash
+# Deploy to production
+dev/deploy.sh
+```
 
-### Phase 2 (In Progress 🚧)
-- [ ] WaitlistService implementation
-- [ ] Authentication setup
-- [ ] Authorization policies
-- [ ] CRUD controllers
-- [ ] Basic views
+**Deployment Steps:**
+1. Commits and pushes local changes to GitHub
+2. SSHs to production server
+3. Resets to safe commit (prevents conflicts)
+4. Pulls latest changes
+5. Clears cache
+6. Confirms deployment
 
-### Phase 3 (Planned 📝)
-- [ ] PDF/PNG export
-- [ ] Internationalization (DE/EN)
-- [ ] Dashboard
-- [ ] Schedule builder UI
-- [ ] Drag & drop interface
+**Production Server:**
+- URL: [fairnestplan.z11.de](https://fairnestplan.z11.de/)
+- Server: eclabs-vm06
+- Path: `/var/kunden/webs/ruben/www/fairnestplan.z11.de`
 
-### Phase 4 (Planned 📝)
-- [ ] Email verification
-- [ ] Password recovery
-- [ ] Rate limiting
-- [ ] Audit logs
-- [ ] Integration tests
+### Development Tools
+
+**Git History Cleanup:**
+```bash
+# Remove file from entire history
+git filter-repo --invert-paths --path dev/example.xls --force
+
+# Replace text in entire history
+dev/git-replace-in-history.sh 'old-text' 'new-text'
+```
+
+**Database Management:**
+```bash
+# Run migrations
+bin/cake migrations migrate
+
+# Rollback migration
+bin/cake migrations rollback
+
+# Create new migration
+bin/cake bake migration MigrationName
+
+# Update schema documentation
+docker compose -f docker/docker-compose.yml exec -T db mysqldump \
+  -u root -proot_secret --no-data --skip-comments --compact \
+  ausfallplan > dev/database_structure.sql
+```
+
+## Roadmap
+
+### Completed ✅
+- [x] Multi-tenant architecture
+- [x] User authentication & authorization
+- [x] Children management with CSV import
+- [x] Sibling group management
+- [x] Schedule creation and management
+- [x] Automatic distribution algorithm
+- [x] Waitlist management
+- [x] Drag & drop interfaces
+- [x] PDF/Excel/CSV export
+- [x] Internationalization (DE/EN)
+- [x] Mobile responsive design
+- [x] Dashboard with recent activities
+- [x] E2E browser tests
+- [x] Production deployment
+
+### Planned 📝
+- [ ] Email verification for new users
+- [ ] Password recovery flow
+- [ ] Audit logs for changes
+- [ ] Rate limiting for API endpoints
+- [ ] Advanced reporting and statistics
+- [ ] Email notifications for schedule changes
+- [ ] Calendar integration (iCal export)
+- [ ] Mobile app (React Native)
 
 ## Contributing
 
-This project follows CakePHP coding standards. Please ensure:
-- All tests pass before submitting PR
-- New features include unit tests
-- Code follows PSR-12 standards
-- PHPDoc blocks are complete
+This project follows CakePHP coding standards and best practices.
+
+**Before submitting a PR:**
+1. ✅ All PHPUnit tests pass
+2. ✅ All Playwright E2E tests pass
+3. ✅ Code follows PSR-12 standards
+4. ✅ PHPDoc blocks are complete
+5. ✅ New features include tests
+6. ✅ Database migrations include schema update
+
+**Development Workflow:**
+```bash
+# 1. Make changes
+# 2. Run QuickTest
+docker compose -f docker/docker-compose.yml exec -T app vendor/bin/phpunit tests/TestCase/QuickTest.php
+
+# 3. Run full tests with coverage (for major changes)
+docker compose -f docker/docker-compose.yml exec -T app vendor/bin/phpunit --coverage-html coverage
+
+# 4. Run E2E tests
+timeout 120 npx playwright test --project=chromium
+
+# 5. Commit (only if tests pass)
+timeout 5 bash -c 'git add -A && git commit -m "feat: description"'
+```
 
 ## License
 
@@ -295,6 +532,16 @@ MIT License - see LICENSE file for details
 
 Built with CakePHP 5 and modern PHP practices.
 
+**Key Technologies:**
+- CakePHP 5.2
+- PHP 8.3
+- MySQL 8.0
+- Playwright
+- PHPUnit
+- Docker
+
 ---
 
-For detailed architecture and feature specifications, see [README_BLUEPRINT.md](./README_BLUEPRINT.md).
+**Live Demo**: [fairnestplan.z11.de](https://fairnestplan.z11.de/)
+
+**GitHub**: [Eastcoast-Laboratories/Ausfallplan-Generator](https://github.com/Eastcoast-Laboratories/Ausfallplan-Generator)
