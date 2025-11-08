@@ -236,19 +236,19 @@ $lang = substr($locale, 0, 2); // de or en
                 <div class="column">
                     <div class="feature-card">
                         <h3>👥 <?= __('Child Management') ?></h3>
-                        <p><?= __('Manage children with sibling groups, integration status and individual priorities.') ?></p>
+                        <p><?= __('Keep track of all children – with information about siblings, special needs, and priorities.') ?></p>
                     </div>
                 </div>
                 <div class="column">
                     <div class="feature-card">
                         <h3>📅 <?= __('Automatic Distribution') ?></h3>
-                        <p><?= __('Intelligent algorithms distribute children fairly across days, respecting capacities and sibling groups.') ?></p>
+                        <p><?= __('The system automatically and fairly distributes children across days – matching group size and families.') ?></p>
                     </div>
                 </div>
                 <div class="column">
                     <div class="feature-card">
                         <h3>📋 <?= __('Waitlist') ?></h3>
-                        <p><?= __('If places become available, the waitlist helps with quick and fair filling.') ?></p>
+                        <p><?= __('When places become available, the waitlist ensures quick and fair succession.') ?></p>
                     </div>
                 </div>
             </div>
