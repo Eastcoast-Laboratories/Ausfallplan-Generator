@@ -387,8 +387,9 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <a href="<?= $this->Url->build('/') ?>" class="sidebar-logo">
-                <span>🌟</span>
-                <span><?= __('Ausfallplan') ?></span>
+                <span>
+                    <img src="<?= $this->Url->build('/img/fairnestplan_logo.png') ?>" alt="FairNestPlan" width="88">
+                </span>
             </a>
         </div>
         

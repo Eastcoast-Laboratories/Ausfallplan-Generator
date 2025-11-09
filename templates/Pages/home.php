@@ -78,16 +78,23 @@ $lang = substr($locale, 0, 2); // de or en
         }
         .header-nav {
             background: white;
-            padding: 1rem 2rem;
+            padding: 0rem 2rem 0rem 0rem;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         .header-nav .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
             font-size: 1.5rem;
             font-weight: bold;
             color: #667eea;
+        }
+        .header-nav .logo img {
+            height: 7rem;
+            width: auto;
         }
         .header-nav .nav-links a {
             margin-left: 1.5rem;
@@ -191,7 +198,9 @@ $lang = substr($locale, 0, 2); // de or en
 </head>
 <body>
     <nav class="header-nav">
-        <div class="logo">🌟 FairNestPlan</div>
+        <div class="logo">
+            <img src="<?= $this->Url->build('/img/fairnestplan_logo.png') ?>" alt="FairNestPlan">
+        </div>
         <div class="hamburger" onclick="toggleMenu()">
             <span></span>
             <span></span>
@@ -218,7 +227,6 @@ $lang = substr($locale, 0, 2); // de or en
 
     <div class="hero">
         <div class="container">
-            <h1>🌟 FairNestPlan</h1>
             <p><?= __('Simple and fair planning in case of absences for daycare centers and kindergartens') ?></p>
             <p><?= __('Manage children, create a list of which children come on which days with an intelligent substitute list system') ?></p>
             <div style="margin-top: 2rem;">
@@ -230,13 +238,11 @@ $lang = substr($locale, 0, 2); // de or en
 
     <div id="features" class="features">
         <div class="container">
-            <h2 style="text-align: center; margin-bottom: 3rem;"><?= __('Key Features') ?></h2>
-            
             <div class="row">
                 <div class="column">
                     <div class="feature-card">
                         <h3>👥 <?= __('Child Management') ?></h3>
-                        <p><?= __('Keep track of all children – with information about siblings, special needs, and priorities.') ?></p>
+                        <p><?= __('Add children with siblings and integration status easily and set the display order.') ?></p>
                     </div>
                 </div>
                 <div class="column">

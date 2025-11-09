@@ -11,13 +11,10 @@
     font-style: normal;
 }
 body {
-    padding: 60px 0;
+    padding: 0;
 }
 header {
     margin-bottom: 60px;
-}
-img {
-    margin-bottom: 30px;
 }
 h1 {
     font-weight: bold;

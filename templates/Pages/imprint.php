@@ -39,7 +39,7 @@ $this->disableAutoLayout();
 </head>
 <body>
     <nav class="header-nav">
-        <a href="<?= $this->Url->build('/') ?>" class="logo">🌟 FairNestPlan</a>
+         <img src="<?= $this->Url->build('/img/fairnestplan_logo.png') ?>" alt="FairNestPlan" width="140">
         <div>
             <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'login']) ?>">Login</a>
         </div>

@@ -175,10 +175,10 @@ class UsersController extends AppController
             return;
         }
         
-        // Create approval URL
+        // Create approval URL for org-admins
         $approvalUrl = \Cake\Routing\Router::url([
-            'controller' => 'Admin/Users',
-            'action' => 'approve',
+            'controller' => 'Users',
+            'action' => 'approveOrgUser',
             $user->id
         ], true);
         
@@ -520,5 +520,86 @@ class UsersController extends AppController
                 $this->Flash->error(__('Invalid or expired code.'));
             }
         }
+    }
+    
+    /**
+     * Approve organization user
+     * Allows org-admins to approve pending users for their organization
+     *
+     * @param int $userId The user ID to approve
+     * @return \Cake\Http\Response|null Redirects to dashboard
+     */
+    public function approveOrgUser($userId = null)
+    {
+        // Require login
+        $identity = $this->Authentication->getIdentity();
+        if (!$identity) {
+            $this->Flash->error(__('Access denied. Please login.'));
+            return $this->redirect(['controller' => 'Users', 'action' => 'login']);
+        }
+        
+        // Get the user to approve
+        $userToApprove = $this->Users->get($userId, [
+            'contain' => ['OrganizationUsers' => ['Organizations']]
+        ]);
+        
+        // Check if the logged-in user is an org_admin in any organization that the pending user wants to join
+        $orgUsersTable = $this->fetchTable('OrganizationUsers');
+        
+        // Get all organizations where logged-in user is org_admin
+        $adminOrgIds = $orgUsersTable->find()
+            ->where([
+                'user_id' => $identity->id,
+                'role' => 'org_admin'
+            ])
+            ->all()
+            ->extract('organization_id')
+            ->toList();
+        
+        if (empty($adminOrgIds)) {
+            $this->Flash->error(__('You do not have permission to perform actions. (Viewer role is read-only)'));
+            return $this->redirect(['controller' => 'Dashboard', 'action' => 'index']);
+        }
+        
+        // Check if user to approve belongs to one of the orgs where current user is admin
+        $sharedOrg = null;
+        foreach ($userToApprove->organization_users as $orgUser) {
+            if (in_array($orgUser->organization_id, $adminOrgIds)) {
+                $sharedOrg = $orgUser;
+                break;
+            }
+        }
+        
+        if (!$sharedOrg) {
+            $this->Flash->error(__('You are not an administrator of this user\'s organization.'));
+            return $this->redirect(['controller' => 'Dashboard', 'action' => 'index']);
+        }
+        
+        // Approve the user
+        $userToApprove->status = 'active';
+        $userToApprove->approved_at = new \DateTime();
+        $userToApprove->approved_by = $identity->id;
+        
+        if ($this->Users->save($userToApprove)) {
+            $this->Flash->success(__('User approved successfully.'));
+            
+            // Send notification to the approved user
+            \App\Service\EmailDebugService::send([
+                'to' => $userToApprove->email,
+                'subject' => 'Your account has been approved',
+                'body' => "Hello,\n\nYour account for organization '{$sharedOrg->organization->name}' has been approved!\n\nYou can now log in and start using FairNestPlan.\n\nLogin: " . \Cake\Routing\Router::url(['controller' => 'Users', 'action' => 'login'], true),
+                'links' => [
+                    'Login Now' => \Cake\Routing\Router::url(['controller' => 'Users', 'action' => 'login'], true)
+                ],
+                'data' => [
+                    'user_id' => $userToApprove->id,
+                    'organization' => $sharedOrg->organization->name
+                ]
+            ]);
+        } else {
+            $this->Flash->error(__('Could not approve user.'));
+        }
+        
+        return $this->redirect(['controller' => 'Dashboard', 'action' => 'index']);
     }
 }

@@ -86,7 +86,10 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
     
     <nav class="top-nav">
         <div class="top-nav-title">
-            <a href="<?= $this->Url->build('/') ?>"><span><?= __('Ausfallplan') ?></span> Generator</a>
+            <a href="<?= $this->Url->build('/') ?>">
+                <img src="<?= $this->Url->build('/img/fairnestplan_logo.png') ?>" alt="FairNestPlan Logo" style="height: 24px; vertical-align: middle; margin-right: 0.5rem;">
+                <span><?= __('FairNestPlan') ?></span>
+            </a>
         </div>
         <div class="top-nav-links">
             <?php if ($this->request->getParam('action') !== 'login'): ?>
