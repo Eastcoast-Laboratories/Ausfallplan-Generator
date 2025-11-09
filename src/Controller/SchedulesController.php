@@ -99,8 +99,15 @@ class SchedulesController extends AppController
                 $missingSiblingsPerSchedule[$schedule->id] = $missingSiblings;
             }
         }
+        
+        // Check if user is viewer in selected organization (for permission checks in view)
+        $isViewer = false;
+        if ($selectedOrgId) {
+            $userRole = $this->getUserRoleInOrg((int)$selectedOrgId);
+            $isViewer = ($userRole === 'viewer');
+        }
 
-        $this->set(compact('schedules', 'user', 'activeScheduleId', 'childrenCounts', 'missingSiblingsPerSchedule', 'userOrgs', 'hasMultipleOrgs', 'selectedOrgId'));
+        $this->set(compact('schedules', 'user', 'activeScheduleId', 'childrenCounts', 'missingSiblingsPerSchedule', 'userOrgs', 'hasMultipleOrgs', 'selectedOrgId', 'isViewer'));
     }
 
     /**

@@ -104,9 +104,29 @@ class OrganizationsController extends AppController
         }
         
         $user = $identity->getOriginalData();
-        if (!$user->isSystemAdmin()) {
-            $this->Flash->error(__('Access denied. System admin privileges required.'));
-            return $this->redirect(['_name' => 'dashboard']);
+        
+        // Check if user is member of this organization (any role) OR system admin
+        $canView = false;
+        if ($user->isSystemAdmin()) {
+            $canView = true;
+        } else {
+            // Check if user is member of this organization
+            $orgUsersTable = $this->fetchTable('OrganizationUsers');
+            $membership = $orgUsersTable->find()
+                ->where([
+                    'user_id' => $user->id,
+                    'organization_id' => $id
+                ])
+                ->first();
+            
+            if ($membership) {
+                $canView = true;
+            }
+        }
+        
+        if (!$canView) {
+            $this->Flash->error(__('Access denied. You are not a member of this organization.'));
+            return $this->redirect(['action' => 'index']);
         }
 
         $organization = $this->Organizations->get($id, [

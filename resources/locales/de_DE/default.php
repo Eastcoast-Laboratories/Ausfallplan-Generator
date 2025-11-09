@@ -383,4 +383,5 @@ return [
     // Waitlist & Schedule messages
     'Bitte wählen Sie einen Ausfallplan aus, um die Nachrückliste zu sehen.' => 'Bitte wählen Sie einen Ausfallplan aus, um die Nachrückliste zu sehen.',
     'Zu den Ausfallplänen' => 'Zu den Ausfallplänen',
+    'Access denied. You are not a member of this organization.' => 'Zugriff verweigert. Sie sind kein Mitglied dieser Organisation.',
 ];
