@@ -338,8 +338,8 @@ class UsersController extends AppController
             // Remove password-related fields from data
             unset($data['new_password'], $data['confirm_password']);
             
-            // Don't allow role or organization_id change through profile
-            unset($data['role'], $data['organization_id']);
+            // Don't allow role, organization_id, or subscription changes through profile
+            unset($data['role'], $data['organization_id'], $data['subscription_plan'], $data['subscription_status']);
             
             $userEntity = $this->Users->patchEntity($userEntity, $data);
             

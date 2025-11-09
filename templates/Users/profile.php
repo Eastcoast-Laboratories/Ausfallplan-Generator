@@ -32,6 +32,25 @@ $this->assign('title', __('Profile Settings'));
 
             <div class="form-row">
                 <div class="form-info">
+                    <label><?= __('Subscription Plan') ?></label>
+                    <div class="role-badge role-<?= h($userEntity->subscription_plan) ?>">
+                        <?php
+                        $planNames = [
+                            'test' => __('Test (Free)'),
+                            'pro' => __('Pro'),
+                            'enterprise' => __('Enterprise')
+                        ];
+                        echo h($planNames[$userEntity->subscription_plan] ?? ucfirst($userEntity->subscription_plan));
+                        ?>
+                    </div>
+                    <small>
+                        <?= $this->Html->link(__('Manage Subscription'), ['controller' => 'Subscriptions', 'action' => 'index']) ?>
+                    </small>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-info">
                     <label><?= __('Role') ?></label>
                     <div class="role-badge role-<?= h($userEntity->role) ?>">
                         <?= h(ucfirst($userEntity->role)) ?>
@@ -47,6 +66,72 @@ $this->assign('title', __('Profile Settings'));
                         <?= $userEntity->created ? $userEntity->created->format('d.m.Y') : __('N/A') ?>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2><?= __('Personal Information') ?></h2>
+            
+            <div class="form-row">
+                <?= $this->Form->control('first_name', [
+                    'label' => __('First Name'),
+                    'type' => 'text',
+                    'required' => false,
+                    'class' => 'form-input'
+                ]) ?>
+            </div>
+
+            <div class="form-row">
+                <?= $this->Form->control('last_name', [
+                    'label' => __('Last Name'),
+                    'type' => 'text',
+                    'required' => false,
+                    'class' => 'form-input'
+                ]) ?>
+            </div>
+
+            <div class="form-row">
+                <?= $this->Form->control('info', [
+                    'label' => __('Additional Information'),
+                    'type' => 'textarea',
+                    'required' => false,
+                    'class' => 'form-input',
+                    'rows' => 4
+                ]) ?>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2><?= __('Bank Details for Direct Debit') ?></h2>
+            <p class="section-hint"><?= __('Required for bank transfer subscription payments.') ?></p>
+            
+            <div class="form-row">
+                <?= $this->Form->control('bank_account_holder', [
+                    'label' => __('Account Holder Name'),
+                    'type' => 'text',
+                    'required' => false,
+                    'class' => 'form-input'
+                ]) ?>
+            </div>
+
+            <div class="form-row">
+                <?= $this->Form->control('bank_iban', [
+                    'label' => __('IBAN'),
+                    'type' => 'text',
+                    'required' => false,
+                    'class' => 'form-input',
+                    'placeholder' => 'DE89 3704 0044 0532 0130 00'
+                ]) ?>
+            </div>
+
+            <div class="form-row">
+                <?= $this->Form->control('bank_bic', [
+                    'label' => __('BIC/SWIFT'),
+                    'type' => 'text',
+                    'required' => false,
+                    'class' => 'form-input',
+                    'placeholder' => 'COBADEFFXXX'
+                ]) ?>
             </div>
         </div>
 

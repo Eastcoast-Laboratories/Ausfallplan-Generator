@@ -233,13 +233,14 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
             color: #2c3e50;
         }
         
-        .language-option:hover {
+        .language-option:hover:not(.active) {
             background: #f5f7fa;
         }
         
         .language-option.active {
             background: #e3f2fd;
             font-weight: 600;
+            cursor: default;
         }
         
         /* User Menu */

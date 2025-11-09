@@ -35,7 +35,21 @@ $planPrices = [
     
     <?php if ($plan === 'enterprise'): ?>
         <p><?= __('For enterprise subscriptions, please contact us directly:') ?></p>
-        <p><a href="mailto:fairnestplan-kontakt@it.z11.de">fairnestplan-kontakt@it.z11.de</a></p>
+        <p>
+            <a href="mailto:fairnestplan-kontakt@it.z11.de?subject=<?= urlencode(__('Enterprise Subscription Inquiry')) ?>&body=<?= urlencode(__('Hello,
+
+I am interested in an Enterprise subscription for FairnestPlan.
+
+Organization: 
+Number of users: 
+Number of children: 
+
+Please provide me with more information about pricing and features.
+
+Best regards')) ?>">
+                fairnestplan-kontakt@it.z11.de
+            </a>
+        </p>
         <p><?= $this->Html->link(__('Back to Plans'), ['action' => 'index'], ['class' => 'button']) ?></p>
     <?php else: ?>
         <?= $this->Form->create(null, ['type' => 'post']) ?>
