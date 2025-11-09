@@ -19,6 +19,9 @@ $this->assign('title', __('Create Schedule'));
                     'empty' => false,
                     'class' => 'organization-selector'
                 ]);
+            } else {
+                // Hidden field for users with only one organization
+                echo $this->Form->hidden('organization_id');
             }
             
             echo $this->Form->control('title', [

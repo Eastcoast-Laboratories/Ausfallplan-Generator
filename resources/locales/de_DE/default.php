@@ -315,7 +315,7 @@ return [
     'The schedule could not be updated. Please try again.' => 'Der Ausfallplan konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut.',
     'The schedule has been deleted.' => 'Der Ausfallplan wurde gelöscht.',
     'The schedule could not be deleted. Please try again.' => 'Der Ausfallplan konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.',
-    
+    'Could not save schedule.' => 'Der Ausfallplan konnte nicht gespeichert werden.',
     // User Menu
     'Settings' => 'Einstellungen',
     'My Account' => 'Mein Konto',

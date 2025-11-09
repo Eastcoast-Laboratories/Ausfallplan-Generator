@@ -222,7 +222,7 @@ class SchedulesController extends AppController
                 $this->Flash->success(__('Schedule created successfully.'));
                 return $this->redirect(['action' => 'view', $schedule->id]);
             }
-            $this->Flash->error(__('Could not save schedule. Please try again.'));
+            $this->Flash->error("[E84398] ".__('Could not save schedule.'));
         }
         
         $this->set(compact('schedule', 'organizations', 'canSelectOrganization'));
@@ -271,7 +271,7 @@ class SchedulesController extends AppController
                 $this->Flash->success(__('Schedule updated successfully.'));
                 return $this->redirect(['action' => 'view', $schedule->id]);
             }
-            $this->Flash->error(__('Could not save schedule. Please try again.'));
+            $this->Flash->error(__('Could not save schedule.'));
         }
         
         $this->set(compact('schedule', 'organizations', 'userOrgs'));
