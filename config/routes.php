@@ -70,6 +70,9 @@ return function (RouteBuilder $routes): void {
         $builder->connect('/forgot-password', ['controller' => 'Users', 'action' => 'forgotPassword']);
         $builder->connect('/reset-password', ['controller' => 'Users', 'action' => 'resetPassword']);
         $builder->connect('/set-language', ['controller' => 'Pages', 'action' => 'setLanguage']);
+        $builder->connect('/subscriptions', ['controller' => 'Subscriptions', 'action' => 'index']);
+        $builder->connect('/subscriptions/upgrade/:plan', ['controller' => 'Subscriptions', 'action' => 'upgrade'], ['pass' => ['plan']]);
+        $builder->connect('/subscriptions/cancel', ['controller' => 'Subscriptions', 'action' => 'cancel']);
         
         // Admin Routes - Prefix scope automatically adds /admin/ to URLs
         $builder->prefix('Admin', function (RouteBuilder $routes) {
