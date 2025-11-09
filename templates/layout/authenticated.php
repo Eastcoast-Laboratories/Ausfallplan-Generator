@@ -479,7 +479,7 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
                 <!-- Language Switcher -->
                 <div class="language-switcher">
                     <div class="language-flag" title="<?= __('Change Language') ?>">
-                        <?= $currentLang === 'de' ? '🇩🇪' : '🇬🇧' ?>
+                        <?= $currentLang === 'de' ? '🇬🇧' : '🇩🇪' ?>
                     </div>
                     <div class="language-dropdown">
                         <?php if ($currentLang === 'de'): ?>

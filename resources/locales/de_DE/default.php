@@ -141,6 +141,15 @@ return [
     'Settings' => 'Einstellungen',
     'My Account' => 'Mein Konto',
     'Logout' => 'Abmelden',
+    'Personal Information' => 'Persönliche Informationen',
+    'First Name' => 'Vorname',
+    'Additional Information' => 'Zusätzliche Informationen',
+    'Bank Details for Direct Debit' => 'Bankverbindung für Lastschrifteinzug',
+    'Required for bank transfer subscription payments.' => 'Erforderlich für Abonnementzahlungen per Banküberweisung.',
+    'Account Holder Name' => 'Kontoinhaber',
+    '(if different)' => '(wenn abweichend)',
+    'IBAN' => 'IBAN',
+    'BIC/SWIFT' => 'BIC/SWIFT',
     
     // Dashboard
     'Add Child' => 'Kind hinzufügen',

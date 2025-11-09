@@ -107,7 +107,7 @@ $this->assign('title', __('Profile Settings'));
             
             <div class="form-row">
                 <?= $this->Form->control('bank_account_holder', [
-                    'label' => __('Account Holder Name'),
+                    'label' => __('Account Holder Name') . ' ' . __('(if different)'),
                     'type' => 'text',
                     'required' => false,
                     'class' => 'form-input'

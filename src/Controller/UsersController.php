@@ -327,12 +327,15 @@ class UsersController extends AppController
             
             // Handle password change
             if (!empty($data['new_password'])) {
-                if ($data['new_password'] !== $data['confirm_password']) {
+                if (!empty($data['confirm_password']) && $data['new_password'] !== $data['confirm_password']) {
                     $this->Flash->error(__('Passwords do not match.'));
                     $this->set(compact('userEntity'));
                     return;
                 }
-                $data['password'] = $data['new_password'];
+                // Only set password if confirmation is also provided
+                if (!empty($data['confirm_password'])) {
+                    $data['password'] = $data['new_password'];
+                }
             }
             
             // Remove password-related fields from data
