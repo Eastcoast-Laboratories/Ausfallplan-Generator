@@ -379,4 +379,8 @@ return [
     '9. Widerrufsrecht für Verbraucher' => '9. Widerrufsrecht für Verbraucher',
     '10. Änderung der AGB' => '10. Änderung der AGB',
     '11. Schlussbestimmungen' => '11. Schlussbestimmungen',
+    
+    // Waitlist & Schedule messages
+    'Bitte wählen Sie einen Ausfallplan aus, um die Nachrückliste zu sehen.' => 'Bitte wählen Sie einen Ausfallplan aus, um die Nachrückliste zu sehen.',
+    'Zu den Ausfallplänen' => 'Zu den Ausfallplänen',
 ];

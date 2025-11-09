@@ -8,7 +8,13 @@ $this->assign('title', __('Organization Management'));
 <div class="organizations index content">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
         <h3 style="margin: 0;"><?= __('Organizations') ?></h3>
-        <?= $this->Html->link('+ ' . __('Add Organization'), ['action' => 'add'], ['class' => 'button']) ?>
+        <?php
+        // All users can create organizations
+        $canCreate = true;
+        ?>
+        <?php if ($canCreate): ?>
+            <?= $this->Html->link('+ ' . __('Add Organization'), ['action' => 'add'], ['class' => 'button']) ?>
+        <?php endif; ?>
     </div>
     
     <div class="table-responsive">
@@ -44,29 +50,25 @@ $this->assign('title', __('Organization Management'));
                     <td class="actions">
                         <?= $this->Html->link(__('Ansehen'), ['action' => 'view', $organization->id]) ?>
                         <?php 
-                        // Check permissions for edit and delete
+                        // Check permissions for edit and delete based on user role in this org
                         $canEdit = false;
                         $canDelete = false;
                         $identity = $this->request->getAttribute('identity');
                         if ($identity) {
                             if ($identity->is_system_admin) {
+                                // System admin can edit/delete all orgs
                                 $canEdit = true;
                                 $canDelete = true;
-                            } else {
-                                // Check if user is org_admin of this organization
-                                $orgUsersTable = \Cake\ORM\TableRegistry::getTableLocator()->get('OrganizationUsers');
-                                $isOrgAdmin = $orgUsersTable->find()
-                                    ->where([
-                                        'user_id' => $identity->id,
-                                        'organization_id' => $organization->id,
-                                        'role' => 'org_admin'
-                                    ])
-                                    ->count() > 0;
-                                
-                                if ($isOrgAdmin) {
+                            } elseif (isset($organization->user_role)) {
+                                // Regular users: only org_admin and editor can edit, only org_admin can delete
+                                if ($organization->user_role === 'org_admin') {
                                     $canEdit = true;
                                     $canDelete = true;
+                                } elseif ($organization->user_role === 'editor') {
+                                    $canEdit = true;
+                                    $canDelete = false;
                                 }
+                                // viewer: no edit, no delete (canEdit and canDelete stay false)
                             }
                         }
                         ?>

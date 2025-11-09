@@ -26,10 +26,12 @@ $this->assign('title', __('Children'));
     </div>
     <?php endif; ?>
     
+    <?php if (!($isViewer ?? false)): ?>
     <div class="actions" style="display: flex; gap: 1rem; justify-content: flex-end;">
         <?= $this->Html->link('📥 ' . __('CSV Import'), ['action' => 'import'], ['class' => 'button', 'style' => 'background: #2196f3; color: white;']) ?>
         <?= $this->Html->link(__('New Child'), ['action' => 'add'], ['class' => 'button', 'id' => 'new-child-button']) ?>
     </div>
+    <?php endif; ?>
     <div class="table-responsive">
         <table>
             <thead>
@@ -104,14 +106,18 @@ $this->assign('title', __('Children'));
                     <td><?= $child->has('sibling_group') && $child->sibling_group ? h($child->sibling_group->label) : '' ?></td>
                     <td><?= h($child->created) ?></td>
                     <td class="actions">
-                        <?= $this->Html->link(__('Edit'), ['action' => 'edit', $child->id]) ?>
-                        <button 
-                            class="delete-child-btn" 
-                            data-child-id="<?= $child->id ?>"
-                            data-child-name="<?= h($child->name) ?>"
-                            style="background: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer; padding: 0.25rem 0.5rem;">
-                            <?= __('Delete') ?>
-                        </button>
+                        <?php if (!($isViewer ?? false)): ?>
+                            <?= $this->Html->link(__('Edit'), ['action' => 'edit', $child->id]) ?>
+                            <button 
+                                class="delete-child-btn" 
+                                data-child-id="<?= $child->id ?>"
+                                data-child-name="<?= h($child->name) ?>"
+                                style="background: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer; padding: 0.25rem 0.5rem;">
+                                <?= __('Delete') ?>
+                            </button>
+                        <?php else: ?>
+                            <?= $this->Html->link(__('View'), ['action' => 'view', $child->id]) ?>
+                        <?php endif; ?>
                     </td>
                 </tr>
                 <?php endforeach; ?>

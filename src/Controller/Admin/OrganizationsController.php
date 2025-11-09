@@ -47,26 +47,23 @@ class OrganizationsController extends AppController
                 ->orderBy(['Organizations.name' => 'ASC'])
                 ->all();
         } else {
-            // Editor sees only their organizations where they are org_admin
+            // Regular users see their organizations (org_admin, editor, viewer)
             $orgUsersTable = $this->fetchTable('OrganizationUsers');
             $userOrgEntities = $orgUsersTable->find()
-                ->where([
-                    'user_id' => $user->id,
-                    'role' => 'org_admin'
-                ])
+                ->where(['user_id' => $user->id])
                 ->all();
             
-            $userOrgs = [];
+            $userOrgsWithRoles = [];
             foreach ($userOrgEntities as $orgUser) {
-                $userOrgs[] = $orgUser->organization_id;
+                $userOrgsWithRoles[$orgUser->organization_id] = $orgUser->role;
             }
             
-            if (empty($userOrgs)) {
+            if (empty($userOrgsWithRoles)) {
                 // User has no organizations - show empty list with option to create one
                 $organizations = [];
             } else {
                 $organizations = $this->Organizations->find()
-                    ->where(['Organizations.id IN' => $userOrgs])
+                    ->where(['Organizations.id IN' => array_keys($userOrgsWithRoles)])
                     ->select([
                         'Organizations.id',
                         'Organizations.name',
@@ -82,6 +79,11 @@ class OrganizationsController extends AppController
                     ->group(['Organizations.id'])
                     ->orderBy(['Organizations.name' => 'ASC'])
                     ->all();
+                    
+                // Add role information to each organization
+                foreach ($organizations as $org) {
+                    $org->user_role = $userOrgsWithRoles[$org->id] ?? 'viewer';
+                }
             }
         }
 

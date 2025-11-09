@@ -161,14 +161,16 @@ class UsersController extends AppController
      */
     private function notifyOrgAdminsAboutNewUser($user, $organization, $requestedRole): void
     {
-        // Get all org-admins of the organization
+        // Get all ACTIVE org-admins of the organization (exclude pending/inactive users)
         $orgAdmins = $this->fetchTable('OrganizationUsers')
             ->find()
             ->where([
-                'organization_id' => $organization->id,
-                'role' => 'org_admin'
+                'OrganizationUsers.organization_id' => $organization->id,
+                'OrganizationUsers.role' => 'org_admin'
             ])
-            ->contain(['Users'])
+            ->contain(['Users' => function ($q) {
+                return $q->where(['Users.status' => 'active']);
+            }])
             ->all();
         
         if ($orgAdmins->isEmpty()) {
@@ -191,7 +193,8 @@ class UsersController extends AppController
         
         // Send email to each org-admin
         foreach ($orgAdmins as $orgAdmin) {
-            if (!$orgAdmin->user) {
+            // Skip if user doesn't exist or is not active
+            if (!$orgAdmin->user || $orgAdmin->user->status !== 'active') {
                 continue;
             }
             

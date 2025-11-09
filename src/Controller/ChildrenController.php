@@ -65,8 +65,12 @@ class ChildrenController extends AppController
         
         // Can show selector if user has multiple organizations or is system admin
         $canSelectOrganization = $user->is_system_admin || count($organizations) > 1;
+        
+        // Get user role in selected organization (for permission checks in view)
+        $userRole = $selectedOrgId ? $this->getUserRoleInOrg((int)$selectedOrgId) : 'org_admin';
+        $isViewer = ($userRole === 'viewer');
 
-        $this->set(compact('children', 'siblingNames', 'organizations', 'selectedOrgId', 'canSelectOrganization'));
+        $this->set(compact('children', 'siblingNames', 'organizations', 'selectedOrgId', 'canSelectOrganization', 'isViewer'));
     }
 
     /**

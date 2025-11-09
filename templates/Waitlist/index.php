@@ -233,10 +233,18 @@ $this->assign('title', __('Waitlist'));
         </div>
         
     </div>
+    
     <?php else: ?>
-        <div style="background: #fff3cd; padding: 2rem; border-radius: 8px; text-align: center;">
-            <p><?= __('Please select a schedule to manage the waitlist.') ?></p>
-            <?= $this->Html->link(__('Create Schedule'), ['controller' => 'Schedules', 'action' => 'add'], ['class' => 'button']) ?>
+        <!-- No schedule selected -->
+        <div style="background: #f5f7fa; padding: 3rem; border-radius: 8px; text-align: center;">
+            <p style="font-size: 1.2rem; color: #666; margin-bottom: 1rem;">
+                <?= __('Bitte wählen Sie einen Ausfallplan aus, um die Nachrückliste zu sehen.') ?>
+            </p>
+            <?= $this->Html->link(
+                __('Zu den Ausfallplänen'),
+                ['controller' => 'Schedules', 'action' => 'index'],
+                ['class' => 'button', 'style' => 'background: #667eea; color: white;']
+            ) ?>
         </div>
     <?php endif; ?>
 </div>
