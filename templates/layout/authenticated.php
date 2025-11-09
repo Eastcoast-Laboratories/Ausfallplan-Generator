@@ -447,6 +447,11 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
                 <span><?= __('Organizations') ?></span>
             </a>
             <?php endif; ?>
+            
+            <a href="/subscriptions" class="sidebar-nav-item <?= $this->request->getParam('controller') === 'Subscriptions' ? 'active' : '' ?>">
+                <span>💳</span>
+                <span><?= __('Subscription') ?></span>
+            </a>
         </nav>
     </aside>
     

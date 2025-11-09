@@ -22,6 +22,12 @@ use Cake\ORM\Entity;
  * @property int|null $approved_by
  * @property \Cake\I18n\DateTime $created
  * @property \Cake\I18n\DateTime $modified
+ * @property string $subscription_plan
+ * @property string $subscription_status
+ * @property \Cake\I18n\DateTime|null $subscription_started_at
+ * @property \Cake\I18n\DateTime|null $subscription_expires_at
+ * @property string|null $payment_method
+ *
  *
  * @property \App\Model\Entity\Organization $organization
  * @property \App\Model\Entity\Organization[] $organizations
@@ -44,6 +50,11 @@ class User extends Entity
         'email_token' => true,
         'status' => true,
         'approved_at' => true,
+        'subscription_plan' => true,
+        'subscription_status' => true,
+        'subscription_started_at' => true,
+        'subscription_expires_at' => true,
+        'payment_method' => true,
         'approved_by' => true,
         'created' => true,
         'modified' => true,
