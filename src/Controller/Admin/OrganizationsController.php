@@ -165,6 +165,23 @@ class OrganizationsController extends AppController
             $choice = $data['organization_choice'] ?? 'new';
             
             if ($choice === 'new') {
+                // Check subscription limits for test plan users
+                if (!$user->is_system_admin && $user->subscription_plan === 'test') {
+                    // Count user's organizations (as org_admin)
+                    $orgUsersTable = $this->fetchTable('OrganizationUsers');
+                    $userOrgCount = $orgUsersTable->find()
+                        ->where([
+                            'user_id' => $user->id,
+                            'role' => 'org_admin'
+                        ])
+                        ->count();
+                    
+                    if ($userOrgCount >= 1) {
+                        $this->Flash->error(__('Test plan users can only create 1 organization. Please upgrade to Pro for unlimited organizations.'));
+                        $this->set(compact('organization'));
+                        return;
+                    }
+                }
                 // Create new organization
                 $organization = $this->Organizations->patchEntity($organization, [
                     'name' => $data['organization_name'],

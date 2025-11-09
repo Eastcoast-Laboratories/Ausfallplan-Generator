@@ -210,6 +210,20 @@ class SchedulesController extends AppController
                 return;
             }
             
+            // Check subscription limits for test plan users
+            if (!$user->is_system_admin && $user->subscription_plan === 'test') {
+                // Count active schedules for this user across all organizations
+                $activeSchedulesCount = $this->Schedules->find()
+                    ->where(['Schedules.user_id' => $user->id])
+                    ->count();
+                
+                if ($activeSchedulesCount >= 1) {
+                    $this->Flash->error(__('Test plan users can only create 1 schedule. Please upgrade to Pro for unlimited schedules.'));
+                    $this->set(compact('schedule', 'organizations', 'canSelectOrganization'));
+                    return;
+                }
+            }
+            
             if ($this->Schedules->save($schedule)) {
                 // Set this as the active schedule in session
                 $this->request->getSession()->write('activeScheduleId', $schedule->id);
