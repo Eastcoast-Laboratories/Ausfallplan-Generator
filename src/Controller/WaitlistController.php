@@ -86,7 +86,7 @@ class WaitlistController extends AppController
             // Regular user: Get their organization
             $primaryOrg = $this->getPrimaryOrganization();
             if (!$primaryOrg) {
-                $this->Flash->info(__('Sie sind noch keiner Organisation zugeordnet. Bitte erstellen Sie eine Organisation.'));
+                $this->Flash->info(__('You are not yet assigned to an organization. Please create an organization.'));
                 return $this->redirect(['controller' => 'Admin/Organizations', 'action' => 'index']);
             }
             
@@ -128,7 +128,7 @@ class WaitlistController extends AppController
             
             // If no schedules exist, redirect to schedules page
             if (!$selectedSchedule || $schedules->count() === 0) {
-                $this->Flash->info(__('Bitte erstellen Sie zuerst einen Ausfallplan.'));
+                $this->Flash->info(__('Please create a schedule first.'));
                 return $this->redirect(['controller' => 'Schedules', 'action' => 'index']);
             }
         }

@@ -253,7 +253,7 @@ class OrganizationsController extends AppController
                 ->count() > 0;
             
             if (!$hasPermission) {
-                $this->Flash->error(__('Sie haben keine Berechtigung, diese Organisation zu bearbeiten.'));
+                $this->Flash->error(__('You do not have permission to edit this organization.'));
                 return $this->redirect(['action' => 'index']);
             }
         }
@@ -312,7 +312,7 @@ class OrganizationsController extends AppController
                 ->count() > 0;
             
             if (!$hasPermission) {
-                $this->Flash->error(__('Sie haben keine Berechtigung, diese Organisation zu löschen.'));
+                $this->Flash->error(__('You do not have permission to delete this organization.'));
                 return $this->redirect(['action' => 'index']);
             }
         }

@@ -60,15 +60,12 @@ $this->assign('title', __('Organization Management'));
                                 $canEdit = true;
                                 $canDelete = true;
                             } elseif (isset($organization->user_role)) {
-                                // Regular users: only org_admin and editor can edit, only org_admin can delete
+                                // Regular users: only org_admin can edit and delete
                                 if ($organization->user_role === 'org_admin') {
                                     $canEdit = true;
                                     $canDelete = true;
-                                } elseif ($organization->user_role === 'editor') {
-                                    $canEdit = true;
-                                    $canDelete = false;
                                 }
-                                // viewer: no edit, no delete (canEdit and canDelete stay false)
+                                // editor and viewer: no edit, no delete (canEdit and canDelete stay false)
                             }
                         }
                         ?>
