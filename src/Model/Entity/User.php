@@ -27,6 +27,12 @@ use Cake\ORM\Entity;
  * @property \Cake\I18n\DateTime|null $subscription_started_at
  * @property \Cake\I18n\DateTime|null $subscription_expires_at
  * @property string|null $payment_method
+ * @property string|null $first_name
+ * @property string|null $last_name
+ * @property string|null $info
+ * @property string|null $bank_account_holder
+ * @property string|null $bank_iban
+ * @property string|null $bank_bic
  *
  *
  * @property \App\Model\Entity\Organization $organization
@@ -56,6 +62,12 @@ class User extends Entity
         'subscription_expires_at' => true,
         'payment_method' => true,
         'approved_by' => true,
+        'first_name' => true,
+        'last_name' => true,
+        'info' => true,
+        'bank_account_holder' => true,
+        'bank_iban' => true,
+        'bank_bic' => true,
         'created' => true,
         'modified' => true,
         'organization' => true,
