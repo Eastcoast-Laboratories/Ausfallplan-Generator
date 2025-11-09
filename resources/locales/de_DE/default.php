@@ -364,4 +364,19 @@ return [
     'Access denied. System admin privileges required.' => 'Zugriff verweigert. Systemadministrator-Rechte erforderlich.',
     'Access denied. Please login.' => 'Zugriff verweigert. Bitte melden Sie sich an.',
     'You do not have permission to perform actions. (Viewer role is read-only)' => 'Sie haben keine Berechtigung Aktionen auszuführen. (Viewer-Rolle ist nur lesend)',
+    
+    // AGB / Terms of Service
+    'AGB' => 'AGB',
+    'Allgemeine Geschäftsbedingungen (AGB)' => 'Allgemeine Geschäftsbedingungen (AGB)',
+    '1. Geltungsbereich' => '1. Geltungsbereich',
+    '2. Vertragsschluss' => '2. Vertragsschluss',
+    '3. Leistungsumfang' => '3. Leistungsumfang',
+    '4. Nutzungsrechte und Datenschutz' => '4. Nutzungsrechte und Datenschutz',
+    '5. Pflichten des Kunden' => '5. Pflichten des Kunden',
+    '6. Zahlungsbedingungen' => '6. Zahlungsbedingungen',
+    '7. Haftung' => '7. Haftung',
+    '8. Vertragslaufzeit und Kündigung' => '8. Vertragslaufzeit und Kündigung',
+    '9. Widerrufsrecht für Verbraucher' => '9. Widerrufsrecht für Verbraucher',
+    '10. Änderung der AGB' => '10. Änderung der AGB',
+    '11. Schlussbestimmungen' => '11. Schlussbestimmungen',
 ];

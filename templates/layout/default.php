@@ -12,6 +12,18 @@
  * @since         0.10.0
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  * @var \App\View\AppView $this
+ * 
+ * VERWENDUNG: Dieses Layout wird verwendet für statische Seiten, die KEIN eigenes inline-Layout haben:
+ * - templates/Pages/impressum.php (DE Impressum)
+ * - templates/Pages/datenschutz.php (DE Datenschutz)
+ * - templates/Pages/agb.php (AGB)
+ * - Weitere statische Seiten über PagesController::display()
+ * 
+ * NICHT verwendet für:
+ * - Eingeloggte Benutzer → nutzen templates/layout/authenticated.php
+ * - templates/Pages/home.php → nutzt eigenes inline-Layout ($this->disableAutoLayout())
+ * - templates/Pages/imprint.php → nutzt eigenes inline-Layout ($this->disableAutoLayout())
+ * - templates/Pages/privacy.php → nutzt eigenes inline-Layout ($this->disableAutoLayout())
  */
 
 $cakeDescription = 'CakePHP: the rapid development php framework';

@@ -342,9 +342,9 @@ $lang = substr($locale, 0, 2); // de or en
         <div class="container">
             <p>&copy; <?= date('Y') ?> FairNestPlan. <?= __('All rights reserved.') ?></p>
             <p>
-                <a href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'display', 'imprint']) ?>"><?= __('Imprint') ?></a> | 
-                <a href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'display', 'privacy']) ?>"><?= __('Privacy') ?></a> | 
-                <a href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'display', 'terms']) ?>"><?= __('Terms') ?></a>
+                <a href="/pages/imprint"><?= __('Imprint') ?></a> | 
+                <a href="/pages/privacy"><?= __('Privacy') ?></a> | 
+                <a href="/pages/agb"><?= __('Terms') ?></a>
             </p>
         </div>
     </footer>
