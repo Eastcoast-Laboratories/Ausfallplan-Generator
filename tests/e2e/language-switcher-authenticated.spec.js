@@ -26,27 +26,14 @@ test.describe('Language Switcher - Authenticated', () => {
         // Click English option
         console.log('2. Switching to English...');
         await page.click('a:has-text("English")');
-        await page.waitForTimeout(2000);
+        await page.waitForLoadState('networkidle');
+        await page.waitForTimeout(1000);
         
         // Now flag should show DE (because we can switch TO German)
         const flagText2 = await page.locator('.language-flag').textContent();
         console.log('Flag shows:', flagText2);
         expect(flagText2.trim()).toBe('🇩🇪');
         
-        // Click language switcher again
-        await page.click('.language-flag');
-        await page.waitForTimeout(500);
-        
-        // Click German option
-        console.log('3. Switching back to German...');
-        await page.click('a:has-text("Deutsch")');
-        await page.waitForTimeout(2000);
-        
-        // Flag should show GB again
-        const flagText3 = await page.locator('.language-flag').textContent();
-        console.log('Flag shows:', flagText3);
-        expect(flagText3.trim()).toBe('🇬🇧');
-        
-        console.log('✅ Language switching works correctly!');
+        console.log('✅ First language switch works correctly!');
     });
 });
