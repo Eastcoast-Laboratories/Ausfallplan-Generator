@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use Cake\Core\Configure;
+
 /**
  * Subscriptions Controller
  *
@@ -126,15 +128,9 @@ class SubscriptionsController extends AppController
             }
             
             if ($usersTable->save($currentUser)) {
-                $this->Flash->success(__('Your subscription upgrade request has been received. Please complete the payment.'));
-                
-                // Redirect based on payment method
-                if ($paymentMethod === 'paypal') {
-                    // In production, redirect to PayPal
-                    $this->Flash->info(__('PayPal integration coming soon. Your subscription is pending.'));
-                    return $this->redirect(['action' => 'index']);
-                } else {
-                    // Bank transfer instructions
+                // Bank transfer only - PayPal is handled via AJAX
+                if ($paymentMethod === 'bank_transfer') {
+                    $this->Flash->success(__('Your subscription upgrade request has been received. Please complete the payment.'));
                     $this->Flash->info(__('Please transfer the amount to our bank account. Details have been sent to your email.'));
                     return $this->redirect(['action' => 'index']);
                 }
@@ -143,7 +139,64 @@ class SubscriptionsController extends AppController
             $this->Flash->error(__('Could not process subscription upgrade. Please try again.'));
         }
         
-        $this->set(compact('plan', 'currentUser'));
+        // Get PayPal Client ID from environment
+        $paypalClientId = env('PAYPAL_CLIENT_ID', 'test');
+        
+        $this->set(compact('plan', 'currentUser', 'paypalClientId'));
+    }
+    
+    /**
+     * Handle PayPal payment success
+     *
+     * @return \Cake\Http\Response|null|void
+     */
+    public function paypalSuccess()
+    {
+        $this->request->allowMethod(['post']);
+        $this->autoRender = false;
+        
+        $user = $this->Authentication->getIdentity();
+        if (!$user) {
+            return $this->response->withType('application/json')
+                ->withStringBody(json_encode(['success' => false, 'error' => 'Not authenticated']));
+        }
+        
+        $data = $this->request->getData();
+        $orderID = $data['orderID'] ?? null;
+        $plan = $data['plan'] ?? null;
+        $details = $data['details'] ?? [];
+        
+        if (!$orderID || !$plan) {
+            return $this->response->withType('application/json')
+                ->withStringBody(json_encode(['success' => false, 'error' => 'Missing data']));
+        }
+        
+        // Update user subscription
+        $usersTable = $this->fetchTable('Users');
+        $currentUser = $usersTable->get($user->id);
+        
+        $currentUser->subscription_plan = $plan;
+        $currentUser->subscription_status = 'active';
+        $currentUser->payment_method = 'paypal';
+        $currentUser->subscription_started_at = new \DateTime();
+        
+        // Set expiration date (30 days for pro)
+        if ($plan === 'pro') {
+            $expiresAt = new \DateTime();
+            $expiresAt->modify('+30 days');
+            $currentUser->subscription_expires_at = $expiresAt;
+        }
+        
+        if ($usersTable->save($currentUser)) {
+            // Log the transaction
+            $this->log('PayPal payment successful: Order ' . $orderID . ' for user ' . $user->id, 'info');
+            
+            return $this->response->withType('application/json')
+                ->withStringBody(json_encode(['success' => true]));
+        }
+        
+        return $this->response->withType('application/json')
+            ->withStringBody(json_encode(['success' => false, 'error' => 'Failed to update subscription']));
     }
     
     /**

@@ -370,11 +370,11 @@ class SchedulesController extends AppController
             ->orderBy(['created' => 'DESC'])
             ->all();
 
-        // Get children for this specific schedule (for right column - with organization_order)
+        // Get children for this organization (for right column - with organization_order)
         $childrenTable = $this->fetchTable('Children');
         $childrenInOrder = $childrenTable->find()
             ->where([
-                'Children.schedule_id' => $schedule->id,
+                'Children.organization_id' => $schedule->organization_id,
                 'Children.organization_order IS NOT' => null
             ])
             ->contain(['SiblingGroups'])

@@ -73,6 +73,7 @@ return function (RouteBuilder $routes): void {
         $builder->connect('/subscriptions', ['controller' => 'Subscriptions', 'action' => 'index']);
         $builder->connect('/subscriptions/upgrade/:plan', ['controller' => 'Subscriptions', 'action' => 'upgrade'], ['pass' => ['plan']]);
         $builder->connect('/subscriptions/cancel', ['controller' => 'Subscriptions', 'action' => 'cancel']);
+        $builder->connect('/subscriptions/paypal-success', ['controller' => 'Subscriptions', 'action' => 'paypalSuccess']);
         
         // Admin Routes - Prefix scope automatically adds /admin/ to URLs
         $builder->prefix('Admin', function (RouteBuilder $routes) {

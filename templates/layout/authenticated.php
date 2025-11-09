@@ -292,8 +292,13 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
             background: transparent;
         }
         
-        /* Keep dropdown visible when hovering over user menu */
-        .user-menu:hover .user-dropdown {
+        /* Keep dropdown visible when hovering over user menu (only if not clicked) */
+        .user-menu:hover .user-dropdown:not(.clicked-open) {
+            display: block;
+        }
+        
+        /* Keep dropdown visible when clicked */
+        .user-dropdown.clicked-open {
             display: block;
         }
         
@@ -489,10 +494,10 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
                 
                 <!-- User Menu -->
                 <div class="user-menu">
-                    <div class="user-avatar" title="<?= h($user->email ?? '') ?>">
+                    <div class="user-avatar" id="user-avatar" title="<?= h($user->email ?? '') ?>">
                         <?= strtoupper(substr($user->email ?? 'U', 0, 1)) ?>
                     </div>
-                    <div class="user-dropdown">
+                    <div class="user-dropdown" id="user-dropdown">
                         <div class="user-dropdown-header">
                             <div class="user-dropdown-name"><?= h($user->email ?? __('User')) ?></div>
                             <div class="user-dropdown-email"><?= h($user->role ?? 'viewer') ?></div>
@@ -547,6 +552,29 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
                     sidebar.classList.remove('mobile-open');
                     overlay.classList.remove('active');
                 }
+            });
+        });
+        
+        // User menu click behavior
+        const userAvatar = document.getElementById('user-avatar');
+        const userDropdown = document.getElementById('user-dropdown');
+        
+        userAvatar.addEventListener('click', function(e) {
+            e.stopPropagation();
+            userDropdown.classList.toggle('clicked-open');
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!userAvatar.contains(e.target) && !userDropdown.contains(e.target)) {
+                userDropdown.classList.remove('clicked-open');
+            }
+        });
+        
+        // Close dropdown when clicking on a menu item
+        document.querySelectorAll('.user-dropdown-item').forEach(item => {
+            item.addEventListener('click', function() {
+                userDropdown.classList.remove('clicked-open');
             });
         });
     </script>
