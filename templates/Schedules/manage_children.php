@@ -209,13 +209,6 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 0.5rem;">
                                     <button 
-                                        class="delete-child" 
-                                        data-child-id="<?= $child->id ?>"
-                                        style="background: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; font-weight: bold; padding: 0.4rem 0.6rem;"
-                                        title="<?= __("Delete child") ?>">
-                                        🗑️
-                                    </button>
-                                    <button 
                                         class="remove-from-order" 
                                         data-child-id="<?= $child->id ?>"
                                         style="background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1.2rem; font-weight: bold;"

@@ -54,7 +54,13 @@ $this->assign('title', __('Subscription Plans'));
             <?php 
                 $isCurrentPlan = $currentUser->subscription_plan === $planKey;
                 $isClickable = !$isCurrentPlan && $planKey !== 'test';
-                $upgradeUrl = $isClickable ? $this->Url->build(['action' => 'upgrade', $planKey]) : ($planKey === 'enterprise' ? 'mailto:fairnestplan-kontakt@it.z11.de' : '#');
+                if ($isClickable) {
+                    $upgradeUrl = '/subscriptions/upgrade/' . h($planKey);
+                } elseif ($planKey === 'enterprise') {
+                    $upgradeUrl = '/subscriptions/upgrade/enterprise';
+                } else {
+                    $upgradeUrl = '#';
+                }
             ?>
             <a href="<?= $upgradeUrl ?>" class="price-card-link" style="text-decoration: none; color: inherit; display: block; <?= !$isClickable && $planKey !== 'enterprise' ? 'pointer-events: none;' : '' ?>">
                 <div class="price-card" style="border: 2px solid <?= $isCurrentPlan ? '#28a745' : '#ddd' ?>; border-radius: 8px; padding: 2rem; text-align: center; transition: all 0.3s ease; height: 100%;">

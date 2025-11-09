@@ -252,14 +252,37 @@ $this->assign('title', __('Waitlist'));
 <?php if ($selectedSchedule && $waitlistChildren && $waitlistChildren->count() > 0): ?>
 <script>
 // Initialize Sortable.js for drag & drop
-const el = document.getElementById('waitlist-sortable');
-const sortable = Sortable.create(el, {
+const waitlistEl = document.getElementById('waitlist-sortable');
+const availableEl = document.querySelector('.available-children > div');
+
+const sortable = Sortable.create(waitlistEl, {
     animation: 150,
     ghostClass: 'sortable-ghost',
     handle: '.waitlist-item',
+    group: 'waitlist-group',
     onEnd: function (evt) {
+        // Check if item was moved to available children
+        if (evt.to === availableEl) {
+            // Remove from waitlist
+            const childId = evt.item.dataset.id;
+            fetch('<?= $this->Url->build(['action' => 'delete']) ?>/' + childId, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-Token': '<?= $this->request->getAttribute('csrfToken') ?>'
+                }
+            })
+            .then(() => {
+                location.reload();
+            })
+            .catch(error => {
+                console.error('Error removing from waitlist:', error);
+                location.reload();
+            });
+            return;
+        }
+        
         // Get new order
-        const items = el.querySelectorAll('.waitlist-item');
+        const items = waitlistEl.querySelectorAll('.waitlist-item');
         const order = Array.from(items).map(item => item.dataset.id);
         
         // Send AJAX request to update order
@@ -294,6 +317,15 @@ const sortable = Sortable.create(el, {
             // Reload page on error
             location.reload();
         });
+    }
+});
+
+// Make available children droppable
+Sortable.create(availableEl, {
+    group: 'waitlist-group',
+    sort: false,
+    onAdd: function(evt) {
+        // This is handled in the waitlist onEnd
     }
 });
 

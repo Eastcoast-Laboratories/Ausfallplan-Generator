@@ -481,14 +481,25 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
                         <?= $currentLang === 'de' ? '🇩🇪' : '🇬🇧' ?>
                     </div>
                     <div class="language-dropdown">
-                        <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'changeLanguage', 'de']) ?>" class="language-option <?= $currentLang === 'de' ? 'active' : '' ?>">
-                            <span>🇩🇪</span>
-                            <span>Deutsch</span>
-                        </a>
-                        <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'changeLanguage', 'en']) ?>" class="language-option <?= $currentLang === 'en' ? 'active' : '' ?>">
-                            <span>🇬🇧</span>
-                            <span>English</span>
-                        </a>
+                        <?php if ($currentLang === 'de'): ?>
+                            <div class="language-option active" style="cursor: default; pointer-events: none;">
+                                <span>🇩🇪</span>
+                                <span style="font-weight: bold;">Deutsch</span>
+                            </div>
+                            <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'changeLanguage', 'en']) ?>" class="language-option">
+                                <span>🇬🇧</span>
+                                <span>English</span>
+                            </a>
+                        <?php else: ?>
+                            <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'changeLanguage', 'de']) ?>" class="language-option">
+                                <span>🇩🇪</span>
+                                <span>Deutsch</span>
+                            </a>
+                            <div class="language-option active" style="cursor: default; pointer-events: none;">
+                                <span>🇬🇧</span>
+                                <span style="font-weight: bold;">English</span>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
                 
