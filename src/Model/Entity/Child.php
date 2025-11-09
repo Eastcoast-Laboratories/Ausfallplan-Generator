@@ -11,6 +11,9 @@ use Cake\ORM\Entity;
  * @property int $id
  * @property int $organization_id
  * @property string $name
+ * @property string|null $name_encrypted
+ * @property string|null $name_iv
+ * @property string|null $name_tag
  * @property string|null $last_name
  * @property string|null $display_name
  * @property string|null $gender
@@ -35,6 +38,9 @@ class Child extends Entity
     protected array $_accessible = [
         'organization_id' => true,
         'name' => true,
+        'name_encrypted' => true,
+        'name_iv' => true,
+        'name_tag' => true,
         'last_name' => true,
         'display_name' => true,
         'gender' => true,

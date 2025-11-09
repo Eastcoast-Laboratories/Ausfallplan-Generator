@@ -6,9 +6,9 @@ namespace App\Test\Fixture;
 use Cake\TestSuite\Fixture\TestFixture;
 
 /**
- * OrganizationsFixture
+ * EncryptedDeksFixture
  */
-class OrganizationsFixture extends TestFixture
+class EncryptedDeksFixture extends TestFixture
 {
     /**
      * Init method
@@ -20,15 +20,9 @@ class OrganizationsFixture extends TestFixture
         $this->records = [
             [
                 'id' => 1,
-                'name' => 'Test Kita',
-                'encryption_enabled' => true,
-                'created' => '2024-01-01 10:00:00',
-                'modified' => '2024-01-01 10:00:00',
-            ],
-            [
-                'id' => 2,
-                'name' => 'Second Kita',
-                'encryption_enabled' => false,
+                'organization_id' => 1,
+                'user_id' => 1,
+                'wrapped_dek' => 'base64_encoded_wrapped_dek_for_user_1',
                 'created' => '2024-01-01 10:00:00',
                 'modified' => '2024-01-01 10:00:00',
             ],
