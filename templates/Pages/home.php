@@ -150,6 +150,29 @@ $lang = substr($locale, 0, 2); // de or en
             display: block;
         }
         
+        .column.flex{
+            display: flex;
+        }
+
+        .hero p{
+            font-size: max(2vw, 1.5rem);
+        }
+
+        h3{
+            font-size: 1.9rem;
+        }
+
+        .price-card ul{
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .price-card ul li::before {
+            content: "+ ";
+            color: #4caf50;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
         /* Mobile Navigation */
         @media (max-width: 768px) {
             .hamburger {
@@ -199,7 +222,7 @@ $lang = substr($locale, 0, 2); // de or en
 <body>
     <nav class="header-nav">
         <div class="logo">
-            <img src="<?= $this->Url->build('/img/fairnestplan_logo.png') ?>" alt="FairNestPlan">
+            <img src="<?= $this->Url->build('/img/fairnestplan_logo_w.png') ?>" alt="FairNestPlan">
         </div>
         <div class="hamburger" onclick="toggleMenu()">
             <span></span>
@@ -239,19 +262,19 @@ $lang = substr($locale, 0, 2); // de or en
     <div id="features" class="features">
         <div class="container">
             <div class="row">
-                <div class="column">
+                <div class="column flex">
                     <div class="feature-card">
                         <h3>👥 <?= __('Child Management') ?></h3>
                         <p><?= __('Add children with siblings and integration status easily and set the display order.') ?></p>
                     </div>
                 </div>
-                <div class="column">
+                <div class="column flex">
                     <div class="feature-card">
                         <h3>📅 <?= __('Automatic Distribution') ?></h3>
                         <p><?= __('The system automatically and fairly distributes children across days – matching group size and families.') ?></p>
                     </div>
                 </div>
-                <div class="column">
+                <div class="column flex">
                     <div class="feature-card">
                         <h3>📋 <?= __('Waitlist') ?></h3>
                         <p><?= __('When places become available, the waitlist ensures quick and fair succession.') ?></p>
@@ -260,19 +283,19 @@ $lang = substr($locale, 0, 2); // de or en
             </div>
 
             <div class="row">
-                <div class="column">
+                <div class="column flex">
                     <div class="feature-card">
                         <h3>🖨️ <?= __('PDF/Excel Export') ?></h3>
                         <p><?= __('Export beautiful, print-ready schedules as PDF for distribution or Excel format for editing.') ?></p>
                     </div>
                 </div>
-                <div class="column">
+                <div class="column flex">
                     <div class="feature-card">
                         <h3>🌍 <?= __('Multilingual') ?></h3>
                         <p><?= __('Available in German and English. Easy language switching for international teams.') ?></p>
                     </div>
                 </div>
-                <div class="column">
+                <div class="column flex">
                     <div class="feature-card">
                         <h3>🔒 <?= __('Secure') ?></h3>
                         <p><?= __('Role-based access control, secure authentication and GDPR compliant.') ?></p>
