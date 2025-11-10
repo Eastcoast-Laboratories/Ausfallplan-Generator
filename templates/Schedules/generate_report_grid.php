@@ -25,6 +25,7 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
             font-size: 11px;
             padding: 20px;
             background: white;
+            line-height: 1;
         }
 
         .header {
@@ -32,6 +33,11 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
             margin-bottom: 20px;
             font-size: 18px;
             font-weight: bold;
+        }
+
+        .header img {
+            height: 40px;
+            margin-bottom: 10px;
         }
 
         .report-table {
@@ -110,7 +116,8 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
 </head>
 <body>
     <div class="header">
-        <?= h($schedule->title) ?> - <?= __('Ausfallplan') ?>
+        <img src="<?= $this->Url->build('/img/fairnestplan_logo_w.png') ?>" alt="FairNestPlan">
+        <div><?= h($schedule->title) ?> - <?= __('Ausfallplan') ?></div>
     </div>
 
     <div class="no-print" style="margin-bottom: 20px; text-align: center;">

@@ -29,6 +29,7 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
             font-size: 11px;
             padding: 20px;
             background: white;
+            line-height: 1;
         }
 
         .header {
@@ -36,6 +37,11 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
             margin-bottom: 20px;
             font-size: 16px;
             font-weight: bold;
+        }
+
+        .header img {
+            height: 40px;
+            margin-bottom: 10px;
         }
 
         .container {
@@ -75,7 +81,7 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
             display: flex;
             justify-content: space-between;
             padding: 1px 0;
-            line-height: 1.2;
+            line-height: 0.4;
         }
 
         .child-name {
@@ -187,7 +193,8 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
     </div>
 
     <div class="header">
-        <?= __('Ausfallplan') ?> <?= h($schedule->title) ?>
+        <img src="<?= $this->Url->build('/img/fairnestplan_logo_w.png') ?>" alt="FairNestPlan">
+        <div><?= __('Ausfallplan') ?> <?= h($schedule->title) ?></div>
     </div>
 
     <div class="container">
