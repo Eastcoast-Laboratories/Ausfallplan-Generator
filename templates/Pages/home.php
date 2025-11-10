@@ -91,10 +91,12 @@ $lang = substr($locale, 0, 2); // de or en
             font-size: 1.5rem;
             font-weight: bold;
             color: #667eea;
+            background-color: #faf5ea;
         }
         .header-nav .logo img {
             height: 7rem;
             width: auto;
+            margin-left: 1rem;
         }
         .header-nav .nav-links a {
             margin-left: 1.5rem;

@@ -26,7 +26,7 @@ test.describe('Sibling Badges Verification', () => {
     await page.waitForTimeout(2000);
     
     // Take screenshot for reference
-    await page.screenshot({ path: '/var/www/Ausfallplan-Generator/sibling_test_full.png', fullPage: true });
+    await page.screenshot({ path: '/var/www/Ausfallplan-Generator/screenshots/sibling_test_full.png', fullPage: true });
     
     // Find all sibling badges
     const siblingBadges = await page.locator('a:has-text("Geschwister")').all();

@@ -25,6 +25,32 @@ else
 fi
 echo ""
 
+# Check if nginx is running and stop it (it usually uses port 8080)
+echo "🔍 Checking for nginx..."
+if systemctl is-active --quiet nginx; then
+    echo "⚠️  Nginx is running and may block port 8080."
+    echo "   Stopping nginx..."
+    sudo systemctl stop nginx
+    
+    if [ $? -eq 0 ]; then
+        echo "   ✓ Nginx stopped successfully."
+    else
+        echo "   ❌ Failed to stop nginx. Please run: sudo systemctl stop nginx"
+        exit 1
+    fi
+else
+    echo "✓ Nginx is not running."
+fi
+
+# Double-check if port 8080 is available
+if lsof -Pi :8080 -sTCP:LISTEN -t >/dev/null 2>&1; then
+    echo "⚠️  Port 8080 is still in use by another process:"
+    lsof -Pi :8080 -sTCP:LISTEN
+    echo "   Please stop it manually or change the port in docker-compose.yml"
+    exit 1
+fi
+echo ""
+
 # Create necessary directories
 echo "📁 Creating necessary directories..."
 mkdir -p tmp/cache/models tmp/cache/persistent tmp/cache/views tmp/sessions tmp/tests logs
