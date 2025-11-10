@@ -14,14 +14,19 @@ test.describe('Language Switcher - Authenticated', () => {
         // Should be in German by default
         console.log('1. Checking German is active...');
         
-        // Check the flag shows GB (because we can switch TO English)
+        // Check the flag shows DE (current language)
         const flagText1 = await page.locator('.language-flag').textContent();
         console.log('Flag shows:', flagText1);
-        expect(flagText1.trim()).toBe('🇬🇧');
+        expect(flagText1.trim()).toBe('🇩🇪');
         
         // Click language switcher to open dropdown
         await page.click('.language-flag');
         await page.waitForTimeout(500);
+        
+        // Verify dropdown shows DE as active and EN as clickable
+        const activeOption = await page.locator('.language-option.active').textContent();
+        console.log('Active option:', activeOption);
+        expect(activeOption).toContain('Deutsch');
         
         // Click English option
         console.log('2. Switching to English...');
@@ -29,11 +34,20 @@ test.describe('Language Switcher - Authenticated', () => {
         await page.waitForLoadState('networkidle');
         await page.waitForTimeout(1000);
         
-        // Now flag should show DE (because we can switch TO German)
+        // Now flag should show GB (current language)
         const flagText2 = await page.locator('.language-flag').textContent();
         console.log('Flag shows:', flagText2);
-        expect(flagText2.trim()).toBe('🇩🇪');
+        expect(flagText2.trim()).toBe('🇬🇧');
         
-        console.log('✅ First language switch works correctly!');
+        // Click language switcher again
+        await page.click('.language-flag');
+        await page.waitForTimeout(500);
+        
+        // Verify dropdown shows EN as active and DE as clickable
+        const activeOption2 = await page.locator('.language-option.active').textContent();
+        console.log('Active option:', activeOption2);
+        expect(activeOption2).toContain('English');
+        
+        console.log('✅ Language switcher works correctly!');
     });
 });

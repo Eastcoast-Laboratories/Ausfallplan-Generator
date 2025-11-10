@@ -479,7 +479,7 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
                 <!-- Language Switcher -->
                 <div class="language-switcher">
                     <div class="language-flag" title="<?= __('Change Language') ?>">
-                        <?= $currentLang === 'de' ? '🇬🇧' : '🇩🇪' ?>
+                        <?= $currentLang === 'de' ? '🇩🇪' : '🇬🇧' ?>
                     </div>
                     <div class="language-dropdown">
                         <?php if ($currentLang === 'de'): ?>
@@ -492,14 +492,14 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
                                 <span>English</span>
                             </a>
                         <?php else: ?>
-                            <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'changeLanguage', 'de']) ?>" class="language-option">
-                                <span>🇩🇪</span>
-                                <span>Deutsch</span>
-                            </a>
                             <div class="language-option active" style="cursor: default; pointer-events: none;">
                                 <span>🇬🇧</span>
                                 <span style="font-weight: bold;">English</span>
                             </div>
+                            <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'changeLanguage', 'de']) ?>" class="language-option">
+                                <span>🇩🇪</span>
+                                <span>Deutsch</span>
+                            </a>
                         <?php endif; ?>
                     </div>
                 </div>

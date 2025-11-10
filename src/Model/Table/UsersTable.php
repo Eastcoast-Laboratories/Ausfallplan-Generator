@@ -76,7 +76,13 @@ class UsersTable extends Table
             ->scalar('password')
             ->maxLength('password', 255)
             ->requirePresence('password', 'create')
-            ->notEmptyString('password');
+            ->notEmptyString('password')
+            ->add('password', 'complexity', [
+                'rule' => function ($value, $context) {
+                    return $this->validatePasswordComplexity($value);
+                },
+                'message' => 'Password must be at least 8 characters and contain at least one number and one letter'
+            ]);
 
         $validator
             ->scalar('role')
@@ -111,5 +117,32 @@ class UsersTable extends Table
         $rules->add($rules->isUnique(['email'], 'This email is already registered'));
 
         return $rules;
+    }
+
+    /**
+     * Validate password complexity
+     * Password must be at least 8 characters and contain at least one number and one letter
+     *
+     * @param string $password Password to validate
+     * @return bool
+     */
+    public function validatePasswordComplexity(string $password): bool
+    {
+        // At least 8 characters
+        if (strlen($password) < 8) {
+            return false;
+        }
+
+        // Must contain at least one letter
+        if (!preg_match('/[a-zA-Z]/', $password)) {
+            return false;
+        }
+
+        // Must contain at least one number
+        if (!preg_match('/[0-9]/', $password)) {
+            return false;
+        }
+
+        return true;
     }
 }

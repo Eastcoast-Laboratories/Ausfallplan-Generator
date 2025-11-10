@@ -137,6 +137,7 @@ return [
     'Leave blank if you don\'t want to change your password.' => 'Lassen Sie das Feld leer, wenn Sie Ihr Passwort nicht ändern möchten.',
     'New Password' => 'Neues Passwort',
     'Confirm Password' => 'Passwort bestätigen',
+    'Password must be at least 8 characters and contain at least one number and one letter.' => 'Passwort muss mindestens 8 Zeichen lang sein und mindestens eine Zahl und einen Buchstaben enthalten.',
     'Save Changes' => 'Änderungen speichern',
     'Settings' => 'Einstellungen',
     'My Account' => 'Mein Konto',

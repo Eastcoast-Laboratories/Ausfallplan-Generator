@@ -334,6 +334,12 @@ class UsersController extends AppController
                 }
                 // Only set password if confirmation is also provided
                 if (!empty($data['confirm_password'])) {
+                    // Validate password complexity
+                    if (!$this->Users->validatePasswordComplexity($data['new_password'])) {
+                        $this->Flash->error(__('Password must be at least 8 characters and contain at least one number and one letter.'));
+                        $this->set(compact('userEntity'));
+                        return;
+                    }
                     $data['password'] = $data['new_password'];
                 }
             }
