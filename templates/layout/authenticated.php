@@ -12,7 +12,9 @@
  */
 
 $user = $this->request->getAttribute('identity');
-$currentLang = $this->request->getSession()->read('Config.language', 'de');
+$currentLang = $this->request->getSession()->read('Config.language', 'de_DE');
+// Extract short language code (de_DE -> de, en_US -> en)
+$currentLangShort = substr($currentLang, 0, 2);
 ?>
 <!DOCTYPE html>
 <html lang="<?= $currentLang ?>">
@@ -479,10 +481,10 @@ $currentLang = $this->request->getSession()->read('Config.language', 'de');
                 <!-- Language Switcher -->
                 <div class="language-switcher">
                     <div class="language-flag" title="<?= __('Change Language') ?>">
-                        <?= $currentLang === 'de' ? '🇩🇪' : '🇬🇧' ?>
+                        <?= $currentLangShort === 'de' ? '🇩🇪' : '🇬🇧' ?>
                     </div>
                     <div class="language-dropdown">
-                        <?php if ($currentLang === 'de'): ?>
+                        <?php if ($currentLangShort === 'de'): ?>
                             <div class="language-option active" style="cursor: default; pointer-events: none;">
                                 <span>🇩🇪</span>
                                 <span style="font-weight: bold;">Deutsch</span>
