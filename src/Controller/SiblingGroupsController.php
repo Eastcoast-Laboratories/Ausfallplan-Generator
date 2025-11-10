@@ -117,9 +117,20 @@ class SiblingGroupsController extends AppController
         if ($this->request->is('post')) {
             $data = $this->request->getData();
             
-            // Set organization from authenticated user
+            // Set organization from authenticated user's primary organization
             $user = $this->Authentication->getIdentity();
-            $data['organization_id'] = $user->organization_id;
+            $organizationUsersTable = $this->fetchTable('OrganizationUsers');
+            $orgUser = $organizationUsersTable->find()
+                ->where(['user_id' => $user->id, 'is_primary' => true])
+                ->first();
+            
+            if (!$orgUser) {
+                $this->Flash->error(__('You must be assigned to an organization to create sibling groups.'));
+                $this->set(compact('siblingGroup'));
+                return;
+            }
+            
+            $data['organization_id'] = $orgUser->organization_id;
             
             $siblingGroup = $this->SiblingGroups->patchEntity($siblingGroup, $data);
             
