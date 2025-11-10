@@ -119,7 +119,7 @@ $this->assign('title', __('Waitlist'));
             <div style="background: #f5f7fa; padding: 1rem; border-radius: 8px; min-height: 300px;">
                 <?php if (!empty($availableChildren) && (is_countable($availableChildren) ? count($availableChildren) : $availableChildren->count()) > 0): ?>
                     <?php foreach ($availableChildren as $child): ?>
-                        <div style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                        <div class="available-child-item" data-id="<?= $child->id ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; cursor: move;">
                             <div>
                                 <strong><?= h($child->name) ?></strong>
                                 <?php if ($child->is_integrative): ?>
@@ -320,12 +320,36 @@ const sortable = Sortable.create(waitlistEl, {
     }
 });
 
-// Make available children droppable
+// Make available children droppable and draggable
 Sortable.create(availableEl, {
     group: 'waitlist-group',
     sort: false,
-    onAdd: function(evt) {
-        // This is handled in the waitlist onEnd
+    handle: '.available-child-item',
+    onEnd: function(evt) {
+        // Check if item was moved to waitlist
+        if (evt.to === waitlistEl) {
+            // Add to waitlist
+            const childId = evt.item.dataset.id;
+            fetch('<?= $this->Url->build(['action' => 'add']) ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': '<?= $this->request->getAttribute('csrfToken') ?>'
+                },
+                body: JSON.stringify({
+                    schedule_id: <?= $selectedSchedule->id ?>,
+                    child_id: childId
+                })
+            })
+            .then(() => {
+                location.reload();
+            })
+            .catch(error => {
+                console.error('Error adding to waitlist:', error);
+                location.reload();
+            });
+            return;
+        }
     }
 });
 
