@@ -29,14 +29,14 @@ $planPrices = [
         <?php if ($plan === 'pro'): ?>
             <p><?= __('Billed monthly. Cancel anytime.') ?></p>
         <?php else: ?>
-            <p><?= __('Please contact our sales team for enterprise pricing.') ?></p>
+            <p style="line-height: 1.6;"><?= __('Our Enterprise plan offers custom-tailored solutions for your organization. We develop individually adapted features, provide dedicated support, and ensure seamless integration with your existing systems. Contact us to discuss your specific requirements and receive a personalized quote.') ?></p>
         <?php endif; ?>
     </div>
     
     <?php if ($plan === 'enterprise'): ?>
         <p><?= __('For enterprise subscriptions, please contact us directly:') ?></p>
         <p>
-            <a href="mailto:fairnestplan-kontakt@it.z11.de?subject=<?= str_replace('+', '%20', urlencode(__('Enterprise Subscription Inquiry'))) ?>&body=<?= str_replace('+', '%20', urlencode(__("Hello,\nI am interested in an Enterprise subscription for FairnestPlan.\nOrganization: \nNumber of users: \nNumber of children: \nPlease provide me with more information about pricing and features.\nBest regards"))) ?>">
+            <a href="mailto:fairnestplan-kontakt@it.z11.de?subject=<?= str_replace('+', '%20', urlencode(__('Enterprise Subscription Inquiry'))) ?>&body=<?= str_replace('+', '%20', urlencode(__("Hello,\r\nI am interested in an Enterprise subscription for FairnestPlan.\r\nOrganization:\r\nNumber of users:\r\nNumber of children:\r\nPlease provide me with more information about pricing and features.\r\nBest regards"))) ?>">
                 fairnestplan-kontakt@it.z11.de
             </a>
         </p>
