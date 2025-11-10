@@ -36,17 +36,7 @@ $planPrices = [
     <?php if ($plan === 'enterprise'): ?>
         <p><?= __('For enterprise subscriptions, please contact us directly:') ?></p>
         <p>
-            <a href="mailto:fairnestplan-kontakt@it.z11.de?subject=<?= urlencode(__('Enterprise Subscription Inquiry')) ?>&body=<?= urlencode(__('Hello,
-
-I am interested in an Enterprise subscription for FairnestPlan.
-
-Organization: 
-Number of users: 
-Number of children: 
-
-Please provide me with more information about pricing and features.
-
-Best regards')) ?>">
+            <a href="mailto:fairnestplan-kontakt@it.z11.de?subject=<?= str_replace('+', '%20', urlencode(__('Enterprise Subscription Inquiry'))) ?>&body=<?= str_replace('+', '%20', urlencode(__("Hello,\nI am interested in an Enterprise subscription for FairnestPlan.\nOrganization: \nNumber of users: \nNumber of children: \nPlease provide me with more information about pricing and features.\nBest regards"))) ?>">
                 fairnestplan-kontakt@it.z11.de
             </a>
         </p>

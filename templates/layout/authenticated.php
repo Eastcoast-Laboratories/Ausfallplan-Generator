@@ -60,9 +60,9 @@ $currentLangShort = substr($currentLang, 0, 2);
         }
         
         .sidebar-header {
-            padding: 1.5rem;
             background: #1a252f;
             border-bottom: 1px solid #34495e;
+            height: 4rem;
         }
         
         .sidebar-logo {
@@ -72,7 +72,7 @@ $currentLangShort = substr($currentLang, 0, 2);
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0rem;
         }
         
         .sidebar-nav {
@@ -396,7 +396,7 @@ $currentLangShort = substr($currentLang, 0, 2);
         <div class="sidebar-header">
             <a href="<?= $this->Url->build('/') ?>" class="sidebar-logo">
                 <span>
-                    <img src="<?= $this->Url->build('/img/fairnestplan_logo.png') ?>" alt="FairNestPlan" width="88">
+                    <img src="<?= $this->Url->build('/img/fairnestplan_logo_w.png') ?>" alt="FairNestPlan" width="100%">
                 </span>
             </a>
         </div>

@@ -445,4 +445,6 @@ return [
     'Contact' => 'Kontakt',
     'Test plan users can only create 1 organization. Please upgrade to Pro for unlimited organizations.' => 'Test-Plan Benutzer können nur 1 Organisation erstellen. Bitte upgraden Sie auf Pro für unbegrenzte Organisationen.',
     'Test plan users can only create 1 schedule. Please upgrade to Pro for unlimited schedules.' => 'Test-Plan Benutzer können nur 1 Ausfallplan erstellen. Bitte upgraden Sie auf Pro für unbegrenzte Ausfallpläne.',
+    'Enterprise Subscription Inquiry' => 'Enterprise-Abonnement Anfrage',
+    "Hello,\nI am interested in an Enterprise subscription for FairnestPlan.\nOrganization: \nNumber of users: \nNumber of children: \nPlease provide me with more information about pricing and features.\nBest regards" => "Hallo,\nich interessiere mich für ein Enterprise-Abonnement für FairnestPlan.\nOrganisation: \nAnzahl der Benutzer: \nAnzahl der Kinder: \nBitte geben Sie mir mehr Informationen über die Preise und Funktionen.\nBeste Grüße"
 ];
