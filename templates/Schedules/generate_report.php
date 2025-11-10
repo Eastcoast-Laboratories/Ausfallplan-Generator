@@ -192,6 +192,18 @@ $this->assign('title', __('FairNestPlan') . ' - ' . h($schedule->title));
             margin-top: 2px;
         }
 
+        .schedule-title {
+            margin-left: 10px;
+            font-size: <?php
+                // depending on the length of the schedule title, adjust font size
+                $titleLength = strlen($schedule->title);
+                $fontSize = 36 - ($titleLength / 3 );
+                echo max(12, min(36, $fontSize));
+            ?>px;
+            font-weight: bold;
+            padding-bottom: 4px;
+        }
+        
         @media print {
             body {
                 padding: 10px;
@@ -224,7 +236,7 @@ $this->assign('title', __('FairNestPlan') . ' - ' . h($schedule->title));
 
     <div class="header">
         <img src="<?= $this->Url->build('/img/fairnestplan_logo_w.png') ?>" alt="FairNestPlan">
-        <div style="margin-left: 10px; font-size: 16px; font-weight: bold; "><?= h($schedule->title) ?></div>
+        <div class="schedule-title"><?= h($schedule->title) ?></div>
     </div>
 
     <div class="container">
@@ -327,8 +339,8 @@ $this->assign('title', __('FairNestPlan') . ' - ' . h($schedule->title));
                             ?>
                             <div style="padding: 2px 0;"><?= h($childData['child']->name) ?></div>
                             <div style="background: #e3f2fd; padding: 2px 6px; border-radius: 3px; font-weight: bold; text-align: center;"><?= h($childData['weight']) ?></div>
-                            <div style="color: #999; text-align: center;" class="not-on-print"><?= h($stats['daysCount']) ?></div>
-                            <div style="color: #999; text-align: center;" class="not-on-print"><?= h($stats['firstOnWaitlistCount']) ?></div>
+                            <div style="color: #999; text-align: center;" class="not-on-print checksums"><?= h($stats['daysCount']) ?></div>
+                            <div style="color: #999; text-align: center;" class="not-on-print checksums"><?= h($stats['firstOnWaitlistCount']) ?></div>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <div style="grid-column: 1 / -1; color: #666; text-align: center; padding: 2rem;">
