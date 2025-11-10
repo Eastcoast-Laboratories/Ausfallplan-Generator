@@ -10,13 +10,15 @@
  */
 // Variables are passed directly from controller
 
-$this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
+$dayMinHeight = "180px";
+
+$this->assign('title', __('FairNestPlan') . ' - ' . h($schedule->title));
 ?>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title><?= h($schedule->title) ?> - <?= __('Ausfallplan') ?></title>
+    <title><?= h($schedule->title) ?> - <?= __('FairNestPlan') ?></title>
     <style>
         * {
             margin: 0;
@@ -34,9 +36,12 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
 
         .header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-top: -30px;
             font-size: 16px;
             font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .header img {
@@ -59,7 +64,7 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
         .day-box {
             border: 2px solid #000;
             padding: 8px;
-            min-height: 180px;
+            min-height: <?= $dayMinHeight ?>;
             display: flex;
             flex-direction: column;
         }
@@ -75,6 +80,7 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
         .children-list {
             list-style: none;
             flex: 1;
+            margin-bottom: 0;
         }
 
         .child-item {
@@ -100,23 +106,24 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
         .day-sum {
             margin-top: 0;
             padding-top: 5px;
+            margin-bottom: -15px;
             border-top: 1px solid #ccc;
-            font-size: 9px;
+            font-size: 7px;
             text-align: right;
             color: #666;
         }
 
         .firstOnWaitlist-child {
             padding-top: 8px;
-            border-top: 1px solid #ccc;
-            text-align: center;
+            border-top: none;
+            text-align: left;
             font-size: 10px;
         }
 
         .sidebar {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 10px;
             position: sticky;
             top: 20px;
             align-self: flex-start;
@@ -125,6 +132,7 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
         .waitlist-box, .always-end-box {
             border: 2px solid #000;
             padding: 12px;
+            min-height: <?= $dayMinHeight ?>;
         }
 
         .box-title {
@@ -170,12 +178,34 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
             font-size: 14px;
         }
 
+        .waitlist-header {
+           font-weight: bold; padding-bottom: 4px; border-bottom: 1px solid #ccc;
+        }
+
+        .checksums {
+            color: #aaa;
+            font-size: 7px;
+            margin-top:4px; 
+        }
+
+        .waitlist-header.checksums {
+            margin-top: 2px;
+        }
+
         @media print {
             body {
                 padding: 10px;
             }
             .no-print {
                 display: none;
+            }
+            .header {
+               margin-top: -10px;
+            }
+            .not-on-print {
+                opacity: 0;
+                width: 0;
+                overflow: hidden;
             }
         }
     </style>
@@ -194,7 +224,7 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
 
     <div class="header">
         <img src="<?= $this->Url->build('/img/fairnestplan_logo_w.png') ?>" alt="FairNestPlan">
-        <div><?= __('Ausfallplan') ?> <?= h($schedule->title) ?></div>
+        <div style="margin-left: 10px; font-size: 16px; font-weight: bold; "><?= h($schedule->title) ?></div>
     </div>
 
     <div class="container">
@@ -226,7 +256,8 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
                         </div>
                         <?php if ($day['firstOnWaitlistChild']): ?>
                             <div class="firstOnWaitlist-child">
-                                <?= h($day['firstOnWaitlistChild']['child']->name) ?> <span class="flag-icon">⬇️</span>
+                                <span class="flag-icon">⬇️</span>
+                                <?= h($day['firstOnWaitlistChild']['child']->name) ?> 
                             </div>
                         <?php endif; ?>
                     </div>
@@ -251,12 +282,12 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
 
         <div class="sidebar">
             <div class="waitlist-box">
-                <div class="box-title"><?= __('Nachrückliste') ?></div>
+                <div class="box-title">⬇️ <?= __('Waitlist') ?></div>
                 <div style="display: grid; grid-template-columns: 1fr auto auto auto; gap: 4px; font-size: 10px;">
-                    <div style="font-weight: bold; padding-bottom: 4px; border-bottom: 1px solid #ccc;">Name</div>
-                    <div style="font-weight: bold; padding-bottom: 4px; border-bottom: 1px solid #ccc; text-align: center;">Z</div>
-                    <div style="font-weight: bold; padding-bottom: 4px; border-bottom: 1px solid #ccc; color: #999; text-align: center;">D</div>
-                    <div style="font-weight: bold; padding-bottom: 4px; border-bottom: 1px solid #ccc; color: #999; text-align: center;">⬇️</div>
+                    <div class="waitlist-header">Name</div>
+                    <div class="waitlist-header" style="text-align: center;">Z</div>
+                    <div class="waitlist-header not-on-print checksums" style="text-align: center;">D</div>
+                    <div class="waitlist-header not-on-print checksums" style="text-align: center;">⬇️</div>
                     
                     <?php if (!empty($waitlist)): ?>
                         <?php foreach ($waitlist as $child): 
@@ -268,24 +299,25 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
                         ?>
                             <div style="padding: 2px 0;"><?= h($child->name) ?></div>
                             <div style="background: #e3f2fd; padding: 2px 6px; border-radius: 3px; font-weight: bold; text-align: center;"><?= h($count) ?></div>
-                            <div style="color: #999; text-align: center;"><?= h($stats['daysCount']) ?></div>
-                            <div style="color: #999; text-align: center;"><?= h($stats['firstOnWaitlistCount']) ?></div>
+                            <div class="not-on-print checksums" style="text-align: center;"><?= h($stats['daysCount']) ?></div>
+                            <div class="not-on-print checksums" style="text-align: center;"><?= h($stats['firstOnWaitlistCount']) ?></div>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <div style="grid-column: 1 / -1; color: #666; text-align: center; padding: 2rem;">
+                        <div class="checksums" style="grid-column: 1 / -1; text-align: center; padding: 2rem;">
                             <?= __('No entries') ?>
                         </div>
                     <?php endif; ?>
                 </div>
             </div>
-
+            <?php if (!empty($alwaysAtEnd)): ?>
             <div class="always-end-box">
-                <div class="box-title"><?= __('Immer am Ende') ?></div>
+                <div class="box-title"><?= __('Always at end') ?></div>
                 <div style="display: grid; grid-template-columns: 1fr auto auto auto; gap: 4px; font-size: 10px;">
-                    <div style="font-weight: bold; padding-bottom: 4px; border-bottom: 1px solid #ccc;">Name</div>
-                    <div style="font-weight: bold; padding-bottom: 4px; border-bottom: 1px solid #ccc; text-align: center;">Z</div>
-                    <div style="font-weight: bold; padding-bottom: 4px; border-bottom: 1px solid #ccc; color: #999; text-align: center;">D</div>
-                    <div style="font-weight: bold; padding-bottom: 4px; border-bottom: 1px solid #ccc; color: #999; text-align: center;">⬇️</div>
+                    <div class="waitlist-header">Name</div>
+                    <div class="waitlist-header" style="text-align: center;">i</div>
+
+                    <div class="waitlist-header not-on-print checksums" style="text-align: center;">D</div>
+                    <div class="waitlist-header not-on-print checksums" style="text-align: center;">⬇️</div>
                     
                     <?php if (!empty($alwaysAtEnd)): ?>
                         <?php foreach ($alwaysAtEnd as $childData): ?>
@@ -295,8 +327,8 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
                             ?>
                             <div style="padding: 2px 0;"><?= h($childData['child']->name) ?></div>
                             <div style="background: #e3f2fd; padding: 2px 6px; border-radius: 3px; font-weight: bold; text-align: center;"><?= h($childData['weight']) ?></div>
-                            <div style="color: #999; text-align: center;"><?= h($stats['daysCount']) ?></div>
-                            <div style="color: #999; text-align: center;"><?= h($stats['firstOnWaitlistCount']) ?></div>
+                            <div style="color: #999; text-align: center;" class="not-on-print"><?= h($stats['daysCount']) ?></div>
+                            <div style="color: #999; text-align: center;" class="not-on-print"><?= h($stats['firstOnWaitlistCount']) ?></div>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <div style="grid-column: 1 / -1; color: #666; text-align: center; padding: 2rem;">
@@ -305,6 +337,7 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
                     <?php endif; ?>
                 </div>
             </div>
+            <?php endif; ?>
             
             <?php
             // Calculate total counting children (ALL children, not just in waitlist)
@@ -324,8 +357,8 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
                 }
             }
             ?>
-            <div class="total-counting-children" style="text-align: right;">
-                <?= __('Summe aller Zählkinder') ?>: <?= h($totalCountingChildren) ?>
+            <div class="total-counting-children not-on-print" style="text-align: right;">
+                <?= __('Counting sum of all children') ?>: <?= h($totalCountingChildren) ?>
             </div>
         </div>
     </div>

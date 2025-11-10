@@ -1,17 +1,17 @@
 const { test, expect } = require('@playwright/test');
 
 /**
- * TEST: "Immer am Ende" section with statistics columns
+ * TEST: "Always at end" section with statistics columns
  * 
- * Verifies that children in "Immer am Ende" section have:
+ * Verifies that children in "Always at end" section have:
  * - Name column
  * - Z (weight) column
  * - D (days count) column
  * - ⬇️ (first on waitlist count) column
  */
 test.describe('Report - Always at End Statistics Columns', () => {
-    test('should show statistics columns for "Immer am Ende" children', async ({ page }) => {
-        console.log('🧪 Testing "Immer am Ende" statistics columns...');
+    test('should show statistics columns for "Always at end" children', async ({ page }) => {
+        console.log('🧪 Testing "Always at end" statistics columns...');
         
         // Step 1: Login
         console.log('📍 Step 1: Login');
@@ -24,16 +24,16 @@ test.describe('Report - Always at End Statistics Columns', () => {
         
         // Step 2: Navigate to existing schedule (Demo Kita schedule)
         console.log('📍 Step 2: Navigate to report');
-        // Use schedule ID 1 which should have "Immer am Ende" children
+        // Use schedule ID 1 which should have "Always at end" children
         await page.goto('http://localhost:8080/schedules/generate-report/1');
         await page.waitForLoadState('networkidle');
         console.log('✅ Report loaded');
         
-        // Step 3: Verify "Immer am Ende" section exists
-        console.log('📍 Step 3: Verify "Immer am Ende" section');
+        // Step 3: Verify "Always at end" section exists
+        console.log('📍 Step 3: Verify "Always at end" section');
         const alwaysEndBox = page.locator('.always-end-box');
         await expect(alwaysEndBox).toBeVisible({ timeout: 5000 });
-        console.log('✅ "Immer am Ende" section found');
+        console.log('✅ "Always at end" section found');
         
         // Step 4: Verify header row with column titles
         console.log('📍 Step 4: Verify header columns');
@@ -56,7 +56,7 @@ test.describe('Report - Always at End Statistics Columns', () => {
         console.log('📍 Step 5: Verify child rows have all columns');
         const childRows = alwaysEndBox.locator('.always-end-child');
         const childCount = await childRows.count();
-        console.log(`  Found ${childCount} children in "Immer am Ende"`);
+        console.log(`  Found ${childCount} children in "Always at end"`);
         
         if (childCount > 0) {
             // Check first child has all 4 columns
@@ -75,7 +75,7 @@ test.describe('Report - Always at End Statistics Columns', () => {
             }
             console.log('✅ All columns have content');
         } else {
-            console.log('⚠️  No children in "Immer am Ende" section');
+            console.log('⚠️  No children in "Always at end" section');
         }
         
         // Step 6: Take screenshot for verification
@@ -107,7 +107,7 @@ test.describe('Report - Always at End Statistics Columns', () => {
         
         console.log('');
         console.log('📊 SUMMARY:');
-        console.log('  - "Immer am Ende" section exists: ✅');
+        console.log('  - "Always at end" section exists: ✅');
         console.log('  - Header has 4 columns (Name, Z, D, ⬇️): ✅');
         console.log('  - Child rows have all 4 columns: ✅');
         console.log('  - Statistics are numeric: ✅');

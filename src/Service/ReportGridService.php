@@ -132,10 +132,10 @@ class ReportGridService
                     ]
                 );
             } elseif ($dayRow == count($waitlist) + 1 && !empty($alwaysAtEnd)) {
-                // "Immer am Ende" label (after waitlist children + 1 empty row)
-                $row[] = $this->createCell(self::CELL_LABEL, 'Immer am Ende:', ['style' => 'bold']);
+                // "Always at end" label (after waitlist children + 1 empty row)
+                $row[] = $this->createCell(self::CELL_LABEL, __('Always at end'), ['style' => 'bold']);
             } elseif ($dayRow > count($waitlist) + 1 && !empty($alwaysAtEnd)) {
-                // "Immer am Ende" children
+                // "Always at end" children
                 $alwaysAtEndIndex = $dayRow - count($waitlist) - 2;
                 if ($alwaysAtEndIndex < count($alwaysAtEnd)) {
                     $alwaysAtEndChild = $alwaysAtEnd[$alwaysAtEndIndex];
@@ -234,7 +234,7 @@ class ReportGridService
         $row = [];
         
         // Label in first column
-        $row[] = $this->createCell(self::CELL_LABEL, 'Immer am Ende:', ['style' => 'bold']);
+        $row[] = $this->createCell(self::CELL_LABEL, __('Always at end'), ['style' => 'bold']);
         
         // Children names
         $names = [];

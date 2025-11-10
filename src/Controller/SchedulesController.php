@@ -790,7 +790,7 @@ class SchedulesController extends AppController
                         $row[] = $stats['daysCount'];
                         $row[] = $stats['firstOnWaitlistCount'];
                     } elseif ($rowIdx == count($waitlist) + 1 && !empty($alwaysAtEnd)) {
-                        $row[] = 'Immer am Ende:';
+                        $row[] = __('Always at end').':';
                         $row[] = '';
                         $row[] = '';
                         $row[] = '';
@@ -973,7 +973,7 @@ class SchedulesController extends AppController
             // Total content rows: maxChildrenPerDay + 2
             $rowsPerBlock = $maxChildrenPerDay + 2;
             
-            // For first block: may need more rows for waitlist + "Immer am Ende" children
+            // For first block: may need more rows for waitlist + "Always at end" children
             if ($isFirstBlock) {
                 $waitlistRows = count($waitlist);
                 $alwaysAtEndRows = !empty($alwaysAtEnd) ? count($alwaysAtEnd) + 2 : 0; // +2 for label and spacing
@@ -1063,7 +1063,7 @@ class SchedulesController extends AppController
                         $sheet->getStyle($cellCoord)->getFont()->setSize(8)->getColor()->setRGB('808080');
                     } elseif ($rowIdx == count($waitlist) + 1 && !empty($alwaysAtEnd)) {
                         $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $currentRow;
-                        $sheet->getCell($cellCoord)->setValue(__('Immer am Ende') . ':');
+                        $sheet->getCell($cellCoord)->setValue(__('Always at end') . ':');
                     } elseif ($rowIdx > count($waitlist) + 1 && !empty($alwaysAtEnd)) {
                         $alwaysAtEndIdx = $rowIdx - count($waitlist) - 2;
                         if ($alwaysAtEndIdx < count($alwaysAtEnd)) {

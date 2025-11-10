@@ -30,9 +30,12 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
 
         .header {
             text-align: center;
-            margin-bottom: 20px;
-            font-size: 18px;
+            margin-top: -10px;
+            font-size: 16px;
             font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .header img {
@@ -115,9 +118,9 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
     </style>
 </head>
 <body>
-    <div class="header">
+     <div class="header">
         <img src="<?= $this->Url->build('/img/fairnestplan_logo_w.png') ?>" alt="FairNestPlan">
-        <div><?= h($schedule->title) ?> - <?= __('Ausfallplan') ?></div>
+        <div style="margin-left: 10px; font-size: 16px; font-weight: bold; "><?= h($schedule->title) ?></div>
     </div>
 
     <div class="no-print" style="margin-bottom: 20px; text-align: center;">

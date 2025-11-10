@@ -180,7 +180,7 @@ class WaitlistController extends AppController
         }
         
         // Get available children (children with schedule_id but NOT on waitlist)
-        // These are the "Immer am Ende" children that can be added to waitlist
+        // These are the "Always at end" children that can be added to waitlist
         $availableChildren = [];
         if ($scheduleId && $selectedSchedule) {
             $availableChildren = $this->fetchTable('Children')->find()

@@ -1,14 +1,14 @@
 const { test, expect } = require('@playwright/test');
 
 /**
- * TEST: "Immer am Ende" section in report
+ * TEST: "Always at End" section in report
  * 
- * Tests that the "Immer am Ende" section appears in reports
+ * Tests that the "Always at End" section appears in reports
  * and shows children assigned to schedule but not on waitlist.
  */
 test.describe('Report - Always at End Section', () => {
-    test('should show "Immer am Ende" section in report', async ({ page }) => {
-        console.log('🧪 Testing "Immer am Ende" section...');
+    test('should show "Always at End" section in report', async ({ page }) => {
+        console.log('🧪 Testing "Always at End" section...');
         
         // Step 1: Login
         console.log('📍 Step 1: Login');
@@ -60,14 +60,14 @@ test.describe('Report - Always at End Section', () => {
             console.log(`  Body text (first 200 chars): ${bodyText.substring(0, 200)}`);
         }
         
-        // Step 5: Check if "Immer am Ende" section exists in the page HTML
-        console.log('📍 Step 5: Check for "Immer am Ende" in page');
+        // Step 5: Check if "Always at End" section exists in the page HTML
+        console.log('📍 Step 5: Check for "Always at End" in page');
         const pageContent = await page.content();
         const hasAlwaysAtEndBox = pageContent.includes('always-end-box');
-        const hasImmerAmEndeText = pageContent.includes('Immer am Ende');
+        const hasImmerAmEndeText = pageContent.includes('Always at End');
         
         console.log(`  - HTML contains 'always-end-box': ${hasAlwaysAtEndBox ? '✅' : '❌'}`);
-        console.log(`  - HTML contains 'Immer am Ende': ${hasImmerAmEndeText ? '✅' : '❌'}`);
+        console.log(`  - HTML contains 'Always at End': ${hasImmerAmEndeText ? '✅' : '❌'}`);
         
         // The template should have the always-end-box div
         expect(hasAlwaysAtEndBox).toBe(true);
@@ -84,7 +84,7 @@ test.describe('Report - Always at End Section', () => {
         console.log('');
         console.log('📊 SUMMARY:');
         console.log('  - Report loaded: ✅');
-        console.log('  - "Immer am Ende" section exists: ✅');
+        console.log('  - "Always at End" section exists: ✅');
         console.log('  - Section has content: ✅');
         console.log('');
         console.log('✅ TEST PASSED!');

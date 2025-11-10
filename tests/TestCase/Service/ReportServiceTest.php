@@ -235,7 +235,7 @@ class ReportServiceTest extends TestCase
         
         $grid = $gridData['grid'];
         
-        // Find "Immer am Ende:" label in right column
+        // Find "Always at end:" label in right column
         $foundLabel = false;
         $foundChild1 = false;
         $foundChild2 = false;
@@ -244,20 +244,20 @@ class ReportServiceTest extends TestCase
             // Right column is the last cell in each row
             $rightCell = end($row);
             
-            if ($rightCell['type'] === 'label' && $rightCell['value'] === 'Immer am Ende:') {
+            if ($rightCell['type'] === 'label' && $rightCell['value'] === __('Always at end:')) {
                 $foundLabel = true;
             }
             
-            if ($rightCell['type'] === 'child' && $rightCell['value'] === 'Always At End Child 1') {
+            if ($rightCell['type'] === 'child' && $rightCell['value'] === __('Always At End Child 1')) {
                 $foundChild1 = true;
             }
             
-            if ($rightCell['type'] === 'child' && $rightCell['value'] === 'Always At End Child 2') {
+            if ($rightCell['type'] === 'child' && $rightCell['value'] === __('Always At End Child 2')) {
                 $foundChild2 = true;
             }
         }
         
-        $this->assertTrue($foundLabel, '"Immer am Ende:" label should appear in right column');
+        $this->assertTrue($foundLabel, '"Always at end" label should appear in right column');
         $this->assertTrue($foundChild1, 'Always At End Child 1 should appear in right column');
         $this->assertTrue($foundChild2, 'Always At End Child 2 should appear in right column');
     }

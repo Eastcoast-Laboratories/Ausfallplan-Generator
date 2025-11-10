@@ -186,7 +186,7 @@ test.describe('Production E2E Test', () => {
     
     // Verify report content
     await expect(page.locator('body')).toContainText(/Nachrückliste|Waitlist/, { timeout: 5000 });
-    await expect(page.locator('body')).toContainText(/Summe aller Zählkinder|Total/, { timeout: 5000 });
+    await expect(page.locator('body')).toContainText(/Counting|Total/, { timeout: 5000 });
     
     console.log('✅ Step 8 completed: Report generated');
 
