@@ -136,7 +136,7 @@ $this->assign('title', __('Waitlist'));
                                         ['controller' => 'SiblingGroups', 'action' => 'view', $child->sibling_group_id],
                                         [
                                             'style' => 'background: #fff3cd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem; text-decoration: none; color: #856404; display: inline-block;',
-                                            'title' => 'Geschwister: ' . h($siblingNames[$child->id]),
+                                            'title' => __('View Sibling Group'),
                                             'escape' => false
                                         ]
                                     ) ?>
@@ -208,7 +208,7 @@ $this->assign('title', __('Waitlist'));
                                             ['controller' => 'SiblingGroups', 'action' => 'view', $child->sibling_group_id],
                                             [
                                                 'style' => 'background: #fff3cd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem; text-decoration: none; color: #856404; display: inline-block;',
-                                                'title' => 'Geschwister: ' . h($siblingNames[$child->id]),
+                                                'title' => __('View Sibling Group'),
                                                 'escape' => false
                                             ]
                                         ) ?>

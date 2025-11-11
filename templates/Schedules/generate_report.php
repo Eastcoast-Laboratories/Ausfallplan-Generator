@@ -405,9 +405,9 @@ $this->assign('title', __('FairNestPlan') . ' - ' . h($schedule->title));
     
     <!-- Encryption Scripts -->
     <script src="<?= $this->Url->build('/js/crypto/orgEncryption.js') ?>"></script>
-    <script src="<?= $this->Url->build('/js/childDecryption.js') ?>"></script>
     <script>
-    // Add organization ID to all child names for decryption
+    // IMPORTANT: Set organization ID BEFORE childDecryption.js loads
+    // This ensures org IDs are available when decryption starts
     document.addEventListener('DOMContentLoaded', function() {
         const orgId = <?= (int)$schedule->organization_id ?>;
         
@@ -418,6 +418,18 @@ $this->assign('title', __('FairNestPlan') . ' - ' . h($schedule->title));
         });
         
         console.log('[Report] Set organization ID:', orgId, 'for', childNameElements.length, 'child names');
+        
+        // Trigger decryption manually after setting org IDs
+        if (window.ChildDecryption) {
+            console.log('[Report] Triggering manual decryption after org IDs set');
+            window.ChildDecryption.decryptAll();
+        }
+    });
+    </script>
+    <script src="<?= $this->Url->build('/js/childDecryption.js') ?>"></script>
+    <script>
+    // Continue with password check and status logging
+    document.addEventListener('DOMContentLoaded', function() {
         
         // Check if password is available
         setTimeout(function() {
