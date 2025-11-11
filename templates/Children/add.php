@@ -12,7 +12,23 @@ $this->assign('title', __('Add Child'));
     <fieldset>
         <legend><?= __('Add Child') ?></legend>
         <?php
-            echo $this->Form->control('name', ['label' => __('Name'), 'required' => true, 'autofocus' => true]);
+            // Organization selector - show first for editors/admins
+            if (!empty($userOrgs)):
+                $orgOptions = [];
+                foreach ($userOrgs as $org) {
+                    $orgOptions[$org->id] = $org->name;
+                }
+                echo $this->Form->control('organization_id', [
+                    'type' => 'select',
+                    'options' => $orgOptions,
+                    'label' => __('Organization'),
+                    'required' => true,
+                    'default' => $selectedOrgId ?? null,
+                    'help' => __('Select the organization this child belongs to')
+                ]);
+            endif;
+            
+            echo $this->Form->control('name', ['label' => __('Name'), 'required' => true, 'autofocus' => false]);
             echo $this->Form->control('last_name', ['label' => __('Last Name'), 'required' => false]);
             echo $this->Form->control('display_name', [
                 'label' => __('Display Name (for Reports)'),

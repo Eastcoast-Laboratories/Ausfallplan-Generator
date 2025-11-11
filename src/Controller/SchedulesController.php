@@ -530,47 +530,84 @@ class SchedulesController extends AppController
     public function updateChildrenOrder($id = null)
     {
         $this->request->allowMethod(['post']);
-        $this->viewBuilder()->setClassName('Json');
         
-        $schedule = $this->Schedules->get($id);
-        
-        // Check permission
-        if (!$this->hasOrgRole($schedule->organization_id, 'editor')) {
-            $this->set([
-                'success' => false,
-                'message' => __('Permission denied'),
-                '_serialize' => ['success', 'message']
-            ]);
-            return $this->response->withType('application/json');
-        }
-        
-        $data = $this->request->getData();
-        $childrenIds = $data['children'] ?? [];
-        
-        if (!empty($childrenIds) && is_array($childrenIds)) {
-            $childrenTable = $this->fetchTable('Children');
+        try {
+            $schedule = $this->Schedules->get($id);
             
-            // Update organization_order for each child based on array position
-            foreach ($childrenIds as $index => $childId) {
-                $child = $childrenTable->get($childId);
-                $child->organization_order = $index + 1; // Start from 1
-                $childrenTable->save($child);
+            // Check permission
+            if (!$this->hasOrgRole($schedule->organization_id, 'editor')) {
+                return $this->response
+                    ->withType('application/json')
+                    ->withStringBody(json_encode([
+                        'success' => false,
+                        'message' => __('Permission denied')
+                    ]));
             }
             
-            $this->set([
-                'success' => true,
-                'message' => __('Children order updated'),
-                '_serialize' => ['success', 'message']
-            ]);
-        } else {
-            $this->set([
-                'success' => false,
-                'message' => __('Invalid children data'),
-                '_serialize' => ['success', 'message']
-            ]);
+            $data = $this->request->getData();
+            $childrenIds = $data['children'] ?? [];
+            
+            if (!empty($childrenIds) && is_array($childrenIds)) {
+                $childrenTable = $this->fetchTable('Children');
+                
+                // Update organization_order for each child based on array position
+                foreach ($childrenIds as $index => $childId) {
+                    try {
+                        $child = $childrenTable->get($childId);
+                        
+                        // Verify child belongs to this schedule
+                        if ($child->schedule_id !== (int)$id) {
+                            return $this->response
+                                ->withType('application/json')
+                                ->withStringBody(json_encode([
+                                    'success' => false,
+                                    'message' => __('Child {0} does not belong to this schedule', $child->name)
+                                ]));
+                        }
+                        
+                        $child->organization_order = $index + 1; // Start from 1
+                        
+                        if (!$childrenTable->save($child)) {
+                            $errors = $child->getErrors();
+                            return $this->response
+                                ->withType('application/json')
+                                ->withStringBody(json_encode([
+                                    'success' => false,
+                                    'message' => __('Failed to save child {0}: {1}', $child->name, json_encode($errors))
+                                ]));
+                        }
+                    } catch (\Exception $e) {
+                        return $this->response
+                            ->withType('application/json')
+                            ->withStringBody(json_encode([
+                                'success' => false,
+                                'message' => __('Error updating child: {0}', $e->getMessage())
+                            ]));
+                    }
+                }
+                
+                return $this->response
+                    ->withType('application/json')
+                    ->withStringBody(json_encode([
+                        'success' => true,
+                        'message' => __('Children order updated')
+                    ]));
+            } else {
+                return $this->response
+                    ->withType('application/json')
+                    ->withStringBody(json_encode([
+                        'success' => false,
+                        'message' => __('Invalid children data')
+                    ]));
+            }
+        } catch (\Exception $e) {
+            return $this->response
+                ->withType('application/json')
+                ->withStringBody(json_encode([
+                    'success' => false,
+                    'message' => __('Error: {0}', $e->getMessage())
+                ]));
         }
-        
-        return $this->response->withType('application/json');
     }
 
     /**
