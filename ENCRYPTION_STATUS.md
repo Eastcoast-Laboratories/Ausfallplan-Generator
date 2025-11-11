@@ -163,10 +163,6 @@
   - [ ] Chrome/Edge
   - [ ] Firefox
   - [ ] Safari
-- [ ] Performance tests
-  - [ ] Key generation time
-  - [ ] Encryption/decryption speed
-  - [ ] Bulk operations
 
 ## 📋 Testing Checklist
 
