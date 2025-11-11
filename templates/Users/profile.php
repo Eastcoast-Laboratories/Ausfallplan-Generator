@@ -203,16 +203,82 @@ $this->assign('title', __('Profile Settings'));
         </div>
 
         <div class="form-actions">
-            <?= $this->Form->button(__('Save Changes'), [
-                'class' => 'btn-primary'
-            ]) ?>
-            <?= $this->Html->link(__('Cancel'), ['controller' => 'Dashboard', 'action' => 'index'], [
-                'class' => 'btn-secondary'
-            ]) ?>
+            <?= $this->Form->button(__('Update Profile'), ['class' => 'btn-primary', 'type' => 'submit']) ?>
+            <?= $this->Html->link(__('Cancel'), ['controller' => 'Dashboard', 'action' => 'index'], ['class' => 'btn-secondary']) ?>
         </div>
-
         <?= $this->Form->end() ?>
     </div>
+
+    <!-- Encryption Setup Script -->
+    <?php if (!$userEntity->encrypted_private_key || !$userEntity->key_salt): ?>
+    <?= $this->Html->script('crypto/orgEncryption') ?>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const setupButton = document.getElementById('setup-encryption-btn');
+        
+        if (setupButton && window.OrgEncryption) {
+            setupButton.addEventListener('click', async function() {
+                if (!confirm('<?= __('This will generate encryption keys for your account. You will need to enter your current password to encrypt your private key. Continue?') ?>')) {
+                    return;
+                }
+                
+                const password = prompt('<?= __('Please enter your current password to set up encryption:') ?>');
+                if (!password) {
+                    alert('<?= __('Password is required to set up encryption.') ?>');
+                    return;
+                }
+                
+                setupButton.disabled = true;
+                setupButton.textContent = '<?= __('Generating keys...') ?>';
+                
+                try {
+                    console.log('Generating RSA key pair...');
+                    const keyPair = await window.OrgEncryption.generateKeyPair();
+                    
+                    console.log('Wrapping private key with password...');
+                    const result = await window.OrgEncryption.wrapPrivateKeyWithPassword(
+                        keyPair.privateKey,
+                        password
+                    );
+                    
+                    console.log('Exporting public key...');
+                    const publicKeyPem = await window.OrgEncryption.exportPublicKey(keyPair.publicKey);
+                    
+                    // Send to server
+                    const response = await fetch('/users/setup-encryption', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-Token': '<?= $this->request->getAttribute('csrfToken') ?>'
+                        },
+                        body: JSON.stringify({
+                            public_key: publicKeyPem,
+                            encrypted_private_key: result.wrappedKey,
+                            key_salt: result.salt
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert('<?= __('Encryption has been successfully set up for your account!') ?>');
+                        window.location.reload();
+                    } else {
+                        alert('<?= __('Error setting up encryption:') ?> ' + (data.message || 'Unknown error'));
+                        setupButton.disabled = false;
+                        setupButton.textContent = '<?= __('Set Up Encryption Now') ?> 🔒';
+                    }
+                } catch (error) {
+                    console.error('Encryption setup error:', error);
+                    alert('<?= __('Error generating encryption keys. Please try again.') ?>');
+                    setupButton.disabled = false;
+                    setupButton.textContent = '<?= __('Set Up Encryption Now') ?> 🔒';
+                }
+            });
+        }
+    });
+    </script>
+    <?php endif; ?>
 
     <!-- Danger Zone -->
     <div class="danger-zone">

@@ -321,6 +321,81 @@ class UsersController extends AppController
     }
 
     /**
+     * Setup encryption for existing users
+     *
+     * @return \Cake\Http\Response|null Renders view.
+     */
+    public function setupEncryption()
+    {
+        $this->request->allowMethod(['post']);
+        $identity = $this->Authentication->getIdentity();
+        
+        if (!$identity) {
+            return $this->response->withType('application/json')
+                ->withStringBody(json_encode(['success' => false, 'message' => 'Not authenticated']));
+        }
+        
+        $data = $this->request->getData();
+        
+        if (empty($data['public_key']) || empty($data['encrypted_private_key']) || empty($data['key_salt'])) {
+            return $this->response->withType('application/json')
+                ->withStringBody(json_encode(['success' => false, 'message' => 'Missing required fields']));
+        }
+        
+        $user = $this->Users->get($identity->id);
+        
+        // Check if user already has encryption set up
+        if ($user->encrypted_private_key && $user->key_salt) {
+            return $this->response->withType('application/json')
+                ->withStringBody(json_encode(['success' => false, 'message' => 'Encryption already set up']));
+        }
+        
+        $user->public_key = $data['public_key'];
+        $user->encrypted_private_key = $data['encrypted_private_key'];
+        $user->key_salt = $data['key_salt'];
+        
+        if ($this->Users->save($user)) {
+            // Generate DEKs for user's organizations
+            $orgsUsersTable = $this->fetchTable('OrganizationsUsers');
+            $userOrgs = $orgsUsersTable->find()
+                ->where(['user_id' => $user->id])
+                ->contain(['Organizations'])
+                ->all();
+            
+            $encryptedDeksTable = $this->fetchTable('EncryptedDeks');
+            
+            foreach ($userOrgs as $orgUser) {
+                $org = $orgUser->organization;
+                
+                if (!$org->encryption_enabled) {
+                    continue;
+                }
+                
+                // Check if organization already has a DEK
+                $existingDek = $encryptedDeksTable->find()
+                    ->where(['organization_id' => $org->id])
+                    ->first();
+                
+                if (!$existingDek) {
+                    // Organization doesn't have a DEK yet - needs to be generated client-side
+                    // For now, we skip this - DEK will be generated when needed
+                    continue;
+                }
+                
+                // For existing DEKs, we need another user to wrap it for this user
+                // This is a limitation - for now user needs to ask admin to share DEK
+                // TODO: Implement DEK sharing workflow
+            }
+            
+            return $this->response->withType('application/json')
+                ->withStringBody(json_encode(['success' => true]));
+        }
+        
+        return $this->response->withType('application/json')
+            ->withStringBody(json_encode(['success' => false, 'message' => 'Failed to save encryption keys']));
+    }
+
+    /**
      * Logout method - End user session
      *
      * @return \Cake\Http\Response|null|void
