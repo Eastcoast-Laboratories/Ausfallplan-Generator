@@ -390,5 +390,78 @@ $this->assign('title', __('FairNestPlan') . ' - ' . h($schedule->title));
             </div>
         </div>
     </div>
+    
+    <!-- Encryption Warning (if password missing) -->
+    <div id="encryption-warning" class="no-print" style="display: none; position: fixed; top: 20px; right: 20px; background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); max-width: 400px; z-index: 10000;">
+        <strong>⚠️ <?= __('Encryption Key Missing') ?></strong><br>
+        <span id="encryption-warning-message"></span><br>
+        <small><?= __('Child names cannot be decrypted without your password.') ?></small><br>
+        <div style="margin-top: 10px;">
+            <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'profile']) ?>" class="button-secondary" style="text-decoration: none; padding: 8px 15px; background: #3498db; color: white; border-radius: 4px; display: inline-block;">
+                🔑 <?= __('Go to Settings') ?>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Encryption Scripts -->
+    <script src="<?= $this->Url->build('/js/orgEncryption.js') ?>"></script>
+    <script src="<?= $this->Url->build('/js/childDecryption.js') ?>"></script>
+    <script>
+    // Add organization ID to all child names for decryption
+    document.addEventListener('DOMContentLoaded', function() {
+        const orgId = <?= (int)$schedule->organization_id ?>;
+        
+        // Add org-id data attribute to all child-name elements
+        const childNameElements = document.querySelectorAll('.child-name');
+        childNameElements.forEach(el => {
+            el.dataset.orgId = orgId;
+        });
+        
+        console.log('[Report] Set organization ID:', orgId, 'for', childNameElements.length, 'child names');
+        
+        // Check if password is available
+        setTimeout(function() {
+            const password = sessionStorage.getItem('_temp_login_password');
+            
+            if (!password) {
+                console.warn('[Report] ⚠️ Password not available in sessionStorage - child names cannot be decrypted');
+                
+                const warningDiv = document.getElementById('encryption-warning');
+                const messageSpan = document.getElementById('encryption-warning-message');
+                
+                if (warningDiv && messageSpan) {
+                    messageSpan.textContent = '<?= __('Password not available for key decryption. Please re-enter your password in settings.') ?>';
+                    warningDiv.style.display = 'block';
+                }
+            } else {
+                console.log('[Report] ✅ Password available in sessionStorage');
+            }
+            
+            // Check if decryption succeeded after 2 seconds
+            setTimeout(function() {
+                const decryptedElements = document.querySelectorAll('.child-name[data-decrypted="true"]');
+                const encryptedElements = document.querySelectorAll('.child-name[data-encrypted]');
+                
+                console.log('[Report] Decryption Status:', {
+                    total: encryptedElements.length,
+                    decrypted: decryptedElements.length,
+                    failed: encryptedElements.length - decryptedElements.length
+                });
+                
+                if (encryptedElements.length > 0 && decryptedElements.length === 0) {
+                    console.error('[Report] ❌ No child names were decrypted! Check encryption keys and DEK.');
+                    
+                    const warningDiv = document.getElementById('encryption-warning');
+                    const messageSpan = document.getElementById('encryption-warning-message');
+                    
+                    if (warningDiv && messageSpan) {
+                        messageSpan.textContent = '<?= __('Decryption failed. Please check your encryption keys in settings.') ?>';
+                        warningDiv.style.display = 'block';
+                    }
+                }
+            }, 2000);
+        }, 500);
+    });
+    </script>
 </body>
 </html>

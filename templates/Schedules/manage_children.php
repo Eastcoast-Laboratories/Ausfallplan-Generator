@@ -118,10 +118,10 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
         <!-- Children NOT in Organization Order (NULL) - LEFT SIDE -->
         <div class="not-in-order-children">
             <h4><?= __("Not on schedule") ?></h4>
-            <div style="background: #ffebee; padding: 1rem; border-radius: 8px; min-height: 400px;">
+            <div id="children-not-in-order" style="background: #ffebee; padding: 1rem; border-radius: 8px; min-height: 400px;">
                 <?php if (!empty($childrenNotInOrder)): ?>
                     <?php foreach ($childrenNotInOrder as $child): ?>
-                        <div class="child-item-excluded" data-child-id="<?= $child->id ?>" data-org-id="<?= $child->organization_id ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #f44336;">
+                        <div class="child-item-excluded" data-child-id="<?= $child->id ?>" data-org-id="<?= $child->organization_id ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #f44336; cursor: move;">
                             <div>
                                 <strong class="child-name" style="color: #999;"
                                     data-encrypted="<?= h($child->name_encrypted ?? '') ?>"
@@ -274,14 +274,55 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
 
 <?php if (!empty($childrenInOrder) || !empty($childrenNotInOrder)): ?>
 <script>
-// Initialize Sortable.js for drag & drop
-const el = document.getElementById("children-sortable");
-const sortable = Sortable.create(el, {
+// Initialize Sortable.js for drag & drop - BIDIRECTIONAL
+const inOrderEl = document.getElementById("children-sortable");
+const notInOrderEl = document.getElementById("children-not-in-order");
+
+// Sortable for "In Order" list (right side)
+const sortableInOrder = Sortable.create(inOrderEl, {
     animation: 150,
     ghostClass: "sortable-ghost",
+    group: "children-manage", // Same group for bidirectional drag
     onEnd: function (evt) {
-        // Get new order - extract child IDs from both single items and sibling groups
-        const items = el.querySelectorAll(".child-item, .sibling-group");
+        // Check if dragged TO "Not in Order" list
+        if (evt.to === notInOrderEl) {
+            console.log('[ManageChildren] Dragged from In Order TO Not in Order');
+            const childId = evt.item.dataset.childId;
+            
+            // If it's a sibling group, get all child IDs
+            let childIds = [];
+            if (evt.item.classList.contains('sibling-group')) {
+                childIds = evt.item.dataset.childIds.split(',').map(id => parseInt(id));
+            } else {
+                childIds = [parseInt(childId)];
+            }
+            
+            // Remove all children from order
+            const removePromises = childIds.map(id => {
+                return fetch("<?= $this->Url->build(["action" => "removeFromOrder", $schedule->id]) ?>", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-Token": "<?= $this->request->getAttribute("csrfToken") ?>"
+                    },
+                    body: JSON.stringify({ child_id: id })
+                });
+            });
+            
+            Promise.all(removePromises)
+                .then(() => {
+                    console.log('[ManageChildren] ✅ Removed from order, reloading...');
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('[ManageChildren] ❌ Error removing:', error);
+                    location.reload();
+                });
+            return;
+        }
+        // Reordering within "In Order" list
+        console.log('[ManageChildren] Reordered within In Order list');
+        const items = inOrderEl.querySelectorAll(".child-item, .sibling-group");
         const childrenIds = [];
         
         items.forEach(item => {
@@ -324,6 +365,54 @@ const sortable = Sortable.create(el, {
             console.error("Error updating order:", error);
             location.reload(); // Reload to show correct state
         });
+    }
+});
+
+// Sortable for "Not in Order" list (left side)
+const sortableNotInOrder = Sortable.create(notInOrderEl, {
+    animation: 150,
+    ghostClass: "sortable-ghost",
+    group: "children-manage", // Same group for bidirectional drag
+    onEnd: function (evt) {
+        // Check if dragged TO "In Order" list
+        if (evt.to === inOrderEl) {
+            console.log('[ManageChildren] Dragged from Not in Order TO In Order');
+            const childId = evt.item.dataset.childId;
+            
+            if (!childId) {
+                console.error('[ManageChildren] No child ID found');
+                location.reload();
+                return;
+            }
+            
+            // Add to order
+            fetch("<?= $this->Url->build(["action" => "addToOrder", $schedule->id]) ?>", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-Token": "<?= $this->request->getAttribute("csrfToken") ?>"
+                },
+                body: JSON.stringify({ child_id: parseInt(childId) })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('[ManageChildren] ✅ Added to order, reloading...');
+                    location.reload();
+                } else {
+                    console.error('[ManageChildren] Failed to add:', data.message);
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('[ManageChildren] ❌ Error adding:', error);
+                location.reload();
+            });
+            return;
+        }
+        
+        // If staying within "Not in Order", do nothing
+        console.log('[ManageChildren] Reordered within Not in Order list (no action)');
     }
 });
 
