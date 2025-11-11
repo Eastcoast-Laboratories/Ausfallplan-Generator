@@ -72,7 +72,7 @@ $this->assign('title', __('Add Child'));
     <?= $this->Form->hidden('name_iv', ['id' => 'name-iv-field']) ?>
     <?= $this->Form->hidden('name_tag', ['id' => 'name-tag-field']) ?>
     
-    <?= $this->Form->button(__('Submit'), ['id' => 'submit-button']) ?>
+    <?= $this->Form->button(__('Submit'), ['id' => 'submit-button', 'type' => 'button']) ?>
     <?= $this->Form->end() ?>
 </div>
 
@@ -90,13 +90,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         return;
     }
     
-    // Intercept form submission to encrypt name if needed
-    form.addEventListener('submit', async function(e) {
-        // Only encrypt if fields are empty (first submission)
-        if (nameEncryptedField.value) {
-            return; // Already encrypted, proceed with submission
-        }
-        
+    // Handle button click to encrypt and submit
+    submitButton.addEventListener('click', async function(e) {
         e.preventDefault();
         
         const name = nameField.value.trim();

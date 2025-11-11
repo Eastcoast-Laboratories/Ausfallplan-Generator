@@ -426,9 +426,12 @@ class WaitlistController extends AppController
      * @param string|null $scheduleId Schedule ID
      * @return \Cake\Http\Response|null Redirects back to index
      */
-    public function addAll($scheduleId = null)
+    public function addAll()
     {
         $this->request->allowMethod(['post']);
+        
+        // Get schedule_id from query parameter
+        $scheduleId = $this->request->getQuery('schedule_id');
         
         if (!$scheduleId) {
             $this->Flash->error(__('Invalid schedule.'));
