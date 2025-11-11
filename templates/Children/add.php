@@ -103,11 +103,21 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Try to get DEK from session storage (async!)
         const dek = await window.OrgEncryption.getDEK(selectedOrgId);
         
-        console.log('ENCRYPTION_CHECK: DEK found =', dek ? 'YES' : 'NO');
-        console.log('ENCRYPTION_CHECK: DEK type =', typeof dek, dek instanceof CryptoKey ? 'CryptoKey' : 'Not CryptoKey');
+        console.log(`ENCRYPTION_CHECK: DEK found = ${dek ? 'YES' : 'NO'}`);
+        console.log(`ENCRYPTION_CHECK: DEK type = ${typeof dek} ${dek instanceof CryptoKey ? 'CryptoKey' : 'Not CryptoKey'}`);
         
         if (!dek) {
             console.log('ENCRYPTION_CHECK: No DEK available for organization, proceeding without encryption');
+            
+            // WARN user that data will be stored unencrypted
+            const proceed = confirm('⚠️ WARNING: No encryption key available for this organization!\n\nThe child\'s data will be stored UNENCRYPTED in the database.\n\nThis may happen if:\n- Encryption is not set up for your organization\n- You need to log out and log in again\n- Your encryption keys are not properly configured\n\nDo you want to proceed anyway?');
+            
+            if (!proceed) {
+                submitButton.disabled = false;
+                submitButton.textContent = '<?= __('Submit') ?>';
+                return;
+            }
+            
             form.submit();
             return;
         }
