@@ -60,7 +60,6 @@ $this->assign('title', __('Add Child'));
     <?= $this->Form->end() ?>
 </div>
 
-<?= $this->Html->script('crypto/orgEncryption', ['block' => true]) ?>
 <script>
 document.addEventListener('DOMContentLoaded', async function() {
     const form = document.querySelector('.children.form form');
@@ -101,11 +100,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             return;
         }
         
-        // Try to get DEK from session storage
-        const dek = window.OrgEncryption.getDEK(selectedOrgId);
+        // Try to get DEK from session storage (async!)
+        const dek = await window.OrgEncryption.getDEK(selectedOrgId);
         
         console.log('ENCRYPTION_CHECK: DEK found =', dek ? 'YES' : 'NO');
-        console.log('ENCRYPTION_CHECK: sessionStorage keys =', Object.keys(sessionStorage));
+        console.log('ENCRYPTION_CHECK: DEK type =', typeof dek, dek instanceof CryptoKey ? 'CryptoKey' : 'Not CryptoKey');
         
         if (!dek) {
             console.log('ENCRYPTION_CHECK: No DEK available for organization, proceeding without encryption');

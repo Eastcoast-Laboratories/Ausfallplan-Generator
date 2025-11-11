@@ -201,7 +201,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<?= $this->Html->script('crypto/orgEncryption', ['block' => true]) ?>
 <script>
 // Decrypt encrypted child names on page load
 document.addEventListener('DOMContentLoaded', async function() {
@@ -231,12 +230,12 @@ document.addEventListener('DOMContentLoaded', async function() {
             continue;
         }
         
-        // Try to get DEK from session storage
-        const dek = window.OrgEncryption.getDEK(orgId);
+        // Try to get DEK from session storage (async!)
+        const dek = await window.OrgEncryption.getDEK(orgId);
         
         if (!dek) {
             console.log(`No DEK available for organization ${orgId}`);
-            continue;
+            return;
         }
         
         try {

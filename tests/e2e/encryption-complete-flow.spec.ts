@@ -69,13 +69,24 @@ test.describe('Encryption Complete Flow', () => {
             await dialog.dismiss();
         });
         
-        // Login and wait for dashboard
-        await Promise.all([
-            page.waitForNavigation({ timeout: 10000 }).catch(() => {}),
-            page.click('button[type="submit"]')
-        ]);
+        // Login and wait for redirect
+        await page.click('button[type="submit"]');
         
-        await page.waitForTimeout(2000); // Give time for page to load
+        // Wait for either dashboard or error
+        try {
+            await page.waitForURL(/\/(dashboard|organizations)/, { timeout: 8000 });
+        } catch (e) {
+            // Check if we're still on login page
+            const currentUrl = page.url();
+            if (currentUrl.includes('/login')) {
+                // Take screenshot and check for error messages
+                const errorMsg = await page.locator('.error, .message.error, .flash.error').textContent().catch(() => 'No error message found');
+                console.log('Login failed with error:', errorMsg);
+                throw new Error(`Login failed, still on login page. Error: ${errorMsg}`);
+            }
+        }
+        
+        await page.waitForTimeout(2000); // Give time for page to fully load
         
         const currentUrl = page.url();
         console.log('Current URL after login:', currentUrl);

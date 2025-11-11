@@ -70,6 +70,48 @@ $this->assign('title', __('Profile Settings'));
         </div>
 
         <div class="form-section">
+            <h2><?= __('Encryption & Security') ?> 🔐</h2>
+            
+            <div class="form-row">
+                <div class="form-info">
+                    <label><?= __('Client-Side Encryption Status') ?></label>
+                    <?php if ($userEntity->encrypted_private_key && $userEntity->key_salt): ?>
+                        <div class="encryption-status enabled">
+                            <span class="status-icon">✅</span>
+                            <span class="status-text"><?= __('Encryption Enabled') ?></span>
+                        </div>
+                        <small>
+                            <?= __('Your sensitive data is encrypted using client-side encryption. Your encryption keys were generated on {0}.', [
+                                $userEntity->created ? $userEntity->created->format('d.m.Y') : __('registration')
+                            ]) ?>
+                        </small>
+                        <div class="encryption-details">
+                            <small style="color: #666;">
+                                <strong><?= __('Technical Info:') ?></strong><br>
+                                • <?= __('Public Key Length:') ?> <?= strlen($userEntity->public_key ?? '') ?> <?= __('chars') ?><br>
+                                • <?= __('Encrypted Private Key Length:') ?> <?= strlen($userEntity->encrypted_private_key ?? '') ?> <?= __('chars') ?><br>
+                                • <?= __('Encryption: RSA-OAEP-2048 + AES-GCM-256') ?>
+                            </small>
+                        </div>
+                    <?php else: ?>
+                        <div class="encryption-status disabled">
+                            <span class="status-icon">⚠️</span>
+                            <span class="status-text"><?= __('Encryption Not Set Up') ?></span>
+                        </div>
+                        <small>
+                            <?= __('Your account was created before encryption was implemented. Your data is currently stored in plaintext.') ?>
+                        </small>
+                        <div style="margin-top: 10px;">
+                            <button type="button" id="setup-encryption-btn" class="button-primary">
+                                <?= __('Set Up Encryption Now') ?> 🔒
+                            </button>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
             <h2><?= __('Personal Information') ?></h2>
             
             <div class="form-row">
