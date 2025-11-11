@@ -177,17 +177,15 @@ class UsersController extends AppController
                 $debugLink = \Cake\Routing\Router::url(['controller' => 'Debug', 'action' => 'emails'], true);
                 
                 if ($isNewOrganization) {
-                    $message = __('Registration successful! You are the admin of your new organization. Please check your email to verify your account.');
-                } else if ($organization->name === 'keine organisation') {
-                    $message = __('Registration successful. Please check your email to verify your account.');
+                    // New org creators are auto-verified, no email needed
+                    $message = __('Registration successful! You are the admin of your new organization and can start using the system immediately.');
+                    $this->Flash->success($message, ['escape' => false]);
                 } else {
-                    $message = __('Registration successful! Organization admins have been notified and will review your request. Please check your email to verify your account.');
+                    // Joining existing org requires verification
+                    $message = __('Registration successful! Please check your email to verify your account before you can access the organization.');
+                    $message .= "\n\n" . __('View all emails at: <a href="{0}" target="_blank">Debug Email Viewer</a>', [$debugLink]);
+                    $this->Flash->success($message, ['escape' => false]);
                 }
-                
-                $this->Flash->success(
-                    $message . " (Dev: <a href='{$debugLink}' style='color: white; text-decoration: underline;'>View Emails</a>)",
-                    ['escape' => false]
-                );
                 return $this->redirect(['action' => 'login']);
             }
             $this->Flash->error(__('Registration failed. Please try again.'));
