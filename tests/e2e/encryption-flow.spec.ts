@@ -41,19 +41,21 @@ test.describe('Complete Encryption Flow', () => {
         await page.goto('http://localhost:8080/register');
         
         // Wait for page to be fully loaded
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('domcontentloaded');
         
         await page.fill('input[name="email"]', testEmail);
         await page.fill('input[name="password"]', testPassword);
         await page.fill('input[name="password_confirm"]', testPassword);
         
-        // Wait for radio button to be visible
-        await page.waitForSelector('input[name="organization_choice"][value="new"]', { state: 'visible' });
-        await page.click('input[name="organization_choice"][value="new"]');
+        // Check what organization options are available - use text-based selection
+        const createNewOrgRadio = page.locator('input[type="radio"][value="new"]');
+        await createNewOrgRadio.waitFor({ state: 'visible', timeout: 5000 });
+        await createNewOrgRadio.check();
         
-        // Wait for organization name field to be visible
-        await page.waitForSelector('input[name="organization_name"]', { state: 'visible' });
-        await page.fill('input[name="organization_name"]', orgName);
+        // Wait for organization name field to appear and fill it
+        const orgNameInput = page.locator('input[name="organization_name"]');
+        await orgNameInput.waitFor({ state: 'visible', timeout: 5000 });
+        await orgNameInput.fill(orgName);
         
         // Check logs before submit
         console.log('📝 Console logs before registration:', consoleLogs.length);

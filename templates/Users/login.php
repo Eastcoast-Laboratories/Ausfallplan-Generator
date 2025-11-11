@@ -139,8 +139,12 @@ if ($encryptionData): ?>
             for (const wrappedDekData of encryptionData.wrapped_deks) {
                 try {
                     console.log(`Unwrapping DEK for organization ${wrappedDekData.organization_id}...`);
+                    
+                    // Convert base64 wrapped DEK to ArrayBuffer
+                    const wrappedDekArrayBuffer = window.OrgEncryption.base64ToArrayBuffer(wrappedDekData.wrapped_dek);
+                    
                     const dek = await window.OrgEncryption.unwrapDEK(
-                        wrappedDekData.wrapped_dek,
+                        wrappedDekArrayBuffer,
                         privateKey
                     );
                     

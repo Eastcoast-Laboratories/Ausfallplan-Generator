@@ -321,7 +321,6 @@ $this->assign('title', __('Profile Settings'));
         }
     });
     </script>
-    <?php endif; ?>
 
     <!-- Danger Zone -->
     <div class="danger-zone">
