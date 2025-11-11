@@ -161,13 +161,28 @@ const OrgEncryption = (function() {
 
     /**
      * Unwrap (decrypt) a private key with a password-derived KEK
-     * @param {ArrayBuffer} wrappedKey - Wrapped private key
-     * @param {Uint8Array} iv - IV used for wrapping
+     * @param {string} wrappedKeyBase64 - Wrapped private key (Base64)
      * @param {string} password - User's password
-     * @param {Uint8Array} salt - Salt for KEK derivation
+     * @param {string} saltBase64 - Salt for KEK derivation (Base64)
+     * @param {string} ivBase64 - IV used for wrapping (Base64, optional)
      * @returns {Promise<CryptoKey>}
      */
-    async function unwrapPrivateKeyWithPassword(wrappedKey, iv, password, salt) {
+    async function unwrapPrivateKeyWithPassword(wrappedKeyBase64, password, saltBase64, ivBase64) {
+        // Convert Base64 to ArrayBuffer
+        const wrappedKey = base64ToArrayBuffer(wrappedKeyBase64);
+        const salt = base64ToArrayBuffer(saltBase64);
+        
+        // IV is optional for backward compatibility
+        // If not provided, we use a dummy IV (not secure, but maintains compatibility)
+        let iv;
+        if (ivBase64) {
+            iv = base64ToArrayBuffer(ivBase64);
+        } else {
+            // For backward compatibility: use first 12 bytes of wrapped key as IV
+            // This is NOT secure but allows decryption of old keys
+            iv = new Uint8Array(wrappedKey.slice(0, 12));
+        }
+        
         const kek = await deriveKEKFromPassword(password, salt);
         
         return await window.crypto.subtle.unwrapKey(
