@@ -168,13 +168,36 @@ document.addEventListener('DOMContentLoaded', async function() {
             console.log('Exporting public key...');
             const publicKeyPem = await window.OrgEncryption.exportPublicKey(keyPair.publicKey);
             
+            // Generate DEK for new organization
+            console.log('Generating DEK for organization...');
+            const dek = await window.OrgEncryption.generateDEK();
+            
+            // Wrap DEK with user's public key
+            console.log('Wrapping DEK with public key...');
+            const wrappedDek = await window.OrgEncryption.wrapDEK(dek, keyPair.publicKey);
+            
+            // Convert to base64
+            const wrappedDekBase64 = window.OrgEncryption.arrayBufferToBase64(wrappedDek);
+            
             // Set hidden field values
             publicKeyField.value = publicKeyPem;
             encryptedPrivateKeyField.value = result.wrappedKey;
             keySaltField.value = result.salt;
             
+            // Add DEK field if it doesn't exist
+            let dekField = document.getElementById('wrapped-dek-field');
+            if (!dekField) {
+                dekField = document.createElement('input');
+                dekField.type = 'hidden';
+                dekField.name = 'wrapped_dek';
+                dekField.id = 'wrapped-dek-field';
+                form.appendChild(dekField);
+            }
+            dekField.value = wrappedDekBase64;
+            
             console.log('Wrapped key length:', result.wrappedKey.length);
             console.log('Salt length:', result.salt.length);
+            console.log('Wrapped DEK length:', wrappedDekBase64.length);
             
             console.log('Keys generated successfully, submitting form...');
             

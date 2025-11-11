@@ -100,26 +100,16 @@ class UsersController extends AppController
             }
             
             if ($this->Users->save($user)) {
-                // Handle encryption: Generate initial wrapped DEK if encryption keys provided
-                if (!empty($data['public_key']) && $organization->encryption_enabled) {
+                // Handle encryption: Save wrapped DEK if provided (generated client-side)
+                if (!empty($data['public_key']) && !empty($data['wrapped_dek']) && $organization->encryption_enabled) {
                     $encryptedDeksTable = $this->fetchTable('EncryptedDeks');
                     
-                    // For new organizations: Generate a new DEK for the organization
-                    // For existing organizations: Admin must wrap DEK for new user separately
-                    if ($isNewOrganization) {
-                        // Generate a random DEK (32 bytes for AES-256)
-                        $dek = random_bytes(32);
-                        
-                        // In real implementation, this would be wrapped with user's public key
-                        // For now, we just store a placeholder that indicates encryption is set up
-                        $wrappedDek = base64_encode($dek); // Simplified - should use public key encryption
-                        
-                        $encryptedDeksTable->save($encryptedDeksTable->newEntity([
-                            'organization_id' => $organization->id,
-                            'user_id' => $user->id,
-                            'wrapped_dek' => $wrappedDek,
-                        ]));
-                    }
+                    // Save the wrapped DEK (already encrypted with user's public key client-side)
+                    $encryptedDeksTable->save($encryptedDeksTable->newEntity([
+                        'organization_id' => $organization->id,
+                        'user_id' => $user->id,
+                        'wrapped_dek' => $data['wrapped_dek'],
+                    ]));
                 }
                 
                 // Create organization_users entry
