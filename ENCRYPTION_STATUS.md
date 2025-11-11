@@ -65,49 +65,51 @@
 - ✅ Keys cleared on logout (implemented in module)
 - ✅ Private keys and salts hidden from JSON serialization
 
-## 🔄 REMAINING - Integration & UI
+## ✅ COMPLETED - Backend API
 
-### Backend API Adjustments 🔄
-**Priority: HIGH** - Required for functionality
+### Backend API Adjustments ✅
+**Status: COMPLETE** - All backend endpoints implemented
 
-#### UsersController Updates
-- [ ] Registration flow
-  - [ ] Accept public_key, encrypted_private_key, key_salt in registration
-  - [ ] Store user encryption keys
-  - [ ] Generate initial wrapped DEK for user's organization
-- [ ] Login flow
-  - [ ] Return user's encrypted_private_key, key_salt in login response
-  - [ ] Return wrapped DEKs for user's organizations
-- [ ] Password change flow
-  - [ ] Accept new encrypted_private_key and key_salt
-  - [ ] Update user record (no DEK rotation needed)
+#### UsersController Updates ✅
+- [x] Registration flow
+  - [x] Accept public_key, encrypted_private_key, key_salt in registration
+  - [x] Store user encryption keys
+  - [x] Generate initial wrapped DEK for user's organization
+- [x] Login flow
+  - [x] Return user's encrypted_private_key, key_salt in login response
+  - [x] Return wrapped DEKs for user's organizations
+  - [x] Store encryption data in session
+- [x] Password change flow
+  - [x] Accept new encrypted_private_key and key_salt
+  - [x] Update user record (no DEK rotation needed)
 
-#### ChildrenController Updates
-- [ ] Create/Update actions
-  - [ ] Check organization.encryption_enabled
-  - [ ] If enabled: accept name_encrypted, name_iv, name_tag
-  - [ ] If disabled: accept only plaintext name
-  - [ ] Validate encrypted data format
-- [ ] Read actions
-  - [ ] Return encrypted fields if encryption enabled
-  - [ ] Return plaintext if encryption disabled
+#### ChildrenController Updates ✅
+- [x] Create/Update actions
+  - [x] Check organization.encryption_enabled
+  - [x] If enabled: accept name_encrypted, name_iv, name_tag
+  - [x] If disabled: accept only plaintext name
+  - [x] Validate encrypted data format
+- [x] Read actions
+  - [x] Return encrypted fields if encryption enabled
+  - [x] Return plaintext if encryption disabled
 
-#### OrganizationsController Updates
-- [ ] Add toggle endpoint
-  - [ ] POST /organizations/:id/toggle-encryption
-  - [ ] Admin-only access
-  - [ ] Update encryption_enabled field
-  - [ ] Return success/error
+#### OrganizationsController Updates ✅
+- [x] Add toggle endpoint
+  - [x] POST /api/organizations/:id/toggle-encryption
+  - [x] Admin-only access
+  - [x] Update encryption_enabled field
+  - [x] Return success/error
 
-#### DEK Management API
-- [ ] POST /organizations/:id/wrap-dek
-  - [ ] Accept new_user_id and their public_key
-  - [ ] Unwrap organization DEK with admin's private key
-  - [ ] Wrap DEK with new user's public key
-  - [ ] Store in encrypted_deks table
-- [ ] DELETE /organizations/:id/users/:userId/dek
-  - [ ] Remove user's wrapped DEK
-  - [ ] Admin-only access
+#### DEK Management API ✅
+- [x] POST /api/organizations/:id/wrap-dek
+  - [x] Accept user_id and wrapped_dek
+  - [x] Admin-only access
+  - [x] Store in encrypted_deks table
+- [x] POST/DELETE /api/organizations/:id/revoke-dek/:userId
+  - [x] Remove user's wrapped DEK
+  - [x] Admin-only access
+
+## 🔄 REMAINING - UI Integration
 
 ### UI Integration 🔄
 **Priority: MEDIUM** - Required for user experience
