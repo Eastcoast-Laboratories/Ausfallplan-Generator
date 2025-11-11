@@ -68,3 +68,72 @@
     flex: 1;
 }
 </style>
+
+<?php
+// Check if encryption data is available in session (after successful login)
+$encryptionData = $this->request->getSession()->read('encryption');
+if ($encryptionData): ?>
+<?= $this->Html->script('crypto/orgEncryption', ['block' => true]) ?>
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+    if (!window.OrgEncryption) {
+        console.warn('Encryption module not available');
+        return;
+    }
+    
+    const encryptionData = <?= json_encode($encryptionData) ?>;
+    
+    if (!encryptionData || !encryptionData.encrypted_private_key || !encryptionData.key_salt) {
+        console.log('No encryption data available for this user');
+        return;
+    }
+    
+    // Prompt for password to unwrap private key
+    const password = prompt('<?= __('Enter your password to unlock encrypted data:') ?>');
+    
+    if (!password) {
+        console.log('Password not provided, encrypted data will not be available');
+        return;
+    }
+    
+    try {
+        console.log('Unwrapping private key...');
+        const privateKey = await window.OrgEncryption.unwrapPrivateKeyWithPassword(
+            encryptionData.encrypted_private_key,
+            password,
+            encryptionData.key_salt
+        );
+        
+        console.log('Private key unwrapped successfully');
+        
+        // Unwrap DEKs for each organization
+        if (encryptionData.wrapped_deks && encryptionData.wrapped_deks.length > 0) {
+            for (const wrappedDekData of encryptionData.wrapped_deks) {
+                try {
+                    console.log(`Unwrapping DEK for organization ${wrappedDekData.organization_id}...`);
+                    const dek = await window.OrgEncryption.unwrapDEK(
+                        wrappedDekData.wrapped_dek,
+                        privateKey
+                    );
+                    
+                    // Store DEK in session storage
+                    window.OrgEncryption.storeDEK(wrappedDekData.organization_id, dek);
+                    console.log(`DEK stored for organization ${wrappedDekData.organization_id}`);
+                } catch (error) {
+                    console.error(`Failed to unwrap DEK for organization ${wrappedDekData.organization_id}:`, error);
+                }
+            }
+        }
+        
+        console.log('Encryption keys loaded successfully');
+        alert('<?= __('Encrypted data unlocked successfully!') ?>');
+        
+        // Redirect to dashboard
+        window.location.href = '/dashboard';
+    } catch (error) {
+        console.error('Key unwrapping error:', error);
+        alert('<?= __('Failed to unlock encrypted data. Please check your password.') ?>');
+    }
+});
+</script>
+<?php endif; ?>
