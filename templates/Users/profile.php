@@ -91,6 +91,14 @@ $this->assign('title', __('Profile Settings'));
                             <strong>⚠️ <?= __('Encryption Key Error') ?></strong><br>
                             <span id="encryption-error-message"></span><br>
                             <small><?= __('Your encryption keys may be corrupted or incompatible. Please regenerate your encryption keys.') ?></small>
+                            <div style="margin-top: 10px;">
+                                <button type="button" id="re-enter-password-btn" class="button-secondary" style="margin-right: 10px;">
+                                    🔑 <?= __('Re-enter Password') ?>
+                                </button>
+                                <button type="button" id="regenerate-keys-btn" class="button-danger">
+                                    🔄 <?= __('Regenerate Keys') ?>
+                                </button>
+                            </div>
                         </div>
                         <small>
                             <?= __('Your sensitive data is encrypted using client-side encryption. Your encryption keys were generated on {0}.', [
@@ -105,6 +113,11 @@ $this->assign('title', __('Profile Settings'));
                                 • <?= __('Key Salt Length:') ?> <?= strlen($userEntity->key_salt) ?> <?= __('chars') ?><br>
                                 • <?= __('Encryption: RSA-OAEP-2048 + AES-GCM-256') ?>
                             </small>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <button type="button" id="regenerate-keys-enabled-btn" class="button-secondary">
+                                🔄 <?= __('Regenerate Encryption Keys') ?>
+                            </button>
                         </div>
                     <?php else: ?>
                         <div class="encryption-status disabled">
@@ -239,13 +252,21 @@ $this->assign('title', __('Profile Settings'));
     document.addEventListener('DOMContentLoaded', function() {
         // Check for encryption errors from sessionStorage
         const encryptionError = sessionStorage.getItem('encryption_error');
-        if (encryptionError) {
-            const errorData = JSON.parse(encryptionError);
+        // Also check if password was not found during login
+        const passwordMissing = !sessionStorage.getItem('_temp_login_password');
+        
+        if (encryptionError || passwordMissing) {
             const warningDiv = document.getElementById('encryption-error-warning');
             const messageSpan = document.getElementById('encryption-error-message');
             
             if (warningDiv && messageSpan) {
-                messageSpan.textContent = errorData.error;
+                if (passwordMissing && !encryptionError) {
+                    messageSpan.textContent = '<?= __('Password not available for key decryption. Please re-enter your password.') ?>';
+                } else if (encryptionError) {
+                    const errorData = JSON.parse(encryptionError);
+                    messageSpan.textContent = errorData.error;
+                }
+                
                 warningDiv.style.display = 'block';
                 
                 // Update status icon to warning
@@ -316,6 +337,160 @@ $this->assign('title', __('Profile Settings'));
                     alert('<?= __('Error generating encryption keys. Please try again.') ?>');
                     setupButton.disabled = false;
                     setupButton.textContent = '<?= __('Set Up Encryption Now') ?> 🔒';
+                }
+            });
+        }
+        
+        // Re-enter Password Button
+        const reEnterPasswordBtn = document.getElementById('re-enter-password-btn');
+        if (reEnterPasswordBtn) {
+            reEnterPasswordBtn.addEventListener('click', async function() {
+                const password = prompt('<?= __('Please re-enter your password to unlock encryption keys:') ?>');
+                if (!password) {
+                    return;
+                }
+                
+                // Store password in sessionStorage for encryption
+                sessionStorage.setItem('_temp_login_password', password);
+                
+                // Clear encryption error
+                sessionStorage.removeItem('encryption_error');
+                
+                alert('<?= __('Password stored successfully. Encryption should now work. Reloading page...') ?>');
+                window.location.reload();
+            });
+        }
+        
+        // Regenerate Keys Button (when error)
+        const regenerateKeysBtn = document.getElementById('regenerate-keys-btn');
+        if (regenerateKeysBtn && window.OrgEncryption) {
+            regenerateKeysBtn.addEventListener('click', async function() {
+                if (!confirm('<?= __('This will regenerate your encryption keys. All existing encrypted data will become inaccessible. Continue?') ?>')) {
+                    return;
+                }
+                
+                const password = prompt('<?= __('Please enter your current password to regenerate encryption keys:') ?>');
+                if (!password) {
+                    alert('<?= __('Password is required to regenerate encryption keys.') ?>');
+                    return;
+                }
+                
+                regenerateKeysBtn.disabled = true;
+                regenerateKeysBtn.textContent = '<?= __('Generating keys...') ?>';
+                
+                try {
+                    console.log('Regenerating RSA key pair...');
+                    const keyPair = await window.OrgEncryption.generateKeyPair();
+                    
+                    console.log('Wrapping private key with password...');
+                    const result = await window.OrgEncryption.wrapPrivateKeyWithPassword(
+                        keyPair.privateKey,
+                        password
+                    );
+                    
+                    console.log('Exporting public key...');
+                    const publicKeyPem = await window.OrgEncryption.exportPublicKey(keyPair.publicKey);
+                    
+                    // Send to server
+                    const response = await fetch('/users/setup-encryption', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-Token': '<?= $this->request->getAttribute('csrfToken') ?>'
+                        },
+                        body: JSON.stringify({
+                            public_key: publicKeyPem,
+                            encrypted_private_key: result.wrappedKey,
+                            key_salt: result.salt
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Store password for immediate use
+                        sessionStorage.setItem('_temp_login_password', password);
+                        sessionStorage.removeItem('encryption_error');
+                        
+                        alert('<?= __('Encryption keys have been successfully regenerated!') ?>');
+                        window.location.reload();
+                    } else {
+                        alert('<?= __('Error regenerating encryption keys:') ?> ' + (data.message || 'Unknown error'));
+                        regenerateKeysBtn.disabled = false;
+                        regenerateKeysBtn.textContent = '🔄 <?= __('Regenerate Keys') ?>';
+                    }
+                } catch (error) {
+                    console.error('Key regeneration error:', error);
+                    alert('<?= __('Error generating encryption keys. Please try again.') ?>');
+                    regenerateKeysBtn.disabled = false;
+                    regenerateKeysBtn.textContent = '🔄 <?= __('Regenerate Keys') ?>';
+                }
+            });
+        }
+        
+        // Regenerate Keys Button (when encryption is enabled and working)
+        const regenerateKeysEnabledBtn = document.getElementById('regenerate-keys-enabled-btn');
+        if (regenerateKeysEnabledBtn && window.OrgEncryption) {
+            regenerateKeysEnabledBtn.addEventListener('click', async function() {
+                if (!confirm('<?= __('⚠️ WARNING: This will regenerate your encryption keys. All existing encrypted data will become inaccessible and must be re-encrypted. This action cannot be undone. Continue?') ?>')) {
+                    return;
+                }
+                
+                const password = prompt('<?= __('Please enter your current password to regenerate encryption keys:') ?>');
+                if (!password) {
+                    alert('<?= __('Password is required to regenerate encryption keys.') ?>');
+                    return;
+                }
+                
+                regenerateKeysEnabledBtn.disabled = true;
+                regenerateKeysEnabledBtn.textContent = '<?= __('Generating keys...') ?>';
+                
+                try {
+                    console.log('Regenerating RSA key pair...');
+                    const keyPair = await window.OrgEncryption.generateKeyPair();
+                    
+                    console.log('Wrapping private key with password...');
+                    const result = await window.OrgEncryption.wrapPrivateKeyWithPassword(
+                        keyPair.privateKey,
+                        password
+                    );
+                    
+                    console.log('Exporting public key...');
+                    const publicKeyPem = await window.OrgEncryption.exportPublicKey(keyPair.publicKey);
+                    
+                    // Send to server
+                    const response = await fetch('/users/setup-encryption', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-Token': '<?= $this->request->getAttribute('csrfToken') ?>'
+                        },
+                        body: JSON.stringify({
+                            public_key: publicKeyPem,
+                            encrypted_private_key: result.wrappedKey,
+                            key_salt: result.salt
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Store password for immediate use
+                        sessionStorage.setItem('_temp_login_password', password);
+                        sessionStorage.removeItem('encryption_error');
+                        
+                        alert('<?= __('Encryption keys have been successfully regenerated! All children names must be re-encrypted.') ?>');
+                        window.location.reload();
+                    } else {
+                        alert('<?= __('Error regenerating encryption keys:') ?> ' + (data.message || 'Unknown error'));
+                        regenerateKeysEnabledBtn.disabled = false;
+                        regenerateKeysEnabledBtn.textContent = '🔄 <?= __('Regenerate Encryption Keys') ?>';
+                    }
+                } catch (error) {
+                    console.error('Key regeneration error:', error);
+                    alert('<?= __('Error generating encryption keys. Please try again.') ?>');
+                    regenerateKeysEnabledBtn.disabled = false;
+                    regenerateKeysEnabledBtn.textContent = '🔄 <?= __('Regenerate Encryption Keys') ?>';
                 }
             });
         }
