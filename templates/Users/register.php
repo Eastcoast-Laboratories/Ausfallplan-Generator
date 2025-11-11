@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             const keyPair = await window.OrgEncryption.generateKeyPair();
             
             console.log('Wrapping private key with password...');
-            const { wrappedKey, salt } = await window.OrgEncryption.wrapPrivateKeyWithPassword(
+            const result = await window.OrgEncryption.wrapPrivateKeyWithPassword(
                 keyPair.privateKey,
                 password
             );
@@ -170,8 +170,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             
             // Set hidden field values
             publicKeyField.value = publicKeyPem;
-            encryptedPrivateKeyField.value = wrappedKey;
-            keySaltField.value = salt;
+            encryptedPrivateKeyField.value = result.wrappedKey;
+            keySaltField.value = result.salt;
+            
+            console.log('Wrapped key length:', result.wrappedKey.length);
+            console.log('Salt length:', result.salt.length);
             
             console.log('Keys generated successfully, submitting form...');
             
