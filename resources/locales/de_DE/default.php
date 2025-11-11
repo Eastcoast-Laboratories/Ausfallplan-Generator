@@ -510,5 +510,10 @@ return [
     'Fortfahren?' => 'Fortfahren?',
     'Sensible Daten (z.B. Kindernamen) werden clientseitig verschlüsselt' => 'Sensible Daten (z.B. Kindernamen) werden clientseitig verschlüsselt',
     'Sensible Daten werden unverschlüsselt gespeichert' => 'Sensible Daten werden unverschlüsselt gespeichert',
-    'Änderbar unter' => 'Änderbar unter'
+    'Änderbar unter' => 'Änderbar unter',
+    'Keine verschlüsselten Kindernamen gefunden. Möchten Sie die Verschlüsselung trotzdem deaktivieren?' => 'Keine verschlüsselten Kindernamen gefunden. Möchten Sie die Verschlüsselung trotzdem deaktivieren?',
+    'Verschlüsselung deaktiviert. {0} Kindernamen wurden entschlüsselt, {1} sind fehlgeschlagen.' => 'Verschlüsselung deaktiviert. {0} Kindernamen wurden entschlüsselt, {1} sind fehlgeschlagen.',
+    'Verschlüsselung deaktiviert. {0} Kindernamen wurden erfolgreich entschlüsselt.' => 'Verschlüsselung deaktiviert. {0} Kindernamen wurden erfolgreich entschlüsselt.',
+    'Verschlüsselung deaktiviert. Es gab keine verschlüsselten Kindernamen.' => 'Verschlüsselung deaktiviert. Es gab keine verschlüsselten Kindernamen.',
+    'Fehler: Verschlüsselung wurde deaktiviert, aber keine entschlüsselten Daten wurden empfangen.' => 'Fehler: Verschlüsselung wurde deaktiviert, aber keine entschlüsselten Daten wurden empfangen.'
 ];

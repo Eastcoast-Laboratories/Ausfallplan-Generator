@@ -296,25 +296,48 @@ class OrganizationsController extends AppController
             if ($previousEncryptionState && !$organization->encryption_enabled) {
                 // Process decrypted children names from hidden form fields
                 $decryptedNames = $this->request->getData('decrypted_children_names');
+                $decryptedCount = (int)$this->request->getData('decrypted_count');
                 
                 if ($decryptedNames && is_array($decryptedNames)) {
                     $childrenTable = $this->fetchTable('Children');
                     $updateCount = 0;
+                    $failedCount = 0;
                     
                     foreach ($decryptedNames as $childId => $decryptedName) {
-                        $child = $childrenTable->get($childId);
-                        if ($child->organization_id == $id) {
-                            // Update name and clear encrypted name
-                            $child->name = $decryptedName;
-                            $child->name_encrypted = null;
-                            
-                            if ($childrenTable->save($child)) {
-                                $updateCount++;
+                        try {
+                            $child = $childrenTable->get($childId);
+                            if ($child->organization_id == $id) {
+                                // Update name and clear encrypted name
+                                $child->name = $decryptedName;
+                                $child->name_encrypted = null;
+                                
+                                if ($childrenTable->save($child)) {
+                                    $updateCount++;
+                                } else {
+                                    $failedCount++;
+                                }
                             }
+                        } catch (\Exception $e) {
+                            $failedCount++;
+                            $this->log("Failed to decrypt child $childId: " . $e->getMessage(), 'error');
                         }
                     }
                     
-                    $this->log("Decrypted $updateCount children names for organization $id", 'info');
+                    $this->log("Decrypted $updateCount children names for organization $id (failed: $failedCount)", 'info');
+                    
+                    // Show success/error message
+                    if ($failedCount > 0) {
+                        $this->Flash->warning(__('Verschlüsselung deaktiviert. {0} Kindernamen wurden entschlüsselt, {1} sind fehlgeschlagen.', [$updateCount, $failedCount]));
+                    } else {
+                        $this->Flash->success(__('Verschlüsselung deaktiviert. {0} Kindernamen wurden erfolgreich entschlüsselt.', [$updateCount]));
+                    }
+                } else if ($decryptedCount === 0) {
+                    // No children to decrypt
+                    $this->Flash->info(__('Verschlüsselung deaktiviert. Es gab keine verschlüsselten Kindernamen.'));
+                } else {
+                    // Error: encryption disabled but no decrypted names received
+                    $this->Flash->error(__('Fehler: Verschlüsselung wurde deaktiviert, aber keine entschlüsselten Daten wurden empfangen.'));
+                    $this->log("Encryption disabled for org $id but no decrypted names received", 'error');
                 }
             }
             

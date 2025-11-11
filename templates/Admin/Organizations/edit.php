@@ -96,6 +96,14 @@ $this->assign('title', __('Edit Organization'));
                                 
                                 console.log(`🔓 Successfully decrypted ${decryptCount} children names`);
                                 
+                                // Check if we actually decrypted any children
+                                if (decryptCount === 0) {
+                                    console.warn('⚠️ No encrypted children found to decrypt');
+                                    if (!confirm('<?= __('Keine verschlüsselten Kindernamen gefunden. Möchten Sie die Verschlüsselung trotzdem deaktivieren?') ?>')) {
+                                        return;
+                                    }
+                                }
+                                
                                 // Add decrypted names as hidden fields to form
                                 for (const [childId, decryptedName] of Object.entries(decryptedNames)) {
                                     const hiddenField = document.createElement('input');
@@ -110,6 +118,13 @@ $this->assign('title', __('Edit Organization'));
                                 
                                 // Mark decryption as complete
                                 decryptionComplete = true;
+                                
+                                // Add success count as hidden field for server-side message
+                                const countField = document.createElement('input');
+                                countField.type = 'hidden';
+                                countField.name = 'decrypted_count';
+                                countField.value = decryptCount;
+                                form.appendChild(countField);
                                 
                                 // Now submit the form - this will trigger the submit event again but with the flag set
                                 form.requestSubmit();
