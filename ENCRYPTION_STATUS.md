@@ -122,45 +122,46 @@
   - [x] Update via API
   - [x] Show encryption icon/badge (🔒/🔓)
 
-#### Children Forms
-- [ ] Include orgEncryption.js script
-- [ ] Registration/Login
-  - [ ] Generate keys on registration
-  - [ ] Store wrapped private key and salt
-  - [ ] Unwrap keys on login
-  - [ ] Store in sessionStorage
-- [ ] Child Create/Edit Forms
-  - [ ] Check if organization has encryption enabled
-  - [ ] If enabled: encrypt name field before submit
-  - [ ] Send name_encrypted, name_iv, name_tag to server
-  - [ ] If disabled: send plaintext name
-- [ ] Child Display/List
-  - [ ] Check if organization has encryption enabled
-  - [ ] If enabled: decrypt name_encrypted on page load
-  - [ ] Display decrypted name in UI
-  - [ ] If disabled: display plaintext name
+#### Children Forms ✅
+- [x] Include orgEncryption.js script
+- [x] Registration/Login
+  - [x] Generate keys on registration
+  - [x] Store wrapped private key and salt
+  - [x] Unwrap keys on login
+  - [x] Store in sessionStorage
+- [x] Child Create/Edit Forms
+  - [x] Check if organization has encryption enabled
+  - [x] If enabled: encrypt name field before submit
+  - [x] Send name_encrypted, name_iv, name_tag to server
+  - [x] If disabled: send plaintext name
+- [x] Child Display/List
+  - [x] Check if organization has encryption enabled
+  - [x] If enabled: decrypt name_encrypted on page load
+  - [x] Display decrypted name in UI
+  - [x] If disabled: display plaintext name
 
-#### User Management
+#### User Management 🔄
 - [ ] When adding user to organization
-  - [ ] Wrap DEK with new user's public key
-  - [ ] Call wrap-dek API endpoint
+  - [x] Wrap DEK API endpoint available
+  - [ ] UI integration pending
 - [ ] When removing user from organization
-  - [ ] Call revoke-dek API endpoint
-  - [ ] Optional: Trigger DEK rotation
+  - [x] Revoke DEK API endpoint available
+  - [ ] UI integration pending
 
-#### Visual Indicators
-- [ ] Encryption status badge in organization list
-- [ ] Lock icon for encrypted organizations
-- [ ] Tooltip explaining encryption status
+#### Visual Indicators ✅
+- [x] Encryption status badge in organization list
+- [x] Lock icon for encrypted organizations (🔒/🔓)
+- [x] Tooltip explaining encryption status
 
 ### Additional Testing 🔄
 **Priority: LOW** - Nice to have
 
-- [ ] End-to-end tests with Playwright
-  - [ ] Registration with key generation
-  - [ ] Login and key unwrapping
-  - [ ] Child creation with encryption
-  - [ ] Multi-user access to same data
+- [x] End-to-end tests with Playwright  
+  - [x] Registration with key generation (tests/e2e/encryption-complete-flow.spec.ts)
+  - [x] Child creation with encryption
+  - [x] Encrypted names decryption in UI
+  - [ ] Multi-user access to same data (needs refinement)
+  - [x] Report generation with encrypted data
 - [ ] Browser compatibility tests
   - [ ] Chrome/Edge
   - [ ] Firefox
