@@ -615,7 +615,12 @@ $currentLangShort = substr($currentLang, 0, 2);
         console.log('✅ OrgEncryption module loaded');
         
         <?php $encryptionData = $this->request->getSession()->read('encryption'); ?>
-        const encryptionData = <?= json_encode($encryptionData ?: null) ?>;
+        const encryptionData = {
+            encrypted_private_key: <?= json_encode($encryptionData['encrypted_private_key'] ?? null) ?>,
+            key_salt: <?= json_encode($encryptionData['key_salt'] ?? null) ?>,
+            key_iv: <?= json_encode($encryptionData['key_iv'] ?? null) ?>,
+            wrapped_deks: <?= json_encode($encryptionData['wrapped_deks'] ?? []) ?>
+        };
         
         console.log('🔐 encryptionData present:', !!encryptionData);
         console.log('🔐 has private key:', !!(encryptionData && encryptionData.encrypted_private_key));
@@ -665,7 +670,8 @@ $currentLangShort = substr($currentLang, 0, 2);
             const privateKey = await window.OrgEncryption.unwrapPrivateKeyWithPassword(
                 encryptionData.encrypted_private_key,
                 password,
-                encryptionData.key_salt
+                encryptionData.key_salt,
+                encryptionData.key_iv  // Pass IV for proper unwrapping!
             );
             
             // Unwrap DEKs for each organization

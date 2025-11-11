@@ -184,6 +184,17 @@ document.addEventListener('DOMContentLoaded', async function() {
             encryptedPrivateKeyField.value = result.wrappedKey;
             keySaltField.value = result.salt;
             
+            // Add IV field (CRITICAL for unwrapping!)
+            let ivField = document.getElementById('key-iv-field');
+            if (!ivField) {
+                ivField = document.createElement('input');
+                ivField.type = 'hidden';
+                ivField.name = 'key_iv';
+                ivField.id = 'key-iv-field';
+                form.appendChild(ivField);
+            }
+            ivField.value = result.iv;
+            
             // Add DEK field if it doesn't exist
             let dekField = document.getElementById('wrapped-dek-field');
             if (!dekField) {

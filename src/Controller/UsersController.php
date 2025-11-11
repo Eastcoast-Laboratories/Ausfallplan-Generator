@@ -289,7 +289,7 @@ class UsersController extends AppController
             
             // Load encryption keys and wrapped DEKs for client-side decryption
             $user = $this->Users->get($identity->id, [
-                'fields' => ['id', 'encrypted_private_key', 'key_salt']
+                'fields' => ['id', 'encrypted_private_key', 'key_salt', 'key_iv']
             ]);
             
             if ($user->encrypted_private_key && $user->key_salt) {
@@ -305,6 +305,7 @@ class UsersController extends AppController
                 $this->request->getSession()->write('encryption', [
                     'encrypted_private_key' => $user->encrypted_private_key,
                     'key_salt' => $user->key_salt,
+                    'key_iv' => $user->key_iv, // CRITICAL for unwrapping!
                     'wrapped_deks' => array_map(function($dek) {
                         return [
                             'organization_id' => $dek->organization_id,
