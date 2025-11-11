@@ -179,17 +179,18 @@ class EncryptedDeksTableTest extends TestCase
      */
     public function testUniqueConstraint(): void
     {
-        // Try to create duplicate
+        // Fixture already has org_id=1, user_id=1
+        // Try to create duplicate - should throw exception
+        $this->expectException(\Cake\Database\Exception\QueryException::class);
+        $this->expectExceptionMessageMatches('/Duplicate entry.*organization_id/');
+        
         $entity1 = $this->EncryptedDeks->newEntity([
             'organization_id' => 1,
             'user_id' => 1,
             'wrapped_dek' => 'duplicate_dek',
         ]);
         
-        $result = $this->EncryptedDeks->save($entity1);
-        
-        // Should fail due to unique constraint
-        $this->assertFalse($result);
+        $this->EncryptedDeks->saveOrFail($entity1);
     }
 
     /**
