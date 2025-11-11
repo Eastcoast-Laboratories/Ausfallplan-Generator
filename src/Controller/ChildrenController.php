@@ -260,7 +260,19 @@ class ChildrenController extends AppController
             ->orderBy(['created' => 'DESC'])
             ->all();
         
-        $this->set(compact('child', 'siblingGroups', 'schedules', 'selectedOrgId', 'userOrgs'));
+        // Check if selected organization has encryption enabled
+        $encryptionEnabled = false;
+        if ($selectedOrgId) {
+            $organizationsTable = $this->fetchTable('Organizations');
+            try {
+                $organization = $organizationsTable->get($selectedOrgId);
+                $encryptionEnabled = (bool)$organization->encryption_enabled;
+            } catch (\Exception $e) {
+                // Organization not found, encryption disabled
+            }
+        }
+        
+        $this->set(compact('child', 'siblingGroups', 'schedules', 'selectedOrgId', 'userOrgs', 'encryptionEnabled'));
     }
 
     /**
