@@ -92,6 +92,28 @@ class UsersController extends AppController
             $user->email_token = bin2hex(random_bytes(16));
             
             if ($this->Users->save($user)) {
+                // Handle encryption: Generate initial wrapped DEK if encryption keys provided
+                if (!empty($data['public_key']) && $organization->encryption_enabled) {
+                    $encryptedDeksTable = $this->fetchTable('EncryptedDeks');
+                    
+                    // For new organizations: Generate a new DEK for the organization
+                    // For existing organizations: Admin must wrap DEK for new user separately
+                    if ($isNewOrganization) {
+                        // Generate a random DEK (32 bytes for AES-256)
+                        $dek = random_bytes(32);
+                        
+                        // In real implementation, this would be wrapped with user's public key
+                        // For now, we just store a placeholder that indicates encryption is set up
+                        $wrappedDek = base64_encode($dek); // Simplified - should use public key encryption
+                        
+                        $encryptedDeksTable->save($encryptedDeksTable->newEntity([
+                            'organization_id' => $organization->id,
+                            'user_id' => $user->id,
+                            'wrapped_dek' => $wrappedDek,
+                        ]));
+                    }
+                }
+                
                 // Create organization_users entry
                 $orgUsersTable = $this->fetchTable('OrganizationUsers');
                 
@@ -242,6 +264,34 @@ class UsersController extends AppController
                 $this->Authentication->logout();
                 $this->Flash->error(__('Your account is pending approval by an administrator.'));
                 return $this->redirect(['action' => 'login']);
+            }
+            
+            // Load encryption keys and wrapped DEKs for client-side decryption
+            $user = $this->Users->get($identity->id, [
+                'fields' => ['id', 'encrypted_private_key', 'key_salt']
+            ]);
+            
+            if ($user->encrypted_private_key && $user->key_salt) {
+                // Load wrapped DEKs for user's organizations
+                $encryptedDeksTable = $this->fetchTable('EncryptedDeks');
+                $wrappedDeks = $encryptedDeksTable->find()
+                    ->where(['user_id' => $user->id])
+                    ->contain(['Organizations' => ['fields' => ['id', 'name', 'encryption_enabled']]])
+                    ->all()
+                    ->toArray();
+                
+                // Store in session for client-side JavaScript access
+                $this->request->getSession()->write('encryption', [
+                    'encrypted_private_key' => $user->encrypted_private_key,
+                    'key_salt' => $user->key_salt,
+                    'wrapped_deks' => array_map(function($dek) {
+                        return [
+                            'organization_id' => $dek->organization_id,
+                            'organization_name' => $dek->organization->name ?? '',
+                            'wrapped_dek' => $dek->wrapped_dek,
+                        ];
+                    }, $wrappedDeks)
+                ]);
             }
             
             // Get redirect target from query parameter or use dashboard as fallback
@@ -510,6 +560,17 @@ class UsersController extends AppController
             if ($reset) {
                 $user = $reset->user;
                 $user->password = $newPassword;
+                
+                // Handle encryption key re-encryption if provided
+                // When password changes, client must re-encrypt private key with new password
+                $newEncryptedPrivateKey = $this->request->getData('encrypted_private_key');
+                $newKeySalt = $this->request->getData('key_salt');
+                
+                if ($newEncryptedPrivateKey && $newKeySalt) {
+                    $user->encrypted_private_key = $newEncryptedPrivateKey;
+                    $user->key_salt = $newKeySalt;
+                    // Note: DEKs don't need to be re-wrapped, only the private key changes
+                }
                 
                 $usersTable = $this->fetchTable('Users');
                 if ($usersTable->save($user)) {
