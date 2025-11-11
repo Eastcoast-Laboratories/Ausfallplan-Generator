@@ -64,6 +64,10 @@ class UsersController extends AppController
                         $this->set(compact('user', 'organizationsList'));
                         return;
                     }
+                    
+                    // Reload organization to get default values from DB (like encryption_enabled)
+                    $organization = $organizationsTable->get($organization->id);
+                    
                     $isNewOrganization = true;
                 } else {
                     // Organization with this name already exists
@@ -107,6 +111,7 @@ class UsersController extends AppController
                 
                 error_log("DEBUG Registration - hasPublicKey: " . ($hasPublicKey ? 'YES' : 'NO'));
                 error_log("DEBUG Registration - hasWrappedDek: " . ($hasWrappedDek ? 'YES' : 'NO'));  
+                error_log("DEBUG Registration - encryptionEnabled RAW: " . var_export($organization->encryption_enabled, true));
                 error_log("DEBUG Registration - encryptionEnabled: " . ($encryptionEnabled ? 'YES' : 'NO'));
                 error_log("DEBUG Registration - organization_id: " . $organization->id);
                 error_log("DEBUG Registration - user_id: " . $user->id);
