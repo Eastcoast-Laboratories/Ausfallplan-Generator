@@ -34,8 +34,13 @@
                     <th class="actions"><?= __('Actions') ?></th>
                 </tr>
                 <?php foreach ($siblingGroup->children as $child) : ?>
-                <tr>
-                    <td><?= h($child->name) ?></td>
+                <tr data-org-id="<?= $child->organization_id ?>">
+                    <td>
+                        <span class="child-name"
+                            data-encrypted="<?= h($child->name_encrypted ?? '') ?>"
+                            data-iv="<?= h($child->name_iv ?? '') ?>"
+                            data-tag="<?= h($child->name_tag ?? '') ?>"><?= h($child->name) ?></span>
+                    </td>
                     <td><?= $child->is_active ? __('Active') : __('Inactive') ?></td>
                     <td><?= $child->is_integrative ? __('Yes') : __('No') ?></td>
                     <td><?= h($child->created) ?></td>
