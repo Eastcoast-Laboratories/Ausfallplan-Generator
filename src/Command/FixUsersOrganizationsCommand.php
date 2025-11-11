@@ -167,6 +167,7 @@ class FixUsersOrganizationsCommand extends Command
         $io->out('Next steps:');
         $io->out('1. Clear cache: bin/cake cache clear_all');
         $io->out('2. Test login and child creation');
+        // eval 'docker compose -f docker/docker-compose.yml exec -T app bin/cake cache clear_all'
 
         return self::CODE_SUCCESS;
     }
