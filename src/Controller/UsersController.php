@@ -91,17 +91,10 @@ class UsersController extends AppController
             $user = $this->Users->patchEntity($user, $data);
             
             // Set initial status and email verification
-            // For new organization creators (org_admins), auto-verify and activate
-            if ($isNewOrganization) {
-                $user->status = 'active';
-                $user->email_verified = true;
-                $user->email_token = null; // No verification needed
-            } else {
-                // For joining existing organizations, require verification
-                $user->status = 'pending';
-                $user->email_verified = false;
-                $user->email_token = bin2hex(random_bytes(16));
-            }
+            // All users require email verification
+            $user->status = 'pending';
+            $user->email_verified = false;
+            $user->email_token = bin2hex(random_bytes(16));
             
             if ($this->Users->save($user)) {
                 // Handle encryption: Save wrapped DEK if provided (generated client-side)
@@ -150,29 +143,26 @@ class UsersController extends AppController
                 ]);
                 $orgUsersTable->save($orgUser);
                 
-                // Send verification email only if user needs to verify (joining existing org)
-                // New organization creators are auto-verified and don't need email
-                if ($user->email_token) {
-                    $verifyUrl = \Cake\Routing\Router::url([
-                        'controller' => 'Users',
-                        'action' => 'verify',
-                        $user->email_token
-                    ], true);
-                    
-                    \App\Service\EmailDebugService::send([
-                        'to' => $user->email,
-                        'subject' => 'Verify your email address',
-                        'body' => "Hello,\n\nPlease verify your email address by clicking the link below:\n\n{$verifyUrl}\n\nIf you did not register, please ignore this email.",
-                        'links' => [
-                            'Verify Email' => $verifyUrl
-                        ],
-                        'data' => [
-                            'user_id' => $user->id,
-                            'email' => $user->email,
-                            'token' => $user->email_token
-                        ]
-                    ]);
-                }
+                // Send verification email to ALL users
+                $verifyUrl = \Cake\Routing\Router::url([
+                    'controller' => 'Users',
+                    'action' => 'verify',
+                    $user->email_token
+                ], true);
+                
+                \App\Service\EmailDebugService::send([
+                    'to' => $user->email,
+                    'subject' => 'Verify your email address',
+                    'body' => "Hello,\n\nPlease verify your email address by clicking the link below:\n\n{$verifyUrl}\n\nIf you did not register, please ignore this email.",
+                    'links' => [
+                        'Verify Email' => $verifyUrl
+                    ],
+                    'data' => [
+                        'user_id' => $user->id,
+                        'email' => $user->email,
+                        'token' => $user->email_token
+                    ]
+                ]);
                 
                 // If joining existing organization, notify org-admins
                 if (!$isNewOrganization && $organization->name !== 'keine organisation') {
@@ -181,16 +171,10 @@ class UsersController extends AppController
                 
                 $debugLink = \Cake\Routing\Router::url(['controller' => 'Debug', 'action' => 'emails'], true);
                 
-                if ($isNewOrganization) {
-                    // New org creators are auto-verified, no email needed
-                    $message = __('Registration successful! You are the admin of your new organization and can start using the system immediately.');
-                    $this->Flash->success($message, ['escape' => false]);
-                } else {
-                    // Joining existing org requires verification
-                    $message = __('Registration successful! Please check your email to verify your account before you can access the organization.');
-                    $message .= "\n\n" . __('View all emails at: <a href="{0}" target="_blank">Debug Email Viewer</a>', [$debugLink]);
-                    $this->Flash->success($message, ['escape' => false]);
-                }
+                // All users need to verify their email
+                $message = __('Registration successful! Please check your email to verify your account.');
+                $message .= "\n\n" . __('View all emails at: <a href="{0}" target="_blank">Debug Email Viewer</a>', [$debugLink]);
+                $this->Flash->success($message, ['escape' => false]);
                 return $this->redirect(['action' => 'login']);
             }
             $this->Flash->error(__('Registration failed. Please try again.'));
