@@ -448,5 +448,12 @@ return [
     'Enterprise Subscription Inquiry' => 'Enterprise-Abonnement Anfrage',
     // NOTE: a space before \r\n does not work !!!!
     "Hello,\r\nI am interested in an Enterprise subscription for FairnestPlan.\r\nOrganization:\r\nNumber of users:\r\nNumber of children:\r\nPlease provide me with more information about pricing and features.\r\nBest regards" => "Hallo,\r\nich interessiere mich für ein Enterprise-Abonnement für FairnestPlan.\r\nOrganisation:\r\nAnzahl der Benutzer:\r\nAnzahl der Kinder:\r\nBitte geben Sie mir mehr Informationen über die Preise und Funktionen.\r\nBeste Grüße",
-    'Our Enterprise plan offers custom-tailored solutions for your organization. We develop individually adapted features, provide dedicated support, and ensure seamless integration with your existing systems. Contact us to discuss your specific requirements and receive a personalized quote.' => 'Unser Enterprise-Plan bietet maßgeschneiderte Lösungen für Ihre Organisation. Wir entwickeln individuell angepasste Funktionen, bieten dedizierten Support und gewährleisten eine nahtlose Integration in Ihre bestehenden Systeme. Kontaktieren Sie uns, um Ihre spezifischen Anforderungen zu besprechen und ein personalisiertes Angebot zu erhalten.'
+    'Our Enterprise plan offers custom-tailored solutions for your organization. We develop individually adapted features, provide dedicated support, and ensure seamless integration with your existing systems. Contact us to discuss your specific requirements and receive a personalized quote.' => 'Unser Enterprise-Plan bietet maßgeschneiderte Lösungen für Ihre Organisation. Wir entwickeln individuell angepasste Funktionen, bieten dedizierten Support und gewährleisten eine nahtlose Integration in Ihre bestehenden Systeme. Kontaktieren Sie uns, um Ihre spezifischen Anforderungen zu besprechen und ein personalisiertes Angebot zu erhalten.',
+    
+    // Encryption
+    'Encryption Warning' => 'Verschlüsselungswarnung',
+    'No encryption key available for this organization. Data will be stored unencrypted.' => 'Kein Verschlüsselungsschlüssel für diese Organisation verfügbar. Daten werden unverschlüsselt gespeichert.',
+    'Please log out and log in again to load encryption keys.' => 'Bitte melden Sie sich ab und wieder an, um die Verschlüsselungsschlüssel zu laden.',
+    'Encrypting...' => 'Verschlüssele...',
+    'Error encrypting data. Proceeding with plaintext.' => 'Fehler beim Verschlüsseln der Daten. Fahre mit Klartext fort.'
 ];

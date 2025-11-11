@@ -453,13 +453,16 @@ class WaitlistController extends AppController
         
         $allChildren = $allChildrenQuery->all();
         
-        // Get children already assigned to this schedule (with or without waitlist_order)
-        $existingOnSchedule = $childrenTable->find()
-            ->where(['schedule_id' => $scheduleId])
+        // Get children already ON THE WAITLIST for this schedule (with waitlist_order set)
+        $existingOnWaitlist = $childrenTable->find()
+            ->where([
+                'schedule_id' => $scheduleId,
+                'waitlist_order IS NOT' => null
+            ])
             ->all();
         
         $existingChildIds = [];
-        foreach ($existingOnSchedule as $child) {
+        foreach ($existingOnWaitlist as $child) {
             $existingChildIds[] = (int)$child->id;
         }
         
