@@ -50,6 +50,89 @@ $this->assign('title', __('Add Child'));
             ]);
         ?>
     </fieldset>
-    <?= $this->Form->button(__('Submit')) ?>
+    
+    <!-- Hidden fields for encrypted name data -->
+    <?= $this->Form->hidden('name_encrypted', ['id' => 'name-encrypted-field']) ?>
+    <?= $this->Form->hidden('name_iv', ['id' => 'name-iv-field']) ?>
+    <?= $this->Form->hidden('name_tag', ['id' => 'name-tag-field']) ?>
+    
+    <?= $this->Form->button(__('Submit'), ['id' => 'submit-button']) ?>
     <?= $this->Form->end() ?>
 </div>
+
+<?= $this->Html->script('crypto/orgEncryption', ['block' => true]) ?>
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+    const form = document.querySelector('.children.form form');
+    const submitButton = document.getElementById('submit-button');
+    const nameField = document.querySelector('input[name="name"]');
+    const nameEncryptedField = document.getElementById('name-encrypted-field');
+    const nameIvField = document.getElementById('name-iv-field');
+    const nameTagField = document.getElementById('name-tag-field');
+    
+    if (!form || !window.OrgEncryption) {
+        console.log('Encryption module not available or form not found');
+        return;
+    }
+    
+    // Intercept form submission to encrypt name if needed
+    form.addEventListener('submit', async function(e) {
+        // Only encrypt if fields are empty (first submission)
+        if (nameEncryptedField.value) {
+            return; // Already encrypted, proceed with submission
+        }
+        
+        e.preventDefault();
+        
+        const name = nameField.value.trim();
+        if (!name) {
+            alert('<?= __('Please enter a name') ?>');
+            return;
+        }
+        
+        // Check if organization has encryption enabled
+        const selectedOrgId = <?= json_encode($selectedOrgId ?? 0) ?>;
+        
+        if (!selectedOrgId) {
+            console.log('No organization selected, proceeding without encryption');
+            form.submit();
+            return;
+        }
+        
+        // Try to get DEK from session storage
+        const dek = window.OrgEncryption.getDEK(selectedOrgId);
+        
+        if (!dek) {
+            console.log('No DEK available for organization, proceeding without encryption');
+            form.submit();
+            return;
+        }
+        
+        // Disable button and show loading state
+        submitButton.disabled = true;
+        const originalText = submitButton.textContent;
+        submitButton.textContent = '<?= __('Encrypting...') ?>';
+        
+        try {
+            console.log('Encrypting name field...');
+            const encrypted = await window.OrgEncryption.encryptField(name, dek);
+            
+            // Set encrypted values
+            nameEncryptedField.value = encrypted.ciphertext;
+            nameIvField.value = encrypted.iv;
+            nameTagField.value = encrypted.tag;
+            
+            console.log('Name encrypted successfully, submitting form...');
+            
+            // Submit form
+            form.submit();
+        } catch (error) {
+            console.error('Encryption error:', error);
+            alert('<?= __('Error encrypting data. Proceeding with plaintext.') ?>');
+            submitButton.disabled = false;
+            submitButton.textContent = originalText;
+            form.submit(); // Submit without encryption as fallback
+        }
+    });
+});
+</script>

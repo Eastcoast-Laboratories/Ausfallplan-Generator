@@ -53,9 +53,12 @@ $this->assign('title', __('Children'));
             </thead>
             <tbody>
                 <?php foreach ($children as $child): ?>
-                <tr>
+                <tr data-child-id="<?= $child->id ?>" data-org-id="<?= $child->organization_id ?>">
                     <td>
-                        <?= h($child->name) ?>
+                        <span class="child-name" 
+                              data-encrypted="<?= h($child->name_encrypted ?? '') ?>"
+                              data-iv="<?= h($child->name_iv ?? '') ?>"
+                              data-tag="<?= h($child->name_tag ?? '') ?>"><?= h($child->name) ?></span>
                         <?php if ($child->sibling_group_id && isset($siblingNames[$child->id])): ?>
                             <?= $this->Html->link(
                                 '👨‍👩‍👧',
@@ -69,7 +72,7 @@ $this->assign('title', __('Children'));
                         <?php endif; ?>
                     </td>
                     <td><?= h($child->last_name) ?></td>
-                    <td><strong><?= h($child->display_name ?? ($child->name . ' ' . $child->last_name)) ?></strong></td>
+                    <td><strong><span class="child-display-name"><?= h($child->display_name ?? ($child->name . ' ' . $child->last_name)) ?></span></strong></td>
                     <?php if (!$selectedOrgId && $canSelectOrganization): ?>
                     <td><?= h($organizations[$child->organization_id] ?? '-') ?></td>
                     <?php endif; ?>
@@ -194,6 +197,71 @@ document.addEventListener('DOMContentLoaded', function() {
     if (successMessage && newChildButton) {
         // Focus the button so user can press Enter to add another child
         newChildButton.focus();
+    }
+});
+</script>
+
+<?= $this->Html->script('crypto/orgEncryption', ['block' => true]) ?>
+<script>
+// Decrypt encrypted child names on page load
+document.addEventListener('DOMContentLoaded', async function() {
+    if (!window.OrgEncryption) {
+        console.log('Encryption module not available');
+        return;
+    }
+    
+    const nameElements = document.querySelectorAll('.child-name[data-encrypted]');
+    
+    for (const element of nameElements) {
+        const encrypted = element.dataset.encrypted;
+        const iv = element.dataset.iv;
+        const tag = element.dataset.tag;
+        
+        // Skip if no encrypted data
+        if (!encrypted || !iv || !tag) {
+            continue;
+        }
+        
+        // Get organization ID from row
+        const row = element.closest('tr');
+        const orgId = row ? row.dataset.orgId : null;
+        
+        if (!orgId) {
+            console.log('No organization ID found for child');
+            continue;
+        }
+        
+        // Try to get DEK from session storage
+        const dek = window.OrgEncryption.getDEK(orgId);
+        
+        if (!dek) {
+            console.log(`No DEK available for organization ${orgId}`);
+            continue;
+        }
+        
+        try {
+            // Decrypt name
+            const decrypted = await window.OrgEncryption.decryptField({
+                ciphertext: encrypted,
+                iv: iv,
+                tag: tag
+            }, dek);
+            
+            // Update display
+            element.textContent = decrypted;
+            
+            // Also update display name if needed
+            const displayNameElement = row.querySelector('.child-display-name');
+            if (displayNameElement && displayNameElement.textContent.includes('encrypted:')) {
+                const lastName = row.querySelector('td:nth-child(2)').textContent.trim();
+                displayNameElement.textContent = decrypted + (lastName ? ' ' + lastName : '');
+            }
+            
+            console.log(`Decrypted name for child in org ${orgId}`);
+        } catch (error) {
+            console.error('Error decrypting child name:', error);
+            // Leave encrypted/placeholder value visible
+        }
     }
 });
 </script>
