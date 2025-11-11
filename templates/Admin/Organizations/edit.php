@@ -16,6 +16,11 @@ $this->assign('title', __('Edit Organization'));
             <fieldset>
                 <?= $this->Form->control('name', ['required' => true]) ?>
                 <?= $this->Form->control('is_active', ['type' => 'checkbox', 'label' => __('Aktiv')]) ?>
+                <?= $this->Form->control('encryption_enabled', [
+                    'type' => 'checkbox',
+                    'label' => __('Client-Side Encryption aktiviert'),
+                    'help' => __('Wenn deaktiviert, werden verschlüsselte Kindernamen automatisch entschlüsselt und als Klartext in der Datenbank gespeichert.')
+                ]) ?>
                 <?= $this->Form->control('contact_email', ['type' => 'email', 'label' => __('Kontakt E-Mail')]) ?>
                 <?= $this->Form->control('contact_phone', ['label' => __('Telefon')]) ?>
             </fieldset>

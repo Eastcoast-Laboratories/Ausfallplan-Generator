@@ -69,8 +69,8 @@ $this->assign('title', __('Profile Settings'));
             </div>
         </div>
 
-        <div class="form-section">
-            <h2><?= __('Encryption & Security') ?> 🔐</h2>
+        <div class="form-section" style="display: none;">
+            <h2><?= __('Encryption & Security (OLD - HIDDEN)') ?> 🔐</h2>
             
             <div class="form-row">
                 <div class="form-info">
@@ -245,16 +245,145 @@ $this->assign('title', __('Profile Settings'));
             <?= $this->Html->link(__('Cancel'), ['controller' => 'Dashboard', 'action' => 'index'], ['class' => 'btn-secondary']) ?>
         </div>
         <?= $this->Form->end() ?>
+        
+        <!-- Encryption & Security Section (Collapsible) -->
+        <?php
+        $hasPublicKey = !empty($userEntity->public_key) && strlen($userEntity->public_key) > 100;
+        $hasPrivateKey = !empty($userEntity->encrypted_private_key) && strlen($userEntity->encrypted_private_key) > 100;
+        $hasSalt = !empty($userEntity->key_salt) && strlen($userEntity->key_salt) > 10;
+        $hasFullEncryption = $hasPublicKey && $hasPrivateKey && $hasSalt;
+        $hasError = false; // Will be set by JavaScript
+        ?>
+        
+        <div class="encryption-section" id="encryption-section">
+            <div class="encryption-header" id="encryption-header" style="cursor: pointer;">
+                <h2><?= __('Encryption & Security') ?> 🔐</h2>
+                <button type="button" class="toggle-btn" id="encryption-toggle-btn">
+                    <span id="toggle-text"><?= __('Show Details') ?></span>
+                    <span id="toggle-icon">▼</span>
+                </button>
+            </div>
+            
+            <div class="encryption-content" id="encryption-content" style="display: none;">
+                <?php if ($hasFullEncryption): ?>
+                    <div class="encryption-status enabled" id="encryption-status-container">
+                        <span class="status-icon">✅</span>
+                        <span class="status-text"><?= __('Encryption Enabled') ?></span>
+                    </div>
+                    
+                    <div id="encryption-error-warning" style="display: none; margin-top: 15px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px; color: #856404;">
+                        <strong>⚠️ <?= __('Encryption Key Error') ?></strong><br>
+                        <span id="encryption-error-message"></span><br>
+                        <small><?= __('Your encryption keys may be corrupted or incompatible. Please regenerate your encryption keys.') ?></small>
+                        
+                        <div style="margin-top: 15px;">
+                            <div class="password-input-group" style="margin-bottom: 10px;">
+                                <label for="reenter-password-input"><?= __('Re-enter Password') ?>:</label>
+                                <input type="password" id="reenter-password-input" class="form-input" placeholder="<?= __('Your password') ?>" style="margin-top: 5px;">
+                            </div>
+                            <button type="button" id="re-enter-password-btn" class="button-secondary" style="margin-right: 10px;">
+                                🔑 <?= __('Unlock Keys') ?>
+                            </button>
+                            <button type="button" id="regenerate-keys-error-btn" class="button-danger">
+                                🔄 <?= __('Regenerate Keys') ?>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="encryption-info" style="margin-top: 15px;">
+                        <p>
+                            <?= __('Your sensitive data is encrypted using client-side encryption. Your encryption keys were generated on {0}.', [
+                                $userEntity->created ? $userEntity->created->format('d.m.Y') : __('registration')
+                            ]) ?>
+                        </p>
+                        
+                        <div class="encryption-details" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;">
+                            <strong><?= __('Technical Info:') ?></strong><br>
+                            • <?= __('Public Key Length:') ?> <?= strlen($userEntity->public_key) ?> <?= __('chars') ?><br>
+                            • <?= __('Encrypted Private Key Length:') ?> <?= strlen($userEntity->encrypted_private_key) ?> <?= __('chars') ?><br>
+                            • <?= __('Key Salt Length:') ?> <?= strlen($userEntity->key_salt) ?> <?= __('chars') ?><br>
+                            • <?= __('Encryption: RSA-OAEP-2048 + AES-GCM-256') ?>
+                        </div>
+                        
+                        <div style="margin-top: 15px;">
+                            <div class="password-input-group" style="margin-bottom: 10px;">
+                                <label for="regenerate-password-input"><?= __('Password') ?>:</label>
+                                <input type="password" id="regenerate-password-input" class="form-input" placeholder="<?= __('Enter password to regenerate keys') ?>" style="margin-top: 5px;">
+                            </div>
+                            <button type="button" id="regenerate-keys-enabled-btn" class="button-secondary">
+                                🔄 <?= __('Regenerate Encryption Keys') ?>
+                            </button>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <div class="encryption-status disabled">
+                        <span class="status-icon">⚠️</span>
+                        <span class="status-text"><?= __('Encryption Not Set Up') ?></span>
+                    </div>
+                    
+                    <p style="margin-top: 10px;">
+                        <?= __('Your account does not have encryption keys configured. Set up encryption to protect your sensitive data.') ?>
+                    </p>
+                    
+                    <?php if (!$hasPublicKey && !$hasPrivateKey && !$hasSalt): ?>
+                        <small style="display: block; margin-top: 5px; color: #999;">
+                            <?= __('Status: No encryption keys found in database.') ?>
+                        </small>
+                    <?php else: ?>
+                        <small style="display: block; margin-top: 5px; color: #d9534f;">
+                            <?= __('Warning: Partial encryption data detected. Keys may be corrupted.') ?><br>
+                            • <?= __('Public Key:') ?> <?= $hasPublicKey ? '✓' : '✗' ?><br>
+                            • <?= __('Private Key:') ?> <?= $hasPrivateKey ? '✓' : '✗' ?><br>
+                            • <?= __('Salt:') ?> <?= $hasSalt ? '✓' : '✗' ?>
+                        </small>
+                    <?php endif; ?>
+                    
+                    <div style="margin-top: 15px;">
+                        <div class="password-input-group" style="margin-bottom: 10px;">
+                            <label for="setup-password-input"><?= __('Password') ?>:</label>
+                            <input type="password" id="setup-password-input" class="form-input" placeholder="<?= __('Enter password to setup encryption') ?>" style="margin-top: 5px;">
+                        </div>
+                        <button type="button" id="setup-encryption-btn" class="button-primary">
+                            <?= $hasPublicKey || $hasPrivateKey || $hasSalt ? __('Regenerate Encryption Keys') : __('Set Up Encryption Now') ?> 🔒
+                        </button>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
 
     <!-- Encryption Setup Script -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Toggle functionality
+        const encryptionHeader = document.getElementById('encryption-header');
+        const encryptionContent = document.getElementById('encryption-content');
+        const toggleBtn = document.getElementById('encryption-toggle-btn');
+        const toggleText = document.getElementById('toggle-text');
+        const toggleIcon = document.getElementById('toggle-icon');
+        
+        let isExpanded = false;
+        
+        function toggleEncryption() {
+            isExpanded = !isExpanded;
+            encryptionContent.style.display = isExpanded ? 'block' : 'none';
+            toggleText.textContent = isExpanded ? '<?= __('Hide Details') ?>' : '<?= __('Show Details') ?>';
+            toggleIcon.textContent = isExpanded ? '▲' : '▼';
+        }
+        
+        if (encryptionHeader && toggleBtn) {
+            encryptionHeader.addEventListener('click', toggleEncryption);
+            toggleBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                toggleEncryption();
+            });
+        }
+        
         // Check for encryption errors from sessionStorage
         const encryptionError = sessionStorage.getItem('encryption_error');
-        // Also check if password was not found during login
         const passwordMissing = !sessionStorage.getItem('_temp_login_password');
         
+        // Auto-expand if there's an error
         if (encryptionError || passwordMissing) {
             const warningDiv = document.getElementById('encryption-error-warning');
             const messageSpan = document.getElementById('encryption-error-message');
@@ -275,20 +404,27 @@ $this->assign('title', __('Profile Settings'));
                     statusContainer.querySelector('.status-icon').textContent = '⚠️';
                     statusContainer.style.borderLeft = '4px solid #ffc107';
                 }
+                
+                // Auto-expand when there's an error
+                if (!isExpanded) {
+                    toggleEncryption();
+                }
             }
         }
         
         const setupButton = document.getElementById('setup-encryption-btn');
+        const setupPasswordInput = document.getElementById('setup-password-input');
         
-        if (setupButton && window.OrgEncryption) {
+        if (setupButton && setupPasswordInput && window.OrgEncryption) {
             setupButton.addEventListener('click', async function() {
                 if (!confirm('<?= __('This will generate encryption keys for your account. You will need to enter your current password to encrypt your private key. Continue?') ?>')) {
                     return;
                 }
                 
-                const password = prompt('<?= __('Please enter your current password to set up encryption:') ?>');
+                const password = setupPasswordInput.value.trim();
                 if (!password) {
                     alert('<?= __('Password is required to set up encryption.') ?>');
+                    setupPasswordInput.focus();
                     return;
                 }
                 
@@ -343,10 +479,13 @@ $this->assign('title', __('Profile Settings'));
         
         // Re-enter Password Button
         const reEnterPasswordBtn = document.getElementById('re-enter-password-btn');
-        if (reEnterPasswordBtn) {
+        const reenterPasswordInput = document.getElementById('reenter-password-input');
+        if (reEnterPasswordBtn && reenterPasswordInput) {
             reEnterPasswordBtn.addEventListener('click', async function() {
-                const password = prompt('<?= __('Please re-enter your password to unlock encryption keys:') ?>');
+                const password = reenterPasswordInput.value.trim();
                 if (!password) {
+                    alert('<?= __('Password is required to regenerate encryption keys.') ?>');
+                    reenterPasswordInput.focus();
                     return;
                 }
                 
@@ -362,21 +501,22 @@ $this->assign('title', __('Profile Settings'));
         }
         
         // Regenerate Keys Button (when error)
-        const regenerateKeysBtn = document.getElementById('regenerate-keys-btn');
-        if (regenerateKeysBtn && window.OrgEncryption) {
-            regenerateKeysBtn.addEventListener('click', async function() {
+        const regenerateKeysErrorBtn = document.getElementById('regenerate-keys-error-btn');
+        if (regenerateKeysErrorBtn && reenterPasswordInput && window.OrgEncryption) {
+            regenerateKeysErrorBtn.addEventListener('click', async function() {
                 if (!confirm('<?= __('This will regenerate your encryption keys. All existing encrypted data will become inaccessible. Continue?') ?>')) {
                     return;
                 }
                 
-                const password = prompt('<?= __('Please enter your current password to regenerate encryption keys:') ?>');
+                const password = reenterPasswordInput.value.trim();
                 if (!password) {
                     alert('<?= __('Password is required to regenerate encryption keys.') ?>');
+                    reenterPasswordInput.focus();
                     return;
                 }
                 
-                regenerateKeysBtn.disabled = true;
-                regenerateKeysBtn.textContent = '<?= __('Generating keys...') ?>';
+                regenerateKeysErrorBtn.disabled = true;
+                regenerateKeysErrorBtn.textContent = '<?= __('Generating keys...') ?>';
                 
                 try {
                     console.log('Regenerating RSA key pair...');
@@ -416,29 +556,31 @@ $this->assign('title', __('Profile Settings'));
                         window.location.reload();
                     } else {
                         alert('<?= __('Error regenerating encryption keys:') ?> ' + (data.message || 'Unknown error'));
-                        regenerateKeysBtn.disabled = false;
-                        regenerateKeysBtn.textContent = '🔄 <?= __('Regenerate Keys') ?>';
+                        regenerateKeysErrorBtn.disabled = false;
+                        regenerateKeysErrorBtn.textContent = '🔄 <?= __('Regenerate Keys') ?>';
                     }
                 } catch (error) {
                     console.error('Key regeneration error:', error);
                     alert('<?= __('Error generating encryption keys. Please try again.') ?>');
-                    regenerateKeysBtn.disabled = false;
-                    regenerateKeysBtn.textContent = '🔄 <?= __('Regenerate Keys') ?>';
+                    regenerateKeysErrorBtn.disabled = false;
+                    regenerateKeysErrorBtn.textContent = '🔄 <?= __('Regenerate Keys') ?>';
                 }
             });
         }
         
         // Regenerate Keys Button (when encryption is enabled and working)
         const regenerateKeysEnabledBtn = document.getElementById('regenerate-keys-enabled-btn');
-        if (regenerateKeysEnabledBtn && window.OrgEncryption) {
+        const regeneratePasswordInput = document.getElementById('regenerate-password-input');
+        if (regenerateKeysEnabledBtn && regeneratePasswordInput && window.OrgEncryption) {
             regenerateKeysEnabledBtn.addEventListener('click', async function() {
                 if (!confirm('<?= __('⚠️ WARNING: This will regenerate your encryption keys. All existing encrypted data will become inaccessible and must be re-encrypted. This action cannot be undone. Continue?') ?>')) {
                     return;
                 }
                 
-                const password = prompt('<?= __('Please enter your current password to regenerate encryption keys:') ?>');
+                const password = regeneratePasswordInput.value.trim();
                 if (!password) {
                     alert('<?= __('Password is required to regenerate encryption keys.') ?>');
+                    regeneratePasswordInput.focus();
                     return;
                 }
                 
@@ -700,9 +842,136 @@ $this->assign('title', __('Profile Settings'));
         background: #c0392b;
     }
 
+    /* Encryption Section Styles */
+    .encryption-section {
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+    }
+
+    .encryption-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 0.5rem;
+    }
+
+    .encryption-header h2 {
+        margin: 0;
+        font-size: 1.3rem;
+        color: #2c3e50;
+    }
+
+    .toggle-btn {
+        background: transparent;
+        border: 1px solid #dee2e6;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: background 0.2s;
+    }
+
+    .toggle-btn:hover {
+        background: #e9ecef;
+    }
+
+    .encryption-content {
+        padding-top: 1rem;
+    }
+
+    .encryption-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        border-radius: 4px;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .encryption-status.enabled {
+        background: #d4edda;
+        color: #155724;
+        border-left: 4px solid #28a745;
+    }
+
+    .encryption-status.disabled {
+        background: #fff3cd;
+        color: #856404;
+        border-left: 4px solid #ffc107;
+    }
+
+    .password-input-group {
+        margin-bottom: 1rem;
+    }
+
+    .password-input-group label {
+        display: block;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .button-primary, .button-secondary, .button-danger {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: background 0.2s;
+        font-size: 1rem;
+    }
+
+    .button-primary {
+        background: #3498db;
+        color: white;
+    }
+
+    .button-primary:hover {
+        background: #2980b9;
+    }
+
+    .button-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    .button-secondary:hover {
+        background: #5a6268;
+    }
+
+    .button-danger {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .button-danger:hover {
+        background: #c0392b;
+    }
+
     @media (max-width: 600px) {
         .settings-content {
             padding: 1.5rem;
+        }
+
+        .encryption-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .toggle-btn {
+            width: 100%;
+            justify-content: center;
         }
 
         .form-actions {
