@@ -504,5 +504,8 @@ return [
     'Enter password to setup encryption' => 'Passwort eingeben um Verschlüsselung einzurichten',
     'Enter password to regenerate keys' => 'Passwort eingeben um Schlüssel neu zu generieren',
     'Unlock Keys' => 'Schlüssel entsperren',
-    'Your password' => 'Ihr Passwort'
+    'Your password' => 'Ihr Passwort',
+    '⚠️ WARNUNG: Verschlüsselung deaktivieren?' => '⚠️ WARNUNG: Verschlüsselung deaktivieren?',
+    'Alle verschlüsselten Kindernamen werden automatisch entschlüsselt und als Klartext in der Datenbank gespeichert. Dieser Vorgang kann nicht rückgängig gemacht werden.' => 'Alle verschlüsselten Kindernamen werden automatisch entschlüsselt und als Klartext in der Datenbank gespeichert. Dieser Vorgang kann nicht rückgängig gemacht werden.',
+    'Fortfahren?' => 'Fortfahren?'
 ];

@@ -306,7 +306,7 @@ $this->assign('title', __('Profile Settings'));
                         </div>
                         
                         <div style="margin-top: 15px;">
-                            <div class="password-input-group" style="margin-bottom: 10px;">
+                            <div class="password-input-group" id="regenerate-password-group" style="margin-bottom: 10px; display: none;">
                                 <label for="regenerate-password-input"><?= __('Password') ?>:</label>
                                 <input type="password" id="regenerate-password-input" class="form-input" placeholder="<?= __('Enter password to regenerate keys') ?>" style="margin-top: 5px;">
                             </div>
@@ -571,8 +571,17 @@ $this->assign('title', __('Profile Settings'));
         // Regenerate Keys Button (when encryption is enabled and working)
         const regenerateKeysEnabledBtn = document.getElementById('regenerate-keys-enabled-btn');
         const regeneratePasswordInput = document.getElementById('regenerate-password-input');
+        const regeneratePasswordGroup = document.getElementById('regenerate-password-group');
+        
         if (regenerateKeysEnabledBtn && regeneratePasswordInput && window.OrgEncryption) {
             regenerateKeysEnabledBtn.addEventListener('click', async function() {
+                // Show password field if hidden
+                if (regeneratePasswordGroup && regeneratePasswordGroup.style.display === 'none') {
+                    regeneratePasswordGroup.style.display = 'block';
+                    regeneratePasswordInput.focus();
+                    return;
+                }
+                
                 if (!confirm('<?= __('⚠️ WARNING: This will regenerate your encryption keys. All existing encrypted data will become inaccessible and must be re-encrypted. This action cannot be undone. Continue?') ?>')) {
                     return;
                 }

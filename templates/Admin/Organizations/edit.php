@@ -24,9 +24,94 @@ $this->assign('title', __('Edit Organization'));
                 <?= $this->Form->control('contact_email', ['type' => 'email', 'label' => __('Kontakt E-Mail')]) ?>
                 <?= $this->Form->control('contact_phone', ['label' => __('Telefon')]) ?>
             </fieldset>
-            <?= $this->Form->button(__('Speichern')) ?>
+            <?= $this->Form->button(__('Speichern'), ['id' => 'save-org-btn']) ?>
             <?= $this->Html->link(__('Abbrechen'), ['action' => 'view', $organization->id], ['class' => 'button']) ?>
             <?= $this->Form->end() ?>
+            
+            <script>
+            document.addEventListener('DOMContentLoaded', async function() {
+                const encryptionCheckbox = document.querySelector('input[name="encryption_enabled"]');
+                const form = document.querySelector('form');
+                const organizationId = <?= $organization->id ?>;
+                const originalEncryptionState = encryptionCheckbox ? encryptionCheckbox.checked : false;
+                
+                console.log('🔐 Org Edit: Original encryption_enabled from DB:', <?= json_encode($organization->encryption_enabled) ?>);
+                console.log('🔐 Org Edit: Checkbox checked state:', encryptionCheckbox ? encryptionCheckbox.checked : 'N/A');
+                
+                if (form && encryptionCheckbox) {
+                    form.addEventListener('submit', async function(e) {
+                        // Check if encryption was disabled
+                        if (originalEncryptionState && !encryptionCheckbox.checked) {
+                            e.preventDefault();
+                            
+                            if (!confirm('<?= __('⚠️ WARNUNG: Verschlüsselung deaktivieren?') ?>\n\n<?= __('Alle verschlüsselten Kindernamen werden automatisch entschlüsselt und als Klartext in der Datenbank gespeichert. Dieser Vorgang kann nicht rückgängig gemacht werden.') ?>\n\n<?= __('Fortfahren?') ?>')) {
+                                return;
+                            }
+                            
+                            // User confirmed - now decrypt all children names client-side
+                            try {
+                                console.log('🔓 Starting client-side decryption of children names...');
+                                
+                                // Check if OrgEncryption module is available
+                                if (!window.OrgEncryption) {
+                                    alert('Encryption module not loaded. Please reload the page.');
+                                    return;
+                                }
+                                
+                                // Get DEK for this organization
+                                const dek = await window.OrgEncryption.getDEK(organizationId);
+                                if (!dek) {
+                                    alert('No encryption key available. Cannot decrypt children names.');
+                                    return;
+                                }
+                                
+                                // Use children data from PHP
+                                const children = <?= json_encode($children) ?>;
+                                
+                                console.log(`🔓 Found ${children.length} children to decrypt`);
+                                
+                                const decryptedNames = {};
+                                let decryptCount = 0;
+                                
+                                for (const child of children) {
+                                    if (child.name_encrypted) {
+                                        try {
+                                            const decryptedName = await window.OrgEncryption.decryptData(child.name_encrypted, dek);
+                                            decryptedNames[child.id] = decryptedName;
+                                            decryptCount++;
+                                            console.log(`✅ Decrypted child ${child.id}: ${decryptedName}`);
+                                        } catch (err) {
+                                            console.error(`❌ Failed to decrypt child ${child.id}:`, err);
+                                            // Use existing name as fallback
+                                            decryptedNames[child.id] = child.name || 'Decryption failed';
+                                        }
+                                    }
+                                }
+                                
+                                console.log(`🔓 Successfully decrypted ${decryptCount} children names`);
+                                
+                                // Add decrypted names as hidden fields to form
+                                for (const [childId, decryptedName] of Object.entries(decryptedNames)) {
+                                    const hiddenField = document.createElement('input');
+                                    hiddenField.type = 'hidden';
+                                    hiddenField.name = `decrypted_children_names[${childId}]`;
+                                    hiddenField.value = decryptedName;
+                                    form.appendChild(hiddenField);
+                                }
+                                
+                                // Now submit the form
+                                form.submit();
+                                
+                            } catch (error) {
+                                console.error('❌ Error during decryption:', error);
+                                alert('Error decrypting children names: ' + error.message);
+                            }
+                        }
+                        // If encryption is being enabled or unchanged, form submits normally
+                    });
+                }
+            });
+            </script>
         </div>
     </div>
 

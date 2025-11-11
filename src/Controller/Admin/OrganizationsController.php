@@ -289,7 +289,34 @@ class OrganizationsController extends AppController
         ]);
 
         if ($this->request->is(['patch', 'post', 'put'])) {
+            $previousEncryptionState = $organization->encryption_enabled;
             $organization = $this->Organizations->patchEntity($organization, $this->request->getData());
+            
+            // Check if encryption was disabled
+            if ($previousEncryptionState && !$organization->encryption_enabled) {
+                // Process decrypted children names from hidden form fields
+                $decryptedNames = $this->request->getData('decrypted_children_names');
+                
+                if ($decryptedNames && is_array($decryptedNames)) {
+                    $childrenTable = $this->fetchTable('Children');
+                    $updateCount = 0;
+                    
+                    foreach ($decryptedNames as $childId => $decryptedName) {
+                        $child = $childrenTable->get($childId);
+                        if ($child->organization_id == $id) {
+                            // Update name and clear encrypted name
+                            $child->name = $decryptedName;
+                            $child->name_encrypted = null;
+                            
+                            if ($childrenTable->save($child)) {
+                                $updateCount++;
+                            }
+                        }
+                    }
+                    
+                    $this->log("Decrypted $updateCount children names for organization $id", 'info');
+                }
+            }
             
             if ($this->Organizations->save($organization)) {
                 $this->Flash->success(__('The organization has been saved.'));
@@ -306,7 +333,13 @@ class OrganizationsController extends AppController
             }
         ])->orderBy(['email' => 'ASC'])->toArray();
 
-        $this->set(compact('organization', 'allUsers'));
+        // Get all children for this organization (for decryption)
+        $children = $this->fetchTable('Children')->find()
+            ->where(['organization_id' => $id])
+            ->select(['id', 'name', 'name_encrypted'])
+            ->toArray();
+
+        $this->set(compact('organization', 'allUsers', 'children'));
     }
 
     /**
