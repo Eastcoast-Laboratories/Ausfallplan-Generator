@@ -145,26 +145,29 @@ class UsersController extends AppController
                 ]);
                 $orgUsersTable->save($orgUser);
                 
-                // Send verification email to user
-                $verifyUrl = \Cake\Routing\Router::url([
-                    'controller' => 'Users',
-                    'action' => 'verify',
-                    $user->email_token
-                ], true);
-                
-                \App\Service\EmailDebugService::send([
-                    'to' => $user->email,
-                    'subject' => 'Verify your email address',
-                    'body' => "Hello,\n\nPlease verify your email address by clicking the link below:\n\n{$verifyUrl}\n\nIf you did not register, please ignore this email.",
-                    'links' => [
-                        'Verify Email' => $verifyUrl
-                    ],
-                    'data' => [
-                        'user_id' => $user->id,
-                        'email' => $user->email,
-                        'token' => $user->email_token
-                    ]
-                ]);
+                // Send verification email only if user needs to verify (joining existing org)
+                // New organization creators are auto-verified and don't need email
+                if ($user->email_token) {
+                    $verifyUrl = \Cake\Routing\Router::url([
+                        'controller' => 'Users',
+                        'action' => 'verify',
+                        $user->email_token
+                    ], true);
+                    
+                    \App\Service\EmailDebugService::send([
+                        'to' => $user->email,
+                        'subject' => 'Verify your email address',
+                        'body' => "Hello,\n\nPlease verify your email address by clicking the link below:\n\n{$verifyUrl}\n\nIf you did not register, please ignore this email.",
+                        'links' => [
+                            'Verify Email' => $verifyUrl
+                        ],
+                        'data' => [
+                            'user_id' => $user->id,
+                            'email' => $user->email,
+                            'token' => $user->email_token
+                        ]
+                    ]);
+                }
                 
                 // If joining existing organization, notify org-admins
                 if (!$isNewOrganization && $organization->name !== 'keine organisation') {
