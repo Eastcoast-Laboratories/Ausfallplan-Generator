@@ -87,9 +87,17 @@ class UsersController extends AppController
             $user = $this->Users->patchEntity($user, $data);
             
             // Set initial status and email verification
-            $user->status = 'pending';
-            $user->email_verified = false;
-            $user->email_token = bin2hex(random_bytes(16));
+            // For new organization creators (org_admins), auto-verify and activate
+            if ($isNewOrganization) {
+                $user->status = 'active';
+                $user->email_verified = true;
+                $user->email_token = null; // No verification needed
+            } else {
+                // For joining existing organizations, require verification
+                $user->status = 'pending';
+                $user->email_verified = false;
+                $user->email_token = bin2hex(random_bytes(16));
+            }
             
             if ($this->Users->save($user)) {
                 // Handle encryption: Generate initial wrapped DEK if encryption keys provided
