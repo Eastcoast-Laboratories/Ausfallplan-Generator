@@ -267,8 +267,9 @@ class AppController extends Controller
                     $sib->schedule_id != $currentScheduleId) {
                     $missingSiblings[] = [
                         'id' => $sib->id,
-                        'name' => $sib->name,
-                        'sibling_of' => $child->name,
+                        'child_id' => $child->id, // Current child ID
+                        'sibling_id' => $sib->id, // Missing sibling ID
+                        'sibling_group_id' => $child->sibling_group_id,
                         'schedule_id' => $sib->schedule_id, // Sibling's schedule (where they currently are)
                     ];
                 }

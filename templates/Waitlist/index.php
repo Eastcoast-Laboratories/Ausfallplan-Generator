@@ -130,7 +130,7 @@ $this->assign('title', __('Waitlist'));
                                         <?= __('Integrative') ?>
                                     </span>
                                 <?php endif; ?>
-                                <?php if ($child->sibling_group_id && isset($siblingNames[$child->id])): ?>
+                                <?php if ($child->sibling_group_id): ?>
                                     <?= $this->Html->link(
                                         '👨‍👩‍👧 ' . __("Geschwister"),
                                         ['controller' => 'SiblingGroups', 'action' => 'view', $child->sibling_group_id],
@@ -202,7 +202,7 @@ $this->assign('title', __('Waitlist'));
                                         data-encrypted="<?= h($child->name_encrypted ?? '') ?>"
                                         data-iv="<?= h($child->name_iv ?? '') ?>"
                                         data-tag="<?= h($child->name_tag ?? '') ?>"><?= h($child->name) ?></strong>
-                                    <?php if ($child->sibling_group_id && isset($siblingNames[$child->id])): ?>
+                                    <?php if ($child->sibling_group_id): ?>
                                         <?= $this->Html->link(
                                             '👨‍👩‍👧 ' . __('Geschwister'),
                                             ['controller' => 'SiblingGroups', 'action' => 'view', $child->sibling_group_id],
