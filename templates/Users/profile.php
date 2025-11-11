@@ -75,7 +75,14 @@ $this->assign('title', __('Profile Settings'));
             <div class="form-row">
                 <div class="form-info">
                     <label><?= __('Client-Side Encryption Status') ?></label>
-                    <?php if ($userEntity->encrypted_private_key && $userEntity->key_salt): ?>
+                    <?php 
+                    $hasPublicKey = !empty($userEntity->public_key) && strlen($userEntity->public_key) > 100;
+                    $hasPrivateKey = !empty($userEntity->encrypted_private_key) && strlen($userEntity->encrypted_private_key) > 100;
+                    $hasSalt = !empty($userEntity->key_salt) && strlen($userEntity->key_salt) > 10;
+                    $hasFullEncryption = $hasPublicKey && $hasPrivateKey && $hasSalt;
+                    ?>
+                    
+                    <?php if ($hasFullEncryption): ?>
                         <div class="encryption-status enabled">
                             <span class="status-icon">✅</span>
                             <span class="status-text"><?= __('Encryption Enabled') ?></span>
@@ -88,8 +95,9 @@ $this->assign('title', __('Profile Settings'));
                         <div class="encryption-details">
                             <small style="color: #666;">
                                 <strong><?= __('Technical Info:') ?></strong><br>
-                                • <?= __('Public Key Length:') ?> <?= strlen($userEntity->public_key ?? '') ?> <?= __('chars') ?><br>
-                                • <?= __('Encrypted Private Key Length:') ?> <?= strlen($userEntity->encrypted_private_key ?? '') ?> <?= __('chars') ?><br>
+                                • <?= __('Public Key Length:') ?> <?= strlen($userEntity->public_key) ?> <?= __('chars') ?><br>
+                                • <?= __('Encrypted Private Key Length:') ?> <?= strlen($userEntity->encrypted_private_key) ?> <?= __('chars') ?><br>
+                                • <?= __('Key Salt Length:') ?> <?= strlen($userEntity->key_salt) ?> <?= __('chars') ?><br>
                                 • <?= __('Encryption: RSA-OAEP-2048 + AES-GCM-256') ?>
                             </small>
                         </div>
@@ -99,11 +107,23 @@ $this->assign('title', __('Profile Settings'));
                             <span class="status-text"><?= __('Encryption Not Set Up') ?></span>
                         </div>
                         <small>
-                            <?= __('Your account was created before encryption was implemented. Your data is currently stored in plaintext.') ?>
+                            <?= __('Your account does not have encryption keys configured. Set up encryption to protect your sensitive data.') ?>
                         </small>
+                        <?php if (!$hasPublicKey && !$hasPrivateKey && !$hasSalt): ?>
+                            <small style="display: block; margin-top: 5px; color: #999;">
+                                <?= __('Status: No encryption keys found in database.') ?>
+                            </small>
+                        <?php else: ?>
+                            <small style="display: block; margin-top: 5px; color: #d9534f;">
+                                <?= __('Warning: Partial encryption data detected. Keys may be corrupted.') ?><br>
+                                • <?= __('Public Key:') ?> <?= $hasPublicKey ? '✓' : '✗' ?><br>
+                                • <?= __('Private Key:') ?> <?= $hasPrivateKey ? '✓' : '✗' ?><br>
+                                • <?= __('Salt:') ?> <?= $hasSalt ? '✓' : '✗' ?>
+                            </small>
+                        <?php endif; ?>
                         <div style="margin-top: 10px;">
                             <button type="button" id="setup-encryption-btn" class="button-primary">
-                                <?= __('Set Up Encryption Now') ?> 🔒
+                                <?= $hasPublicKey || $hasPrivateKey || $hasSalt ? __('Regenerate Encryption Keys') : __('Set Up Encryption Now') ?> 🔒
                             </button>
                         </div>
                     <?php endif; ?>
