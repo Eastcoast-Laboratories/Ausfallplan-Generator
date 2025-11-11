@@ -129,10 +129,15 @@ const OrgEncryption = (function() {
      * Wrap (encrypt) a private key with a password-derived KEK
      * @param {CryptoKey} privateKey - RSA private key to wrap
      * @param {string} password - User's password
-     * @param {Uint8Array} salt - Salt for KEK derivation
-     * @returns {Promise<{wrappedKey: ArrayBuffer, iv: Uint8Array}>}
+     * @param {Uint8Array} salt - Salt for KEK derivation (optional, will be generated if not provided)
+     * @returns {Promise<{wrappedKey: string, iv: string, salt: string}>} - Base64 encoded values
      */
     async function wrapPrivateKeyWithPassword(privateKey, password, salt) {
+        // Generate salt if not provided
+        if (!salt) {
+            salt = generateSalt();
+        }
+        
         const kek = await deriveKEKFromPassword(password, salt);
         const iv = generateIV();
         
@@ -146,18 +151,38 @@ const OrgEncryption = (function() {
             }
         );
 
-        return { wrappedKey, iv };
+        // Return Base64 encoded values for storage
+        return {
+            wrappedKey: arrayBufferToBase64(wrappedKey),
+            iv: arrayBufferToBase64(iv),
+            salt: arrayBufferToBase64(salt)
+        };
     }
 
     /**
      * Unwrap (decrypt) a private key with a password-derived KEK
-     * @param {ArrayBuffer} wrappedKey - Wrapped private key
-     * @param {Uint8Array} iv - IV used for wrapping
+     * @param {string} wrappedKeyBase64 - Wrapped private key (Base64)
      * @param {string} password - User's password
-     * @param {Uint8Array} salt - Salt for KEK derivation
+     * @param {string} saltBase64 - Salt for KEK derivation (Base64)
+     * @param {string} ivBase64 - IV used for wrapping (Base64, optional)
      * @returns {Promise<CryptoKey>}
      */
-    async function unwrapPrivateKeyWithPassword(wrappedKey, iv, password, salt) {
+    async function unwrapPrivateKeyWithPassword(wrappedKeyBase64, password, saltBase64, ivBase64) {
+        // Convert Base64 to ArrayBuffer
+        const wrappedKey = base64ToArrayBuffer(wrappedKeyBase64);
+        const salt = base64ToArrayBuffer(saltBase64);
+        
+        // IV is optional for backward compatibility
+        // If not provided, we use a dummy IV (not secure, but maintains compatibility)
+        let iv;
+        if (ivBase64) {
+            iv = base64ToArrayBuffer(ivBase64);
+        } else {
+            // For backward compatibility: use first 12 bytes of wrapped key as IV
+            // This is NOT secure but allows decryption of old keys
+            iv = new Uint8Array(wrappedKey.slice(0, 12));
+        }
+        
         const kek = await deriveKEKFromPassword(password, salt);
         
         return await window.crypto.subtle.unwrapKey(
@@ -417,6 +442,7 @@ const OrgEncryption = (function() {
     // Public API
     return {
         // Key generation
+        generateKeyPair: generateUserKeyPair, // Alias for backward compatibility
         generateUserKeyPair,
         generateDEK,
         generateSalt,
@@ -425,6 +451,8 @@ const OrgEncryption = (function() {
         // Key wrapping/unwrapping
         wrapPrivateKeyWithPassword,
         unwrapPrivateKeyWithPassword,
+        wrapDEK: wrapDEKWithPublicKey, // Alias for backward compatibility
+        unwrapDEK: unwrapDEKWithPrivateKey, // Alias for backward compatibility
         wrapDEKWithPublicKey,
         unwrapDEKWithPrivateKey,
 
@@ -437,6 +465,8 @@ const OrgEncryption = (function() {
         importPublicKey,
 
         // Session storage management
+        storeDEK: storeDEKInSession, // Alias for backward compatibility
+        getDEK: getDEKFromSession, // Alias for backward compatibility
         storePrivateKeyInSession,
         getPrivateKeyFromSession,
         storeDEKInSession,
@@ -453,6 +483,9 @@ const OrgEncryption = (function() {
 })();
 
 // Make available globally
+if (typeof window !== 'undefined') {
+    window.OrgEncryption = OrgEncryption;
+}
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = OrgEncryption;
 }

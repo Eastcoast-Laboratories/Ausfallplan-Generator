@@ -64,6 +64,10 @@ class UsersController extends AppController
                         $this->set(compact('user', 'organizationsList'));
                         return;
                     }
+                    
+                    // Reload organization to get default values from DB (like encryption_enabled)
+                    $organization = $organizationsTable->get($organization->id);
+                    
                     $isNewOrganization = true;
                 } else {
                     // Organization with this name already exists
@@ -87,11 +91,42 @@ class UsersController extends AppController
             $user = $this->Users->patchEntity($user, $data);
             
             // Set initial status and email verification
+            // All users require email verification
             $user->status = 'pending';
             $user->email_verified = false;
             $user->email_token = bin2hex(random_bytes(16));
             
             if ($this->Users->save($user)) {
+                // Handle encryption: Save wrapped DEK if provided (generated client-side)
+                $hasPublicKey = !empty($data['public_key']);
+                $hasWrappedDek = !empty($data['wrapped_dek']);
+                $encryptionEnabled = $organization->encryption_enabled;
+                
+                error_log("DEBUG Registration - hasPublicKey: " . ($hasPublicKey ? 'YES' : 'NO'));
+                error_log("DEBUG Registration - hasWrappedDek: " . ($hasWrappedDek ? 'YES' : 'NO'));  
+                error_log("DEBUG Registration - encryptionEnabled RAW: " . var_export($organization->encryption_enabled, true));
+                error_log("DEBUG Registration - encryptionEnabled: " . ($encryptionEnabled ? 'YES' : 'NO'));
+                error_log("DEBUG Registration - organization_id: " . $organization->id);
+                error_log("DEBUG Registration - user_id: " . $user->id);
+                
+                if ($hasPublicKey && $hasWrappedDek && $encryptionEnabled) {
+                    $encryptedDeksTable = $this->fetchTable('EncryptedDeks');
+                    
+                    // Save the wrapped DEK (already encrypted with user's public key client-side)
+                    $dekEntity = $encryptedDeksTable->newEntity([
+                        'organization_id' => $organization->id,
+                        'user_id' => $user->id,
+                        'wrapped_dek' => $data['wrapped_dek'],
+                    ]);
+                    
+                    $saved = $encryptedDeksTable->save($dekEntity);
+                    error_log("DEBUG Registration - DEK saved: " . ($saved ? 'YES' : 'NO'));
+                    
+                    if (!$saved) {
+                        error_log("DEBUG Registration - DEK save errors: " . json_encode($dekEntity->getErrors()));
+                    }
+                }
+                
                 // Create organization_users entry
                 $orgUsersTable = $this->fetchTable('OrganizationUsers');
                 
@@ -108,7 +143,7 @@ class UsersController extends AppController
                 ]);
                 $orgUsersTable->save($orgUser);
                 
-                // Send verification email to user
+                // Send verification email to ALL users
                 $verifyUrl = \Cake\Routing\Router::url([
                     'controller' => 'Users',
                     'action' => 'verify',
@@ -136,18 +171,10 @@ class UsersController extends AppController
                 
                 $debugLink = \Cake\Routing\Router::url(['controller' => 'Debug', 'action' => 'emails'], true);
                 
-                if ($isNewOrganization) {
-                    $message = __('Registration successful! You are the admin of your new organization. Please check your email to verify your account.');
-                } else if ($organization->name === 'keine organisation') {
-                    $message = __('Registration successful. Please check your email to verify your account.');
-                } else {
-                    $message = __('Registration successful! Organization admins have been notified and will review your request. Please check your email to verify your account.');
-                }
-                
-                $this->Flash->success(
-                    $message . " (Dev: <a href='{$debugLink}' style='color: white; text-decoration: underline;'>View Emails</a>)",
-                    ['escape' => false]
-                );
+                // All users need to verify their email
+                $message = __('Registration successful! Please check your email to verify your account.');
+                $message .= "\n\n" . __('View all emails at: <a href="{0}" target="_blank">Debug Email Viewer</a>', [$debugLink]);
+                $this->Flash->success($message, ['escape' => false]);
                 return $this->redirect(['action' => 'login']);
             }
             $this->Flash->error(__('Registration failed. Please try again.'));
@@ -244,6 +271,35 @@ class UsersController extends AppController
                 return $this->redirect(['action' => 'login']);
             }
             
+            // Load encryption keys and wrapped DEKs for client-side decryption
+            $user = $this->Users->get($identity->id, [
+                'fields' => ['id', 'encrypted_private_key', 'key_salt', 'key_iv']
+            ]);
+            
+            if ($user->encrypted_private_key && $user->key_salt) {
+                // Load wrapped DEKs for user's organizations
+                $encryptedDeksTable = $this->fetchTable('EncryptedDeks');
+                $wrappedDeks = $encryptedDeksTable->find()
+                    ->where(['user_id' => $user->id])
+                    ->contain(['Organizations' => ['fields' => ['id', 'name', 'encryption_enabled']]])
+                    ->all()
+                    ->toArray();
+                
+                // Store in session for client-side JavaScript access
+                $this->request->getSession()->write('encryption', [
+                    'encrypted_private_key' => $user->encrypted_private_key,
+                    'key_salt' => $user->key_salt,
+                    'key_iv' => $user->key_iv, // CRITICAL for unwrapping!
+                    'wrapped_deks' => array_map(function($dek) {
+                        return [
+                            'organization_id' => $dek->organization_id,
+                            'organization_name' => $dek->organization->name ?? '',
+                            'wrapped_dek' => $dek->wrapped_dek,
+                        ];
+                    }, $wrappedDeks)
+                ]);
+            }
+            
             // Get redirect target from query parameter or use dashboard as fallback
             $redirect = $this->request->getQuery('redirect');
             
@@ -260,6 +316,91 @@ class UsersController extends AppController
         if ($this->request->is('post') && !$result->isValid()) {
             $this->Flash->error(__('Invalid email or password'));
         }
+    }
+
+    /**
+     * Setup encryption for existing users
+     *
+     * @return \Cake\Http\Response|null Renders view.
+     */
+    public function setupEncryption()
+    {
+        $this->request->allowMethod(['post']);
+        $this->viewBuilder()->disableAutoLayout();
+        
+        $identity = $this->Authentication->getIdentity();
+        
+        if (!$identity) {
+            return $this->response->withType('application/json')
+                ->withStringBody(json_encode(['success' => false, 'message' => 'Not authenticated']));
+        }
+        
+        // Get JSON data from request body
+        $jsonData = $this->request->input('php://input');
+        $data = json_decode($jsonData, true);
+        
+        if (!$data) {
+            error_log('DEBUG setupEncryption - Failed to parse JSON: ' . $jsonData);
+            return $this->response->withType('application/json')
+                ->withStringBody(json_encode(['success' => false, 'message' => 'Invalid JSON data']));
+        }
+        
+        if (empty($data['public_key']) || empty($data['encrypted_private_key']) || empty($data['key_salt'])) {
+            return $this->response->withType('application/json')
+                ->withStringBody(json_encode(['success' => false, 'message' => 'Missing required fields']));
+        }
+        
+        $user = $this->Users->get($identity->id);
+        
+        // Check if user already has encryption set up
+        if ($user->encrypted_private_key && $user->key_salt) {
+            return $this->response->withType('application/json')
+                ->withStringBody(json_encode(['success' => false, 'message' => 'Encryption already set up']));
+        }
+        
+        $user->public_key = $data['public_key'];
+        $user->encrypted_private_key = $data['encrypted_private_key'];
+        $user->key_salt = $data['key_salt'];
+        
+        if ($this->Users->save($user)) {
+            // Generate DEKs for user's organizations
+            $orgsUsersTable = $this->fetchTable('OrganizationsUsers');
+            $userOrgs = $orgsUsersTable->find()
+                ->where(['user_id' => $user->id])
+                ->contain(['Organizations'])
+                ->all();
+            
+            $encryptedDeksTable = $this->fetchTable('EncryptedDeks');
+            
+            foreach ($userOrgs as $orgUser) {
+                $org = $orgUser->organization;
+                
+                if (!$org->encryption_enabled) {
+                    continue;
+                }
+                
+                // Check if organization already has a DEK
+                $existingDek = $encryptedDeksTable->find()
+                    ->where(['organization_id' => $org->id])
+                    ->first();
+                
+                if (!$existingDek) {
+                    // Organization doesn't have a DEK yet - needs to be generated client-side
+                    // For now, we skip this - DEK will be generated when needed
+                    continue;
+                }
+                
+                // For existing DEKs, we need another user to wrap it for this user
+                // This is a limitation - for now user needs to ask admin to share DEK
+                // TODO: Implement DEK sharing workflow
+            }
+            
+            return $this->response->withType('application/json')
+                ->withStringBody(json_encode(['success' => true]));
+        }
+        
+        return $this->response->withType('application/json')
+            ->withStringBody(json_encode(['success' => false, 'message' => 'Failed to save encryption keys']));
     }
 
     /**
@@ -510,6 +651,17 @@ class UsersController extends AppController
             if ($reset) {
                 $user = $reset->user;
                 $user->password = $newPassword;
+                
+                // Handle encryption key re-encryption if provided
+                // When password changes, client must re-encrypt private key with new password
+                $newEncryptedPrivateKey = $this->request->getData('encrypted_private_key');
+                $newKeySalt = $this->request->getData('key_salt');
+                
+                if ($newEncryptedPrivateKey && $newKeySalt) {
+                    $user->encrypted_private_key = $newEncryptedPrivateKey;
+                    $user->key_salt = $newKeySalt;
+                    // Note: DEKs don't need to be re-wrapped, only the private key changes
+                }
                 
                 $usersTable = $this->fetchTable('Users');
                 if ($usersTable->save($user)) {

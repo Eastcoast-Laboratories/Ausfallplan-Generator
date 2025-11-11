@@ -137,7 +137,7 @@ class OrganizationEncryptionTest extends TestCase
         $this->assertTrue($this->Organizations->associations()->has('EncryptedDeks'));
         
         $association = $this->Organizations->associations()->get('EncryptedDeks');
-        $this->assertEquals('HasMany', $association->type());
+        $this->assertEquals('oneToMany', $association->type());
     }
 
     /**

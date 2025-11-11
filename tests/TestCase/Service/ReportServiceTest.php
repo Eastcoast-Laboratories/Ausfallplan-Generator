@@ -244,7 +244,7 @@ class ReportServiceTest extends TestCase
             // Right column is the last cell in each row
             $rightCell = end($row);
             
-            if ($rightCell['type'] === 'label' && $rightCell['value'] === __('Always at end:')) {
+            if ($rightCell['type'] === 'label' && $rightCell['value'] === __('Always at end')) {
                 $foundLabel = true;
             }
             

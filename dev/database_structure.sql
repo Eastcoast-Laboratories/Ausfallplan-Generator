@@ -17,6 +17,9 @@ CREATE TABLE `children` (
   `postal_code` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `last_name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `display_name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Pre-formatted name for display in reports based on anonymization choice',
+  `name_encrypted` text COLLATE utf8mb4_unicode_ci COMMENT 'Encrypted name (AES-GCM ciphertext)',
+  `name_iv` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Initialization vector for name encryption',
+  `name_tag` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Authentication tag for name encryption',
   PRIMARY KEY (`id`),
   KEY `sibling_group_id` (`sibling_group_id`),
   KEY `schedule_id` (`schedule_id`),
@@ -25,7 +28,24 @@ CREATE TABLE `children` (
   CONSTRAINT `children_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `children_ibfk_2` FOREIGN KEY (`schedule_id`) REFERENCES `schedules` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `children_ibfk_3` FOREIGN KEY (`sibling_group_id`) REFERENCES `sibling_groups` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=67 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=142 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `encrypted_deks` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `organization_id` int NOT NULL COMMENT 'Organization this DEK belongs to',
+  `user_id` int NOT NULL COMMENT 'User who can decrypt this wrapped DEK',
+  `wrapped_dek` text COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'DEK encrypted with user public key',
+  `created` datetime DEFAULT NULL,
+  `modified` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `organization_id_2` (`organization_id`,`user_id`),
+  KEY `organization_id` (`organization_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `encrypted_deks_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `encrypted_deks_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -47,7 +67,7 @@ CREATE TABLE `organization_users` (
   CONSTRAINT `organization_users_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `organization_users_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `organization_users_ibfk_3` FOREIGN KEY (`invited_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -60,8 +80,9 @@ CREATE TABLE `organizations` (
   `contact_phone` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created` datetime DEFAULT NULL,
   `modified` datetime DEFAULT NULL,
+  `encryption_enabled` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Enable client-side encryption for sensitive data',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -124,7 +145,7 @@ CREATE TABLE `schedules` (
   KEY `user_id` (`user_id`),
   CONSTRAINT `schedules_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `schedules_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -137,7 +158,7 @@ CREATE TABLE `sibling_groups` (
   PRIMARY KEY (`id`),
   KEY `organization_id` (`organization_id`),
   CONSTRAINT `sibling_groups_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -153,13 +174,23 @@ CREATE TABLE `users` (
   `status` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
   `approved_at` datetime DEFAULT NULL,
   `approved_by` int DEFAULT NULL,
+  `public_key` text COLLATE utf8mb4_unicode_ci COMMENT 'RSA/EC public key for encrypting DEKs',
+  `encrypted_private_key` text COLLATE utf8mb4_unicode_ci COMMENT 'Private key encrypted with password-derived KEK',
+  `key_salt` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Salt for password-based key derivation',
+  `key_iv` text COLLATE utf8mb4_unicode_ci COMMENT 'IV for encrypted_private_key',
   `subscription_plan` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'test' COMMENT 'test, pro, enterprise',
   `subscription_status` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active' COMMENT 'active, expired, cancelled, pending',
   `subscription_started_at` datetime DEFAULT NULL,
   `subscription_expires_at` datetime DEFAULT NULL,
   `payment_method` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'paypal, bank_transfer',
+  `first_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `last_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `info` text COLLATE utf8mb4_unicode_ci,
+  `bank_account_holder` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bank_iban` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bank_bic` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   KEY `approved_by` (`approved_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;

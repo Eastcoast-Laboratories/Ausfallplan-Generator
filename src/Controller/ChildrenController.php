@@ -159,6 +159,30 @@ class ChildrenController extends AppController
                 }
             }
             
+            // Check encryption settings for organization
+            $organizationsTable = $this->fetchTable('Organizations');
+            $organization = $organizationsTable->get($data['organization_id']);
+            
+            // Handle encryption: accept both encrypted and plaintext during transition
+            if ($organization->encryption_enabled) {
+                // If encrypted data is provided, use it
+                if (!empty($data['name_encrypted']) && !empty($data['name_iv']) && !empty($data['name_tag'])) {
+                    // Clear plaintext name if encrypted version is provided
+                    $data['name'] = 'encrypted:' . substr($data['name_encrypted'], 0, 20); // Placeholder for database
+                }
+                // Otherwise allow plaintext for backward compatibility during UI implementation
+                // Client-side encryption will be added in future update
+            } else {
+                // If encryption is disabled, reject encrypted data
+                if (!empty($data['name_encrypted'])) {
+                    $this->Flash->error(__('Encryption is not enabled for this organization.'));
+                    $this->set(compact('child', 'siblingGroups', 'schedules', 'selectedOrgId', 'userOrgs'));
+                    return;
+                }
+                // Clear encrypted fields
+                unset($data['name_encrypted'], $data['name_iv'], $data['name_tag']);
+            }
+            
             // Set organization_order (max + 1 for this organization)
             $maxOrgOrder = $this->Children->find()
                 ->where(['organization_id' => $data['organization_id']])
@@ -215,7 +239,37 @@ class ChildrenController extends AppController
         }
 
         if ($this->request->is(['patch', 'post', 'put'])) {
-            $child = $this->Children->patchEntity($child, $this->request->getData());
+            $data = $this->request->getData();
+            
+            // Check encryption settings for organization
+            $organizationsTable = $this->fetchTable('Organizations');
+            $organization = $organizationsTable->get($child->organization_id);
+            
+            // Handle encryption: accept both encrypted and plaintext during transition
+            if ($organization->encryption_enabled) {
+                // If encrypted data is provided, use it
+                if (!empty($data['name_encrypted']) && !empty($data['name_iv']) && !empty($data['name_tag'])) {
+                    // Clear plaintext name if encrypted version is provided
+                    $data['name'] = 'encrypted:' . substr($data['name_encrypted'], 0, 20);
+                }
+                // Otherwise allow plaintext for backward compatibility during UI implementation
+                // Client-side encryption will be added in future update
+            } else {
+                // If encryption is disabled, reject encrypted data
+                if (!empty($data['name_encrypted'])) {
+                    $this->Flash->error(__('Encryption is not enabled for this organization.'));
+                    $siblingGroups = $this->Children->SiblingGroups->find('list')
+                        ->where(['SiblingGroups.organization_id' => $child->organization_id ?? 0])
+                        ->all();
+                    $siblingNames = $this->loadSiblingNames([$child]);
+                    $this->set(compact('child', 'siblingGroups', 'siblingNames'));
+                    return;
+                }
+                // Clear encrypted fields
+                unset($data['name_encrypted'], $data['name_iv'], $data['name_tag']);
+            }
+            
+            $child = $this->Children->patchEntity($child, $data);
             
             if ($this->Children->save($child)) {
                 $this->Flash->success(__('The child has been updated.'));

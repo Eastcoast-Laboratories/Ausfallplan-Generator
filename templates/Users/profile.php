@@ -70,6 +70,73 @@ $this->assign('title', __('Profile Settings'));
         </div>
 
         <div class="form-section">
+            <h2><?= __('Encryption & Security') ?> 🔐</h2>
+            
+            <div class="form-row">
+                <div class="form-info">
+                    <label><?= __('Client-Side Encryption Status') ?></label>
+                    <?php 
+                    $hasPublicKey = !empty($userEntity->public_key) && strlen($userEntity->public_key) > 100;
+                    $hasPrivateKey = !empty($userEntity->encrypted_private_key) && strlen($userEntity->encrypted_private_key) > 100;
+                    $hasSalt = !empty($userEntity->key_salt) && strlen($userEntity->key_salt) > 10;
+                    $hasFullEncryption = $hasPublicKey && $hasPrivateKey && $hasSalt;
+                    ?>
+                    
+                    <?php if ($hasFullEncryption): ?>
+                        <div class="encryption-status enabled" id="encryption-status-container">
+                            <span class="status-icon">✅</span>
+                            <span class="status-text"><?= __('Encryption Enabled') ?></span>
+                        </div>
+                        <div id="encryption-error-warning" style="display: none; margin-top: 10px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107; color: #856404;">
+                            <strong>⚠️ <?= __('Encryption Key Error') ?></strong><br>
+                            <span id="encryption-error-message"></span><br>
+                            <small><?= __('Your encryption keys may be corrupted or incompatible. Please regenerate your encryption keys.') ?></small>
+                        </div>
+                        <small>
+                            <?= __('Your sensitive data is encrypted using client-side encryption. Your encryption keys were generated on {0}.', [
+                                $userEntity->created ? $userEntity->created->format('d.m.Y') : __('registration')
+                            ]) ?>
+                        </small>
+                        <div class="encryption-details">
+                            <small style="color: #666;">
+                                <strong><?= __('Technical Info:') ?></strong><br>
+                                • <?= __('Public Key Length:') ?> <?= strlen($userEntity->public_key) ?> <?= __('chars') ?><br>
+                                • <?= __('Encrypted Private Key Length:') ?> <?= strlen($userEntity->encrypted_private_key) ?> <?= __('chars') ?><br>
+                                • <?= __('Key Salt Length:') ?> <?= strlen($userEntity->key_salt) ?> <?= __('chars') ?><br>
+                                • <?= __('Encryption: RSA-OAEP-2048 + AES-GCM-256') ?>
+                            </small>
+                        </div>
+                    <?php else: ?>
+                        <div class="encryption-status disabled">
+                            <span class="status-icon">⚠️</span>
+                            <span class="status-text"><?= __('Encryption Not Set Up') ?></span>
+                        </div>
+                        <small>
+                            <?= __('Your account does not have encryption keys configured. Set up encryption to protect your sensitive data.') ?>
+                        </small>
+                        <?php if (!$hasPublicKey && !$hasPrivateKey && !$hasSalt): ?>
+                            <small style="display: block; margin-top: 5px; color: #999;">
+                                <?= __('Status: No encryption keys found in database.') ?>
+                            </small>
+                        <?php else: ?>
+                            <small style="display: block; margin-top: 5px; color: #d9534f;">
+                                <?= __('Warning: Partial encryption data detected. Keys may be corrupted.') ?><br>
+                                • <?= __('Public Key:') ?> <?= $hasPublicKey ? '✓' : '✗' ?><br>
+                                • <?= __('Private Key:') ?> <?= $hasPrivateKey ? '✓' : '✗' ?><br>
+                                • <?= __('Salt:') ?> <?= $hasSalt ? '✓' : '✗' ?>
+                            </small>
+                        <?php endif; ?>
+                        <div style="margin-top: 10px;">
+                            <button type="button" id="setup-encryption-btn" class="button-primary">
+                                <?= $hasPublicKey || $hasPrivateKey || $hasSalt ? __('Regenerate Encryption Keys') : __('Set Up Encryption Now') ?> 🔒
+                            </button>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
             <h2><?= __('Personal Information') ?></h2>
             
             <div class="form-row">
@@ -161,16 +228,99 @@ $this->assign('title', __('Profile Settings'));
         </div>
 
         <div class="form-actions">
-            <?= $this->Form->button(__('Save Changes'), [
-                'class' => 'btn-primary'
-            ]) ?>
-            <?= $this->Html->link(__('Cancel'), ['controller' => 'Dashboard', 'action' => 'index'], [
-                'class' => 'btn-secondary'
-            ]) ?>
+            <?= $this->Form->button(__('Update Profile'), ['class' => 'btn-primary', 'type' => 'submit']) ?>
+            <?= $this->Html->link(__('Cancel'), ['controller' => 'Dashboard', 'action' => 'index'], ['class' => 'btn-secondary']) ?>
         </div>
-
         <?= $this->Form->end() ?>
     </div>
+
+    <!-- Encryption Setup Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check for encryption errors from sessionStorage
+        const encryptionError = sessionStorage.getItem('encryption_error');
+        if (encryptionError) {
+            const errorData = JSON.parse(encryptionError);
+            const warningDiv = document.getElementById('encryption-error-warning');
+            const messageSpan = document.getElementById('encryption-error-message');
+            
+            if (warningDiv && messageSpan) {
+                messageSpan.textContent = errorData.error;
+                warningDiv.style.display = 'block';
+                
+                // Update status icon to warning
+                const statusContainer = document.getElementById('encryption-status-container');
+                if (statusContainer) {
+                    statusContainer.querySelector('.status-icon').textContent = '⚠️';
+                    statusContainer.style.borderLeft = '4px solid #ffc107';
+                }
+            }
+        }
+        
+        const setupButton = document.getElementById('setup-encryption-btn');
+        
+        if (setupButton && window.OrgEncryption) {
+            setupButton.addEventListener('click', async function() {
+                if (!confirm('<?= __('This will generate encryption keys for your account. You will need to enter your current password to encrypt your private key. Continue?') ?>')) {
+                    return;
+                }
+                
+                const password = prompt('<?= __('Please enter your current password to set up encryption:') ?>');
+                if (!password) {
+                    alert('<?= __('Password is required to set up encryption.') ?>');
+                    return;
+                }
+                
+                setupButton.disabled = true;
+                setupButton.textContent = '<?= __('Generating keys...') ?>';
+                
+                try {
+                    console.log('Generating RSA key pair...');
+                    const keyPair = await window.OrgEncryption.generateKeyPair();
+                    
+                    console.log('Wrapping private key with password...');
+                    const result = await window.OrgEncryption.wrapPrivateKeyWithPassword(
+                        keyPair.privateKey,
+                        password
+                    );
+                    
+                    console.log('Exporting public key...');
+                    const publicKeyPem = await window.OrgEncryption.exportPublicKey(keyPair.publicKey);
+                    
+                    // Send to server
+                    const response = await fetch('/users/setup-encryption', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-Token': '<?= $this->request->getAttribute('csrfToken') ?>'
+                        },
+                        body: JSON.stringify({
+                            public_key: publicKeyPem,
+                            encrypted_private_key: result.wrappedKey,
+                            key_salt: result.salt
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert('<?= __('Encryption has been successfully set up for your account!') ?>');
+                        window.location.reload();
+                    } else {
+                        alert('<?= __('Error setting up encryption:') ?> ' + (data.message || 'Unknown error'));
+                        setupButton.disabled = false;
+                        setupButton.textContent = '<?= __('Set Up Encryption Now') ?> 🔒';
+                    }
+                } catch (error) {
+                    console.error('Encryption setup error:', error);
+                    alert('<?= __('Error generating encryption keys. Please try again.') ?>');
+                    setupButton.disabled = false;
+                    setupButton.textContent = '<?= __('Set Up Encryption Now') ?> 🔒';
+                }
+            });
+        }
+    });
+    </script>
 
     <!-- Danger Zone -->
     <div class="danger-zone">

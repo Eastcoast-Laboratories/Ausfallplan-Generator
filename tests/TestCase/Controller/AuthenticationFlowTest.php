@@ -288,15 +288,15 @@ class AuthenticationFlowTest extends TestCase
         $usersTable = $this->getTableLocator()->get('Users');
         $user = $usersTable->newEntity([
             'email' => 'resetme@test.com',
-            'password' => 'oldpassword',
+            'password' => 'oldpassword1',
             'status' => 'active',
             'is_system_admin' => false,
             'email_verified' => 1,
         ]);
-        $usersTable->save($user);
+        $user = $usersTable->saveOrFail($user);
         
         $orgUsersTable = $this->getTableLocator()->get('OrganizationUsers');
-        $orgUsersTable->save($orgUsersTable->newEntity([
+        $orgUsersTable->saveOrFail($orgUsersTable->newEntity([
             'organization_id' => 1,
             'user_id' => $user->id,
             'role' => 'viewer',
@@ -332,15 +332,15 @@ class AuthenticationFlowTest extends TestCase
         $usersTable = $this->getTableLocator()->get('Users');
         $user = $usersTable->newEntity([
             'email' => 'resetme2@test.com',
-            'password' => 'oldpassword',
+            'password' => 'oldpassword1',
             'status' => 'active',
             'is_system_admin' => false,
             'email_verified' => 1,
         ]);
-        $usersTable->save($user);
+        $user = $usersTable->saveOrFail($user);
         
         $orgUsersTable = $this->getTableLocator()->get('OrganizationUsers');
-        $orgUsersTable->save($orgUsersTable->newEntity([
+        $orgUsersTable->saveOrFail($orgUsersTable->newEntity([
             'organization_id' => 1,
             'user_id' => $user->id,
             'role' => 'viewer',
@@ -356,7 +356,7 @@ class AuthenticationFlowTest extends TestCase
             'reset_code' => '123456',
             'expires_at' => new \DateTime('+1 hour'),
         ]);
-        $resetsTable->save($reset);
+        $resetsTable->saveOrFail($reset);
 
         // Reset password
         $this->enableCsrfToken();

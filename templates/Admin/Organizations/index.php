@@ -22,6 +22,7 @@ $this->assign('title', __('Organization Management'));
             <thead>
                 <tr>
                     <th><?= __('Name') ?></th>
+                    <th><?= __('Encryption') ?></th>
                     <th><?= __('Status') ?></th>
                     <th><?= __('Benutzer') ?></th>
                     <th><?= __('Kinder') ?></th>
@@ -34,7 +35,20 @@ $this->assign('title', __('Organization Management'));
             <tbody>
                 <?php foreach ($organizations as $organization): ?>
                 <tr>
-                    <td><?= h($organization->name) ?></td>
+                    <td>
+                        <?= h($organization->name) ?>
+                        <?php if ($organization->encryption_enabled ?? false): ?>
+                            <span style="background: #4CAF50; color: white; padding: 0.2rem 0.4rem; border-radius: 3px; font-size: 0.75rem; margin-left: 0.5rem;" 
+                                  title="<?= __('End-to-end encryption enabled') ?>">🔒 <?= __('Encrypted') ?></span>
+                        <?php endif; ?>
+                    </td>
+                    <td style="text-align: center; font-size: 1.3rem;" title="<?= ($organization->encryption_enabled ?? false) ? __('Encryption enabled') : __('Encryption disabled') ?>">
+                        <?php if ($organization->encryption_enabled ?? false): ?>
+                            🔒
+                        <?php else: ?>
+                            🔓
+                        <?php endif; ?>
+                    </td>
                     <td style="white-space: nowrap;">
                         <?php if ($organization->is_active): ?>
                             <span style="color: green;">● <?= __('Aktiv') ?></span>

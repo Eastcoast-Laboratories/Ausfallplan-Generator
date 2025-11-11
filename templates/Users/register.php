@@ -55,8 +55,13 @@
         ?>
     </fieldset>
     
+    <!-- Hidden fields for encryption keys -->
+    <?= $this->Form->hidden('public_key', ['id' => 'public-key-field']) ?>
+    <?= $this->Form->hidden('encrypted_private_key', ['id' => 'encrypted-private-key-field']) ?>
+    <?= $this->Form->hidden('key_salt', ['id' => 'key-salt-field']) ?>
+    
     <div class="form-actions">
-        <?= $this->Form->button(__('Create Account'), ['class' => 'button-primary']) ?>
+        <?= $this->Form->button(__('Create Account'), ['class' => 'button-primary', 'id' => 'register-button']) ?>
         <?= $this->Html->link(__('Already have an account? Login'), ['action' => 'login'], ['class' => 'button']) ?>
     </div>
     <?= $this->Form->end() ?>
@@ -98,4 +103,124 @@
 .form-actions .button {
     flex: 1;
 }
+
+#register-button.generating {
+    opacity: 0.6;
+    cursor: wait;
+}
 </style>
+
+<?= $this->Html->script('crypto/orgEncryption', ['block' => true]) ?>
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+    const form = document.querySelector('.users.form form');
+    const registerButton = document.getElementById('register-button');
+    const passwordField = document.querySelector('input[name="password"]');
+    const publicKeyField = document.getElementById('public-key-field');
+    const encryptedPrivateKeyField = document.getElementById('encrypted-private-key-field');
+    const keySaltField = document.getElementById('key-salt-field');
+    
+    if (!form || !window.OrgEncryption) {
+        console.warn('Encryption module not available or form not found');
+        return;
+    }
+    
+    // Intercept form submission to generate keys
+    form.addEventListener('submit', async function(e) {
+        // Only generate keys if fields are empty (first submission)
+        if (publicKeyField.value) {
+            return; // Keys already generated, proceed with submission
+        }
+        
+        e.preventDefault();
+        
+        // Check password match
+        const password = passwordField.value;
+        const passwordConfirm = document.querySelector('input[name="password_confirm"]').value;
+        
+        if (password !== passwordConfirm) {
+            alert('<?= __('Passwords do not match') ?>');
+            return;
+        }
+        
+        if (password.length < 8) {
+            alert('<?= __('Password must be at least 8 characters') ?>');
+            return;
+        }
+        
+        // Disable button and show loading state
+        registerButton.disabled = true;
+        registerButton.classList.add('generating');
+        const originalText = registerButton.textContent;
+        registerButton.textContent = '<?= __('Generating encryption keys...') ?>';
+        
+        try {
+            // Generate encryption keys
+            console.log('Generating RSA key pair...');
+            const keyPair = await window.OrgEncryption.generateKeyPair();
+            
+            console.log('Wrapping private key with password...');
+            const result = await window.OrgEncryption.wrapPrivateKeyWithPassword(
+                keyPair.privateKey,
+                password
+            );
+            
+            console.log('Exporting public key...');
+            const publicKeyPem = await window.OrgEncryption.exportPublicKey(keyPair.publicKey);
+            
+            // Generate DEK for new organization
+            console.log('Generating DEK for organization...');
+            const dek = await window.OrgEncryption.generateDEK();
+            
+            // Wrap DEK with user's public key
+            console.log('Wrapping DEK with public key...');
+            const wrappedDek = await window.OrgEncryption.wrapDEK(dek, keyPair.publicKey);
+            
+            // Convert to base64
+            const wrappedDekBase64 = window.OrgEncryption.arrayBufferToBase64(wrappedDek);
+            
+            // Set hidden field values
+            publicKeyField.value = publicKeyPem;
+            encryptedPrivateKeyField.value = result.wrappedKey;
+            keySaltField.value = result.salt;
+            
+            // Add IV field (CRITICAL for unwrapping!)
+            let ivField = document.getElementById('key-iv-field');
+            if (!ivField) {
+                ivField = document.createElement('input');
+                ivField.type = 'hidden';
+                ivField.name = 'key_iv';
+                ivField.id = 'key-iv-field';
+                form.appendChild(ivField);
+            }
+            ivField.value = result.iv;
+            
+            // Add DEK field if it doesn't exist
+            let dekField = document.getElementById('wrapped-dek-field');
+            if (!dekField) {
+                dekField = document.createElement('input');
+                dekField.type = 'hidden';
+                dekField.name = 'wrapped_dek';
+                dekField.id = 'wrapped-dek-field';
+                form.appendChild(dekField);
+            }
+            dekField.value = wrappedDekBase64;
+            
+            console.log('Wrapped key length:', result.wrappedKey.length);
+            console.log('Salt length:', result.salt.length);
+            console.log('Wrapped DEK length:', wrappedDekBase64.length);
+            
+            console.log('Keys generated successfully, submitting form...');
+            
+            // Submit form
+            form.submit();
+        } catch (error) {
+            console.error('Key generation error:', error);
+            alert('<?= __('Error generating encryption keys. Please try again.') ?>');
+            registerButton.disabled = false;
+            registerButton.classList.remove('generating');
+            registerButton.textContent = originalText;
+        }
+    });
+});
+</script>

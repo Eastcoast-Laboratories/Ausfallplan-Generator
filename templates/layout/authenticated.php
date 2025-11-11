@@ -593,6 +593,126 @@ $currentLangShort = substr($currentLang, 0, 2);
         });
     </script>
     
+    <!-- Auto-unwrap encryption keys on every page load -->
+    <script src="/js/crypto/orgEncryption.js"></script>
+    <script>
+    // Wait for DOM and script to be ready
+    document.addEventListener('DOMContentLoaded', async function() {
+        console.log('🔐 Auto-unwrap script started');
+        
+        // Wait for OrgEncryption module to load
+        let attempts = 0;
+        while (!window.OrgEncryption && attempts < 50) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            attempts++;
+        }
+        
+        if (!window.OrgEncryption) {
+            console.log('⚠️ OrgEncryption module not available after waiting');
+            return;
+        }
+        
+        console.log('✅ OrgEncryption module loaded');
+        
+        <?php $encryptionData = $this->request->getSession()->read('encryption'); ?>
+        const encryptionData = {
+            encrypted_private_key: <?= json_encode($encryptionData['encrypted_private_key'] ?? null) ?>,
+            key_salt: <?= json_encode($encryptionData['key_salt'] ?? null) ?>,
+            key_iv: <?= json_encode($encryptionData['key_iv'] ?? null) ?>,
+            wrapped_deks: <?= json_encode($encryptionData['wrapped_deks'] ?? []) ?>
+        };
+        
+        console.log('🔐 encryptionData present:', !!encryptionData);
+        console.log('🔐 has private key:', !!(encryptionData && encryptionData.encrypted_private_key));
+        console.log('🔐 has salt:', !!(encryptionData && encryptionData.key_salt));
+        console.log('🔐 wrapped_deks count:', (encryptionData && encryptionData.wrapped_deks) ? encryptionData.wrapped_deks.length : 0);
+        
+        if (!encryptionData || !encryptionData.encrypted_private_key || !encryptionData.key_salt) {
+            console.log('⚠️ Missing encryption data');
+            return;
+        }
+        
+        // Check if we already have DEKs in sessionStorage
+        if (encryptionData.wrapped_deks && encryptionData.wrapped_deks.length > 0) {
+            let allUnwrapped = true;
+            for (const dekData of encryptionData.wrapped_deks) {
+                const existingDek = await window.OrgEncryption.getDEK(dekData.organization_id);
+                if (!existingDek) {
+                    allUnwrapped = false;
+                    break;
+                }
+            }
+            
+            if (allUnwrapped) {
+                console.log('DEKs already unwrapped');
+                return;
+            }
+        } else {
+            console.log('⚠️ No wrapped_deks in encryptionData!');
+        }
+        
+        // Try to get password from sessionStorage (from login)
+        let password = null;
+        try {
+            password = sessionStorage.getItem('_temp_login_password');
+            console.log('🔐 Password from sessionStorage:', password ? '✅ Found' : '❌ Not found');
+        } catch (e) {
+            console.error('Failed to read password:', e);
+        }
+        
+        if (!password) {
+            console.log('⚠️ No password available for automatic key unwrapping');
+            return;
+        }
+        
+        try {
+            console.log('Auto-unwrapping private key...');
+            const privateKey = await window.OrgEncryption.unwrapPrivateKeyWithPassword(
+                encryptionData.encrypted_private_key,
+                password,
+                encryptionData.key_salt,
+                encryptionData.key_iv  // Pass IV for proper unwrapping!
+            );
+            
+            // Unwrap DEKs for each organization
+            if (encryptionData.wrapped_deks && encryptionData.wrapped_deks.length > 0) {
+                for (const wrappedDekData of encryptionData.wrapped_deks) {
+                    try {
+                        // Convert base64 wrapped DEK to ArrayBuffer
+                        const wrappedDekArrayBuffer = window.OrgEncryption.base64ToArrayBuffer(wrappedDekData.wrapped_dek);
+                        
+                        const dek = await window.OrgEncryption.unwrapDEK(
+                            wrappedDekArrayBuffer,
+                            privateKey
+                        );
+                        
+                        // Store in sessionStorage
+                        await window.OrgEncryption.storeDEK(wrappedDekData.organization_id, dek);
+                        console.log(`✅ Unwrapped DEK for org ${wrappedDekData.organization_id}`);
+                    } catch (err) {
+                        console.error(`Failed to unwrap DEK for org ${wrappedDekData.organization_id}:`, err);
+                    }
+                }
+            }
+        } catch (err) {
+            console.error('Key unwrapping error:', err);
+            
+            // Store error in sessionStorage for display in profile settings
+            sessionStorage.setItem('encryption_error', JSON.stringify({
+                error: err.message || 'Key unwrapping failed',
+                timestamp: new Date().toISOString()
+            }));
+        }
+        
+        console.log('✅ Encryption keys loaded - encryption active!');
+        
+        // Clear temp password
+        try {
+            sessionStorage.removeItem('_temp_login_password');
+        } catch (e) {}
+    });
+    </script>
+    
     <?= $this->fetch('script') ?>
 </body>
 </html>
