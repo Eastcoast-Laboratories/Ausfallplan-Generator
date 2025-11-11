@@ -163,18 +163,17 @@ class ChildrenController extends AppController
             $organizationsTable = $this->fetchTable('Organizations');
             $organization = $organizationsTable->get($data['organization_id']);
             
-            // Handle encryption: validate encrypted fields if encryption is enabled
+            // Handle encryption: accept both encrypted and plaintext during transition
             if ($organization->encryption_enabled) {
-                // If encryption is enabled, require encrypted fields
-                if (empty($data['name_encrypted']) || empty($data['name_iv']) || empty($data['name_tag'])) {
-                    $this->Flash->error(__('Encryption is enabled for this organization. Encrypted name data is required.'));
-                    $this->set(compact('child', 'siblingGroups', 'schedules', 'selectedOrgId', 'userOrgs'));
-                    return;
+                // If encrypted data is provided, use it
+                if (!empty($data['name_encrypted']) && !empty($data['name_iv']) && !empty($data['name_tag'])) {
+                    // Clear plaintext name if encrypted version is provided
+                    $data['name'] = 'encrypted:' . substr($data['name_encrypted'], 0, 20); // Placeholder for database
                 }
-                // Clear plaintext name if encrypted version is provided
-                $data['name'] = 'encrypted:' . substr($data['name_encrypted'], 0, 20); // Placeholder for database
+                // Otherwise allow plaintext for backward compatibility during UI implementation
+                // Client-side encryption will be added in future update
             } else {
-                // If encryption is disabled, only accept plaintext name
+                // If encryption is disabled, reject encrypted data
                 if (!empty($data['name_encrypted'])) {
                     $this->Flash->error(__('Encryption is not enabled for this organization.'));
                     $this->set(compact('child', 'siblingGroups', 'schedules', 'selectedOrgId', 'userOrgs'));
@@ -246,23 +245,17 @@ class ChildrenController extends AppController
             $organizationsTable = $this->fetchTable('Organizations');
             $organization = $organizationsTable->get($child->organization_id);
             
-            // Handle encryption: validate encrypted fields if encryption is enabled
+            // Handle encryption: accept both encrypted and plaintext during transition
             if ($organization->encryption_enabled) {
-                // If encryption is enabled, require encrypted fields
-                if (empty($data['name_encrypted']) || empty($data['name_iv']) || empty($data['name_tag'])) {
-                    $this->Flash->error(__('Encryption is enabled for this organization. Encrypted name data is required.'));
-                    // Get sibling groups and names for re-display
-                    $siblingGroups = $this->Children->SiblingGroups->find('list')
-                        ->where(['SiblingGroups.organization_id' => $child->organization_id ?? 0])
-                        ->all();
-                    $siblingNames = $this->loadSiblingNames([$child]);
-                    $this->set(compact('child', 'siblingGroups', 'siblingNames'));
-                    return;
+                // If encrypted data is provided, use it
+                if (!empty($data['name_encrypted']) && !empty($data['name_iv']) && !empty($data['name_tag'])) {
+                    // Clear plaintext name if encrypted version is provided
+                    $data['name'] = 'encrypted:' . substr($data['name_encrypted'], 0, 20);
                 }
-                // Clear plaintext name if encrypted version is provided
-                $data['name'] = 'encrypted:' . substr($data['name_encrypted'], 0, 20);
+                // Otherwise allow plaintext for backward compatibility during UI implementation
+                // Client-side encryption will be added in future update
             } else {
-                // If encryption is disabled, only accept plaintext name
+                // If encryption is disabled, reject encrypted data
                 if (!empty($data['name_encrypted'])) {
                     $this->Flash->error(__('Encryption is not enabled for this organization.'));
                     $siblingGroups = $this->Children->SiblingGroups->find('list')

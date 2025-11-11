@@ -114,13 +114,13 @@
 ### UI Integration 🔄
 **Priority: MEDIUM** - Required for user experience
 
-#### Organization Settings Page
-- [ ] Add encryption toggle switch
-  - [ ] Show current status (enabled/disabled)
-  - [ ] Warning message when disabling
-  - [ ] Confirmation dialog
-  - [ ] Update via API
-  - [ ] Show encryption icon/badge
+#### Organization Settings Page ✅
+- [x] Add encryption toggle switch
+  - [x] Show current status (enabled/disabled)
+  - [x] Warning message when disabling
+  - [x] Confirmation dialog
+  - [x] Update via API
+  - [x] Show encryption icon/badge (🔒/🔓)
 
 #### Children Forms
 - [ ] Include orgEncryption.js script
