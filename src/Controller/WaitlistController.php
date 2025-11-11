@@ -134,15 +134,15 @@ class WaitlistController extends AppController
         }
         
         // Get children on waitlist (NEW: from children table)
-        // Only children with organization_order (exclude children without org_order)
+        // IMPORTANT: Waitlist is independent from organization_order!
+        // Children can be on waitlist even if they are not in organization_order
         $waitlistChildren = [];
         $childrenOnWaitlist = [];
         if ($scheduleId) {
             $waitlistChildren = $this->fetchTable('Children')->find()
                 ->where([
                     'schedule_id' => $scheduleId,
-                    'waitlist_order IS NOT' => null,
-                    'organization_order IS NOT' => null
+                    'waitlist_order IS NOT' => null
                 ])
                 ->orderBy(['waitlist_order' => 'ASC'])
                 ->all();

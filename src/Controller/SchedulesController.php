@@ -406,18 +406,17 @@ class SchedulesController extends AppController
     public function removeFromOrder($id = null)
     {
         $this->request->allowMethod(['post']);
-        $this->viewBuilder()->setClassName('Json');
         
         $schedule = $this->Schedules->get($id);
         
         // Check permission
         if (!$this->hasOrgRole($schedule->organization_id, 'editor')) {
-            $this->set([
-                'success' => false,
-                'message' => __('Permission denied'),
-                '_serialize' => ['success', 'message']
-            ]);
-            return $this->response->withType('application/json');
+            return $this->response
+                ->withType('application/json')
+                ->withStringBody(json_encode([
+                    'success' => false,
+                    'message' => __('Permission denied')
+                ]));
         }
         
         $data = $this->request->getData();
@@ -431,27 +430,28 @@ class SchedulesController extends AppController
             $child->organization_order = null;
             
             if ($childrenTable->save($child)) {
-                $this->set([
-                    'success' => true,
-                    'message' => __('Child removed from organization order'),
-                    '_serialize' => ['success', 'message']
-                ]);
+                return $this->response
+                    ->withType('application/json')
+                    ->withStringBody(json_encode([
+                        'success' => true,
+                        'message' => __('Child removed from organization order')
+                    ]));
             } else {
-                $this->set([
-                    'success' => false,
-                    'message' => __('Failed to save'),
-                    '_serialize' => ['success', 'message']
-                ]);
+                return $this->response
+                    ->withType('application/json')
+                    ->withStringBody(json_encode([
+                        'success' => false,
+                        'message' => __('Failed to save')
+                    ]));
             }
         } else {
-            $this->set([
-                'success' => false,
-                'message' => __('Invalid child ID'),
-                '_serialize' => ['success', 'message']
-            ]);
+            return $this->response
+                ->withType('application/json')
+                ->withStringBody(json_encode([
+                    'success' => false,
+                    'message' => __('Invalid child ID')
+                ]));
         }
-        
-        return $this->response->withType('application/json');
     }
 
     /**
