@@ -33,6 +33,28 @@ class ChildrenController extends AppController
         // Get selected organization ID from query parameter or use primary
         $selectedOrgId = $this->request->getQuery('organization_id');
         
+        // Handle "all" as no filter
+        if ($selectedOrgId === 'all') {
+            $selectedOrgId = null;
+            // Clear session when "all" is selected
+            $this->request->getSession()->delete('selectedOrgId');
+            $this->request->getSession()->delete('activeOrgId');
+        } elseif ($selectedOrgId) {
+            // Store in session when specific org is selected
+            $this->request->getSession()->write('selectedOrgId', $selectedOrgId);
+            $this->request->getSession()->write('activeOrgId', $selectedOrgId);
+        } else {
+            // No query param: try to read from session
+            $selectedOrgId = $this->request->getSession()->read('selectedOrgId');
+            
+            // Validate session value - if it's "all", treat as null
+            if ($selectedOrgId === 'all') {
+                $selectedOrgId = null;
+                $this->request->getSession()->delete('selectedOrgId');
+                $this->request->getSession()->delete('activeOrgId');
+            }
+        }
+        
         // If no selection and user has organizations, use primary
         if (!$selectedOrgId && !empty($userOrgs)) {
             $primaryOrg = $this->getPrimaryOrganization();
@@ -67,7 +89,8 @@ class ChildrenController extends AppController
         $canSelectOrganization = $user->is_system_admin || count($organizations) > 1;
         
         // Get user role in selected organization (for permission checks in view)
-        $userRole = $selectedOrgId ? $this->getUserRoleInOrg((int)$selectedOrgId) : 'org_admin';
+        // Only check role if we have a valid numeric organization ID
+        $userRole = ($selectedOrgId && is_numeric($selectedOrgId)) ? $this->getUserRoleInOrg((int)$selectedOrgId) : 'org_admin';
         $isViewer = ($userRole === 'viewer');
 
         $this->set(compact('children', 'siblingNames', 'organizations', 'selectedOrgId', 'canSelectOrganization', 'isViewer'));
@@ -100,24 +123,40 @@ class ChildrenController extends AppController
 
     /**
      * Add method - Create a new child
+     * 
+     * @param string|null $organization_id Organization id.
      *
      * @return \Cake\Http\Response|null|void Redirects on successful add
      */
-    public function add()
+    public function add($organization_id = null)
     {
         $child = $this->Children->newEmptyEntity();
         
         // Get user's organizations
         $userOrgs = $this->getUserOrganizations();
         
-        // Get selected organization from query, session (activeOrgId from Schedules), or fallback
+        // Get selected organization from query or session
         $selectedOrgId = $this->request->getQuery('organization_id');
-        if ($selectedOrgId) {
+        
+        // Handle "all" as no filter
+        if ($selectedOrgId === 'all' || $selectedOrgId === '') {
+            $selectedOrgId = null;
+            $this->request->getSession()->delete('selectedOrgId');
+        } elseif ($selectedOrgId) {
             $this->request->getSession()->write('selectedOrgId', $selectedOrgId);
         } else {
-            // Try activeOrgId first (set from Schedules index), then selectedOrgId
-            $selectedOrgId = $this->request->getSession()->read('activeOrgId') 
-                ?? $this->request->getSession()->read('selectedOrgId');
+            $selectedOrgId = $this->request->getSession()->read('selectedOrgId');
+        }
+        
+        // Try activeOrgId first (set from Schedules index), then selectedOrgId
+        $selectedOrgId = $this->request->getSession()->read('activeOrgId') 
+                ?? $selectedOrgId;
+        
+        // Validate - if still "all", set to null
+        if ($selectedOrgId === 'all') {
+            $selectedOrgId = null;
+            $this->request->getSession()->delete('selectedOrgId');
+            $this->request->getSession()->delete('activeOrgId');
         }
         
         // Default to first org if still no selection

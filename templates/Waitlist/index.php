@@ -56,11 +56,20 @@ $this->assign('title', __('Waitlist'));
 <div class="waitlist index content">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
         <h3><?= __('Waitlist') ?></h3>
-        <?= $this->Html->link(
-            "+ " . __('Add Child'),
-            ['controller' => 'Children', 'action' => 'add'],
-            ['class' => 'button', 'style' => 'background: #4caf50; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; font-weight: bold;']
-        ) ?>
+        <div style="display: flex; gap: 0.5rem;">
+            <?php if ($selectedSchedule): ?>
+                <?= $this->Html->link(
+                    "📄 " . __('Generate Report'),
+                    ['controller' => 'Schedules', 'action' => 'generate-report', $selectedSchedule->id],
+                    ['class' => 'button', 'style' => 'background: #2196F3; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; font-weight: bold;']
+                ) ?>
+            <?php endif; ?>
+            <?= $this->Html->link(
+                "+ " . __('Add Child'),
+                ['controller' => 'Children', 'action' => 'add'],
+                ['class' => 'button', 'style' => 'background: #4caf50; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; font-weight: bold;']
+            ) ?>
+        </div>
     </div>
     
     <!-- Schedule Selector with Child Count -->

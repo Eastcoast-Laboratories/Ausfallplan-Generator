@@ -16,7 +16,7 @@ $this->assign('title', __('Children'));
     <div class="organization-selector" style="margin-bottom: 2rem;">
         <label for="organization-select"><?= __('Filter by Organization') ?>:</label>
         <select id="organization-select" onchange="window.location.href='<?= $this->Url->build(['action' => 'index']) ?>?organization_id=' + this.value" style="margin-left: 1rem; padding: 0.5rem;">
-            <option value=""><?= __('-- Alle Organisationen --') ?></option>
+            <option value="all"><?= __('All Organizations') ?></option>
             <?php foreach ($organizations as $orgId => $orgName): ?>
                 <option value="<?= $orgId ?>" <?= $selectedOrgId == $orgId ? 'selected' : '' ?>>
                     <?= h($orgName) ?>
