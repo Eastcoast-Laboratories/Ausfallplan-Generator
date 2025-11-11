@@ -110,12 +110,14 @@ class ChildrenController extends AppController
         // Get user's organizations
         $userOrgs = $this->getUserOrganizations();
         
-        // Get selected organization from session (set by filter)
-        $selectedOrgId = $this->request->getSession()->read('selectedOrgId');
-        
-        // If no selection and user has only one org, use it
-        if (!$selectedOrgId && count($userOrgs) === 1) {
-            $selectedOrgId = $userOrgs[0]->id;
+        // Get selected organization from query, session (activeOrgId from Schedules), or fallback
+        $selectedOrgId = $this->request->getQuery('organization_id');
+        if ($selectedOrgId) {
+            $this->request->getSession()->write('selectedOrgId', $selectedOrgId);
+        } else {
+            // Try activeOrgId first (set from Schedules index), then selectedOrgId
+            $selectedOrgId = $this->request->getSession()->read('activeOrgId') 
+                ?? $this->request->getSession()->read('selectedOrgId');
         }
         
         // Default to first org if still no selection

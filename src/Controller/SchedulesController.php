@@ -28,6 +28,7 @@ class SchedulesController extends AppController
         $selectedOrgId = $this->request->getQuery('organization_id');
         if ($selectedOrgId) {
             $this->request->getSession()->write('selectedOrgId', $selectedOrgId);
+            $this->request->getSession()->write('activeOrgId', $selectedOrgId); // Also set as active for Children add
         } else {
             $selectedOrgId = $this->request->getSession()->read('selectedOrgId');
         }

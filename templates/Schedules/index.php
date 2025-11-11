@@ -36,7 +36,7 @@ $this->assign('title', __('Schedules'));
                     <?= __('Organization') ?>:
                 </label>
                 <select name="organization_id" id="organization-filter" onchange="this.form.submit()" style="flex: 1; max-width: 300px;">
-                    <option value=""><?= __('Alle Organisationen') ?></option>
+                    <option value="all"><?= __('All Organizations') ?></option>
                     <?php foreach ($userOrgs as $org): ?>
                         <option value="<?= $org->id ?>" <?= $selectedOrgId == $org->id ? 'selected' : '' ?>>
                             <?= h($org->name) ?>
