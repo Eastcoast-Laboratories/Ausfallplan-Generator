@@ -173,7 +173,7 @@ class SiblingGroupsController extends AppController
      */
     public function edit($id = null)
     {
-        $siblingGroup = $this->SiblingGroups->get($id, contain: []);
+        $siblingGroup = $this->SiblingGroups->get($id, contain: ['Children']);
         
         // Get user's organizations
         $user = $this->Authentication->getIdentity();
@@ -181,6 +181,9 @@ class SiblingGroupsController extends AppController
         
         // Get selected organization (current group's org or from query)
         $selectedOrgId = $this->request->getQuery('organization_id') ?: $siblingGroup->organization_id;
+        
+        // Check if group has children (if yes, organization cannot be changed)
+        $hasChildren = !empty($siblingGroup->children) && count($siblingGroup->children) > 0;
 
         if ($this->request->is(['patch', 'post', 'put'])) {
             $siblingGroup = $this->SiblingGroups->patchEntity($siblingGroup, $this->request->getData());
@@ -193,7 +196,7 @@ class SiblingGroupsController extends AppController
             $this->Flash->error(__('The sibling group could not be updated. Please try again.'));
         }
         
-        $this->set(compact('siblingGroup', 'userOrgs', 'selectedOrgId'));
+        $this->set(compact('siblingGroup', 'userOrgs', 'selectedOrgId', 'hasChildren'));
     }
 
     /**
