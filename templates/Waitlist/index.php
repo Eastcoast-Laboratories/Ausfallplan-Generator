@@ -370,9 +370,20 @@ const sortable = Sortable.create(waitlistEl, {
             return;
         }
         
-        // Get new order
-        const items = waitlistEl.querySelectorAll('.waitlist-item');
-        const order = Array.from(items).map(item => item.dataset.id);
+        // Get new order - handle both single children and sibling groups
+        const items = Array.from(waitlistEl.children);
+        const order = [];
+        
+        items.forEach(item => {
+            if (item.classList.contains('waitlist-item')) {
+                // Single child
+                order.push(item.dataset.id);
+            } else if (item.classList.contains('sibling-group')) {
+                // Sibling group - add all children IDs
+                const childIds = item.dataset.childIds.split(',');
+                childIds.forEach(id => order.push(id));
+            }
+        });
         
         // Send AJAX request to update order
         fetch('<?= $this->Url->build(['action' => 'reorder']) ?>', {
@@ -382,19 +393,18 @@ const sortable = Sortable.create(waitlistEl, {
                 'X-CSRF-Token': '<?= $this->request->getAttribute('csrfToken') ?>'
             },
             body: JSON.stringify({
-                schedule_id: <?= $selectedSchedule->id ?>,
+                schedule_id: <?= json_encode($selectedSchedule ? $selectedSchedule->id : 0) ?>,
                 order: order
             })
         })
         .then(response => response.json())
         .then(data => {
-            if (!data.success) {
-                console.error('Reorder failed');
+            if (data.success) {
+                location.reload();
             }
-            location.reload();
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.error('Error updating order:', error);
             location.reload();
         });
     }

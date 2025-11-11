@@ -114,23 +114,43 @@ class SiblingGroupsController extends AppController
     {
         $siblingGroup = $this->SiblingGroups->newEmptyEntity();
         
+        // Get user's organizations
+        $user = $this->Authentication->getIdentity();
+        $userOrgs = $this->getUserOrganizations();
+        
+        // Get selected organization from query or session
+        $selectedOrgId = $this->request->getQuery('organization_id');
+        
+        // Handle "all" as no filter
+        if ($selectedOrgId === 'all' || $selectedOrgId === '') {
+            $selectedOrgId = null;
+            $this->request->getSession()->delete('selectedOrgId');
+        } elseif ($selectedOrgId) {
+            $this->request->getSession()->write('selectedOrgId', $selectedOrgId);
+        } else {
+            $selectedOrgId = $this->request->getSession()->read('selectedOrgId');
+        }
+        
+        // Default to first org if still no selection
+        if (!$selectedOrgId && !empty($userOrgs)) {
+            $selectedOrgId = $userOrgs[0]->id;
+        }
+        
         if ($this->request->is('post')) {
             $data = $this->request->getData();
             
-            // Set organization from authenticated user's primary organization
-            $user = $this->Authentication->getIdentity();
-            $organizationUsersTable = $this->fetchTable('OrganizationUsers');
-            $orgUser = $organizationUsersTable->find()
-                ->where(['user_id' => $user->id, 'is_primary' => true])
-                ->first();
-            
-            if (!$orgUser) {
-                $this->Flash->error(__('You must be assigned to an organization to create sibling groups.'));
-                $this->set(compact('siblingGroup'));
-                return;
+            // Set organization from form or selected org
+            if (empty($data['organization_id'])) {
+                if ($selectedOrgId) {
+                    $data['organization_id'] = $selectedOrgId;
+                } elseif (!empty($userOrgs)) {
+                    $data['organization_id'] = $userOrgs[0]->id;
+                } else {
+                    $this->Flash->error(__('You must be assigned to an organization to create sibling groups.'));
+                    $this->set(compact('siblingGroup', 'userOrgs', 'selectedOrgId'));
+                    return;
+                }
             }
-            
-            $data['organization_id'] = $orgUser->organization_id;
             
             $siblingGroup = $this->SiblingGroups->patchEntity($siblingGroup, $data);
             
@@ -142,7 +162,7 @@ class SiblingGroupsController extends AppController
             $this->Flash->error(__('The sibling group could not be saved. Please try again.'));
         }
         
-        $this->set(compact('siblingGroup'));
+        $this->set(compact('siblingGroup', 'userOrgs', 'selectedOrgId'));
     }
 
     /**
@@ -154,6 +174,13 @@ class SiblingGroupsController extends AppController
     public function edit($id = null)
     {
         $siblingGroup = $this->SiblingGroups->get($id, contain: []);
+        
+        // Get user's organizations
+        $user = $this->Authentication->getIdentity();
+        $userOrgs = $this->getUserOrganizations();
+        
+        // Get selected organization (current group's org or from query)
+        $selectedOrgId = $this->request->getQuery('organization_id') ?: $siblingGroup->organization_id;
 
         if ($this->request->is(['patch', 'post', 'put'])) {
             $siblingGroup = $this->SiblingGroups->patchEntity($siblingGroup, $this->request->getData());
@@ -166,7 +193,7 @@ class SiblingGroupsController extends AppController
             $this->Flash->error(__('The sibling group could not be updated. Please try again.'));
         }
         
-        $this->set(compact('siblingGroup'));
+        $this->set(compact('siblingGroup', 'userOrgs', 'selectedOrgId'));
     }
 
     /**
