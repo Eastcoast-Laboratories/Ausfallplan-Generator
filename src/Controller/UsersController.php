@@ -438,6 +438,10 @@ class UsersController extends AppController
             // Also set locale immediately for current request
             \Cake\I18n\I18n::setLocale($locale);
             
+            // Clear translation cache to prevent permission errors
+            // This fixes: "Failed to open stream: Permission denied" on cache files
+            \Cake\Cache\Cache::clear('_cake_core_');
+            
             $this->Flash->success(__('Language changed to {0}', $lang === 'de' ? 'Deutsch' : 'English'));
         }
         
