@@ -628,13 +628,22 @@ $currentLangShort = substr($currentLang, 0, 2);
         }
         
         // Check if we already have DEKs in sessionStorage
-        const existingDeks = encryptionData.wrapped_deks && encryptionData.wrapped_deks.filter(dek => 
-            window.OrgEncryption.getDEK(dek.organization_id) !== null
-        );
-        
-        if (existingDeks && existingDeks.length === (encryptionData.wrapped_deks || []).length) {
-            console.log('DEKs already unwrapped');
-            return;
+        if (encryptionData.wrapped_deks && encryptionData.wrapped_deks.length > 0) {
+            let allUnwrapped = true;
+            for (const dekData of encryptionData.wrapped_deks) {
+                const existingDek = await window.OrgEncryption.getDEK(dekData.organization_id);
+                if (!existingDek) {
+                    allUnwrapped = false;
+                    break;
+                }
+            }
+            
+            if (allUnwrapped) {
+                console.log('DEKs already unwrapped');
+                return;
+            }
+        } else {
+            console.log('⚠️ No wrapped_deks in encryptionData!');
         }
         
         // Try to get password from sessionStorage (from login)

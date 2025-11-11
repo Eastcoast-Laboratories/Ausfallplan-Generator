@@ -101,15 +101,32 @@ class UsersController extends AppController
             
             if ($this->Users->save($user)) {
                 // Handle encryption: Save wrapped DEK if provided (generated client-side)
-                if (!empty($data['public_key']) && !empty($data['wrapped_dek']) && $organization->encryption_enabled) {
+                $hasPublicKey = !empty($data['public_key']);
+                $hasWrappedDek = !empty($data['wrapped_dek']);
+                $encryptionEnabled = $organization->encryption_enabled;
+                
+                error_log("DEBUG Registration - hasPublicKey: " . ($hasPublicKey ? 'YES' : 'NO'));
+                error_log("DEBUG Registration - hasWrappedDek: " . ($hasWrappedDek ? 'YES' : 'NO'));  
+                error_log("DEBUG Registration - encryptionEnabled: " . ($encryptionEnabled ? 'YES' : 'NO'));
+                error_log("DEBUG Registration - organization_id: " . $organization->id);
+                error_log("DEBUG Registration - user_id: " . $user->id);
+                
+                if ($hasPublicKey && $hasWrappedDek && $encryptionEnabled) {
                     $encryptedDeksTable = $this->fetchTable('EncryptedDeks');
                     
                     // Save the wrapped DEK (already encrypted with user's public key client-side)
-                    $encryptedDeksTable->save($encryptedDeksTable->newEntity([
+                    $dekEntity = $encryptedDeksTable->newEntity([
                         'organization_id' => $organization->id,
                         'user_id' => $user->id,
                         'wrapped_dek' => $data['wrapped_dek'],
-                    ]));
+                    ]);
+                    
+                    $saved = $encryptedDeksTable->save($dekEntity);
+                    error_log("DEBUG Registration - DEK saved: " . ($saved ? 'YES' : 'NO'));
+                    
+                    if (!$saved) {
+                        error_log("DEBUG Registration - DEK save errors: " . json_encode($dekEntity->getErrors()));
+                    }
                 }
                 
                 // Create organization_users entry

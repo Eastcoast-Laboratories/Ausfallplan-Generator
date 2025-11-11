@@ -66,7 +66,7 @@ test.describe('Complete Encryption Flow', () => {
         await page.waitForTimeout(1000);
         
         await page.fill('input[name="name"]', child1Name);
-        await page.selectOption('select[name="gender"]', 'male');
+        await page.selectOption('select[name="gender"]', 'm');
         await page.fill('input[name="birthdate"]', '2020-01-15');
         
         await page.click('button[type="submit"]');
@@ -79,9 +79,9 @@ test.describe('Complete Encryption Flow', () => {
         await page.waitForTimeout(1000);
         
         await page.fill('input[name="name"]', child2Name);
-        await page.selectOption('select[name="gender"]', 'female');
+        await page.selectOption('select[name="gender"]', 'f');
         await page.fill('input[name="birthdate"]', '2019-06-20');
-        await page.check('input[name="is_integration_child"]');
+        await page.check('input[name="is_integrative"]');
         
         await page.click('button[type="submit"]');
         await page.waitForTimeout(2000);
