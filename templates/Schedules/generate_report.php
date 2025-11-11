@@ -257,7 +257,10 @@ $this->assign('title', __('FairNestPlan') . ' - ' . h($schedule->title));
                     <ul class="children-list">
                         <?php foreach ($day['children'] as $childData): ?>
                             <li class="child-item">
-                                <span class="child-name"><?= h($childData['child']->name) ?></span>
+                                <span class="child-name"
+                                    data-encrypted="<?= h($childData['child']->name_encrypted ?? '') ?>"
+                                    data-iv="<?= h($childData['child']->name_iv ?? '') ?>"
+                                    data-tag="<?= h($childData['child']->name_tag ?? '') ?>"><?= h($childData['child']->name) ?></span>
                                 <span class="child-weight"><?= $childData['is_integrative'] ? '2' : '1' ?></span>
                             </li>
                         <?php endforeach; ?>
@@ -269,7 +272,10 @@ $this->assign('title', __('FairNestPlan') . ' - ' . h($schedule->title));
                         <?php if ($day['firstOnWaitlistChild']): ?>
                             <div class="firstOnWaitlist-child">
                                 <span class="flag-icon">⬇️</span>
-                                <?= h($day['firstOnWaitlistChild']['child']->name) ?> 
+                                <span class="child-name"
+                                    data-encrypted="<?= h($day['firstOnWaitlistChild']['child']->name_encrypted ?? '') ?>"
+                                    data-iv="<?= h($day['firstOnWaitlistChild']['child']->name_iv ?? '') ?>"
+                                    data-tag="<?= h($day['firstOnWaitlistChild']['child']->name_tag ?? '') ?>"><?= h($day['firstOnWaitlistChild']['child']->name) ?></span> 
                             </div>
                         <?php endif; ?>
                     </div>
@@ -309,7 +315,12 @@ $this->assign('title', __('FairNestPlan') . ' - ' . h($schedule->title));
                             $childId = $child->id;
                             $stats = isset($childStats[$childId]) ? $childStats[$childId] : ['daysCount' => 0, 'firstOnWaitlistCount' => 0];
                         ?>
-                            <div style="padding: 2px 0;"><?= h($child->name) ?></div>
+                            <div style="padding: 2px 0;">
+                                <span class="child-name"
+                                    data-encrypted="<?= h($child->name_encrypted ?? '') ?>"
+                                    data-iv="<?= h($child->name_iv ?? '') ?>"
+                                    data-tag="<?= h($child->name_tag ?? '') ?>"><?= h($child->name) ?></span>
+                            </div>
                             <div style="background: #e3f2fd; padding: 2px 6px; border-radius: 3px; font-weight: bold; text-align: center;"><?= h($count) ?></div>
                             <div class="not-on-print checksums" style="text-align: center;"><?= h($stats['daysCount']) ?></div>
                             <div class="not-on-print checksums" style="text-align: center;"><?= h($stats['firstOnWaitlistCount']) ?></div>
@@ -337,7 +348,12 @@ $this->assign('title', __('FairNestPlan') . ' - ' . h($schedule->title));
                             $childId = $childData['child']->id;
                             $stats = isset($childStats[$childId]) ? $childStats[$childId] : ['daysCount' => 0, 'firstOnWaitlistCount' => 0];
                             ?>
-                            <div style="padding: 2px 0;"><?= h($childData['child']->name) ?></div>
+                            <div style="padding: 2px 0;">
+                                <span class="child-name"
+                                    data-encrypted="<?= h($childData['child']->name_encrypted ?? '') ?>"
+                                    data-iv="<?= h($childData['child']->name_iv ?? '') ?>"
+                                    data-tag="<?= h($childData['child']->name_tag ?? '') ?>"><?= h($childData['child']->name) ?></span>
+                            </div>
                             <div style="background: #e3f2fd; padding: 2px 6px; border-radius: 3px; font-weight: bold; text-align: center;"><?= h($childData['weight']) ?></div>
                             <div style="color: #999; text-align: center;" class="not-on-print checksums"><?= h($stats['daysCount']) ?></div>
                             <div style="color: #999; text-align: center;" class="not-on-print checksums"><?= h($stats['firstOnWaitlistCount']) ?></div>
