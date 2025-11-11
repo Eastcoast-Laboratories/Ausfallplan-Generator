@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-use Migrations\AbstractMigration;
+use Migrations\BaseMigration;
 
 /**
  * Add client-side encryption support for multi-user organizations
@@ -11,8 +11,10 @@ use Migrations\AbstractMigration;
  * - user encryption keys (public/private key pairs)
  * - encrypted_deks table for wrapped data encryption keys
  * - encrypted name fields to children table
+ * 
+ * IMPORTANT: Using BaseMigration instead of AbstractMigration for SQLite compatibility
  */
-class AddEncryptionSupport extends AbstractMigration
+class AddEncryptionSupport extends BaseMigration
 {
     /**
      * Change Method.
@@ -28,36 +30,29 @@ class AddEncryptionSupport extends AbstractMigration
     public function change(): void
     {
         // Add encryption_enabled to organizations table
-        $organizations = $this->table('organizations');
-        $organizations
-            ->addColumn('encryption_enabled', 'boolean', [
-                'default' => true,
-                'null' => false,
-                'after' => 'is_active',
-                'comment' => 'Enable client-side encryption for sensitive data',
-            ])
-            ->update();
+        $table = $this->table('organizations');
+        $table->addColumn('encryption_enabled', 'boolean', [
+            'default' => true,
+            'null' => false,
+            'comment' => 'Enable client-side encryption for sensitive data',
+        ])->update();
 
         // Add encryption keys to users table
-        $users = $this->table('users');
-        $users
-            ->addColumn('public_key', 'text', [
-                'null' => true,
-                'after' => 'password',
-                'comment' => 'RSA/EC public key for encrypting DEKs',
-            ])
-            ->addColumn('encrypted_private_key', 'text', [
-                'null' => true,
-                'after' => 'public_key',
-                'comment' => 'Private key encrypted with password-derived KEK',
-            ])
-            ->addColumn('key_salt', 'string', [
-                'limit' => 255,
-                'null' => true,
-                'after' => 'encrypted_private_key',
-                'comment' => 'Salt for password-based key derivation',
-            ])
-            ->update();
+        $table = $this->table('users');
+        $table->addColumn('public_key', 'text', [
+            'null' => true,
+            'comment' => 'RSA/EC public key for encrypting DEKs',
+        ])
+        ->addColumn('encrypted_private_key', 'text', [
+            'null' => true,
+            'comment' => 'Private key encrypted with password-derived KEK',
+        ])
+        ->addColumn('key_salt', 'string', [
+            'limit' => 255,
+            'null' => true,
+            'comment' => 'Salt for password-based key derivation',
+        ])
+        ->update();
 
         // Create encrypted_deks table for wrapped data encryption keys
         $encryptedDeks = $this->table('encrypted_deks');
@@ -94,25 +89,9 @@ class AddEncryptionSupport extends AbstractMigration
             ->create();
 
         // Add encrypted name fields to children table
-        $children = $this->table('children');
-        $children
-            ->addColumn('name_encrypted', 'text', [
-                'null' => true,
-                'after' => 'name',
-                'comment' => 'Encrypted name (AES-GCM ciphertext)',
-            ])
-            ->addColumn('name_iv', 'string', [
-                'limit' => 255,
-                'null' => true,
-                'after' => 'name_encrypted',
-                'comment' => 'Initialization vector for name encryption',
-            ])
-            ->addColumn('name_tag', 'string', [
-                'limit' => 255,
-                'null' => true,
-                'after' => 'name_iv',
-                'comment' => 'Authentication tag for name encryption',
-            ])
-            ->update();
+        // Using raw SQL for SQLite compatibility
+        $this->execute('ALTER TABLE children ADD COLUMN name_encrypted TEXT NULL');
+        $this->execute('ALTER TABLE children ADD COLUMN name_iv VARCHAR(255) NULL');
+        $this->execute('ALTER TABLE children ADD COLUMN name_tag VARCHAR(255) NULL');
     }
 }

@@ -122,23 +122,25 @@
   - [x] Update via API
   - [x] Show encryption icon/badge (🔒/🔓)
 
-#### Children Forms ✅
+#### Children Forms 🔄
 - [x] Include orgEncryption.js script
 - [x] Registration/Login
-  - [x] Generate keys on registration
-  - [x] Store wrapped private key and salt
-  - [x] Unwrap keys on login
-  - [x] Store in sessionStorage
+  - [x] Generate keys on registration ✅
+  - [x] Store wrapped private key and salt ✅
+  - [ ] Unwrap keys on login ⚠️ (Dialog is shown but user can dismiss it)
+  - [ ] Store in sessionStorage ⚠️ (Only works if user enters password)
 - [x] Child Create/Edit Forms
-  - [x] Check if organization has encryption enabled
-  - [x] If enabled: encrypt name field before submit
-  - [x] Send name_encrypted, name_iv, name_tag to server
-  - [x] If disabled: send plaintext name
+  - [x] Check if organization has encryption enabled ✅
+  - [ ] If enabled: encrypt name field before submit ⚠️ (Code present but DEK not in sessionStorage)
+  - [x] Send name_encrypted, name_iv, name_tag to server ✅ (Fields sent but empty)
+  - [x] If disabled: send plaintext name ✅
 - [x] Child Display/List
-  - [x] Check if organization has encryption enabled
-  - [x] If enabled: decrypt name_encrypted on page load
-  - [x] Display decrypted name in UI
-  - [x] If disabled: display plaintext name
+  - [x] Check if organization has encryption enabled ✅
+  - [ ] If enabled: decrypt name_encrypted on page load ⚠️ (Code present but DEK not available)
+  - [x] Display decrypted name in UI ⚠️ (Falls back to plaintext)
+  - [x] If disabled: display plaintext name ✅
+
+**Status:** UI code is complete but encryption requires manual password entry after login. Need to improve UX for automatic key unwrapping.
 
 #### User Management 🔄
 - [ ] When adding user to organization
