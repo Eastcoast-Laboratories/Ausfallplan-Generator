@@ -507,5 +507,8 @@ return [
     'Your password' => 'Ihr Passwort',
     '⚠️ WARNUNG: Verschlüsselung deaktivieren?' => '⚠️ WARNUNG: Verschlüsselung deaktivieren?',
     'Alle verschlüsselten Kindernamen werden automatisch entschlüsselt und als Klartext in der Datenbank gespeichert. Dieser Vorgang kann nicht rückgängig gemacht werden.' => 'Alle verschlüsselten Kindernamen werden automatisch entschlüsselt und als Klartext in der Datenbank gespeichert. Dieser Vorgang kann nicht rückgängig gemacht werden.',
-    'Fortfahren?' => 'Fortfahren?'
+    'Fortfahren?' => 'Fortfahren?',
+    'Sensible Daten (z.B. Kindernamen) werden clientseitig verschlüsselt' => 'Sensible Daten (z.B. Kindernamen) werden clientseitig verschlüsselt',
+    'Sensible Daten werden unverschlüsselt gespeichert' => 'Sensible Daten werden unverschlüsselt gespeichert',
+    'Änderbar unter' => 'Änderbar unter'
 ];
