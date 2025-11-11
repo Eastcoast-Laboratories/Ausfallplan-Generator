@@ -28,6 +28,16 @@ test.describe('Encryption Complete Flow', () => {
         const child2Name = `EncChild2_${timestamp}`;
         const child3Name = `EncChild3_${timestamp}`;
 
+        // Listen to ALL console logs from the browser for debugging
+        page.on('console', msg => {
+            const text = msg.text();
+            if (text.includes('Auto-unwrapping') || text.includes('ENCRYPTION_CHECK') || 
+                text.includes('DEK') || text.includes('sessionStorage') || 
+                text.includes('password') || text.includes('Unwrapping')) {
+                console.log('[BROWSER]', text);
+            }
+        });
+
         console.log('=== Step 1: Register new user with encryption keys ===');
         await page.goto('http://localhost:8080/users/register');
         

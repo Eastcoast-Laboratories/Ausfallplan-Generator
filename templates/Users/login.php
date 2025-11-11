@@ -15,21 +15,24 @@
                 'label' => __('Email'),
                 'required' => true,
                 'placeholder' => 'email@example.com',
-                'autofocus' => true
+                'autofocus' => true,
+                'id' => 'email-field'
             ]);
             echo $this->Form->control('password', [
                 'type' => 'password',
                 'label' => __('Password'),
-                'required' => true
+                'required' => true,
+                'id' => 'password-field'
             ]);
         ?>
     </fieldset>
     
     <div class="form-actions">
-        <?= $this->Form->button(__('Login'), ['class' => 'button-primary']) ?>
+        <?= $this->Form->button(__('Login'), ['class' => 'button-primary', 'id' => 'login-button']) ?>
         <?= $this->Html->link(__('Create new account'), ['action' => 'register'], ['class' => 'button']) ?>
     </div>
     <?= $this->Form->end() ?>
+    
 </div>
 
 <style>
@@ -69,13 +72,31 @@
 }
 </style>
 
-<?php
-// Check if encryption data is available in session (after successful login)
-$encryptionData = $this->request->getSession()->read('encryption');
-if ($encryptionData): ?>
 <?= $this->Html->script('crypto/orgEncryption', ['block' => true]) ?>
 <script>
-document.addEventListener('DOMContentLoaded', async function() {
+// Capture password before login for automatic key unwrapping
+document.addEventListener('DOMContentLoaded', function() {
+    const loginForm = document.querySelector('form');
+    const passwordField = document.getElementById('password-field');
+    
+    if (loginForm && passwordField) {
+        loginForm.addEventListener('submit', function() {
+            // Store password temporarily in sessionStorage for key unwrapping after redirect
+            try {
+                sessionStorage.setItem('_temp_login_password', passwordField.value);
+                console.log('Password stored in sessionStorage for key unwrapping');
+            } catch (e) {
+                console.error('Failed to store password:', e);
+            }
+        });
+    }
+});
+
+// Auto-unwrap keys after successful login
+<?php
+$encryptionData = $this->request->getSession()->read('encryption');
+if ($encryptionData): ?>
+(async function() {
     if (!window.OrgEncryption) {
         console.warn('Encryption module not available');
         return;
@@ -88,16 +109,23 @@ document.addEventListener('DOMContentLoaded', async function() {
         return;
     }
     
-    // Prompt for password to unwrap private key
-    const password = prompt('<?= __('Enter your password to unlock encrypted data:') ?>');
+    // Get password from sessionStorage
+    let password = null;
+    try {
+        password = sessionStorage.getItem('_temp_login_password');
+    } catch (e) {
+        console.error('Failed to read password from sessionStorage:', e);
+    }
     
     if (!password) {
-        console.log('Password not provided, encrypted data will not be available');
+        console.log('No password available for automatic key unwrapping');
         return;
     }
     
+    console.log('Password retrieved from sessionStorage');
+    
     try {
-        console.log('Unwrapping private key...');
+        console.log('Automatically unwrapping private key...');
         const privateKey = await window.OrgEncryption.unwrapPrivateKeyWithPassword(
             encryptionData.encrypted_private_key,
             password,
@@ -118,22 +146,29 @@ document.addEventListener('DOMContentLoaded', async function() {
                     
                     // Store DEK in session storage
                     window.OrgEncryption.storeDEK(wrappedDekData.organization_id, dek);
-                    console.log(`DEK stored for organization ${wrappedDekData.organization_id}`);
+                    console.log(`✅ DEK stored for organization ${wrappedDekData.organization_id}`);
                 } catch (error) {
                     console.error(`Failed to unwrap DEK for organization ${wrappedDekData.organization_id}:`, error);
                 }
             }
         }
         
-        console.log('Encryption keys loaded successfully');
-        alert('<?= __('Encrypted data unlocked successfully!') ?>');
+        console.log('✅ Encryption keys loaded successfully - encryption active!');
         
-        // Redirect to dashboard
-        window.location.href = '/dashboard';
+        // Clear temp password from sessionStorage
+        try {
+            sessionStorage.removeItem('_temp_login_password');
+            console.log('Temp password cleared from sessionStorage');
+        } catch (e) {
+            console.error('Failed to clear temp password:', e);
+        }
+        
+        // DON'T redirect - user is already on login page after successful login
+        // The login controller redirects us, so we don't need to do it here
     } catch (error) {
         console.error('Key unwrapping error:', error);
-        alert('<?= __('Failed to unlock encrypted data. Please check your password.') ?>');
+        console.log('⚠️ Encryption not available - falling back to plaintext');
     }
-});
-</script>
+})();
 <?php endif; ?>
+</script>

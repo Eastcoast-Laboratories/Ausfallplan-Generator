@@ -593,6 +593,85 @@ $currentLangShort = substr($currentLang, 0, 2);
         });
     </script>
     
+    <!-- Auto-unwrap encryption keys on every page load -->
+    <?php
+    $encryptionData = $this->request->getSession()->read('encryption');
+    if ($encryptionData): ?>
+    <?= $this->Html->script('crypto/orgEncryption') ?>
+    <script>
+    (async function() {
+        // Check if DEKs are already unwrapped
+        if (!window.OrgEncryption) {
+            return;
+        }
+        
+        const encryptionData = <?= json_encode($encryptionData) ?>;
+        
+        if (!encryptionData || !encryptionData.encrypted_private_key || !encryptionData.key_salt) {
+            return;
+        }
+        
+        // Check if we already have DEKs in sessionStorage
+        const existingDeks = encryptionData.wrapped_deks && encryptionData.wrapped_deks.filter(dek => 
+            window.OrgEncryption.getDEK(dek.organization_id) !== null
+        );
+        
+        if (existingDeks && existingDeks.length === (encryptionData.wrapped_deks || []).length) {
+            console.log('DEKs already unwrapped');
+            return;
+        }
+        
+        // Try to get password from sessionStorage (from login)
+        let password = null;
+        try {
+            password = sessionStorage.getItem('_temp_login_password');
+        } catch (e) {
+            console.error('Failed to read password:', e);
+        }
+        
+        if (!password) {
+            console.log('No password available for automatic key unwrapping');
+            return;
+        }
+        
+        try {
+            console.log('Auto-unwrapping private key...');
+            const privateKey = await window.OrgEncryption.unwrapPrivateKeyWithPassword(
+                encryptionData.encrypted_private_key,
+                password,
+                encryptionData.key_salt
+            );
+            
+            // Unwrap DEKs for each organization
+            if (encryptionData.wrapped_deks && encryptionData.wrapped_deks.length > 0) {
+                for (const wrappedDekData of encryptionData.wrapped_deks) {
+                    try {
+                        const dek = await window.OrgEncryption.unwrapDEK(
+                            wrappedDekData.wrapped_dek,
+                            privateKey
+                        );
+                        
+                        window.OrgEncryption.storeDEK(wrappedDekData.organization_id, dek);
+                        console.log(`✅ DEK stored for organization ${wrappedDekData.organization_id}`);
+                    } catch (error) {
+                        console.error(`Failed to unwrap DEK for organization ${wrappedDekData.organization_id}:`, error);
+                    }
+                }
+            }
+            
+            console.log('✅ Encryption keys loaded - encryption active!');
+            
+            // Clear temp password
+            try {
+                sessionStorage.removeItem('_temp_login_password');
+            } catch (e) {}
+        } catch (error) {
+            console.error('Key unwrapping error:', error);
+        }
+    })();
+    </script>
+    <?php endif; ?>
+    
     <?= $this->fetch('script') ?>
 </body>
 </html>

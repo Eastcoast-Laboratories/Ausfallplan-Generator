@@ -93,8 +93,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Check if organization has encryption enabled
         const selectedOrgId = <?= json_encode($selectedOrgId ?? 0) ?>;
         
+        console.log('ENCRYPTION_CHECK: selectedOrgId =', selectedOrgId);
+        
         if (!selectedOrgId) {
-            console.log('No organization selected, proceeding without encryption');
+            console.log('ENCRYPTION_CHECK: No organization selected, proceeding without encryption');
             form.submit();
             return;
         }
@@ -102,8 +104,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Try to get DEK from session storage
         const dek = window.OrgEncryption.getDEK(selectedOrgId);
         
+        console.log('ENCRYPTION_CHECK: DEK found =', dek ? 'YES' : 'NO');
+        console.log('ENCRYPTION_CHECK: sessionStorage keys =', Object.keys(sessionStorage));
+        
         if (!dek) {
-            console.log('No DEK available for organization, proceeding without encryption');
+            console.log('ENCRYPTION_CHECK: No DEK available for organization, proceeding without encryption');
             form.submit();
             return;
         }
