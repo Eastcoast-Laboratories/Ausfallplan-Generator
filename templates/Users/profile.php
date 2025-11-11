@@ -69,85 +69,6 @@ $this->assign('title', __('Profile Settings'));
             </div>
         </div>
 
-        <div class="form-section" style="display: none;">
-            <h2><?= __('Encryption & Security (OLD - HIDDEN)') ?> 🔐</h2>
-            
-            <div class="form-row">
-                <div class="form-info">
-                    <label><?= __('Client-Side Encryption Status') ?></label>
-                    <?php 
-                    $hasPublicKey = !empty($userEntity->public_key) && strlen($userEntity->public_key) > 100;
-                    $hasPrivateKey = !empty($userEntity->encrypted_private_key) && strlen($userEntity->encrypted_private_key) > 100;
-                    $hasSalt = !empty($userEntity->key_salt) && strlen($userEntity->key_salt) > 10;
-                    $hasFullEncryption = $hasPublicKey && $hasPrivateKey && $hasSalt;
-                    ?>
-                    
-                    <?php if ($hasFullEncryption): ?>
-                        <div class="encryption-status enabled" id="encryption-status-container">
-                            <span class="status-icon">✅</span>
-                            <span class="status-text"><?= __('Encryption Enabled') ?></span>
-                        </div>
-                        <div id="encryption-error-warning" style="display: none; margin-top: 10px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107; color: #856404;">
-                            <strong>⚠️ <?= __('Encryption Key Error') ?></strong><br>
-                            <span id="encryption-error-message"></span><br>
-                            <small><?= __('Your encryption keys may be corrupted or incompatible. Please regenerate your encryption keys.') ?></small>
-                            <div style="margin-top: 10px;">
-                                <button type="button" id="re-enter-password-btn" class="button-secondary" style="margin-right: 10px;">
-                                    🔑 <?= __('Re-enter Password') ?>
-                                </button>
-                                <button type="button" id="regenerate-keys-btn" class="button-danger">
-                                    🔄 <?= __('Regenerate Keys') ?>
-                                </button>
-                            </div>
-                        </div>
-                        <small>
-                            <?= __('Your sensitive data is encrypted using client-side encryption. Your encryption keys were generated on {0}.', [
-                                $userEntity->created ? $userEntity->created->format('d.m.Y') : __('registration')
-                            ]) ?>
-                        </small>
-                        <div class="encryption-details">
-                            <small style="color: #666;">
-                                <strong><?= __('Technical Info:') ?></strong><br>
-                                • <?= __('Public Key Length:') ?> <?= strlen($userEntity->public_key) ?> <?= __('chars') ?><br>
-                                • <?= __('Encrypted Private Key Length:') ?> <?= strlen($userEntity->encrypted_private_key) ?> <?= __('chars') ?><br>
-                                • <?= __('Key Salt Length:') ?> <?= strlen($userEntity->key_salt) ?> <?= __('chars') ?><br>
-                                • <?= __('Encryption: RSA-OAEP-2048 + AES-GCM-256') ?>
-                            </small>
-                        </div>
-                        <div style="margin-top: 15px;">
-                            <button type="button" id="regenerate-keys-enabled-btn" class="button-secondary">
-                                🔄 <?= __('Regenerate Encryption Keys') ?>
-                            </button>
-                        </div>
-                    <?php else: ?>
-                        <div class="encryption-status disabled">
-                            <span class="status-icon">⚠️</span>
-                            <span class="status-text"><?= __('Encryption Not Set Up') ?></span>
-                        </div>
-                        <small>
-                            <?= __('Your account does not have encryption keys configured. Set up encryption to protect your sensitive data.') ?>
-                        </small>
-                        <?php if (!$hasPublicKey && !$hasPrivateKey && !$hasSalt): ?>
-                            <small style="display: block; margin-top: 5px; color: #999;">
-                                <?= __('Status: No encryption keys found in database.') ?>
-                            </small>
-                        <?php else: ?>
-                            <small style="display: block; margin-top: 5px; color: #d9534f;">
-                                <?= __('Warning: Partial encryption data detected. Keys may be corrupted.') ?><br>
-                                • <?= __('Public Key:') ?> <?= $hasPublicKey ? '✓' : '✗' ?><br>
-                                • <?= __('Private Key:') ?> <?= $hasPrivateKey ? '✓' : '✗' ?><br>
-                                • <?= __('Salt:') ?> <?= $hasSalt ? '✓' : '✗' ?>
-                            </small>
-                        <?php endif; ?>
-                        <div style="margin-top: 10px;">
-                            <button type="button" id="setup-encryption-btn" class="button-primary">
-                                <?= $hasPublicKey || $hasPrivateKey || $hasSalt ? __('Regenerate Encryption Keys') : __('Set Up Encryption Now') ?> 🔒
-                            </button>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
 
         <div class="form-section">
             <h2><?= __('Personal Information') ?></h2>
@@ -573,16 +494,41 @@ $this->assign('title', __('Profile Settings'));
         const regeneratePasswordInput = document.getElementById('regenerate-password-input');
         const regeneratePasswordGroup = document.getElementById('regenerate-password-group');
         
-        if (regenerateKeysEnabledBtn && regeneratePasswordInput && window.OrgEncryption) {
-            regenerateKeysEnabledBtn.addEventListener('click', async function() {
+        console.log('🔐 SCRIPT LOADED: Looking for regenerate button...');
+        console.log('🔐 Button element:', regenerateKeysEnabledBtn);
+        console.log('🔐 Password input:', regeneratePasswordInput);
+        console.log('🔐 Password group:', regeneratePasswordGroup);
+        
+        if (regenerateKeysEnabledBtn) {
+            console.log('✅ Regenerate button found! Adding event listener...');
+            regenerateKeysEnabledBtn.addEventListener('click', async function(event) {
+                console.log('🔥 REGENERATE BUTTON CLICKED!', event);
+                console.log('🔐 Event type:', event.type);
+                console.log('🔐 Target:', event.target);
+                console.log('🔐 Button disabled?', regenerateKeysEnabledBtn.disabled);
+                
                 // Show password field if hidden
                 if (regeneratePasswordGroup && regeneratePasswordGroup.style.display === 'none') {
+                    console.log('🔐 Showing password field');
                     regeneratePasswordGroup.style.display = 'block';
-                    regeneratePasswordInput.focus();
+                    if (regeneratePasswordInput) {
+                        regeneratePasswordInput.focus();
+                    }
+                    return;
+                }
+                
+                // Check if OrgEncryption is available
+                if (!window.OrgEncryption) {
+                    alert('Encryption module not loaded. Please reload the page.');
                     return;
                 }
                 
                 if (!confirm('<?= __('⚠️ WARNING: This will regenerate your encryption keys. All existing encrypted data will become inaccessible and must be re-encrypted. This action cannot be undone. Continue?') ?>')) {
+                    return;
+                }
+                
+                if (!regeneratePasswordInput) {
+                    alert('Password input field not found.');
                     return;
                 }
                 
@@ -644,6 +590,10 @@ $this->assign('title', __('Profile Settings'));
                     regenerateKeysEnabledBtn.textContent = '🔄 <?= __('Regenerate Encryption Keys') ?>';
                 }
             });
+        } else {
+            console.error('❌ REGENERATE BUTTON NOT FOUND! Button with id "regenerate-keys-enabled-btn" does not exist in the DOM.');
+            console.log('🔍 All buttons on page:', document.querySelectorAll('button'));
+            console.log('🔍 All elements with class "button-secondary":', document.querySelectorAll('.button-secondary'));
         }
     });
     </script>
