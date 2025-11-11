@@ -131,10 +131,10 @@ document.addEventListener('DOMContentLoaded', async function() {
             console.log('Encrypting name field...');
             const encrypted = await window.OrgEncryption.encryptField(name, dek);
             
-            // Set encrypted values
-            nameEncryptedField.value = encrypted.ciphertext;
-            nameIvField.value = encrypted.iv;
-            nameTagField.value = encrypted.tag;
+            // Convert ArrayBuffer and Uint8Arrays to Base64 for form submission
+            nameEncryptedField.value = window.OrgEncryption.arrayBufferToBase64(encrypted.ciphertext);
+            nameIvField.value = window.OrgEncryption.arrayBufferToBase64(encrypted.iv.buffer);
+            nameTagField.value = window.OrgEncryption.arrayBufferToBase64(encrypted.tag.buffer);
             
             console.log('Name encrypted successfully, submitting form...');
             

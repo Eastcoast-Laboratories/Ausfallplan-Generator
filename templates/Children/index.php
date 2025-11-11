@@ -239,12 +239,18 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
         
         try {
+            // Convert base64 to ArrayBuffer/Uint8Array
+            const ciphertextBuffer = window.OrgEncryption.base64ToArrayBuffer(encrypted);
+            const ivArray = new Uint8Array(window.OrgEncryption.base64ToArrayBuffer(iv));
+            const tagArray = new Uint8Array(window.OrgEncryption.base64ToArrayBuffer(tag));
+            
             // Decrypt name
-            const decrypted = await window.OrgEncryption.decryptField({
-                ciphertext: encrypted,
-                iv: iv,
-                tag: tag
-            }, dek);
+            const decrypted = await window.OrgEncryption.decryptField(
+                ciphertextBuffer,
+                ivArray,
+                tagArray,
+                dek
+            );
             
             // Update display
             element.textContent = decrypted;

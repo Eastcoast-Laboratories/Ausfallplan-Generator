@@ -47,13 +47,13 @@ test.describe('Complete Encryption Flow', () => {
         await page.fill('input[name="password"]', testPassword);
         await page.fill('input[name="password_confirm"]', testPassword);
         
-        // Check what organization options are available - use text-based selection
-        const createNewOrgRadio = page.locator('input[type="radio"][value="new"]');
-        await createNewOrgRadio.waitFor({ state: 'visible', timeout: 5000 });
-        await createNewOrgRadio.check();
+        // Select "Create new organization" from dropdown
+        const orgChoiceSelect = page.locator('select#organization-choice');
+        await orgChoiceSelect.waitFor({ state: 'visible', timeout: 5000 });
+        await orgChoiceSelect.selectOption('new');
         
         // Wait for organization name field to appear and fill it
-        const orgNameInput = page.locator('input[name="organization_name"]');
+        const orgNameInput = page.locator('input#organization-name-input');
         await orgNameInput.waitFor({ state: 'visible', timeout: 5000 });
         await orgNameInput.fill(orgName);
         
@@ -74,35 +74,41 @@ test.describe('Complete Encryption Flow', () => {
         console.log('📧 Email:', testEmail);
         console.log('🏢 Organization:', orgName);
         
-        // STEP 2: Extract verify link from flash message
-        console.log('\n=== STEP 2: Extract and click verify link ===');
+        // STEP 2: Verify email using direct link (simulating email click)
+        console.log('\n=== STEP 2: Verify email ===');
         
-        // Find the "View all emails" link in the flash message
-        const debugEmailLink = page.locator('a:has-text("Debug Email Viewer")');
-        await expect(debugEmailLink).toBeVisible();
+        // In a real scenario, user would click link in email
+        // For testing, we can query the DB to get the token or use the debug viewer
+        // Let's try the debug viewer approach
+        await page.goto('http://localhost:8080/debug/emails');
+        await page.waitForLoadState('networkidle');
         
-        // Click the debug email viewer
-        await debugEmailLink.click();
-        await page.waitForURL('**/debug/emails', { timeout: 10000 });
+        // Wait for emails table
+        const emailsTable = page.locator('table tbody tr');
+        const emailCount = await emailsTable.count();
         
-        console.log('📧 Opened debug email viewer');
+        console.log(`📧 Found ${emailCount} emails in debug viewer`);
         
-        // Find the most recent email (should be verification email)
-        const firstEmailRow = page.locator('tbody tr').first();
-        await firstEmailRow.click();
+        if (emailCount === 0) {
+            throw new Error('No emails found in debug email viewer');
+        }
         
-        // Wait for email detail to load
-        await page.waitForTimeout(500);
+        // Click on first email
+        await emailsTable.first().click();
+        await page.waitForTimeout(1000);
         
-        // Find and click the "Verify Email" link
-        const verifyLink = page.locator('a:has-text("Verify Email")');
-        await expect(verifyLink).toBeVisible();
+        // Look for verify link
+        const verifyLink = page.locator('a[href*="/users/verify/"]').first();
+        const verifyHref = await verifyLink.getAttribute('href');
         
-        console.log('✅ Found verification link in email');
+        console.log('✅ Found verification link:', verifyHref);
         
-        // Click verify link
-        await verifyLink.click();
-        await page.waitForURL('**/users/verify/*', { timeout: 10000 });
+        // Navigate directly to verification URL
+        if (verifyHref) {
+            await page.goto(verifyHref.startsWith('http') ? verifyHref : 'http://localhost:8080' + verifyHref);
+        } else {
+            throw new Error('Could not extract verification link');
+        }
         
         // Should see success message
         await expect(page.locator('text=Email verified successfully')).toBeVisible({ timeout: 5000 });
