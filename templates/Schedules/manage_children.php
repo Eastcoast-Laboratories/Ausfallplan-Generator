@@ -121,9 +121,12 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
             <div style="background: #ffebee; padding: 1rem; border-radius: 8px; min-height: 400px;">
                 <?php if (!empty($childrenNotInOrder)): ?>
                     <?php foreach ($childrenNotInOrder as $child): ?>
-                        <div class="child-item-excluded" data-child-id="<?= $child->id ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #f44336;">
+                        <div class="child-item-excluded" data-child-id="<?= $child->id ?>" data-org-id="<?= $child->organization_id ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #f44336;">
                             <div>
-                                <strong style="color: #999;"><?= h($child->name) ?></strong>
+                                <strong class="child-name" style="color: #999;"
+                                    data-encrypted="<?= h($child->name_encrypted ?? '') ?>"
+                                    data-iv="<?= h($child->name_iv ?? '') ?>"
+                                    data-tag="<?= h($child->name_tag ?? '') ?>"><?= h($child->name) ?></strong>
                                 <?php if ($child->is_integrative): ?>
                                     <span style="background: #e3f2fd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
                                         <?= __("Integrative") ?>
@@ -198,9 +201,12 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                         <?php if ($item['type'] === 'single'): 
                             $child = $item['child'];
                         ?>
-                            <div class="child-item" data-child-id="<?= $child->id ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #4caf50; cursor: move; transition: all 0.3s ease;">
+                            <div class="child-item" data-child-id="<?= $child->id ?>" data-org-id="<?= $child->organization_id ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #4caf50; cursor: move; transition: all 0.3s ease;">
                                 <div>
-                                    <strong><?= h($child->name) ?></strong>
+                                    <strong class="child-name"
+                                        data-encrypted="<?= h($child->name_encrypted ?? '') ?>"
+                                        data-iv="<?= h($child->name_iv ?? '') ?>"
+                                        data-tag="<?= h($child->name_tag ?? '') ?>"><?= h($child->name) ?></strong>
                                     <?php if ($child->is_integrative): ?>
                                         <span style="background: #e3f2fd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
                                             <?= __("Integrative") ?>
@@ -231,9 +237,12 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
                                 <?php foreach ($siblings as $child): 
                                     $otherSiblings = array_filter($siblingNames, fn($n) => $n !== $child->name);
                                 ?>
-                                    <div style="background: white; padding: 0.75rem; margin-bottom: 0.25rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="background: white; padding: 0.75rem; margin-bottom: 0.25rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;" data-org-id="<?= $child->organization_id ?>">
                                         <div>
-                                            <strong title="<?= __("Siblings") ?>: <?= implode(', ', $otherSiblings) ?>"><?= h($child->name) ?></strong>
+                                            <strong class="child-name" title="<?= __("Siblings") ?>: <?= implode(', ', $otherSiblings) ?>"
+                                                data-encrypted="<?= h($child->name_encrypted ?? '') ?>"
+                                                data-iv="<?= h($child->name_iv ?? '') ?>"
+                                                data-tag="<?= h($child->name_tag ?? '') ?>"><?= h($child->name) ?></strong>
                                             <?php if ($child->is_integrative): ?>
                                                 <span style="background: #e3f2fd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
                                                     <?= __("Integrative") ?>

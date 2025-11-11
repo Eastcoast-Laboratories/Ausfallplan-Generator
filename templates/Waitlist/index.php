@@ -117,11 +117,14 @@ $this->assign('title', __('Waitlist'));
         <div class="available-children">
             <h4><?= __('Available Children') ?></h4>
             <div style="background: #f5f7fa; padding: 1rem; border-radius: 8px; min-height: 300px;">
-                <?php if (!empty($availableChildren) && (is_countable($availableChildren) ? count($availableChildren) : $availableChildren->count()) > 0): ?>
+                <?php if (!empty($availableChildren)): ?>
                     <?php foreach ($availableChildren as $child): ?>
-                        <div class="available-child-item" data-id="<?= $child->id ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; cursor: move;">
+                        <div class="available-child-item" data-id="<?= $child->id ?>" data-org-id="<?= $child->organization_id ?>" data-sibling-group="<?= $child->sibling_group_id ?? '' ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; cursor: move; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #4caf50;">
                             <div>
-                                <strong><?= h($child->name) ?></strong>
+                                <strong class="child-name"
+                                    data-encrypted="<?= h($child->name_encrypted ?? '') ?>"
+                                    data-iv="<?= h($child->name_iv ?? '') ?>"
+                                    data-tag="<?= h($child->name_tag ?? '') ?>"><?= h($child->name) ?></strong>
                                 <?php if ($child->is_integrative): ?>
                                     <span style="background: #e3f2fd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem;">
                                         <?= __('Integrative') ?>
@@ -189,13 +192,16 @@ $this->assign('title', __('Waitlist'));
             <div id="waitlist-sortable" style="background: #fff3e0; padding: 1rem; border-radius: 8px; min-height: 300px;">
                 <?php if (!empty($waitlistChildren) && (is_countable($waitlistChildren) ? count($waitlistChildren) : $waitlistChildren->count()) > 0): ?>
                     <?php foreach ($waitlistChildren as $child): ?>
-                        <div class="waitlist-item" data-id="<?= $child->id ?>" data-sibling-group="<?= $child->sibling_group_id ?? '' ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; cursor: move; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #ff9800;">
+                        <div class="waitlist-item" data-id="<?= $child->id ?>" data-org-id="<?= $child->organization_id ?>" data-sibling-group="<?= $child->sibling_group_id ?? '' ?>" style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; cursor: move; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #ff9800;">
                             <div style="display: flex; align-items: center; gap: 1rem;">
                                 <span style="background: #ff9800; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">
                                     <?= $child->waitlist_order ?>
                                 </span>
                                 <div>
-                                    <strong><?= h($child->name) ?></strong>
+                                    <strong class="child-name"
+                                        data-encrypted="<?= h($child->name_encrypted ?? '') ?>"
+                                        data-iv="<?= h($child->name_iv ?? '') ?>"
+                                        data-tag="<?= h($child->name_tag ?? '') ?>"><?= h($child->name) ?></strong>
                                     <?php if ($child->sibling_group_id && isset($siblingNames[$child->id])): ?>
                                         <?= $this->Html->link(
                                             '👨‍👩‍👧 ' . __('Geschwister'),

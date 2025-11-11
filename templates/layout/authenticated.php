@@ -594,7 +594,11 @@ $currentLangShort = substr($currentLang, 0, 2);
     </script>
     
     <!-- Auto-unwrap encryption keys on every page load -->
+    <!-- Organization Encryption Module -->
     <script src="/js/crypto/orgEncryption.js"></script>
+    
+    <!-- Child Name Decryption (Central Utility) -->
+    <script src="/js/childDecryption.js"></script>
     <script>
     // Wait for DOM and script to be ready
     document.addEventListener('DOMContentLoaded', async function() {
