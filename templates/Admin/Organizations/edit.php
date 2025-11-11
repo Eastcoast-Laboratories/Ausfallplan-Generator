@@ -38,11 +38,17 @@ $this->assign('title', __('Edit Organization'));
                 console.log('🔐 Org Edit: Original encryption_enabled from DB:', <?= json_encode($organization->encryption_enabled) ?>);
                 console.log('🔐 Org Edit: Checkbox checked state:', encryptionCheckbox ? encryptionCheckbox.checked : 'N/A');
                 
+                // Flag to track if decryption is complete
+                let decryptionComplete = false;
+                
                 if (form && encryptionCheckbox) {
                     form.addEventListener('submit', async function(e) {
-                        // Check if encryption was disabled
-                        if (originalEncryptionState && !encryptionCheckbox.checked) {
+                        console.log('📝 Form submit triggered. DecryptionComplete:', decryptionComplete);
+                        
+                        // Check if encryption was disabled AND we haven't decrypted yet
+                        if (originalEncryptionState && !encryptionCheckbox.checked && !decryptionComplete) {
                             e.preventDefault();
+                            console.log('🔐 Encryption is being disabled - need to decrypt children first');
                             
                             if (!confirm('<?= __('⚠️ WARNUNG: Verschlüsselung deaktivieren?') ?>\n\n<?= __('Alle verschlüsselten Kindernamen werden automatisch entschlüsselt und als Klartext in der Datenbank gespeichert. Dieser Vorgang kann nicht rückgängig gemacht werden.') ?>\n\n<?= __('Fortfahren?') ?>')) {
                                 return;
@@ -97,10 +103,16 @@ $this->assign('title', __('Edit Organization'));
                                     hiddenField.name = `decrypted_children_names[${childId}]`;
                                     hiddenField.value = decryptedName;
                                     form.appendChild(hiddenField);
+                                    console.log(`➕ Added hidden field: child ${childId} = ${decryptedName}`);
                                 }
                                 
-                                // Now submit the form
-                                form.submit();
+                                console.log('✅ All hidden fields added. Setting decryptionComplete flag and resubmitting...');
+                                
+                                // Mark decryption as complete
+                                decryptionComplete = true;
+                                
+                                // Now submit the form - this will trigger the submit event again but with the flag set
+                                form.requestSubmit();
                                 
                             } catch (error) {
                                 console.error('❌ Error during decryption:', error);
