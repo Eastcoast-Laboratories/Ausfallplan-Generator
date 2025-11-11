@@ -404,7 +404,7 @@ $this->assign('title', __('FairNestPlan') . ' - ' . h($schedule->title));
     </div>
     
     <!-- Encryption Scripts -->
-    <script src="<?= $this->Url->build('/js/orgEncryption.js') ?>"></script>
+    <script src="<?= $this->Url->build('/js/crypto/orgEncryption.js') ?>"></script>
     <script src="<?= $this->Url->build('/js/childDecryption.js') ?>"></script>
     <script>
     // Add organization ID to all child names for decryption
