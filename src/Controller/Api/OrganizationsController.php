@@ -22,6 +22,7 @@ class OrganizationsController extends AppController
         parent::beforeFilter($event);
         // Allow unauthenticated access for registration
         $this->Authentication->addUnauthenticatedActions(['search']);
+        // toggleEncryption requires authentication and admin role (checked in method)
     }
 
     /**
@@ -61,6 +62,79 @@ class OrganizationsController extends AppController
         $this->response = $this->response
             ->withType('application/json')
             ->withStringBody(json_encode(['organizations' => $organizations]));
+        
+        return $this->response;
+    }
+
+    /**
+     * Toggle encryption for an organization
+     * Admin-only endpoint
+     *
+     * @param int|null $id Organization ID
+     * @return void
+     */
+    public function toggleEncryption($id = null)
+    {
+        $this->request->allowMethod(['post', 'put']);
+        
+        // Get authenticated user
+        $user = $this->Authentication->getIdentity();
+        if (!$user) {
+            $this->response = $this->response
+                ->withType('application/json')
+                ->withStatus(401)
+                ->withStringBody(json_encode(['success' => false, 'message' => __('Authentication required')]));
+            return $this->response;
+        }
+        
+        // Check if user is org admin
+        $orgUsersTable = $this->fetchTable('OrganizationUsers');
+        $orgUser = $orgUsersTable->find()
+            ->where([
+                'organization_id' => $id,
+                'user_id' => $user->id,
+                'role' => 'org_admin'
+            ])
+            ->first();
+        
+        if (!$orgUser && !$user->is_system_admin) {
+            $this->response = $this->response
+                ->withType('application/json')
+                ->withStatus(403)
+                ->withStringBody(json_encode(['success' => false, 'message' => __('Admin access required')]));
+            return $this->response;
+        }
+        
+        // Get organization
+        $organizationsTable = $this->fetchTable('Organizations');
+        try {
+            $organization = $organizationsTable->get($id);
+        } catch (\Exception $e) {
+            $this->response = $this->response
+                ->withType('application/json')
+                ->withStatus(404)
+                ->withStringBody(json_encode(['success' => false, 'message' => __('Organization not found')]));
+            return $this->response;
+        }
+        
+        // Toggle encryption_enabled
+        $organization->encryption_enabled = !$organization->encryption_enabled;
+        
+        if ($organizationsTable->save($organization)) {
+            $status = $organization->encryption_enabled ? __('enabled') : __('disabled');
+            $this->response = $this->response
+                ->withType('application/json')
+                ->withStringBody(json_encode([
+                    'success' => true,
+                    'encryption_enabled' => $organization->encryption_enabled,
+                    'message' => __('Encryption has been {0}', $status)
+                ]));
+        } else {
+            $this->response = $this->response
+                ->withType('application/json')
+                ->withStatus(500)
+                ->withStringBody(json_encode(['success' => false, 'message' => __('Failed to update encryption setting')]));
+        }
         
         return $this->response;
     }
