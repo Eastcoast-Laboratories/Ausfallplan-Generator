@@ -135,6 +135,7 @@ class WaitlistController extends AppController
         
         // Get children on waitlist (NEW: from children table)
         // Only children with organization_order (exclude children without org_order)
+        // Waitlist shows only children that are assigned to organization (have organization_order)
         $waitlistChildren = [];
         $childrenOnWaitlist = [];
         if ($scheduleId) {

@@ -22,9 +22,10 @@
 
 $showRoleSelector = $showRoleSelector ?? true;
 $defaultRole = $defaultRole ?? 'editor';
-?>
 
-<?php
+if (empty($organizationsList)) {
+    $organizationsList = [];
+}
 // Organization selector
 echo $this->Form->control('organization_choice', [
     'type' => 'select',
