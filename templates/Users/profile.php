@@ -83,9 +83,14 @@ $this->assign('title', __('Profile Settings'));
                     ?>
                     
                     <?php if ($hasFullEncryption): ?>
-                        <div class="encryption-status enabled">
+                        <div class="encryption-status enabled" id="encryption-status-container">
                             <span class="status-icon">✅</span>
                             <span class="status-text"><?= __('Encryption Enabled') ?></span>
+                        </div>
+                        <div id="encryption-error-warning" style="display: none; margin-top: 10px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107; color: #856404;">
+                            <strong>⚠️ <?= __('Encryption Key Error') ?></strong><br>
+                            <span id="encryption-error-message"></span><br>
+                            <small><?= __('Your encryption keys may be corrupted or incompatible. Please regenerate your encryption keys.') ?></small>
                         </div>
                         <small>
                             <?= __('Your sensitive data is encrypted using client-side encryption. Your encryption keys were generated on {0}.', [
@@ -230,9 +235,28 @@ $this->assign('title', __('Profile Settings'));
     </div>
 
     <!-- Encryption Setup Script -->
-<?php if (!$hasFullEncryption): ?>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Check for encryption errors from sessionStorage
+        const encryptionError = sessionStorage.getItem('encryption_error');
+        if (encryptionError) {
+            const errorData = JSON.parse(encryptionError);
+            const warningDiv = document.getElementById('encryption-error-warning');
+            const messageSpan = document.getElementById('encryption-error-message');
+            
+            if (warningDiv && messageSpan) {
+                messageSpan.textContent = errorData.error;
+                warningDiv.style.display = 'block';
+                
+                // Update status icon to warning
+                const statusContainer = document.getElementById('encryption-status-container');
+                if (statusContainer) {
+                    statusContainer.querySelector('.status-icon').textContent = '⚠️';
+                    statusContainer.style.borderLeft = '4px solid #ffc107';
+                }
+            }
+        }
+        
         const setupButton = document.getElementById('setup-encryption-btn');
         
         if (setupButton && window.OrgEncryption) {

@@ -683,23 +683,30 @@ $currentLangShort = substr($currentLang, 0, 2);
                             privateKey
                         );
                         
-                        window.OrgEncryption.storeDEK(wrappedDekData.organization_id, dek);
-                        console.log(`✅ DEK stored for organization ${wrappedDekData.organization_id}`);
-                    } catch (error) {
-                        console.error(`Failed to unwrap DEK for organization ${wrappedDekData.organization_id}:`, error);
+                        // Store in sessionStorage
+                        await window.OrgEncryption.storeDEK(wrappedDekData.organization_id, dek);
+                        console.log(`✅ Unwrapped DEK for org ${wrappedDekData.organization_id}`);
+                    } catch (err) {
+                        console.error(`Failed to unwrap DEK for org ${wrappedDekData.organization_id}:`, err);
                     }
                 }
             }
+        } catch (err) {
+            console.error('Key unwrapping error:', err);
             
-            console.log('✅ Encryption keys loaded - encryption active!');
-            
-            // Clear temp password
-            try {
-                sessionStorage.removeItem('_temp_login_password');
-            } catch (e) {}
-        } catch (error) {
-            console.error('Key unwrapping error:', error);
+            // Store error in sessionStorage for display in profile settings
+            sessionStorage.setItem('encryption_error', JSON.stringify({
+                error: err.message || 'Key unwrapping failed',
+                timestamp: new Date().toISOString()
+            }));
         }
+        
+        console.log('✅ Encryption keys loaded - encryption active!');
+        
+        // Clear temp password
+        try {
+            sessionStorage.removeItem('_temp_login_password');
+        } catch (e) {}
     });
     </script>
     
