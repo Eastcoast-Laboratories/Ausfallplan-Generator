@@ -11,6 +11,7 @@ use Cake\ORM\Entity;
  * @property int $id
  * @property string $name
  * @property string $locale
+ * @property bool $encryption_enabled
  * @property \Cake\I18n\DateTime $created
  * @property \Cake\I18n\DateTime $modified
  *
@@ -18,6 +19,7 @@ use Cake\ORM\Entity;
  * @property \App\Model\Entity\Child[] $children
  * @property \App\Model\Entity\Schedule[] $schedules
  * @property \App\Model\Entity\SiblingGroup[] $sibling_groups
+ * @property \App\Model\Entity\EncryptedDek[] $encrypted_deks
  */
 class Organization extends Entity
 {
@@ -30,6 +32,7 @@ class Organization extends Entity
         'name' => true,
         'locale' => true,
         'is_active' => true,
+        'encryption_enabled' => true,
         'contact_email' => true,
         'contact_phone' => true,
         'created' => true,
@@ -38,5 +41,6 @@ class Organization extends Entity
         'children' => true,
         'schedules' => true,
         'sibling_groups' => true,
+        'encrypted_deks' => true,
     ];
 }
