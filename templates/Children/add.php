@@ -107,11 +107,13 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         // Check if organization has encryption enabled
         const selectedOrgId = <?= json_encode($selectedOrgId ?? 0) ?>;
+        const encryptionEnabled = <?= json_encode($encryptionEnabled ?? false) ?>;
         
         console.log('ENCRYPTION_CHECK: selectedOrgId =', selectedOrgId);
+        console.log('ENCRYPTION_CHECK: encryptionEnabled =', encryptionEnabled);
         
-        if (!selectedOrgId) {
-            console.log('ENCRYPTION_CHECK: No organization selected, proceeding without encryption');
+        if (!selectedOrgId || !encryptionEnabled) {
+            console.log('ENCRYPTION_CHECK: No organization selected or encryption not enabled, proceeding without encryption');
             form.submit();
             return;
         }
@@ -123,10 +125,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.log(`ENCRYPTION_CHECK: DEK type = ${typeof dek} ${dek instanceof CryptoKey ? 'CryptoKey' : 'Not CryptoKey'}`);
         
         if (!dek) {
-            console.log('ENCRYPTION_CHECK: No DEK available for organization, proceeding without encryption');
+            console.log('ENCRYPTION_CHECK: No DEK available but encryption is enabled - WARNING user');
             
-            // WARN user that data will be stored unencrypted
-            const proceed = confirm('⚠️ WARNING: No encryption key available for this organization!\n\nThe child\'s data will be stored UNENCRYPTED in the database.\n\nThis may happen if:\n- Encryption is not set up for your organization\n- You need to log out and log in again\n- Your encryption keys are not properly configured\n\nDo you want to proceed anyway?');
+            // WARN user that data will be stored unencrypted (only if encryption is actually enabled!)
+            const proceed = confirm('⚠️ WARNING: No encryption key available for this organization!\n\nThe child\'s data will be stored UNENCRYPTED in the database.\n\nThis may happen if:\n- You need to log out and log in again\n- Your encryption keys are not properly configured\n\nDo you want to proceed anyway?');
             
             if (!proceed) {
                 submitButton.disabled = false;
