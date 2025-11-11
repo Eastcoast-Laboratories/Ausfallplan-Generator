@@ -138,20 +138,29 @@ $this->assign('title', __('Ausfallplan') . ' - ' . h($schedule->title));
                     $metadata = $cell['metadata'] ?? [];
                     
                     $cellClass = 'cell-' . $type;
-                    $cellContent = h($value);
                     
-                    // Special formatting for integrative children
-                    if ($type === 'child' && isset($metadata['is_integrative']) && $metadata['is_integrative']) {
-                        $cellContent .= ' <span class="integrative-badge">I</span>';
-                    }
+                    // Check if this cell contains a child name (types: child, waitlist, firstOnWaitlist)
+                    $isChildCell = in_array($type, ['child', 'waitlist', 'firstOnWaitlist']);
                     
                     // Special formatting for firstOnWaitlist children
+                    $prefix = '';
                     if ($type === 'firstOnWaitlist') {
-                        $cellContent = '→ ' . $cellContent;
+                        $prefix = '→ ';
                     }
                 ?>
                     <td class="<?= $cellClass ?>" data-type="<?= $type ?>">
-                        <?= $cellContent ?>
+                        <?php if ($isChildCell && isset($metadata['child'])): ?>
+                            <?= $prefix ?>
+                            <span class="child-name"
+                                data-encrypted="<?= h($metadata['child']->name_encrypted ?? '') ?>"
+                                data-iv="<?= h($metadata['child']->name_iv ?? '') ?>"
+                                data-tag="<?= h($metadata['child']->name_tag ?? '') ?>"><?= h($value) ?></span>
+                            <?php if (isset($metadata['is_integrative']) && $metadata['is_integrative']): ?>
+                                <span class="integrative-badge">I</span>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <?= h($value) ?>
+                        <?php endif; ?>
                     </td>
                 <?php endforeach; ?>
             </tr>

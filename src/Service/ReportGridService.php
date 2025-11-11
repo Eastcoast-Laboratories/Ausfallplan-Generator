@@ -77,6 +77,7 @@ class ReportGridService
                         self::CELL_CHILD,
                         $childData['child']->name,
                         [
+                            'child' => $childData['child'], // Pass full child entity for encryption
                             'child_id' => $childData['child']->id,
                             'is_integrative' => $childData['is_integrative'],
                             'weight' => $childData['is_integrative'] ? 2 : 1
@@ -90,6 +91,7 @@ class ReportGridService
                             self::CELL_FIRSTONWAITLIST,
                             '→ ' . $firstOnWaitlistChild['child']->name,
                             [
+                                'child' => $firstOnWaitlistChild['child'], // Pass full child entity for encryption
                                 'child_id' => $firstOnWaitlistChild['child']->id,
                                 'is_integrative' => $firstOnWaitlistChild['is_integrative']
                             ]
@@ -126,6 +128,7 @@ class ReportGridService
                     self::CELL_WAITLIST,
                     $waitlistChild->name,
                     [
+                        'child' => $waitlistChild, // Pass full child entity for encryption
                         'child_id' => $waitlistChild->id,
                         'order' => $waitlistChild->waitlist_order,
                         'is_integrative' => $waitlistChild->is_integrative
@@ -143,6 +146,7 @@ class ReportGridService
                         self::CELL_CHILD,
                         $alwaysAtEndChild['child']->name,
                         [
+                            'child' => $alwaysAtEndChild['child'], // Pass full child entity for encryption
                             'child_id' => $alwaysAtEndChild['child']->id,
                             'is_integrative' => $alwaysAtEndChild['weight'] == 2,
                             'always_at_end' => true
