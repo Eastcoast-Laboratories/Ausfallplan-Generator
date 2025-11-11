@@ -98,15 +98,11 @@ test.describe('Complete Encryption Flow', () => {
         
         console.log('✅ Children names visible in list');
         
-        console.log('=== Step 6: Verify Encryption Status ===');
+        console.log('=== Step 6: Database Verification will be done after test ===');
         
-        // Check if we saw encryption logs in browser console
-        const hasWrappedDeks = page.url(); // Just to have a check
-        
-        console.log('Note: Check browser console for:');
-        console.log('  - "wrapped_deks count" should be > 0');
-        console.log('  - "DEK found = YES" when creating child');
-        console.log('  - "Encrypting name field..." when submitting');
+        // Store test data for DB check
+        console.log('Test Email:', testEmail);
+        console.log('Child Names:', child1Name, child2Name);
         
         console.log('=== Step 7: Edit Child and Verify Re-encryption ===');
         
