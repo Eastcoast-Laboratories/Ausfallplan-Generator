@@ -159,14 +159,23 @@ class OrganizationsController extends AppController
         // Viewers are blocked by AuthorizationMiddleware
 
         $organization = $this->Organizations->newEmptyEntity();
+        
+        // Get list of all organizations for selection (needed for view)
+        $organizationsList = $this->Organizations->find('list', [
+            'keyField' => 'id',
+            'valueField' => 'name'
+        ])->orderBy(['name' => 'ASC'])->toArray();
 
         if ($this->request->is('post')) {
             $data = $this->request->getData();
             $choice = $data['organization_choice'] ?? 'new';
             
             if ($choice === 'new') {
-                // Check subscription limits for test plan users
-                if (!$user->is_system_admin && $user->subscription_plan === 'test') {
+                // Check subscription limits for test plan users ONLY
+                // Pro users (subscription_plan = 'pro' OR subscription_status = 'active') are unlimited
+                if (!$user->is_system_admin && 
+                    $user->subscription_plan === 'test' && 
+                    $user->subscription_status !== 'active') {
                     // Count user's organizations (as org_admin)
                     $orgUsersTable = $this->fetchTable('OrganizationUsers');
                     $userOrgCount = $orgUsersTable->find()
@@ -178,7 +187,7 @@ class OrganizationsController extends AppController
                     
                     if ($userOrgCount >= 1) {
                         $this->Flash->error(__('Test plan users can only create 1 organization. Please upgrade to Pro for unlimited organizations.'));
-                        $this->set(compact('organization'));
+                        $this->set(compact('organization', 'organizationsList', 'user'));
                         return;
                     }
                 }
