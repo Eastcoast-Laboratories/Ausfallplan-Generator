@@ -336,6 +336,8 @@ class UsersController extends AppController
     public function setupEncryption()
     {
         $this->request->allowMethod(['post']);
+        $this->viewBuilder()->disableAutoLayout();
+        
         $identity = $this->Authentication->getIdentity();
         
         if (!$identity) {
@@ -343,7 +345,15 @@ class UsersController extends AppController
                 ->withStringBody(json_encode(['success' => false, 'message' => 'Not authenticated']));
         }
         
-        $data = $this->request->getData();
+        // Get JSON data from request body
+        $jsonData = $this->request->input('php://input');
+        $data = json_decode($jsonData, true);
+        
+        if (!$data) {
+            error_log('DEBUG setupEncryption - Failed to parse JSON: ' . $jsonData);
+            return $this->response->withType('application/json')
+                ->withStringBody(json_encode(['success' => false, 'message' => 'Invalid JSON data']));
+        }
         
         if (empty($data['public_key']) || empty($data['encrypted_private_key']) || empty($data['key_salt'])) {
             return $this->response->withType('application/json')

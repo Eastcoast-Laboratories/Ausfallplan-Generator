@@ -230,9 +230,8 @@ $this->assign('title', __('Profile Settings'));
     </div>
 
     <!-- Encryption Setup Script -->
-    <?php if (!$userEntity->encrypted_private_key || !$userEntity->key_salt): ?>
-    <?= $this->Html->script('crypto/orgEncryption') ?>
-    <script>
+<?php if (!$hasFullEncryption): ?>
+<script>
     document.addEventListener('DOMContentLoaded', function() {
         const setupButton = document.getElementById('setup-encryption-btn');
         
