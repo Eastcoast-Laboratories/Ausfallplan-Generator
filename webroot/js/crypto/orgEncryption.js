@@ -129,10 +129,15 @@ const OrgEncryption = (function() {
      * Wrap (encrypt) a private key with a password-derived KEK
      * @param {CryptoKey} privateKey - RSA private key to wrap
      * @param {string} password - User's password
-     * @param {Uint8Array} salt - Salt for KEK derivation
-     * @returns {Promise<{wrappedKey: ArrayBuffer, iv: Uint8Array}>}
+     * @param {Uint8Array} salt - Salt for KEK derivation (optional, will be generated if not provided)
+     * @returns {Promise<{wrappedKey: string, iv: string, salt: string}>} - Base64 encoded values
      */
     async function wrapPrivateKeyWithPassword(privateKey, password, salt) {
+        // Generate salt if not provided
+        if (!salt) {
+            salt = generateSalt();
+        }
+        
         const kek = await deriveKEKFromPassword(password, salt);
         const iv = generateIV();
         
@@ -146,7 +151,12 @@ const OrgEncryption = (function() {
             }
         );
 
-        return { wrappedKey, iv };
+        // Return Base64 encoded values for storage
+        return {
+            wrappedKey: arrayBufferToBase64(wrappedKey),
+            iv: arrayBufferToBase64(iv),
+            salt: arrayBufferToBase64(salt)
+        };
     }
 
     /**
@@ -417,6 +427,7 @@ const OrgEncryption = (function() {
     // Public API
     return {
         // Key generation
+        generateKeyPair: generateUserKeyPair, // Alias for backward compatibility
         generateUserKeyPair,
         generateDEK,
         generateSalt,
@@ -425,6 +436,8 @@ const OrgEncryption = (function() {
         // Key wrapping/unwrapping
         wrapPrivateKeyWithPassword,
         unwrapPrivateKeyWithPassword,
+        wrapDEK: wrapDEKWithPublicKey, // Alias for backward compatibility
+        unwrapDEK: unwrapDEKWithPrivateKey, // Alias for backward compatibility
         wrapDEKWithPublicKey,
         unwrapDEKWithPrivateKey,
 
@@ -437,6 +450,8 @@ const OrgEncryption = (function() {
         importPublicKey,
 
         // Session storage management
+        storeDEK: storeDEKInSession, // Alias for backward compatibility
+        getDEK: getDEKFromSession, // Alias for backward compatibility
         storePrivateKeyInSession,
         getPrivateKeyFromSession,
         storeDEKInSession,
@@ -453,6 +468,9 @@ const OrgEncryption = (function() {
 })();
 
 // Make available globally
+if (typeof window !== 'undefined') {
+    window.OrgEncryption = OrgEncryption;
+}
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = OrgEncryption;
 }

@@ -30,12 +30,7 @@ test.describe('Encryption Complete Flow', () => {
 
         // Listen to ALL console logs from the browser for debugging
         page.on('console', msg => {
-            const text = msg.text();
-            if (text.includes('Auto-unwrapping') || text.includes('ENCRYPTION_CHECK') || 
-                text.includes('DEK') || text.includes('sessionStorage') || 
-                text.includes('password') || text.includes('Unwrapping')) {
-                console.log('[BROWSER]', text);
-            }
+            console.log('[BROWSER]', msg.text());
         });
 
         console.log('=== Step 1: Register new user with encryption keys ===');

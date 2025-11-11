@@ -594,20 +594,36 @@ $currentLangShort = substr($currentLang, 0, 2);
     </script>
     
     <!-- Auto-unwrap encryption keys on every page load -->
-    <?php
-    $encryptionData = $this->request->getSession()->read('encryption');
-    if ($encryptionData): ?>
-    <?= $this->Html->script('crypto/orgEncryption') ?>
+    <script src="/js/crypto/orgEncryption.js"></script>
     <script>
-    (async function() {
-        // Check if DEKs are already unwrapped
+    // Wait for DOM and script to be ready
+    document.addEventListener('DOMContentLoaded', async function() {
+        console.log('🔐 Auto-unwrap script started');
+        
+        // Wait for OrgEncryption module to load
+        let attempts = 0;
+        while (!window.OrgEncryption && attempts < 50) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            attempts++;
+        }
+        
         if (!window.OrgEncryption) {
+            console.log('⚠️ OrgEncryption module not available after waiting');
             return;
         }
         
-        const encryptionData = <?= json_encode($encryptionData) ?>;
+        console.log('✅ OrgEncryption module loaded');
+        
+        <?php $encryptionData = $this->request->getSession()->read('encryption'); ?>
+        const encryptionData = <?= json_encode($encryptionData ?: null) ?>;
+        
+        console.log('🔐 encryptionData present:', !!encryptionData);
+        console.log('🔐 has private key:', !!(encryptionData && encryptionData.encrypted_private_key));
+        console.log('🔐 has salt:', !!(encryptionData && encryptionData.key_salt));
+        console.log('🔐 wrapped_deks count:', (encryptionData && encryptionData.wrapped_deks) ? encryptionData.wrapped_deks.length : 0);
         
         if (!encryptionData || !encryptionData.encrypted_private_key || !encryptionData.key_salt) {
+            console.log('⚠️ Missing encryption data');
             return;
         }
         
@@ -625,12 +641,13 @@ $currentLangShort = substr($currentLang, 0, 2);
         let password = null;
         try {
             password = sessionStorage.getItem('_temp_login_password');
+            console.log('🔐 Password from sessionStorage:', password ? '✅ Found' : '❌ Not found');
         } catch (e) {
             console.error('Failed to read password:', e);
         }
         
         if (!password) {
-            console.log('No password available for automatic key unwrapping');
+            console.log('⚠️ No password available for automatic key unwrapping');
             return;
         }
         
@@ -668,9 +685,8 @@ $currentLangShort = substr($currentLang, 0, 2);
         } catch (error) {
             console.error('Key unwrapping error:', error);
         }
-    })();
+    });
     </script>
-    <?php endif; ?>
     
     <?= $this->fetch('script') ?>
 </body>
