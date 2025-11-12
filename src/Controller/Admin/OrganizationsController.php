@@ -292,11 +292,21 @@ class OrganizationsController extends AppController
             $previousEncryptionState = $organization->encryption_enabled;
             $organization = $this->Organizations->patchEntity($organization, $this->request->getData());
             
+            // DEBUG: Log all request data
+            error_log("🔍 DECRYPT DEBUG - Request Data: " . json_encode($this->request->getData()));
+            error_log("🔍 DECRYPT DEBUG - Previous encryption: " . ($previousEncryptionState ? 'true' : 'false'));
+            error_log("🔍 DECRYPT DEBUG - New encryption: " . ($organization->encryption_enabled ? 'true' : 'false'));
+            
             // Check if encryption was disabled
             if ($previousEncryptionState && !$organization->encryption_enabled) {
+                error_log("🔍 DECRYPT DEBUG - Encryption is being disabled!");
+                
                 // Process decrypted children names from hidden form fields
                 $decryptedNames = $this->request->getData('decrypted_children_names');
                 $decryptedCount = (int)$this->request->getData('decrypted_count');
+                
+                error_log("🔍 DECRYPT DEBUG - Decrypted names: " . json_encode($decryptedNames));
+                error_log("🔍 DECRYPT DEBUG - Decrypted count: " . $decryptedCount);
                 
                 if ($decryptedNames && is_array($decryptedNames)) {
                     $childrenTable = $this->fetchTable('Children');
