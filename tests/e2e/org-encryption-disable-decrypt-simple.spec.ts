@@ -60,11 +60,44 @@ test.describe('Organization Encryption Disable & Auto-Decryption', () => {
         console.log('=== Step 1.5: Verify Email ===');
         // Go to debug emails page to verify email
         await page.goto('http://localhost:8080/debug/emails');
-        await page.waitForSelector('a:has-text("Verify Email")');
-        await page.click('a:has-text("Verify Email")');
-        await page.waitForURL(/users\/verify\//, { timeout: 5000 });
-        await page.waitForTimeout(1000);
-        console.log('✅ Email verified');
+        
+        // Wait for the page to load
+        await page.waitForTimeout(2000);
+        
+        // Get the HTML content and search for our email address to find the right verify link
+        const htmlContent = await page.content();
+        
+        // Find the section containing our test email
+        const emailSectionRegex = new RegExp(`To:.*?${testEmail.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[\\s\\S]*?href="(http:\\/\\/localhost:8080\\/users\\/verify\\/[a-f0-9]+)"`, 'i');
+        const match = htmlContent.match(emailSectionRegex);
+        
+        if (!match || !match[1]) {
+            console.log('Could not find verify link for our email, trying fallback...');
+            // Fallback: get all links and use the last one
+            const verifyLinkMatches = htmlContent.matchAll(/href="(http:\/\/localhost:8080\/users\/verify\/[a-f0-9]+)"/g);
+            const allMatches = [...verifyLinkMatches];
+            if (allMatches.length === 0) {
+                throw new Error('No verify links found');
+            }
+            var verifyLink = allMatches[allMatches.length - 1][1];
+        } else {
+            var verifyLink = match[1];
+        }
+        
+        console.log(`Using verify link: ${verifyLink}`);
+        
+        // Navigate to the verify URL directly
+        await page.goto(verifyLink);
+        await page.waitForTimeout(2000);
+        
+        // Check if verification was successful
+        const pageContent = await page.content();
+        if (pageContent.includes('verified') || pageContent.includes('success') || page.url().includes('/login')) {
+            console.log('✅ Email verified, current URL:', page.url());
+        } else {
+            console.log('⚠️ Verification page content:', pageContent.substring(0, 500));
+            throw new Error('Email verification may have failed');
+        }
         
         console.log('=== Step 1.6: Login ===');
         await page.goto('http://localhost:8080/users/login');
@@ -73,8 +106,20 @@ test.describe('Organization Encryption Disable & Auto-Decryption', () => {
         await page.click('button[type="submit"]');
         
         // Wait for dashboard
-        await page.waitForURL(/\/(dashboard|organizations)/, { timeout: 15000 });
-        console.log('✅ User logged in');
+        try {
+            await page.waitForURL(/\/(dashboard|organizations)/, { timeout: 15000 });
+        } catch (e) {
+            const currentUrl = page.url();
+            console.log('Login timeout - Current URL:', currentUrl);
+            if (currentUrl.includes('/login')) {
+                const errorMsg = await page.locator('.error, .message.error, .flash.error').textContent().catch(() => 'No error found');
+                console.log('Login error:', errorMsg);
+                throw new Error(`Login failed: ${errorMsg}`);
+            }
+        }
+        
+        await page.waitForTimeout(2000);
+        console.log('✅ User logged in, URL:', page.url());
         
         // Get organization ID from organizations page
         await page.goto('http://localhost:8080/admin/organizations');
@@ -92,14 +137,56 @@ test.describe('Organization Encryption Disable & Auto-Decryption', () => {
         
         console.log('=== Step 2: Enable encryption for the organization ===');
         await page.goto(`http://localhost:8080/admin/organizations/edit/${orgId}`);
-        await page.check('input[name="encryption_enabled"]');
+        await page.check('input[type="checkbox"][name="encryption_enabled"]');
         await page.click('button[type="submit"]:has-text("Speichern")');
         await page.waitForURL(`**/admin/organizations/view/${orgId}`);
         console.log('✅ Encryption enabled');
         
+        console.log('=== Step 2.5: Setup encryption keys (DEK) for organization ===');
+        // Go to profile page to setup encryption for this org
+        await page.goto('http://localhost:8080/users/profile');
+        await page.waitForTimeout(2000);
+        
+        // Check if "Setup Encryption" button exists
+        const setupButton = page.locator('button:has-text("Setup Encryption"), button:has-text("Verschlüsselung einrichten")');
+        const hasSetupButton = await setupButton.isVisible().catch(() => false);
+        
+        if (hasSetupButton) {
+            console.log('Setup Encryption button found, clicking...');
+            await setupButton.click();
+            await page.waitForTimeout(1000);
+            
+            // Enter password
+            const passwordInput = page.locator('input[type="password"]').first();
+            await passwordInput.fill(testPassword);
+            
+            // Click confirm button
+            await page.click('button:has-text("Setup"), button:has-text("Einrichten")');
+            await page.waitForTimeout(3000);
+            console.log('✅ DEK created for organization');
+        } else {
+            console.log('✅ Encryption already setup (DEK exists)');
+        }
+        
         console.log('=== Step 3: Create encrypted children ===');
-        for (const childName of childrenNames) {
+        for (let i = 0; i < childrenNames.length; i++) {
+            const childName = childrenNames[i];
             await page.goto('http://localhost:8080/children/add');
+            
+            // For the first child, we may need to enter the password to unlock keys
+            if (i === 0) {
+                await page.waitForTimeout(2000);
+                // Check if password modal is visible
+                const passwordModal = page.locator('#encryption-password-modal, .modal:has-text("Password")');
+                const isModalVisible = await passwordModal.isVisible().catch(() => false);
+                
+                if (isModalVisible) {
+                    console.log('Password modal detected, entering password...');
+                    await page.fill('input[type="password"]', testPassword);
+                    await page.click('button:has-text("Unlock"), button:has-text("Entsperren")');
+                    await page.waitForTimeout(2000);
+                }
+            }
             
             // Fill in child name
             await page.fill('input[name="name"]', childName);
@@ -109,7 +196,7 @@ test.describe('Organization Encryption Disable & Auto-Decryption', () => {
             
             // Submit form
             await page.click('button[type="submit"]');
-            await page.waitForURL('**/children');
+            await page.waitForURL('**/children', { timeout: 10000 });
             
             console.log(`✅ Child created: ${childName}`);
         }

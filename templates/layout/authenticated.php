@@ -710,10 +710,26 @@ $currentLangShort = substr($currentLang, 0, 2);
         
         console.log('✅ Encryption keys loaded - encryption active!');
         
-        // Clear temp password
-        try {
-            sessionStorage.removeItem('_temp_login_password');
-        } catch (e) {}
+        // DON'T clear temp password - keep it for the session
+        // It's needed for creating new DEKs when enabling encryption for new orgs
+        // It will be cleared on logout or when user closes browser
+        console.log('🔐 Password kept in session for future encryption operations');
+    });
+    
+    // Clear password and encryption data on logout
+    document.addEventListener('DOMContentLoaded', function() {
+        const logoutLink = document.querySelector('a[href="/logout"]');
+        if (logoutLink) {
+            logoutLink.addEventListener('click', function() {
+                try {
+                    sessionStorage.removeItem('_temp_login_password');
+                    sessionStorage.clear();
+                    console.log('🔐 Session cleared on logout');
+                } catch (e) {
+                    console.error('Failed to clear session:', e);
+                }
+            });
+        }
     });
     </script>
     
