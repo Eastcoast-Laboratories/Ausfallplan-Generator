@@ -13,6 +13,9 @@ use Cake\ORM\Entity;
  * @property int|null $organization_id
  * @property string $email
  * @property string $password
+ * @property string|null $public_key
+ * @property string|null $encrypted_private_key
+ * @property string|null $key_salt
  * @property string|null $role
  * @property bool $is_system_admin
  * @property bool $email_verified
@@ -38,6 +41,7 @@ use Cake\ORM\Entity;
  * @property \App\Model\Entity\Organization $organization
  * @property \App\Model\Entity\Organization[] $organizations
  * @property \App\Model\Entity\OrganizationUser[] $organization_users
+ * @property \App\Model\Entity\EncryptedDek[] $encrypted_deks
  */
 class User extends Entity
 {
@@ -50,6 +54,9 @@ class User extends Entity
         'organization_id' => true,
         'email' => true,
         'password' => true,
+        'public_key' => true,
+        'encrypted_private_key' => true,
+        'key_salt' => true,
         'role' => true,
         'is_system_admin' => true,
         'email_verified' => true,
@@ -73,6 +80,7 @@ class User extends Entity
         'organization' => true,
         'organizations' => true,
         'organization_users' => true,
+        'encrypted_deks' => true,
     ];
 
     /**
@@ -83,6 +91,8 @@ class User extends Entity
     protected array $_hidden = [
         'password',
         'email_token',
+        'encrypted_private_key',
+        'key_salt',
     ];
 
     /**

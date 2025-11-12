@@ -13,6 +13,7 @@ use Cake\Validation\Validator;
  * @property \App\Model\Table\ChildrenTable&\Cake\ORM\Association\HasMany $Children
  * @property \App\Model\Table\SchedulesTable&\Cake\ORM\Association\HasMany $Schedules
  * @property \App\Model\Table\SiblingGroupsTable&\Cake\ORM\Association\HasMany $SiblingGroups
+ * @property \App\Model\Table\EncryptedDeksTable&\Cake\ORM\Association\HasMany $EncryptedDeks
  *
  * @method \App\Model\Entity\Organization newEmptyEntity()
  * @method \App\Model\Entity\Organization newEntity(array $data, array $options = [])
@@ -69,6 +70,10 @@ class OrganizationsTable extends Table
             'foreignKey' => 'organization_id',
             'className' => 'SiblingGroups',
         ]);
+        
+        $this->hasMany('EncryptedDeks', [
+            'foreignKey' => 'organization_id',
+        ]);
     }
 
     /**
@@ -89,6 +94,10 @@ class OrganizationsTable extends Table
             ->scalar('locale')
             ->maxLength('locale', 10)
             ->notEmptyString('locale');
+
+        $validator
+            ->boolean('encryption_enabled')
+            ->notEmptyString('encryption_enabled');
 
         return $validator;
     }

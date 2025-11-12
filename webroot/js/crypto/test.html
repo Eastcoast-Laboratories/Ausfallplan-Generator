@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Module Tests</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        #test-output {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 20px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .button-container {
+            margin: 20px 0;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .success {
+            color: #4CAF50;
+        }
+        .error {
+            color: #f44336;
+        }
+        .info {
+            color: #2196F3;
+        }
+        .warning {
+            color: #ff9800;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        #status.success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        #status.error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .test-summary {
+            background: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔐 Client-Side Encryption Module Tests</h1>
+    
+    <div class="test-summary">
+        <h2>Test Suite Information</h2>
+        <p><strong>Module:</strong> OrgEncryption (webroot/js/crypto/orgEncryption.js)</p>
+        <p><strong>Purpose:</strong> Validate client-side encryption functionality for multi-user organizations</p>
+        <p><strong>Requirements:</strong> Modern browser with Web Crypto API support</p>
+    </div>
+
+    <div class="button-container">
+        <button id="run-tests" onclick="runTests()">Run All Tests</button>
+        <button id="clear-output" onclick="clearOutput()">Clear Output</button>
+    </div>
+
+    <div id="status"></div>
+    <div id="test-output"></div>
+
+    <script src="orgEncryption.js"></script>
+    <script src="orgEncryption.test.js"></script>
+    <script>
+        let originalConsoleLog = console.log;
+        let originalConsoleError = console.error;
+        let testOutput = document.getElementById('test-output');
+        let statusDiv = document.getElementById('status');
+        let runButton = document.getElementById('run-tests');
+
+        function appendOutput(text, type = 'log') {
+            let color = 'black';
+            if (type === 'error') color = '#f44336';
+            if (type === 'success') color = '#4CAF50';
+            if (type === 'info') color = '#2196F3';
+            
+            const line = document.createElement('div');
+            line.style.color = color;
+            line.textContent = text;
+            testOutput.appendChild(line);
+            testOutput.scrollTop = testOutput.scrollHeight;
+        }
+
+        function showStatus(message, isSuccess) {
+            statusDiv.textContent = message;
+            statusDiv.className = isSuccess ? 'success' : 'error';
+            statusDiv.style.display = 'block';
+        }
+
+        function clearOutput() {
+            testOutput.innerHTML = '';
+            statusDiv.style.display = 'none';
+        }
+
+        async function runTests() {
+            clearOutput();
+            runButton.disabled = true;
+            
+            // Override console methods to capture output
+            console.log = function(...args) {
+                const text = args.join(' ');
+                if (text.includes('✓')) {
+                    appendOutput(text, 'success');
+                } else if (text.includes('===')) {
+                    appendOutput(text, 'info');
+                } else {
+                    appendOutput(text, 'log');
+                }
+                originalConsoleLog.apply(console, args);
+            };
+            
+            console.error = function(...args) {
+                appendOutput(args.join(' '), 'error');
+                originalConsoleError.apply(console, args);
+            };
+
+            try {
+                appendOutput('Starting test suite...', 'info');
+                appendOutput('', 'log');
+                
+                const results = await CryptoTests.runAllTests();
+                
+                appendOutput('', 'log');
+                if (results.failed === 0) {
+                    showStatus(`✓ All ${results.passed} tests passed!`, true);
+                } else {
+                    showStatus(`✗ ${results.failed} of ${results.total} tests failed`, false);
+                }
+            } catch (error) {
+                appendOutput('Test suite crashed: ' + error.message, 'error');
+                showStatus('✗ Test suite failed with errors', false);
+            } finally {
+                // Restore console methods
+                console.log = originalConsoleLog;
+                console.error = originalConsoleError;
+                runButton.disabled = false;
+            }
+        }
+
+        // Check if Web Crypto API is available
+        window.addEventListener('load', function() {
+            if (!window.crypto || !window.crypto.subtle) {
+                appendOutput('⚠️ WARNING: Web Crypto API not available in this browser!', 'error');
+                appendOutput('Tests require a modern browser with Web Crypto API support.', 'error');
+                runButton.disabled = true;
+            } else {
+                appendOutput('✓ Web Crypto API detected', 'success');
+                appendOutput('✓ OrgEncryption module loaded', 'success');
+                appendOutput('', 'log');
+                appendOutput('Click "Run All Tests" to start the test suite.', 'info');
+            }
+        });
+    </script>
+</body>
+</html>
