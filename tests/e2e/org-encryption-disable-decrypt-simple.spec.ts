@@ -143,30 +143,31 @@ test.describe('Organization Encryption Disable & Auto-Decryption', () => {
         console.log('✅ Encryption enabled');
         
         console.log('=== Step 2.5: Setup encryption keys (DEK) for organization ===');
-        // Go to profile page to setup encryption for this org
+        // Go to profile page and expand encryption section
         await page.goto('http://localhost:8080/users/profile');
         await page.waitForTimeout(2000);
         
-        // Check if "Setup Encryption" button exists
-        const setupButton = page.locator('button:has-text("Setup Encryption"), button:has-text("Verschlüsselung einrichten")');
-        const hasSetupButton = await setupButton.isVisible().catch(() => false);
+        // Click to expand encryption section
+        const encryptionHeader = page.locator('#encryption-header');
+        await encryptionHeader.click();
+        await page.waitForTimeout(1000);
         
-        if (hasSetupButton) {
-            console.log('Setup Encryption button found, clicking...');
-            await setupButton.click();
-            await page.waitForTimeout(1000);
-            
-            // Enter password
-            const passwordInput = page.locator('input[type="password"]').first();
-            await passwordInput.fill(testPassword);
-            
-            // Click confirm button
-            await page.click('button:has-text("Setup"), button:has-text("Einrichten")');
-            await page.waitForTimeout(3000);
-            console.log('✅ DEK created for organization');
-        } else {
-            console.log('✅ Encryption already setup (DEK exists)');
-        }
+        // Find and use the global setup button
+        const setupButton = page.locator('#setup-encryption-btn');
+        const passwordInput = page.locator('#setup-password-input');
+        
+        await passwordInput.fill(testPassword);
+        await setupButton.click();
+        
+        // Wait for confirmation dialog and accept
+        page.once('dialog', async dialog => {
+            console.log('Confirm dialog:', dialog.message());
+            await dialog.accept();
+        });
+        
+        // Wait for setup to complete
+        await page.waitForTimeout(6000);
+        console.log('✅ Encryption keys setup completed');
         
         console.log('=== Step 3: Create encrypted children ===');
         for (let i = 0; i < childrenNames.length; i++) {
