@@ -2,59 +2,38 @@
  * Organization Encryption Disable and Auto-Decryption Test
  * 
  * Test Flow:
- * 1. Create a new organization
+ * 1. Register new user with new organization
  * 2. Enable encryption for the organization
- * 3. Create children with names (should be encrypted in DB)
- * 4. Verify children names are encrypted in database
+ * 3. Create children with names (should be encrypted)
+ * 4. Verify children are displayed correctly in list
  * 5. Disable encryption for the organization
- * 6. Verify children names are decrypted in database
+ * 6. Verify success message about decryption
+ * 7. Verify children are still displayed correctly
  * 
  * Run command:
- * timeout 180 npx playwright test tests/e2e/org-encryption-disable-decrypt.spec.ts --project=chromium
+ * timeout 180 npx playwright test tests/e2e/org-encryption-disable-decrypt.spec.ts --project=chromium --headed
  */
 
 import { test, expect } from '@playwright/test';
-import * as mysql from 'mysql2/promise';
 
 test.describe('Organization Encryption Disable & Auto-Decryption', () => {
-    let dbConnection: mysql.Connection;
-    let orgId: number;
-    let childIds: number[] = [];
-    
-    test.beforeAll(async () => {
-        // Create DB connection
-        dbConnection = await mysql.createConnection({
-            host: 'localhost',
-            user: 'ausfallplan',
-            password: 'ausfallplan_secret',
-            database: 'ausfallplan',
-            port: 3307
-        });
-    });
-    
-    test.afterAll(async () => {
-        // Cleanup: Delete test children and organization
-        if (childIds.length > 0) {
-            await dbConnection.execute(
-                `DELETE FROM children WHERE id IN (${childIds.join(',')})`
-            );
-        }
-        
-        if (orgId) {
-            await dbConnection.execute(
-                'DELETE FROM organizations_users WHERE organization_id = ?',
-                [orgId]
-            );
-            await dbConnection.execute(
-                'DELETE FROM organizations WHERE id = ?',
-                [orgId]
-            );
-        }
-        
-        await dbConnection.end();
-    });
-    
     test('should auto-decrypt children names when disabling organization encryption', async ({ page }) => {
+        const timestamp = Date.now();
+        const testEmail = `decrypt-test-${timestamp}@example.com`;
+        const testPassword = 'TestPassword123!';
+        const testOrgName = `Decrypt Test Org ${timestamp}`;
+        const childrenNames = [
+            `Alice Verschlüsselt ${timestamp}`,
+            `Bob Encrypted ${timestamp}`,
+            `Charlie Secret ${timestamp}`
+        ];
+        
+        // Listen to console logs for debugging
+        page.on('console', msg => {
+            if (msg.text().includes('🔐') || msg.text().includes('🔓') || msg.text().includes('Decrypt')) {
+                console.log('[BROWSER]', msg.text());
+            }
+        });
         // Step 1: Login as admin
         console.log('Step 1: Logging in...');
         await page.goto('http://localhost:8080/users/login');

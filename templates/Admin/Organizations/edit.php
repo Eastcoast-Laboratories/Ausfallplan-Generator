@@ -37,6 +37,8 @@ $this->assign('title', __('Edit Organization'));
                 
                 console.log('🔐 Org Edit: Original encryption_enabled from DB:', <?= json_encode($organization->encryption_enabled) ?>);
                 console.log('🔐 Org Edit: Checkbox checked state:', encryptionCheckbox ? encryptionCheckbox.checked : 'N/A');
+                console.log('🔐 Org Edit: Children data received from PHP:', <?= json_encode($children) ?>);
+                console.log('🔐 Org Edit: Number of children:', <?= count($children) ?>);
                 
                 // Flag to track if decryption is complete
                 let decryptionComplete = false;
