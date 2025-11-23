@@ -38,11 +38,29 @@ test.describe('Organization Encryption Disable & Auto-Decryption', () => {
         
         console.log('=== Step 1: Login ===');
         await page.goto('http://localhost:8080/users/login');
+        await page.waitForTimeout(1000);
+        
         await page.fill('input[name="email"]', adminEmail);
         await page.fill('input[name="password"]', adminPassword);
-        await page.click('button[type="submit"]');
-        await page.waitForURL(/dashboard|organizations/, { timeout: 10000 });
-        console.log('✅ Logged in');
+        
+        // Wait for any redirects or form processing
+        const [response] = await Promise.all([
+            page.waitForNavigation({ timeout: 30000, waitUntil: 'networkidle' }),
+            page.click('button[type="submit"]')
+        ]);
+        
+        await page.waitForTimeout(3000);
+        const currentUrl = page.url();
+        console.log('Current URL after login:', currentUrl);
+        
+        // Check if we're still on login page (login failed)
+        if (currentUrl.includes('/login')) {
+            const errorMsg = await page.locator('.error, .message, .flash').textContent().catch(() => 'No error message');
+            console.log('❌ Login failed. Error:', errorMsg);
+            throw new Error(`Login failed: ${errorMsg}`);
+        }
+        
+        console.log('✅ User logged in');
         
         console.log('=== Step 2: Create organization with encryption ===');
         await page.goto('http://localhost:8080/admin/organizations/add');

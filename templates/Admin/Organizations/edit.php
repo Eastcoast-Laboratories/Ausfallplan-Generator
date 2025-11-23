@@ -33,9 +33,10 @@ $this->assign('title', __('Edit Organization'));
                 const encryptionCheckbox = document.querySelector('input[name="encryption_enabled"]');
                 const form = document.querySelector('form');
                 const organizationId = <?= $organization->id ?>;
-                const originalEncryptionState = encryptionCheckbox ? encryptionCheckbox.checked : false;
+                // Use DB value, not checkbox state (checkbox might be manipulated by browser)
+                const originalEncryptionState = <?= json_encode((bool)$organization->encryption_enabled) ?>;
                 
-                console.log('🔐 Org Edit: Original encryption_enabled from DB:', <?= json_encode($organization->encryption_enabled) ?>);
+                console.log('🔐 Org Edit: Original encryption_enabled from DB:', originalEncryptionState);
                 console.log('🔐 Org Edit: Checkbox checked state:', encryptionCheckbox ? encryptionCheckbox.checked : 'N/A');
                 console.log('🔐 Org Edit: Children data received from PHP:', <?= json_encode($children) ?>);
                 console.log('🔐 Org Edit: Number of children:', <?= count($children) ?>);
@@ -76,15 +77,33 @@ $this->assign('title', __('Edit Organization'));
                                 // Use children data from PHP
                                 const children = <?= json_encode($children) ?>;
                                 
-                                console.log(`🔓 Found ${children.length} children to decrypt`);
+                                console.log(`🔓 Total children loaded: ${children.length}`);
+                                console.log('🔓 Children data:', JSON.stringify(children, null, 2));
                                 
                                 const decryptedNames = {};
                                 let decryptCount = 0;
                                 
                                 for (const child of children) {
-                                    if (child.name_encrypted) {
+                                    console.log(`🔍 Checking child ${child.id}:`, {
+                                        has_encrypted: !!child.name_encrypted,
+                                        has_iv: !!child.name_iv,
+                                        has_tag: !!child.name_tag,
+                                        encrypted_length: child.name_encrypted ? child.name_encrypted.length : 0
+                                    });
+                                    
+                                    if (child.name_encrypted && child.name_iv && child.name_tag) {
                                         try {
-                                            const decryptedName = await window.OrgEncryption.decryptData(child.name_encrypted, dek);
+                                            // Convert base64 to Uint8Array (not ArrayBuffer)
+                                            const ciphertextBuf = window.OrgEncryption.base64ToArrayBuffer(child.name_encrypted);
+                                            const ivBuf = window.OrgEncryption.base64ToArrayBuffer(child.name_iv);
+                                            const tagBuf = window.OrgEncryption.base64ToArrayBuffer(child.name_tag);
+                                            
+                                            const ciphertext = new Uint8Array(ciphertextBuf);
+                                            const iv = new Uint8Array(ivBuf);
+                                            const tag = new Uint8Array(tagBuf);
+                                            
+                                            // Decrypt the field
+                                            const decryptedName = await window.OrgEncryption.decryptField(ciphertext, iv, tag, dek);
                                             decryptedNames[child.id] = decryptedName;
                                             decryptCount++;
                                             console.log(`✅ Decrypted child ${child.id}: ${decryptedName}`);

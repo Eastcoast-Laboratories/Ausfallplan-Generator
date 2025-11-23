@@ -369,7 +369,7 @@ class OrganizationsController extends AppController
         // Get all children for this organization (for decryption)
         $children = $this->fetchTable('Children')->find()
             ->where(['organization_id' => $id])
-            ->select(['id', 'name', 'name_encrypted'])
+            ->select(['id', 'name', 'name_encrypted', 'name_iv', 'name_tag'])
             ->toArray();
 
         $this->set(compact('organization', 'allUsers', 'children'));
