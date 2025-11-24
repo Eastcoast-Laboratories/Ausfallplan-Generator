@@ -169,11 +169,15 @@ class UsersController extends AppController
                     $this->notifyOrgAdminsAboutNewUser($user, $organization, $roleInOrg);
                 }
                 
-                $debugLink = \Cake\Routing\Router::url(['controller' => 'Debug', 'action' => 'emails'], true);
-                
                 // All users need to verify their email
                 $message = __('Registration successful! Please check your email to verify your account.');
-                $message .= "\n\n" . __('View all emails at: <a href="{0}" target="_blank">Debug Email Viewer</a>', [$debugLink]);
+                
+                // Only show debug link in development mode
+                if (\Cake\Core\Configure::read('debug')) {
+                    $debugLink = \Cake\Routing\Router::url(['controller' => 'Debug', 'action' => 'emails'], true);
+                    $message .= "\n\n" . __('View all emails at: <a href="{0}" target="_blank">Debug Email Viewer</a>', [$debugLink]);
+                }
+                
                 $this->Flash->success($message, ['escape' => false]);
                 return $this->redirect(['action' => 'login']);
             }
