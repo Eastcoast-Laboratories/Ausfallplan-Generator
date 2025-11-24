@@ -205,7 +205,7 @@ class ChildrenController extends AppController
             $organization = $organizationsTable->get($data['organization_id']);
             
             // Handle encryption: accept both encrypted and plaintext during transition
-            if ($organization->encryption_enabled) {
+            if ((bool)($organization->encryption_enabled ?? false)) {
                 // If encrypted data is provided, use it
                 if (!empty($data['name_encrypted']) && !empty($data['name_iv']) && !empty($data['name_tag'])) {
                     // Clear plaintext name if encrypted version is provided
@@ -307,7 +307,7 @@ class ChildrenController extends AppController
             $organization = $organizationsTable->get($child->organization_id);
             
             // Handle encryption: accept both encrypted and plaintext during transition
-            if ($organization->encryption_enabled) {
+            if ((bool)($organization->encryption_enabled ?? false)) {
                 // If encrypted data is provided, use it
                 if (!empty($data['name_encrypted']) && !empty($data['name_iv']) && !empty($data['name_tag'])) {
                     // Clear plaintext name if encrypted version is provided

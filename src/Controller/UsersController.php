@@ -367,7 +367,7 @@ class UsersController extends AppController
             foreach ($userOrgs as $orgUser) {
                 $org = $orgUser->organization;
                 
-                if (!$org->encryption_enabled) {
+                if (!(bool)($org->encryption_enabled ?? false)) {
                     continue;
                 }
                 
