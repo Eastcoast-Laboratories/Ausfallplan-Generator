@@ -8,17 +8,74 @@ $this->assign('title', __('Schedules'));
 ?>
 
 <style>
+    .schedules-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        margin-top: 1rem;
+    }
+    
+    .schedule-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 1.5rem;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: box-shadow 0.2s ease;
+    }
+    
+    .schedule-card:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .schedule-card.active {
+        border-left: 4px solid #4caf50;
+        background: #e8f5e9;
+    }
+    
+    .card-boxes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .card-box {
+        flex: 1;
+        min-width: 200px;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 4px;
+        border: 1px solid #e0e0e0;
+    }
+    
+    .card-box h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 0.9rem;
+        color: #666;
+        font-weight: normal;
+    }
+    
+    .card-box .value {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .card-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    
     @media (max-width: 768px) {
-        /* Mobile: Allow table headers to wrap */
-        .schedules table th {
-            white-space: normal !important;
-            word-wrap: break-word;
-            min-width: 80px;
+        .card-boxes {
+            flex-direction: column;
         }
         
-        /* Specific fix for "Max Children per Day" */
-        .schedules table th:nth-last-child(2) {
-            min-width: 100px;
+        .card-box {
+            min-width: 100%;
         }
     }
 </style>
@@ -67,43 +124,32 @@ $this->assign('title', __('Schedules'));
         </div>
     <?php endif; ?>
     
-    <div class="table-responsive">
-        <table>
-            <thead>
-                <tr>
-                    <th><?= __('Title') ?></th>
-                    <?php if (isset($user) && $user->is_system_admin): ?>
-                        <th><?= __('User') ?></th>
-                    <?php endif; ?>
-                    <?php if ($hasMultipleOrgs || (isset($user) && $user->is_system_admin)): ?>
-                        <th><?= __('Organization') ?></th>
-                    <?php endif; ?>
-                    <th><?= __('Days') ?></th>
-                    <th><?= __('Children') ?></th>
-                    <th><?= __('Max Children per Day') ?></th>
-                    <th><?= __('Created') ?></th>
-                    <th class="actions"><?= __('Actions') ?></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($schedules as $schedule): 
-                    $isActive = isset($activeScheduleId) && $activeScheduleId == $schedule->id;
-                    $rowStyle = $isActive ? 'background: #e8f5e9; border-left: 4px solid #4caf50;' : '';
-                ?>
-                <tr class="schedule-row" data-schedule-id="<?= $schedule->id ?>" style="<?= $rowStyle ?> cursor: pointer;">
-                    <td>
+    <div class="schedules-grid">
+        <?php foreach ($schedules as $schedule): 
+            $isActive = isset($activeScheduleId) && $activeScheduleId == $schedule->id;
+        ?>
+        <div class="schedule-card <?= $isActive ? 'active' : '' ?>" data-schedule-id="<?= $schedule->id ?>">
+            <!-- First row: 3 boxes -->
+            <div class="card-boxes">
+                <!-- Box 1: Title, User, Organization -->
+                <div class="card-box">
+                    <h4><?= __('Title') ?></h4>
+                    <div class="value">
                         <?= h($schedule->title) ?>
                         <?php if ($isActive): ?>
                             <span style="background: #4caf50; color: white; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.75rem; margin-left: 0.5rem; display: inline-block;">
                                 ⭐ <?= __('Active') ?>
                             </span>
                         <?php endif; ?>
-                    </td>
+                    </div>
                     <?php if (isset($user) && $user->is_system_admin): ?>
-                        <td><?= h($schedule->user->email ?? $schedule->organization->name ?? '-') ?></td>
+                        <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #666;">
+                            <strong><?= __('User') ?>:</strong> <?= h($schedule->user->email ?? $schedule->organization->name ?? '-') ?>
+                        </div>
                     <?php endif; ?>
                     <?php if ($hasMultipleOrgs || (isset($user) && $user->is_system_admin)): ?>
-                        <td>
+                        <div style="margin-top: 0.5rem; font-size: 0.9rem;">
+                            <strong><?= __('Organization') ?>:</strong>
                             <?php if ($schedule->has('organization') && isset($schedule->organization->id)): ?>
                                 <?= $this->Html->link(
                                     h($schedule->organization->name), 
@@ -112,69 +158,54 @@ $this->assign('title', __('Schedules'));
                             <?php else: ?>
                                 -
                             <?php endif; ?>
-                        </td>
+                        </div>
                     <?php endif; ?>
-                    <td><?= h($schedule->days_count) ?></td>
-                    <td>
-                        <strong><?php
-                        if(isset($childrenCounts[$schedule->id]) and $childrenCounts[$schedule->id] > 0) {
-                            echo h($childrenCounts[$schedule->id]);
-                        } ?></strong>
-                        <?php if (isset($childrenCounts[$schedule->id]) && $childrenCounts[$schedule->id] > 0): ?>
-                            <span title="has children" style="color: #4caf50;">✓</span>
+                </div>
+                
+                <!-- Box 2: Days, Children, Max. per Day -->
+                <div class="card-box">
+                    <h4><?= __('Days') ?></h4>
+                    <div class="value"><?= h($schedule->days_count) ?></div>
+                    <div style="margin-top: 0.5rem;">
+                        <strong><?= __('Children') ?>:</strong> 
+                        <?php if(isset($childrenCounts[$schedule->id]) and $childrenCounts[$schedule->id] > 0): ?>
+                            <?= h($childrenCounts[$schedule->id]) ?> <span style="color: #4caf50;">✓</span>
                         <?php else: ?>
-                            <?php
-                            echo $this->Html->link(
-                                __('Add Child'), 
-                                '/schedules/manage-children/' . $schedule->id,
-                                ['class' => 'button', 'style' => 'background: #2196F3; color: white;']
-                            );
-                            ?>
+                            <span style="color: #999;">0</span>
                         <?php endif; ?>
-                    </td>
-                    <td><?= h($schedule->capacity_per_day) ?></td>
-                    <td><?= h($schedule->created->format('Y-m-d H:i')) ?></td>
-                    <td class="actions">
+                    </div>
+                    <div style="margin-top: 0.5rem;">
+                        <strong><?= __('Max Children per Day') ?>:</strong> <?= h($schedule->capacity_per_day) ?>
+                    </div>
+                </div>
+                
+                <!-- Box 3: Actions -->
+                <div class="card-box">
+                    <h4><?= __('Actions') ?></h4>
+                    <div class="card-actions">
                         <?= $this->Html->link(__('Generate List'), ['action' => 'generateReport', $schedule->id], ['class' => 'button', 'style' => 'background: #2196F3; color: white;']) ?>
                         <?php if (!($isViewer ?? false)): ?>
                             <?= $this->Html->link(__('Manage Children'), '/schedules/manage-children/' . $schedule->id, ['class' => 'button']) ?>
-                            <?= $this->Html->link(__('Edit'), ['action' => 'edit', $schedule->id]) ?>
-                            <?= $this->Form->postLink(__('Delete'), ['action' => 'delete', $schedule->id], ['confirm' => __('Are you sure you want to delete # {0}?', $schedule->id)]) ?>
+                            <?= $this->Html->link(__('Edit'), ['action' => 'edit', $schedule->id], ['class' => 'button']) ?>
+                            <?= $this->Form->postLink(__('Delete'), ['action' => 'delete', $schedule->id], ['confirm' => __('Are you sure you want to delete # {0}?', $schedule->id), 'class' => 'button']) ?>
                         <?php endif; ?>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endforeach; ?>
     </div>
 </div>
 
-<style>
-.schedule-row {
-    transition: background-color 0.2s ease;
-}
-
-.schedule-row:hover {
-    background-color: #f5f5f5 !important;
-}
-
-.schedule-row:hover td {
-}
-
-/* Don't override active schedule hover */
-.schedule-row[style*="background: #e8f5e9"]:hover {
-    background-color: #c8e6c9 !important;
-}
-</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const scheduleRows = document.querySelectorAll('.schedule-row');
+    const scheduleCards = document.querySelectorAll('.schedule-card');
     
-    scheduleRows.forEach(row => {
-        row.addEventListener('click', function(e) {
+    scheduleCards.forEach(card => {
+        card.addEventListener('click', function(e) {
             // Don't trigger if clicking on action buttons
-            if (e.target.closest('.actions') || e.target.closest('a') || e.target.closest('form')) {
+            if (e.target.closest('.card-actions') || e.target.closest('a') || e.target.closest('form') || e.target.closest('button')) {
                 return;
             }
             
