@@ -47,7 +47,6 @@ $this->assign('title', __('Children'));
                     <th><?= __('Status') ?></th>
                     <th><?= __('Integrative') ?></th>
                     <th><?= __('Sibling Group') ?></th>
-                    <th><?= __('Created') ?></th>
                     <th class="actions"><?= __('Actions') ?></th>
                 </tr>
             </thead>
@@ -107,7 +106,6 @@ $this->assign('title', __('Children'));
                     <td><?= $child->is_active ? __('Active') : __('Inactive') ?></td>
                     <td><?= $child->is_integrative ? __('Yes') : __('No') ?></td>
                     <td><?= $child->has('sibling_group') && $child->sibling_group ? h($child->sibling_group->label) : '' ?></td>
-                    <td><?= h($child->created) ?></td>
                     <td class="actions">
                         <?php if (!($isViewer ?? false)): ?>
                             <?= $this->Html->link(__('Edit'), ['action' => 'edit', $child->id]) ?>

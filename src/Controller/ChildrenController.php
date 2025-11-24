@@ -214,14 +214,15 @@ class ChildrenController extends AppController
                 // Otherwise allow plaintext for backward compatibility during UI implementation
                 // Client-side encryption will be added in future update
             } else {
-                // If encryption is disabled, reject encrypted data
-                if (!empty($data['name_encrypted'])) {
-                    $this->Flash->error(__('Encryption is not enabled for this organization.'));
+                // If encryption is disabled, clear encrypted fields from POST data
+                unset($data['name_encrypted'], $data['name_iv'], $data['name_tag']);
+                
+                // Ensure plaintext name is required
+                if (empty($data['name'])) {
+                    $this->Flash->error(__('Name is required.'));
                     $this->set(compact('child', 'siblingGroups', 'schedules', 'selectedOrgId', 'userOrgs'));
                     return;
                 }
-                // Clear encrypted fields
-                unset($data['name_encrypted'], $data['name_iv'], $data['name_tag']);
             }
             
             // Set organization_order (max + 1 for this organization)
@@ -315,9 +316,13 @@ class ChildrenController extends AppController
                 // Otherwise allow plaintext for backward compatibility during UI implementation
                 // Client-side encryption will be added in future update
             } else {
-                // If encryption is disabled, reject encrypted data
-                if (!empty($data['name_encrypted'])) {
-                    $this->Flash->error(__('Encryption is not enabled for this organization.'));
+                // If encryption is disabled, clear encrypted fields from POST data
+                // This allows editing children that previously had encryption enabled
+                unset($data['name_encrypted'], $data['name_iv'], $data['name_tag']);
+                
+                // Ensure plaintext name is required
+                if (empty($data['name'])) {
+                    $this->Flash->error(__('Name is required.'));
                     $siblingGroups = $this->Children->SiblingGroups->find('list')
                         ->where(['SiblingGroups.organization_id' => $child->organization_id ?? 0])
                         ->all();
@@ -325,8 +330,6 @@ class ChildrenController extends AppController
                     $this->set(compact('child', 'siblingGroups', 'siblingNames'));
                     return;
                 }
-                // Clear encrypted fields
-                unset($data['name_encrypted'], $data['name_iv'], $data['name_tag']);
             }
             
             $child = $this->Children->patchEntity($child, $data);
