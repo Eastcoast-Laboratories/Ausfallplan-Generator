@@ -328,7 +328,7 @@ class UsersController extends AppController
         }
         
         // Get JSON data from request body
-        $jsonData = $this->request->input('php://input');
+        $jsonData = $this->request->getBody()->getContents();
         $data = json_decode($jsonData, true);
         
         if (!$data) {
