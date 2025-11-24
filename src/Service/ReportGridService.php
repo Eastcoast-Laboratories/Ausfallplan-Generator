@@ -202,7 +202,7 @@ class ReportGridService
         foreach ($days as $day) {
             $row[] = $this->createCell(
                 self::CELL_HEADER,
-                $day['animalName'] . '-Tag ' . $day['number'],
+                $day['animalName'] . '-'.__('Day') . ' ' . $day['number'],
                 ['day_number' => $day['number'], 'animal' => $day['animalName']]
             );
         }

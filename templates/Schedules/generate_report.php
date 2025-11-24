@@ -430,6 +430,13 @@ $this->assign('title', __('FairNestPlan') . ' - ' . h($schedule->title));
     <script>
     // Continue with password check and status logging
     document.addEventListener('DOMContentLoaded', function() {
+        // Check if encryption is enabled for this organization
+        const encryptionEnabled = <?= json_encode($schedule->organization->encryption_enabled ?? false) ?>;
+        
+        if (!encryptionEnabled) {
+            console.log('[Report] ℹ️ Encryption disabled for this organization - skipping encryption checks');
+            return; // Don't show warnings if encryption is disabled
+        }
         
         // Check if password is available
         setTimeout(function() {

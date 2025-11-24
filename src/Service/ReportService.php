@@ -473,7 +473,7 @@ class ReportService
             $days[] = [
                 'number' => $i + 1,
                 'animalName' => $animalName,
-                'title' => sprintf('%s-Tag %d', $animalName, $i + 1),
+                'title' => sprintf('%s-'.__('Day') . ' %d', $animalName, $i + 1),
                 'children' => $dayChildren,
                 'firstOnWaitlistChild' => null, // Will be filled in step 2
                 'countingChildrenSum' => $countingSum,

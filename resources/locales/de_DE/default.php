@@ -252,6 +252,7 @@ return [
     'Rows' => 'Zeilen',
     'Columns' => 'Spalten',
     'Days' => 'Tage',
+    'Day' => 'Tag',
     
     // Common
     'Submit' => 'Absenden',

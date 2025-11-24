@@ -905,7 +905,7 @@ class SchedulesController extends AppController
             // Block header - each day gets 2 columns (Name + Weight)
             $headerRow = [];
             foreach ($blockDays as $day) {
-                $headerRow[] = $day['animalName'] . '-Tag ' . $day['number'];
+                $headerRow[] = $day['animalName'] . '-'.__('Day') . ' ' . $day['number'];
                 $headerRow[] = ''; // Zählkinder (Gewichtung)
             }
             if ($isFirstBlock) {
@@ -1109,7 +1109,7 @@ class SchedulesController extends AppController
             // Block header - each day gets 2 columns (Name + Weight)
             foreach ($blockDays as $day) {
                 $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $currentRow;
-                $sheet->getCell($cellCoord)->setValue($day['animalName'] . '-Tag ' . $day['number']);
+                $sheet->getCell($cellCoord)->setValue($day['animalName'] . '-'.__('Day') . ' ' . $day['number']);
                 $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1) . $currentRow;
                 $sheet->getCell($cellCoord)->setValue('');
                 $col += 2;
