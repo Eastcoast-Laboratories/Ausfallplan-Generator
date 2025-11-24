@@ -22,12 +22,109 @@ class ReportService
      * Animal names for days (German)
      */
     private const ANIMAL_NAMES = [
-        'Ameisen', 'Bienen', 'Chamäleon', 'Dachse', 'Esel', 'Fisch',
-        'Gnu', 'Hirsche', 'Insekten', 'Jaguar', 'Kamele', 'Luchse',
-        'Marabu', 'Nashörner', 'Ochsen', 'Papageien', 'Quallen', 'Rochen',
-        'Schlangen', 'Tiger', 'Uferschnepfen', 'Vögel', 'Wale', 'Xerus',
-        'Yaks', 'Zebras'
+        'de' => [
+            'A'=>['Ameisen', 'Aale'],
+            'B'=>['Bienen', 'Biber'],
+            'C'=>['Chamäleon'],
+            'D'=>['Dachse', 'Dorsch'],
+            'E'=>['Esel', 'Emu'],
+            'F'=>['Fisch', 'Floh'],
+            'G'=>['Gnu', 'Giraffen'],
+            'H'=>['Hirsche', 'Hunde'],
+            'I'=>['Insekten', 'Igel'],
+            'J'=>['Jaguar'],
+            'K'=>['Kamele', 'Kuh'],
+            'L'=>['Luchse', 'Lurch'],
+            'M'=>['Marabu', 'Mandril'],
+            'N'=>['Nashörner', 'Nielpferd'],
+            'O'=>['Ochsen'],
+            'P'=>['Papageien', 'Pinguin'],
+            'Q'=>['Quallen'],
+            'R'=>['Rochen', 'Ratten'],
+            'S'=>['Schlangen', 'Schildkröten'],
+            'T'=>['Tiger', 'Tupan'],
+            'U'=>['Uferschnepfen', 'Uhu'],
+            'V'=>['Vögel'],
+            'W'=>['Wale', 'Wildschwein'],
+            'X'=>['Xerus'],
+            'Y'=>['Yaks'],
+            'Z'=>['Zilpzalp', 'Zebra']
+        ],
+        'en' => [
+            'A'=>['Ant', 'Anteater'],
+            'B'=>['Bees', 'Beaver', 'Bear'],
+            'C'=>['Chameleon', 'Chicken'],
+            'D'=>['Deer', 'Dog'],
+            'E'=>['Elephant', 'Emu'],
+            'F'=>['Fish', 'Frog'],
+            'G'=>['Giraffes', 'Goats'],
+            'H'=>['Horse', 'Hedgehog'],
+            'I'=>['Insects', 'Iguanas'],
+            'J'=>['Jaguars', 'Jellyfish'],
+            'K'=>['Kangaroos'],
+            'L'=>['Lions', 'Lizard'],
+            'M'=>['Monkey', 'Mandril'],
+            'N'=>['Narwhals'],
+            'O'=>['Oxen'],
+            'P'=>['Parrot', 'Penguin'],
+            'Q'=>['Quails'],
+            'R'=>['Rats', 'Raccoons'],
+            'S'=>['Snake', 'Spider'],
+            'T'=>['Tigers', 'Tupans', 'Turtles'],
+            'U'=>['Uguis'],
+            'V'=>['Vultures'],
+            'W'=>['Whales'],
+            'X'=>['Xerus'],
+            'Y'=>['Yaks'],
+            'Z'=>['Zebra']
+        ]
     ];
+
+    /**
+     * Generate a shuffled animal names sequence for a schedule
+     * 
+     * @param string $locale Locale code (de, en)
+     * @return array Shuffled animal names by letter
+     */
+    public function generateAnimalNamesSequence(string $locale = 'de'): array
+    {
+        $names = self::ANIMAL_NAMES[$locale] ?? self::ANIMAL_NAMES['de'];
+        $shuffled = [];
+        
+        foreach ($names as $letter => $animals) {
+            // Shuffle animals for this letter
+            $shuffledAnimals = $animals;
+            shuffle($shuffledAnimals);
+            $shuffled[$letter] = $shuffledAnimals;
+        }
+        
+        return $shuffled;
+    }
+
+    /**
+     * Get animal name for a specific day index
+     * 
+     * @param array $sequence Animal names sequence
+     * @param int $dayIndex Day index (0-based)
+     * @return string Animal name
+     */
+    public function getAnimalNameForDay(array $sequence, int $dayIndex): string
+    {
+        $letters = array_keys($sequence);
+        $letterCount = count($letters);
+        
+        // Determine which letter and which animal within that letter
+        $letterIndex = $dayIndex % $letterCount;
+        $animalIndex = (int)floor($dayIndex / $letterCount);
+        
+        $letter = $letters[$letterIndex];
+        $animals = $sequence[$letter];
+        
+        // If we need more animals than available, cycle through
+        $animalIndex = $animalIndex % count($animals);
+        
+        return $animals[$animalIndex];
+    }
 
     /**
      * Generate report data for a schedule
@@ -59,8 +156,33 @@ class ReportService
             ->all()
             ->toArray();
 
+        // Get animal names sequence from schedule, or generate default
+        $locale = 'de'; // Default locale for reports
+        $animalNamesSequence = null;
+        
+        if ($schedule->animal_names_sequence) {
+            $sequences = @unserialize($schedule->animal_names_sequence);
+            if (is_array($sequences)) {
+                // New format: ['de' => [...], 'en' => [...]]
+                if (isset($sequences[$locale])) {
+                    $animalNamesSequence = $sequences[$locale];
+                } elseif (isset($sequences['de'])) {
+                    // Fallback to German if preferred locale not available
+                    $animalNamesSequence = $sequences['de'];
+                }
+            } else {
+                // Old format: direct array (backward compatibility)
+                $animalNamesSequence = $sequences;
+            }
+        }
+        
+        if (!$animalNamesSequence) {
+            // Fallback to default German sequence
+            $animalNamesSequence = self::ANIMAL_NAMES['de'];
+        }
+
         // Generate day boxes using sorted children with sibling logic
-        $days = $this->generateDaysWithSiblings($daysCount, $sortedChildren, $schedule->capacity_per_day ?? 9);
+        $days = $this->generateDaysWithSiblings($daysCount, $sortedChildren, $schedule->capacity_per_day ?? 9, $animalNamesSequence);
 
         // Find "always at end" children - those with schedule_id but NO waitlist_order
         $alwaysAtEnd = $this->getAssignedChildren($scheduleId);
@@ -188,8 +310,14 @@ class ReportService
     /**
      * Generate days with sibling logic
      * Siblings are always together or not at all
+     * 
+     * @param int $daysCount Number of days to generate
+     * @param array $childUnits Child units (singles or sibling groups)
+     * @param int $capacity Capacity per day
+     * @param array $animalNamesSequence Animal names sequence by letter
+     * @return array Days with children and animal names
      */
-    private function generateDaysWithSiblings(int $daysCount, array $childUnits, int $capacity): array
+    private function generateDaysWithSiblings(int $daysCount, array $childUnits, int $capacity, array $animalNamesSequence): array
     {
         $days = [];
         $currentIndex = 0;
@@ -283,7 +411,8 @@ class ReportService
         $overflowQueue = []; // Units that didn't fit in previous day
         
         for ($i = 0; $i < $daysCount; $i++) {
-            $animalName = self::ANIMAL_NAMES[$i % count(self::ANIMAL_NAMES)];
+            // Get animal name from sequence
+            $animalName = $this->getAnimalNameForDay($animalNamesSequence, $i);
             
             $dayChildren = [];
             $countingSum = 0;

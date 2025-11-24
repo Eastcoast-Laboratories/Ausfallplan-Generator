@@ -225,6 +225,16 @@ class SchedulesController extends AppController
                 }
             }
             
+            // Generate animal names sequence for both locales before saving
+            if (empty($schedule->animal_names_sequence)) {
+                $reportService = new \App\Service\ReportService();
+                $sequences = [
+                    'de' => $reportService->generateAnimalNamesSequence('de'),
+                    'en' => $reportService->generateAnimalNamesSequence('en')
+                ];
+                $schedule->animal_names_sequence = serialize($sequences);
+            }
+            
             if ($this->Schedules->save($schedule)) {
                 // Set this as the active schedule in session
                 $this->request->getSession()->write('activeScheduleId', $schedule->id);
@@ -267,7 +277,31 @@ class SchedulesController extends AppController
             ->toArray();
         
         if ($this->request->is(['patch', 'post', 'put'])) {
-            $schedule = $this->Schedules->patchEntity($schedule, $this->request->getData());
+            $data = $this->request->getData();
+            
+            // Handle animal names sequence update (locale-specific)
+            if (isset($data['animal_names_json'])) {
+                $locale = $this->request->getSession()->read('Config.language') ?? 'de';
+                $animalNamesData = json_decode($data['animal_names_json'], true);
+                
+                if ($animalNamesData) {
+                    // Load existing sequences
+                    $sequences = [];
+                    if ($schedule->animal_names_sequence) {
+                        $sequences = @unserialize($schedule->animal_names_sequence);
+                        if (!is_array($sequences)) {
+                            $sequences = [];
+                        }
+                    }
+                    
+                    // Update only the current locale
+                    $sequences[$locale] = $animalNamesData;
+                    $data['animal_names_sequence'] = serialize($sequences);
+                }
+                unset($data['animal_names_json']);
+            }
+            
+            $schedule = $this->Schedules->patchEntity($schedule, $data);
             
             // Ensure user_id is set
             if (!$schedule->user_id) {
@@ -289,7 +323,73 @@ class SchedulesController extends AppController
             $this->Flash->error(__('Could not save schedule.'));
         }
         
-        $this->set(compact('schedule', 'organizations', 'userOrgs'));
+        // Deserialize animal names sequence for editing (locale-specific)
+        $locale = $this->request->getSession()->read('Config.language') ?? 'de';
+        $animalNames = null;
+        if ($schedule->animal_names_sequence) {
+            $sequences = @unserialize($schedule->animal_names_sequence);
+            if (is_array($sequences) && isset($sequences[$locale])) {
+                $animalNames = $sequences[$locale];
+            }
+        }
+        
+        $this->set(compact('schedule', 'organizations', 'userOrgs', 'animalNames', 'locale'));
+    }
+
+    /**
+     * Shuffle animal names for a schedule (AJAX)
+     *
+     * @param string|null $id Schedule id
+     * @return \Cake\Http\Response JSON response
+     */
+    public function shuffleAnimalNames($id = null)
+    {
+        $this->request->allowMethod(['post']);
+        $this->viewBuilder()->setClassName('Json');
+        
+        $schedule = $this->Schedules->get($id);
+        
+        // Permission check
+        if (!$this->hasOrgRole($schedule->organization_id)) {
+            $this->set([
+                'success' => false,
+                'message' => __('Access denied')
+            ]);
+            $this->viewBuilder()->setOption('serialize', ['success', 'message']);
+            return;
+        }
+        
+        // Generate new shuffled sequence for current locale only
+        $reportService = new \App\Service\ReportService();
+        $locale = $this->request->getSession()->read('Config.language') ?? 'de';
+        $newSequence = $reportService->generateAnimalNamesSequence($locale);
+        
+        // Load existing sequences and update only current locale
+        $sequences = [];
+        if ($schedule->animal_names_sequence) {
+            $sequences = @unserialize($schedule->animal_names_sequence);
+            if (!is_array($sequences)) {
+                $sequences = [];
+            }
+        }
+        
+        // Update only the current locale, keep others
+        $sequences[$locale] = $newSequence;
+        $schedule->animal_names_sequence = serialize($sequences);
+        
+        if ($this->Schedules->save($schedule)) {
+            $this->set([
+                'success' => true,
+                'animalNames' => $newSequence
+            ]);
+        } else {
+            $this->set([
+                'success' => false,
+                'message' => __('Failed to save shuffled names')
+            ]);
+        }
+        
+        $this->viewBuilder()->setOption('serialize', ['success', 'animalNames', 'message']);
     }
 
     /**
