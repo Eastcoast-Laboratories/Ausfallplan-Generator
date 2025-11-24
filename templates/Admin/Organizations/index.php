@@ -44,9 +44,9 @@ $this->assign('title', __('Organization Management'));
                     </td>
                     <td style="text-align: center; font-size: 1.3rem;" title="<?= ($organization->encryption_enabled ?? false) ? __('Encryption enabled') : __('Encryption disabled') ?>">
                         <?php if ($organization->encryption_enabled ?? false): ?>
-                            🔒
+                            🔒<span style="color: green;">✅</span>
                         <?php else: ?>
-                            🔓
+                            🔓<span style="color: red;">❌</span>
                         <?php endif; ?>
                     </td>
                     <td style="white-space: nowrap;">
