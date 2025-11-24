@@ -328,7 +328,9 @@ class SchedulesController extends AppController
         }
         
         // Deserialize animal names sequence for editing (both locales)
-        $locale = $this->request->getSession()->read('Config.language') ?? 'de';
+        $sessionLocale = $this->request->getSession()->read('Config.language') ?? 'de';
+        // Normalize locale: en_US -> en, de_DE -> de
+        $locale = substr($sessionLocale, 0, 2);
         $animalNames = null;
         $animalNamesDE = null;
         $animalNamesEN = null;
@@ -339,7 +341,7 @@ class SchedulesController extends AppController
                 $animalNamesDE = $sequences['de'] ?? null;
                 $animalNamesEN = $sequences['en'] ?? null;
                 // Set current locale's names as default
-                $animalNames = $sequences[$locale] ?? null;
+                $animalNames = $sequences[$locale] ?? $sequences['de'] ?? null;
             }
         }
         
@@ -382,8 +384,10 @@ class SchedulesController extends AppController
         $schedule->animal_names_sequence = serialize($sequences);
         
         // Return current locale for display
-        $locale = $this->request->getSession()->read('Config.language') ?? 'de';
-        $newSequence = $sequences[$locale];
+        $sessionLocale = $this->request->getSession()->read('Config.language') ?? 'de';
+        // Normalize locale: en_US -> en, de_DE -> de
+        $locale = substr($sessionLocale, 0, 2);
+        $newSequence = $sequences[$locale] ?? $sequences['de'];
         
         if ($this->Schedules->save($schedule)) {
             $this->set([
@@ -764,7 +768,9 @@ class SchedulesController extends AppController
         $daysCount = $schedule->days_count ?? $assignedChildrenCount;
         
         // Get current locale from session
-        $locale = $this->request->getSession()->read('Config.language') ?? 'de';
+        $sessionLocale = $this->request->getSession()->read('Config.language') ?? 'de';
+        // Normalize locale: en_US -> en, de_DE -> de
+        $locale = substr($sessionLocale, 0, 2);
         
         $reportService = new \App\Service\ReportService();
         $reportData = $reportService->generateReportData((int)$id, $daysCount, $locale);
@@ -814,7 +820,9 @@ class SchedulesController extends AppController
         $daysCount = $schedule->days_count ?? $assignedChildrenCount;
         
         // Get current locale from session
-        $locale = $this->request->getSession()->read('Config.language') ?? 'de';
+        $sessionLocale = $this->request->getSession()->read('Config.language') ?? 'de';
+        // Normalize locale: en_US -> en, de_DE -> de
+        $locale = substr($sessionLocale, 0, 2);
         
         $reportService = new \App\Service\ReportService();
         $reportData = $reportService->generateReportData((int)$id, $daysCount, $locale);
@@ -861,7 +869,9 @@ class SchedulesController extends AppController
         $daysCount = $schedule->days_count ?? $assignedChildrenCount;
         
         // Get current locale from session
-        $locale = $this->request->getSession()->read('Config.language') ?? 'de';
+        $sessionLocale = $this->request->getSession()->read('Config.language') ?? 'de';
+        // Normalize locale: en_US -> en, de_DE -> de
+        $locale = substr($sessionLocale, 0, 2);
         
         // Generate report data
         $reportService = new \App\Service\ReportService();
@@ -1024,7 +1034,9 @@ class SchedulesController extends AppController
         $daysCount = $schedule->days_count ?? $assignedChildrenCount;
         
         // Get current locale from session
-        $locale = $this->request->getSession()->read('Config.language') ?? 'de';
+        $sessionLocale = $this->request->getSession()->read('Config.language') ?? 'de';
+        // Normalize locale: en_US -> en, de_DE -> de
+        $locale = substr($sessionLocale, 0, 2);
         
         // Generate report data
         $reportService = new \App\Service\ReportService();
