@@ -16,6 +16,7 @@ use Cake\ORM\Entity;
  * @property string $state
  * @property int|null $capacity_per_day
  * @property int|null $days_count
+ * @property string|null $animal_names_sequence
  * @property \Cake\I18n\DateTime $created
  * @property \Cake\I18n\DateTime $modified
  *
@@ -37,9 +38,36 @@ class Schedule extends Entity
         'state' => true,
         'capacity_per_day' => true,
         'days_count' => true,
+        'animal_names_sequence' => true,
         'created' => true,
         'modified' => true,
         'organization' => true,
         'rules' => true,
     ];
+    
+    /**
+     * Get deserialized animal names sequence
+     * 
+     * @return array|null
+     */
+    protected function _getAnimalNamesSequenceArray(): ?array
+    {
+        if (empty($this->animal_names_sequence)) {
+            return null;
+        }
+        
+        $data = @unserialize($this->animal_names_sequence);
+        return is_array($data) ? $data : null;
+    }
+    
+    /**
+     * Set serialized animal names sequence
+     * 
+     * @param array $sequence
+     * @return string
+     */
+    protected function _setAnimalNamesSequenceArray(array $sequence): string
+    {
+        return serialize($sequence);
+    }
 }
