@@ -369,23 +369,21 @@ class SchedulesController extends AppController
             return;
         }
         
-        // Generate new shuffled sequence for current locale only
+        // Generate new shuffled sequences for BOTH locales
         $reportService = new \App\Service\ReportService();
-        $locale = $this->request->getSession()->read('Config.language') ?? 'de';
-        $newSequence = $reportService->generateAnimalNamesSequence($locale);
+        $newSequenceDE = $reportService->generateAnimalNamesSequence('de');
+        $newSequenceEN = $reportService->generateAnimalNamesSequence('en');
         
-        // Load existing sequences and update only current locale
-        $sequences = [];
-        if ($schedule->animal_names_sequence) {
-            $sequences = @unserialize($schedule->animal_names_sequence);
-            if (!is_array($sequences)) {
-                $sequences = [];
-            }
-        }
-        
-        // Update only the current locale, keep others
-        $sequences[$locale] = $newSequence;
+        // Save both locales
+        $sequences = [
+            'de' => $newSequenceDE,
+            'en' => $newSequenceEN
+        ];
         $schedule->animal_names_sequence = serialize($sequences);
+        
+        // Return current locale for display
+        $locale = $this->request->getSession()->read('Config.language') ?? 'de';
+        $newSequence = $sequences[$locale];
         
         if ($this->Schedules->save($schedule)) {
             $this->set([
@@ -765,8 +763,11 @@ class SchedulesController extends AppController
         // Use days_count from schedule or default to assigned children count
         $daysCount = $schedule->days_count ?? $assignedChildrenCount;
         
+        // Get current locale from session
+        $locale = $this->request->getSession()->read('Config.language') ?? 'de';
+        
         $reportService = new \App\Service\ReportService();
-        $reportData = $reportService->generateReportData((int)$id, $daysCount);
+        $reportData = $reportService->generateReportData((int)$id, $daysCount, $locale);
         
         // Punkt 5: Generate 2D grid
         $gridService = new \App\Service\ReportGridService();
@@ -812,8 +813,11 @@ class SchedulesController extends AppController
         // Use days_count from schedule or default to assigned children count
         $daysCount = $schedule->days_count ?? $assignedChildrenCount;
         
+        // Get current locale from session
+        $locale = $this->request->getSession()->read('Config.language') ?? 'de';
+        
         $reportService = new \App\Service\ReportService();
-        $reportData = $reportService->generateReportData((int)$id, $daysCount);
+        $reportData = $reportService->generateReportData((int)$id, $daysCount, $locale);
         
         // Generate 2D grid
         $gridService = new \App\Service\ReportGridService();
@@ -856,9 +860,12 @@ class SchedulesController extends AppController
         
         $daysCount = $schedule->days_count ?? $assignedChildrenCount;
         
+        // Get current locale from session
+        $locale = $this->request->getSession()->read('Config.language') ?? 'de';
+        
         // Generate report data
         $reportService = new \App\Service\ReportService();
-        $reportData = $reportService->generateReportData((int)$id, $daysCount);
+        $reportData = $reportService->generateReportData((int)$id, $daysCount, $locale);
         
         // Build CSV with 4-day blocks
         $csv = [];
@@ -1016,9 +1023,12 @@ class SchedulesController extends AppController
         
         $daysCount = $schedule->days_count ?? $assignedChildrenCount;
         
+        // Get current locale from session
+        $locale = $this->request->getSession()->read('Config.language') ?? 'de';
+        
         // Generate report data
         $reportService = new \App\Service\ReportService();
-        $reportData = $reportService->generateReportData((int)$id, $daysCount);
+        $reportData = $reportService->generateReportData((int)$id, $daysCount, $locale);
         
         $days = $reportData['days'];
         $waitlist = $reportData['waitlist'];

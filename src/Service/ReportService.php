@@ -133,7 +133,7 @@ class ReportService
      * @param int $daysCount Number of days to generate
      * @return array Report data structure
      */
-    public function generateReportData(int $scheduleId, int $daysCount): array
+    public function generateReportData(int $scheduleId, int $daysCount, string $locale = 'de'): array
     {
         $schedulesTable = TableRegistry::getTableLocator()->get('Schedules');
         
@@ -157,7 +157,6 @@ class ReportService
             ->toArray();
 
         // Get animal names sequence from schedule, or generate default
-        $locale = 'de'; // Default locale for reports
         $animalNamesSequence = null;
         
         if ($schedule->animal_names_sequence) {
@@ -177,8 +176,8 @@ class ReportService
         }
         
         if (!$animalNamesSequence) {
-            // Fallback to default German sequence
-            $animalNamesSequence = self::ANIMAL_NAMES['de'];
+            // Fallback to default for specified locale
+            $animalNamesSequence = self::ANIMAL_NAMES[$locale] ?? self::ANIMAL_NAMES['de'];
         }
 
         // Generate day boxes using sorted children with sibling logic
