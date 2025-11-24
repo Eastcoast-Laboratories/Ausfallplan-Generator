@@ -81,3 +81,7 @@ mach du und löse alle probleme online, checke am ende mit einem playwright test
 **Bulk Actions:**
 - Merge von Organisationen (bei Duplikaten)
 
+# aktuell:
+- @ReportService.php#L25-80 habe die namen angepasst, es sollen diese beim erstellen eines neuen schedules in einem extra feld der rscedule tabelle gespeichert werden als serialized string, wobbei fr jeden buchstaben die reihenfolge zufällig gemischt wird innerhalb des buchstabens, damit jeder schedule eine eindeutige namensmischung für die tage hat. Im schedule edit screen soll eien utton erscheinen um diese dann neu zu mischen und abzuspeichern, ausserdem sollen die namen dort editierbar sein, nach dem mischen/erstellen
+
+die namensreichenfolge soll dann beim report als überschriften benutzt werden anstatt der fixen namen wie bisher. dabei soll immer der erste name jedes buchstabens gemnommen werden (die weiteren tiere innerhalb der liste pro buchstaben sind für den fall, dass es mehr als 26 tage gibt, da bekommt dann der zwite tag mit A den zweiten eintrag aus dem a-array
