@@ -104,7 +104,7 @@ class SchedulesTable extends Table
             ->requirePresence('days_count', 'create')
             ->notEmptyString('days_count')
             ->greaterThan('days_count', 0, __('Anzahl Tage muss größer als 0 sein'))
-            ->lessThanOrEqual('days_count', 28, __('Anzahl Tage darf maximal 28 sein'));
+            ->lessThanOrEqual('days_count', 32, __('Anzahl Tage darf maximal 32 sein'));
 
         return $validator;
     }

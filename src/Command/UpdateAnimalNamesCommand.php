@@ -25,31 +25,57 @@ class UpdateAnimalNamesCommand extends Command
         $updated = 0;
         
         foreach ($schedules as $schedule) {
+            $needsUpdate = false;
+            
             if ($schedule->animal_names_sequence) {
                 $sequences = @unserialize($schedule->animal_names_sequence);
                 
-                // Check if it's old format (single array) or missing EN
-                if ($sequences && (!is_array($sequences) || !isset($sequences['en']))) {
-                    $io->verbose("Updating schedule #{$schedule->id}: {$schedule->title}");
-                    
-                    // If old format (direct array), treat as DE
-                    if (!isset($sequences['de'])) {
+                // Check if it's old format (single array) or missing EN or EN has German names
+                if ($sequences && is_array($sequences)) {
+                    // If old format (direct array with letters), treat as DE
+                    if (!isset($sequences['de']) && !isset($sequences['en'])) {
+                        $io->verbose("Old format detected for schedule #{$schedule->id}: {$schedule->title}");
                         $oldSequences = $sequences;
                         $sequences = ['de' => $oldSequences];
+                        $needsUpdate = true;
                     }
                     
-                    // Generate EN names
+                    // Generate EN names if missing
                     if (!isset($sequences['en'])) {
+                        $io->verbose("Missing EN for schedule #{$schedule->id}: {$schedule->title}");
                         $sequences['en'] = $reportService->generateAnimalNamesSequence('en');
+                        $needsUpdate = true;
+                    } else {
+                        // Check if EN contains German words (wrong)
+                        $enSequence = $sequences['en'];
+                        $hasGermanWords = false;
+                        $germanWords = ['Ameisen', 'Bienen', 'Dachse', 'Esel', 'Fisch', 'Gnu'];
+                        
+                        foreach ($enSequence as $letter => $animals) {
+                            foreach ($animals as $animal) {
+                                if (in_array($animal, $germanWords)) {
+                                    $hasGermanWords = true;
+                                    break 2;
+                                }
+                            }
+                        }
+                        
+                        if ($hasGermanWords) {
+                            $io->warning("EN has German words for schedule #{$schedule->id}: {$schedule->title}");
+                            $sequences['en'] = $reportService->generateAnimalNamesSequence('en');
+                            $needsUpdate = true;
+                        }
                     }
                     
-                    $schedule->animal_names_sequence = serialize($sequences);
-                    
-                    if ($schedulesTable->save($schedule)) {
-                        $updated++;
-                        $io->success("  ✓ Updated schedule #{$schedule->id}");
-                    } else {
-                        $io->error("  ✗ Failed to update schedule #{$schedule->id}");
+                    if ($needsUpdate) {
+                        $schedule->animal_names_sequence = serialize($sequences);
+                        
+                        if ($schedulesTable->save($schedule)) {
+                            $updated++;
+                            $io->success("  ✓ Updated schedule #{$schedule->id}");
+                        } else {
+                            $io->error("  ✗ Failed to update schedule #{$schedule->id}");
+                        }
                     }
                 }
             } else {
