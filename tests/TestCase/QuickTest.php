@@ -102,6 +102,7 @@ class QuickTest extends TestCase
             'ends_on' => '2025-01-31',
             'days_count' => 5,
             'state' => 'draft',
+            'animal_names_sequence' => '',
         ]);
         $this->assertTrue($schedules->save($schedule) !== false);
         
