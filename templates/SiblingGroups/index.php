@@ -7,17 +7,14 @@ $this->assign('title', __('Sibling Groups'));
 ?>
 <div class="sibling-groups index content">
     <h3><?= __('Sibling Groups') ?></h3>
-    <div class="actions">
-        <?= $this->Html->link(__('New Sibling Group'), ['action' => 'add'], ['class' => 'button float-right']) ?>
-    </div>
     
-    <?php if ($hasMultipleOrgs || ($this->request->getAttribute('identity') && $this->request->getAttribute('identity')->is_system_admin)): ?>
-        <div style="margin-bottom: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;">
-            <form method="get" action="<?= $this->Url->build(['action' => 'index']) ?>" style="display: flex; align-items: center; gap: 1rem;">
-                <label for="organization-filter" style="margin: 0; font-weight: bold;">
+    <div style="margin-bottom: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;">
+        <?php if ($hasMultipleOrgs || ($this->request->getAttribute('identity') && $this->request->getAttribute('identity')->is_system_admin)): ?>
+            <form method="get" action="<?= $this->Url->build(['action' => 'index']) ?>" style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                <label for="organization-filter" style="margin: 0; font-weight: bold; white-space: nowrap;">
                     <?= __('Organization') ?>:
                 </label>
-                <select name="organization_id" id="organization-filter" onchange="this.form.submit()" style="flex: 1; max-width: 300px;">
+                <select name="organization_id" id="organization-filter" onchange="this.form.submit()" style="flex: 1; min-width: 200px; max-width: 300px;">
                     <option value="all"><?= __('All Organizations') ?></option>
                     <?php foreach ($userOrgs as $org): ?>
                         <option value="<?= $org->id ?>" <?= $selectedOrgId == $org->id ? 'selected' : '' ?>>
@@ -25,9 +22,12 @@ $this->assign('title', __('Sibling Groups'));
                         </option>
                     <?php endforeach; ?>
                 </select>
+                <?= $this->Html->link(__('New Sibling Group'), ['action' => 'add'], ['class' => 'button', 'style' => 'white-space: nowrap;']) ?>
             </form>
-        </div>
-    <?php endif; ?>
+        <?php else: ?>
+            <?= $this->Html->link(__('New Sibling Group'), ['action' => 'add'], ['class' => 'button']) ?>
+        <?php endif; ?>
+    </div>
     
     <div class="table-responsive">
         <table>
@@ -35,7 +35,6 @@ $this->assign('title', __('Sibling Groups'));
                 <tr>
                     <th><?= __('Name') ?></th>
                     <th><?= __('Children') ?></th>
-                    <th><?= __('Created') ?></th>
                     <th class="actions"><?= __('Actions') ?></th>
                 </tr>
             </thead>
@@ -62,7 +61,6 @@ $this->assign('title', __('Sibling Groups'));
                             </span>
                         <?php endif; ?>
                     </td>
-                    <td><?= h($siblingGroup->created) ?></td>
                     <td class="actions">
                         <?= $this->Html->link(__('View'), ['action' => 'view', $siblingGroup->id]) ?>
                         <?= $this->Html->link(__('Edit'), ['action' => 'edit', $siblingGroup->id]) ?>
