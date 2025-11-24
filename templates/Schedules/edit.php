@@ -126,9 +126,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (response.ok) {
                     const data = await response.json();
                     if (data.success && data.animalNames) {
-                        // Update inputs with new shuffled names
-                        updateAnimalNamesInputs(data.animalNames);
-                        alert('<?= __('Animal names shuffled successfully!') ?>');
+                        // Reload page to show shuffled names
+                        window.location.reload();
                     }
                 } else {
                     alert('<?= __('Failed to shuffle animal names.') ?>');
