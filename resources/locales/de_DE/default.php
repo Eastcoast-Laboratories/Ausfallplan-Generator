@@ -509,7 +509,7 @@ return [
     'Encryption keys have been successfully regenerated! All children names must be re-encrypted.' => 'Verschlüsselungsschlüssel wurden erfolgreich neu generiert! Alle Kindernamen müssen neu verschlüsselt werden.',
     'Show Details' => 'Details anzeigen',
     'Hide Details' => 'Details ausblenden',
-    'Client-Side Encryption aktiviert' => 'Client-seitige Verschlüsselung aktiviert',
+    'Client-Side Encryption aktive' => 'Client-seitige Verschlüsselung aktiviert',
     'Wenn deaktiviert, werden verschlüsselte Kindernamen automatisch entschlüsselt und als Klartext in der Datenbank gespeichert.' => 'Wenn deaktiviert, werden verschlüsselte Kindernamen automatisch entschlüsselt und als Klartext in der Datenbank gespeichert.',
     'Enter password to setup encryption' => 'Passwort eingeben um Verschlüsselung einzurichten',
     'Enter password to regenerate keys' => 'Passwort eingeben um Schlüssel neu zu generieren',
@@ -525,5 +525,21 @@ return [
     'Verschlüsselung deaktiviert. {0} Kindernamen wurden entschlüsselt, {1} sind fehlgeschlagen.' => 'Verschlüsselung deaktiviert. {0} Kindernamen wurden entschlüsselt, {1} sind fehlgeschlagen.',
     'Verschlüsselung deaktiviert. {0} Kindernamen wurden erfolgreich entschlüsselt.' => 'Verschlüsselung deaktiviert. {0} Kindernamen wurden erfolgreich entschlüsselt.',
     'Verschlüsselung deaktiviert. Es gab keine verschlüsselten Kindernamen.' => 'Verschlüsselung deaktiviert. Es gab keine verschlüsselten Kindernamen.',
-    'Fehler: Verschlüsselung wurde deaktiviert, aber keine entschlüsselten Daten wurden empfangen.' => 'Fehler: Verschlüsselung wurde deaktiviert, aber keine entschlüsselten Daten wurden empfangen.'
+    'Fehler: Verschlüsselung wurde deaktiviert, aber keine entschlüsselten Daten wurden empfangen.' => 'Fehler: Verschlüsselung wurde deaktiviert, aber keine entschlüsselten Daten wurden empfangen.',
+    
+    // Organization Members Management
+    'Manage Members' => 'Mitglieder verwalten',
+    'Role in Organization' => 'Rolle in Organisation',
+    'Primary Organization' => 'Hauptorganisation',
+    'Joined' => 'Beigetreten',
+    'Remove member from organization?' => 'Mitglied aus Organisation entfernen?',
+    'No members in this organization.' => 'Keine Mitglieder in dieser Organisation.',
+    'Add Member' => 'Mitglied hinzufügen',
+    '-- Select User --' => '-- Benutzer wählen --',
+    'User' => 'Benutzer',
+    'Role' => 'Rolle',
+    'Add' => 'Hinzufügen',
+    'Client-Side Encryption enabled' => 'Client-seitige Verschlüsselung aktiviert',
+    'Basis-Information' => 'Basis-Informationen',
+    'Aktive' => 'Aktiv'
 ];

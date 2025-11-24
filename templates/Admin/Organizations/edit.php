@@ -11,21 +11,22 @@ $this->assign('title', __('Edit Organization'));
     
     <div class="row">
         <div class="column">
-            <h4><?= __('Basis-Informationen') ?></h4>
+            <h4><?= __('Basis-Information') ?></h4>
             <?= $this->Form->create($organization) ?>
             <fieldset>
                 <?= $this->Form->control('name', ['required' => true]) ?>
-                <?= $this->Form->control('is_active', ['type' => 'checkbox', 'label' => __('Aktiv')]) ?>
+                <?= $this->Form->control('is_active', ['type' => 'checkbox', 'label' => __('Aktive')]) ?>
                 <?= $this->Form->control('encryption_enabled', [
                     'type' => 'checkbox',
-                    'label' => __('Client-Side Encryption aktiviert'),
-                    'help' => __('Wenn deaktiviert, werden verschlüsselte Kindernamen automatisch entschlüsselt und als Klartext in der Datenbank gespeichert.')
+                    'label' => __('Client-Side Encryption enabled'),
+                    'help' => __('Wenn deaktiviert, werden verschlüsselte Kindernamen automatisch entschlüsselt und als Klartext in der Datenbank gespeichert.'),
+                    'checked' => (bool)$organization->encryption_enabled  // Explicitly set from DB
                 ]) ?>
                 <?= $this->Form->control('contact_email', ['type' => 'email', 'label' => __('Kontakt E-Mail')]) ?>
                 <?= $this->Form->control('contact_phone', ['label' => __('Telefon')]) ?>
             </fieldset>
-            <?= $this->Form->button(__('Speichern'), ['id' => 'save-org-btn']) ?>
-            <?= $this->Html->link(__('Abbrechen'), ['action' => 'view', $organization->id], ['class' => 'button']) ?>
+            <?= $this->Form->button(__('Save'), ['id' => 'save-org-btn']) ?>
+            <?= $this->Html->link(__('Cancel'), ['action' => 'view', $organization->id], ['class' => 'button']) ?>
             <?= $this->Form->end() ?>
             
             <script>
@@ -36,8 +37,13 @@ $this->assign('title', __('Edit Organization'));
                 // Use DB value, not checkbox state (checkbox might be manipulated by browser)
                 const originalEncryptionState = <?= json_encode((bool)$organization->encryption_enabled) ?>;
                 
+                // Force checkbox to match DB value (fix browser autocomplete issues)
+                if (encryptionCheckbox) {
+                    encryptionCheckbox.checked = originalEncryptionState;
+                }
+                
                 console.log('🔐 Org Edit: Original encryption_enabled from DB:', originalEncryptionState);
-                console.log('🔐 Org Edit: Checkbox checked state:', encryptionCheckbox ? encryptionCheckbox.checked : 'N/A');
+                console.log('🔐 Org Edit: Checkbox forced to:', encryptionCheckbox ? encryptionCheckbox.checked : 'N/A');
                 console.log('🔐 Org Edit: Children data received from PHP:', <?= json_encode($children) ?>);
                 console.log('🔐 Org Edit: Number of children:', <?= count($children) ?>);
                 
@@ -165,18 +171,18 @@ $this->assign('title', __('Edit Organization'));
 
     <div class="row" style="margin-top: 2rem;">
         <div class="column">
-            <h4><?= __('Mitglieder verwalten') ?> (<?= count($organization->organization_users ?? []) ?>)</h4>
+            <h4><?= __('Manage Members') ?> (<?= count($organization->organization_users ?? []) ?>)</h4>
             
             <?php if (!empty($organization->organization_users)): ?>
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
-                            <th><?= __('E-Mail') ?></th>
-                            <th><?= __('Rolle in Organisation') ?></th>
-                            <th><?= __('Hauptorganisation') ?></th>
-                            <th><?= __('Beigetreten') ?></th>
-                            <th class="actions"><?= __('Aktionen') ?></th>
+                            <th><?= __('Email') ?></th>
+                            <th><?= __('Role in Organization') ?></th>
+                            <th><?= __('Primary Organization') ?></th>
+                            <th><?= __('Joined') ?></th>
+                            <th class="actions"><?= __('Actions') ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -197,9 +203,9 @@ $this->assign('title', __('Edit Organization'));
                             <td><?= $orgUser->joined_at ? $orgUser->joined_at->format('d.m.Y') : '-' ?></td>
                             <td class="actions">
                                 <?= $this->Form->postLink(
-                                    __('Entfernen'),
+                                    __('Remove'),
                                     ['action' => 'removeUser', $organization->id, $orgUser->user_id],
-                                    ['confirm' => __('Mitglied aus Organisation entfernen?'), 'class' => 'button button-small button-danger']
+                                    ['confirm' => __('Remove member from organization?'), 'class' => 'button button-small button-danger']
                                 ) ?>
                             </td>
                         </tr>
@@ -208,17 +214,17 @@ $this->assign('title', __('Edit Organization'));
                 </table>
             </div>
             <?php else: ?>
-                <p><?= __('Keine Mitglieder in dieser Organisation.') ?></p>
+                <p><?= __('No members in this organization.') ?></p>
             <?php endif; ?>
             
             <div style="margin-top: 2rem;">
-                <h5><?= __('Mitglied hinzufügen') ?></h5>
+                <h5><?= __('Add Member') ?></h5>
                 <?= $this->Form->create(null, ['url' => ['action' => 'addUser', $organization->id]]) ?>
                 <div class="input">
                     <?= $this->Form->control('user_id', [
                         'options' => $allUsers,
-                        'empty' => __('-- Benutzer wählen --'),
-                        'label' => __('Benutzer')
+                        'empty' => __('-- Select User --'),
+                        'label' => __('User')
                     ]) ?>
                     <?= $this->Form->control('role', [
                         'options' => [
@@ -227,10 +233,10 @@ $this->assign('title', __('Edit Organization'));
                             'viewer' => __('Viewer')
                         ],
                         'default' => 'viewer',
-                        'label' => __('Rolle')
+                        'label' => __('Role')
                     ]) ?>
                 </div>
-                <?= $this->Form->button(__('Hinzufügen'), ['class' => 'button']) ?>
+                <?= $this->Form->button(__('Add'), ['class' => 'button']) ?>
                 <?= $this->Form->end() ?>
             </div>
         </div>
