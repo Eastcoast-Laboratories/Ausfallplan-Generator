@@ -329,12 +329,26 @@ class UsersController extends AppController
         
         // Get JSON data from request body
         $jsonData = $this->request->getBody()->getContents();
+        
+        // Debug logging
+        error_log('DEBUG setupEncryption - Raw JSON length: ' . strlen($jsonData));
+        error_log('DEBUG setupEncryption - Raw JSON (first 200 chars): ' . substr($jsonData, 0, 200));
+        
         $data = json_decode($jsonData, true);
         
         if (!$data) {
-            error_log('DEBUG setupEncryption - Failed to parse JSON: ' . $jsonData);
+            $jsonError = json_last_error_msg();
+            error_log('DEBUG setupEncryption - JSON decode failed: ' . $jsonError);
+            error_log('DEBUG setupEncryption - Full JSON: ' . $jsonData);
             return $this->response->withType('application/json')
-                ->withStringBody(json_encode(['success' => false, 'message' => 'Invalid JSON data']));
+                ->withStringBody(json_encode([
+                    'success' => false, 
+                    'message' => 'Invalid JSON data: ' . $jsonError,
+                    'debug' => [
+                        'length' => strlen($jsonData),
+                        'preview' => substr($jsonData, 0, 100)
+                    ]
+                ]));
         }
         
         if (empty($data['public_key']) || empty($data['encrypted_private_key']) || empty($data['key_salt'])) {
