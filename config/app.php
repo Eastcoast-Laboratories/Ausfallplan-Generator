@@ -360,16 +360,16 @@ return [
     'Log' => [
         'debug' => [
             'className' => FileLog::class,
-            'path' => LOGS,
-            'file' => 'debug',
+            'path' => env('LOG_PATH', LOGS),
+            'file' => env('LOG_DEBUG_FILE', 'debug'),
             'url' => env('LOG_DEBUG_URL', null),
             'scopes' => null,
             'levels' => ['notice', 'info', 'debug'],
         ],
         'error' => [
             'className' => FileLog::class,
-            'path' => LOGS,
-            'file' => 'error',
+            'path' => env('LOG_PATH', LOGS),
+            'file' => env('LOG_ERROR_FILE', 'error'),
             'url' => env('LOG_ERROR_URL', null),
             'scopes' => null,
             'levels' => ['warning', 'error', 'critical', 'alert', 'emergency'],
@@ -377,8 +377,8 @@ return [
         // To enable this dedicated query log, you need to set your datasource's log flag to true
         'queries' => [
             'className' => FileLog::class,
-            'path' => LOGS,
-            'file' => 'queries',
+            'path' => env('LOG_PATH', LOGS),
+            'file' => env('LOG_QUERIES_FILE', 'queries'),
             'url' => env('LOG_QUERIES_URL', null),
             'scopes' => ['cake.database.queries'],
         ],
