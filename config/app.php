@@ -114,6 +114,15 @@ return [
          * Duration set to 10 seconds for development
          * If you set 'className' => 'Null' core cache will be disabled.
          */
+        '_cake_core_' => [
+            'className' => FileEngine::class,
+            'prefix' => 'myapp_cake_core_',
+            'path' => CACHE . 'persistent' . DS,
+            'serialize' => true,
+            'duration' => '+10 seconds',
+            'url' => env('CACHE_CAKECORE_URL', null),
+        ],
+        
         '_cake_translations_' => [
             'className' => FileEngine::class,
             'prefix' => 'myapp_cake_translations_',
