@@ -50,7 +50,7 @@ $this->assign('title', __('Edit Schedule'));
         ?>
     </fieldset>
     
-    <details id="animal-names-section">
+    <details id="animal-names-section" <?= isset($_GET['shuffled']) ? 'open' : '' ?>>
         <summary style="cursor: pointer; padding: 1rem; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; margin: 1rem 0; font-weight: bold;">
             <span class="toggle-icon">▶</span> <?= __('Day Names (Animals)') ?>
         </summary>
@@ -65,28 +65,58 @@ $this->assign('title', __('Edit Schedule'));
             </div>
             
             <div id="animal-names-editor">
-                <?php if ($animalNames): ?>
+                <?php if ($animalNamesDE || $animalNamesEN): ?>
                     <?php 
                     $daysCount = $schedule->days_count ?? 26;
-                    $letters = array_keys($animalNames);
+                    $lettersDE = $animalNamesDE ? array_keys($animalNamesDE) : [];
+                    $lettersEN = $animalNamesEN ? array_keys($animalNamesEN) : [];
+                    
                     for ($day = 0; $day < $daysCount; $day++):
                         $letterIndex = $day % 26;
                         $animalIndex = (int)floor($day / 26);
-                        $letter = $letters[$letterIndex] ?? 'A';
-                        $animals = $animalNames[$letter] ?? [];
-                        $animalName = $animals[$animalIndex] ?? ($animals[0] ?? '');
+                        
+                        $letterDE = $lettersDE[$letterIndex] ?? 'A';
+                        $letterEN = $lettersEN[$letterIndex] ?? 'A';
+                        
+                        $animalsDE = $animalNamesDE[$letterDE] ?? [];
+                        $animalsEN = $animalNamesEN[$letterEN] ?? [];
+                        
+                        $animalNameDE = $animalsDE[$animalIndex] ?? ($animalsDE[0] ?? '');
+                        $animalNameEN = $animalsEN[$animalIndex] ?? ($animalsEN[0] ?? '');
                     ?>
-                        <div class="input text">
-                            <label><?= __('Day {0}', $day + 1) ?> (<?= h($letter) ?>)</label>
-                            <input 
-                                type="text" 
-                                class="animal-names-input" 
-                                data-day="<?= $day ?>"
-                                data-letter="<?= h($letter) ?>"
-                                data-animal-index="<?= $animalIndex ?>"
-                                value="<?= h($animalName) ?>"
-                                placeholder="<?= __('Enter animal name') ?>"
-                            />
+                        <div class="input text" style="border-left: 3px solid #2196f3; padding-left: 1rem; margin-bottom: 1.5rem;">
+                            <label style="font-weight: bold; color: #333;"><?= __('Day {0}', $day + 1) ?> (<?= h($letterDE) ?>)</label>
+                            
+                            <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                                <div style="flex: 1;">
+                                    <label style="font-size: 0.85rem; color: #666;">🇩🇪 Deutsch:</label>
+                                    <input 
+                                        type="text" 
+                                        class="animal-names-input" 
+                                        data-day="<?= $day ?>"
+                                        data-letter="<?= h($letterDE) ?>"
+                                        data-animal-index="<?= $animalIndex ?>"
+                                        data-locale="de"
+                                        value="<?= h($animalNameDE) ?>"
+                                        placeholder="<?= __('Enter animal name') ?>"
+                                        style="width: 100%;"
+                                    />
+                                </div>
+                                <div style="flex: 1;">
+                                    <label style="font-size: 0.85rem; color: #666;">🇬🇧 English:</label>
+                                    <input 
+                                        type="text" 
+                                        class="animal-names-input" 
+                                        data-day="<?= $day ?>"
+                                        data-letter="<?= h($letterEN) ?>"
+                                        data-animal-index="<?= $animalIndex ?>"
+                                        data-locale="en"
+                                        value="<?= h($animalNameEN) ?>"
+                                        placeholder="<?= __('Enter animal name') ?>"
+                                        style="width: 100%;"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     <?php endfor; ?>
                 <?php else: ?>
@@ -126,8 +156,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (response.ok) {
                     const data = await response.json();
                     if (data.success && data.animalNames) {
-                        // Reload page to show shuffled names
-                        window.location.reload();
+                        // Reload page with shuffled parameter to auto-open details
+                        window.location.href = window.location.pathname + '/' + <?= $schedule->id ?> + '?shuffled=1';
                     }
                 } else {
                     alert('<?= __('Failed to shuffle animal names.') ?>');
@@ -139,26 +169,30 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Before form submit, collect all animal names into hidden field
+    // Before form submit, collect all animal names into hidden field (both locales)
     if (form) {
         form.addEventListener('submit', function() {
-            const animalNamesData = {};
+            const animalNamesData = {
+                de: {},
+                en: {}
+            };
             const inputs = document.querySelectorAll('.animal-names-input');
             
             inputs.forEach(input => {
                 const letter = input.dataset.letter;
                 const animalIndex = parseInt(input.dataset.animalIndex) || 0;
+                const locale = input.dataset.locale || 'de';
                 const value = input.value.trim();
                 
                 if (value) {
-                    if (!animalNamesData[letter]) {
-                        animalNamesData[letter] = [];
+                    if (!animalNamesData[locale][letter]) {
+                        animalNamesData[locale][letter] = [];
                     }
                     // Ensure array has enough slots
-                    while (animalNamesData[letter].length <= animalIndex) {
-                        animalNamesData[letter].push('');
+                    while (animalNamesData[locale][letter].length <= animalIndex) {
+                        animalNamesData[locale][letter].push('');
                     }
-                    animalNamesData[letter][animalIndex] = value;
+                    animalNamesData[locale][letter][animalIndex] = value;
                 }
             });
             

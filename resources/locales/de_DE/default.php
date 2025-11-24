@@ -541,5 +541,6 @@ return [
     'Add' => 'Hinzufügen',
     'Client-Side Encryption enabled' => 'Client-seitige Verschlüsselung aktiviert',
     'Basis-Information' => 'Basis-Informationen',
-    'Aktive' => 'Aktiv'
+    'Aktive' => 'Aktiv',
+    'Cannot delete sibling group with children. Please remove children from this group first.' => 'Geschwistergruppe mit Kindern kann nicht gelöscht werden. Bitte entfernen Sie zuerst die Kinder aus dieser Gruppe.'
 ];

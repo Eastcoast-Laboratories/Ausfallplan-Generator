@@ -279,24 +279,28 @@ class SchedulesController extends AppController
         if ($this->request->is(['patch', 'post', 'put'])) {
             $data = $this->request->getData();
             
-            // Handle animal names sequence update (locale-specific)
+            // Handle animal names sequence update (both locales)
             if (isset($data['animal_names_json'])) {
-                $locale = $this->request->getSession()->read('Config.language') ?? 'de';
                 $animalNamesData = json_decode($data['animal_names_json'], true);
                 
-                if ($animalNamesData) {
-                    // Load existing sequences
-                    $sequences = [];
-                    if ($schedule->animal_names_sequence) {
-                        $sequences = @unserialize($schedule->animal_names_sequence);
-                        if (!is_array($sequences)) {
-                            $sequences = [];
+                if ($animalNamesData && is_array($animalNamesData)) {
+                    // If data has 'de' and 'en' keys, it contains both locales
+                    if (isset($animalNamesData['de']) || isset($animalNamesData['en'])) {
+                        // Direct format: {de: {...}, en: {...}}
+                        $data['animal_names_sequence'] = serialize($animalNamesData);
+                    } else {
+                        // Legacy format: single locale data
+                        $locale = $this->request->getSession()->read('Config.language') ?? 'de';
+                        $sequences = [];
+                        if ($schedule->animal_names_sequence) {
+                            $sequences = @unserialize($schedule->animal_names_sequence);
+                            if (!is_array($sequences)) {
+                                $sequences = [];
+                            }
                         }
+                        $sequences[$locale] = $animalNamesData;
+                        $data['animal_names_sequence'] = serialize($sequences);
                     }
-                    
-                    // Update only the current locale
-                    $sequences[$locale] = $animalNamesData;
-                    $data['animal_names_sequence'] = serialize($sequences);
                 }
                 unset($data['animal_names_json']);
             }
@@ -323,17 +327,23 @@ class SchedulesController extends AppController
             $this->Flash->error(__('Could not save schedule.'));
         }
         
-        // Deserialize animal names sequence for editing (locale-specific)
+        // Deserialize animal names sequence for editing (both locales)
         $locale = $this->request->getSession()->read('Config.language') ?? 'de';
         $animalNames = null;
+        $animalNamesDE = null;
+        $animalNamesEN = null;
+        
         if ($schedule->animal_names_sequence) {
             $sequences = @unserialize($schedule->animal_names_sequence);
-            if (is_array($sequences) && isset($sequences[$locale])) {
-                $animalNames = $sequences[$locale];
+            if (is_array($sequences)) {
+                $animalNamesDE = $sequences['de'] ?? null;
+                $animalNamesEN = $sequences['en'] ?? null;
+                // Set current locale's names as default
+                $animalNames = $sequences[$locale] ?? null;
             }
         }
         
-        $this->set(compact('schedule', 'organizations', 'userOrgs', 'animalNames', 'locale'));
+        $this->set(compact('schedule', 'organizations', 'userOrgs', 'animalNames', 'animalNamesDE', 'animalNamesEN', 'locale'));
     }
 
     /**
