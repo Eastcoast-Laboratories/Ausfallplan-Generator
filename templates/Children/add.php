@@ -71,6 +71,7 @@ $this->assign('title', __('Add Child'));
                 'empty' => __('(Select Schedule)'),
                 'label' => __('Schedule (Ausfallplan)'),
                 'help' => __('Select the schedule this child will be assigned to'),
+                'default' => $defaultScheduleId ?? null, // Auto-select if only one exists
             ]);
         ?>
     </fieldset>

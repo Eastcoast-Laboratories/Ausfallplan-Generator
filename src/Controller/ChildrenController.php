@@ -260,6 +260,13 @@ class ChildrenController extends AppController
             ->orderBy(['created' => 'DESC'])
             ->all();
         
+        // Auto-select schedule if only one exists
+        $defaultScheduleId = null;
+        if ($schedules->count() === 1) {
+            $defaultScheduleId = $schedules->toArray();
+            $defaultScheduleId = array_key_first($defaultScheduleId);
+        }
+        
         // Check if selected organization has encryption enabled
         $encryptionEnabled = false;
         if ($selectedOrgId) {
@@ -272,7 +279,7 @@ class ChildrenController extends AppController
             }
         }
         
-        $this->set(compact('child', 'siblingGroups', 'schedules', 'selectedOrgId', 'userOrgs', 'encryptionEnabled'));
+        $this->set(compact('child', 'siblingGroups', 'schedules', 'selectedOrgId', 'userOrgs', 'encryptionEnabled', 'defaultScheduleId'));
     }
 
     /**
