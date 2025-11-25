@@ -89,17 +89,21 @@ $this->assign('title', __('Edit Organization'));
                                 const decryptedNames = {};
                                 let decryptCount = 0;
                                 
+                                const decryptedLastNames = {};
+                                
                                 for (const child of children) {
                                     console.log(`🔍 Checking child ${child.id}:`, {
-                                        has_encrypted: !!child.name_encrypted,
-                                        has_iv: !!child.name_iv,
-                                        has_tag: !!child.name_tag,
-                                        encrypted_length: child.name_encrypted ? child.name_encrypted.length : 0
+                                        has_name_encrypted: !!child.name_encrypted,
+                                        has_name_iv: !!child.name_iv,
+                                        has_name_tag: !!child.name_tag,
+                                        has_last_name_encrypted: !!child.last_name_encrypted,
+                                        has_last_name_iv: !!child.last_name_iv,
+                                        has_last_name_tag: !!child.last_name_tag
                                     });
                                     
+                                    // Decrypt name
                                     if (child.name_encrypted && child.name_iv && child.name_tag) {
                                         try {
-                                            // Convert base64 to Uint8Array (not ArrayBuffer)
                                             const ciphertextBuf = window.OrgEncryption.base64ToArrayBuffer(child.name_encrypted);
                                             const ivBuf = window.OrgEncryption.base64ToArrayBuffer(child.name_iv);
                                             const tagBuf = window.OrgEncryption.base64ToArrayBuffer(child.name_tag);
@@ -108,15 +112,34 @@ $this->assign('title', __('Edit Organization'));
                                             const iv = new Uint8Array(ivBuf);
                                             const tag = new Uint8Array(tagBuf);
                                             
-                                            // Decrypt the field
                                             const decryptedName = await window.OrgEncryption.decryptField(ciphertext, iv, tag, dek);
                                             decryptedNames[child.id] = decryptedName;
                                             decryptCount++;
-                                            console.log(`✅ Decrypted child ${child.id}: ${decryptedName}`);
+                                            console.log(`✅ Decrypted child ${child.id} name: ${decryptedName}`);
                                         } catch (err) {
-                                            console.error(`❌ Failed to decrypt child ${child.id}:`, err);
-                                            // Use existing name as fallback
+                                            console.error(`❌ Failed to decrypt child ${child.id} name:`, err);
                                             decryptedNames[child.id] = child.name || 'Decryption failed';
+                                        }
+                                    }
+                                    
+                                    // Decrypt last_name
+                                    if (child.last_name_encrypted && child.last_name_iv && child.last_name_tag) {
+                                        try {
+                                            const ciphertextBuf = window.OrgEncryption.base64ToArrayBuffer(child.last_name_encrypted);
+                                            const ivBuf = window.OrgEncryption.base64ToArrayBuffer(child.last_name_iv);
+                                            const tagBuf = window.OrgEncryption.base64ToArrayBuffer(child.last_name_tag);
+                                            
+                                            const ciphertext = new Uint8Array(ciphertextBuf);
+                                            const iv = new Uint8Array(ivBuf);
+                                            const tag = new Uint8Array(tagBuf);
+                                            
+                                            const decryptedLastName = await window.OrgEncryption.decryptField(ciphertext, iv, tag, dek);
+                                            decryptedLastNames[child.id] = decryptedLastName;
+                                            decryptCount++;
+                                            console.log(`✅ Decrypted child ${child.id} last_name: ${decryptedLastName}`);
+                                        } catch (err) {
+                                            console.error(`❌ Failed to decrypt child ${child.id} last_name:`, err);
+                                            decryptedLastNames[child.id] = child.last_name || 'Decryption failed';
                                         }
                                     }
                                 }
@@ -138,10 +161,20 @@ $this->assign('title', __('Edit Organization'));
                                     hiddenField.name = `decrypted_children_names[${childId}]`;
                                     hiddenField.value = decryptedName;
                                     form.appendChild(hiddenField);
-                                    console.log(`➕ Added hidden field: child ${childId} = ${decryptedName}`);
+                                    console.log(`➕ Added hidden field: child ${childId} name = ${decryptedName}`);
                                 }
                                 
-                                console.log('✅ All hidden fields added. Setting decryptionComplete flag and resubmitting...');
+                                // Add decrypted last_names as hidden fields to form
+                                for (const [childId, decryptedLastName] of Object.entries(decryptedLastNames)) {
+                                    const hiddenField = document.createElement('input');
+                                    hiddenField.type = 'hidden';
+                                    hiddenField.name = `decrypted_children_last_names[${childId}]`;
+                                    hiddenField.value = decryptedLastName;
+                                    form.appendChild(hiddenField);
+                                    console.log(`➕ Added hidden field: child ${childId} last_name = ${decryptedLastName}`);
+                                }
+                                
+                                console.log('✅ All hidden fields added (names + last_names). Setting decryptionComplete flag and resubmitting...');
                                 
                                 // Mark decryption as complete
                                 decryptionComplete = true;

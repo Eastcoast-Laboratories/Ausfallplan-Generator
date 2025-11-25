@@ -305,23 +305,43 @@ class OrganizationsController extends AppController
                 
                 // Process decrypted children names from hidden form fields
                 $decryptedNames = $this->request->getData('decrypted_children_names');
+                $decryptedLastNames = $this->request->getData('decrypted_children_last_names');
                 $decryptedCount = (int)$this->request->getData('decrypted_count');
                 
                 error_log("🔍 DECRYPT DEBUG - Decrypted names: " . json_encode($decryptedNames));
+                error_log("🔍 DECRYPT DEBUG - Decrypted last_names: " . json_encode($decryptedLastNames));
                 error_log("🔍 DECRYPT DEBUG - Decrypted count: " . $decryptedCount);
                 
-                if ($decryptedNames && is_array($decryptedNames)) {
+                if (($decryptedNames && is_array($decryptedNames)) || ($decryptedLastNames && is_array($decryptedLastNames))) {
                     $childrenTable = $this->fetchTable('Children');
                     $updateCount = 0;
                     $failedCount = 0;
                     
-                    foreach ($decryptedNames as $childId => $decryptedName) {
+                    // Collect all child IDs that need updating
+                    $allChildIds = array_unique(array_merge(
+                        array_keys($decryptedNames ?? []),
+                        array_keys($decryptedLastNames ?? [])
+                    ));
+                    
+                    foreach ($allChildIds as $childId) {
                         try {
                             $child = $childrenTable->get($childId);
                             if ($child->organization_id == $id) {
-                                // Update name and clear encrypted name
-                                $child->name = $decryptedName;
-                                $child->name_encrypted = null;
+                                // Update name if provided
+                                if (isset($decryptedNames[$childId])) {
+                                    $child->name = $decryptedNames[$childId];
+                                    $child->name_encrypted = null;
+                                    $child->name_iv = null;
+                                    $child->name_tag = null;
+                                }
+                                
+                                // Update last_name if provided
+                                if (isset($decryptedLastNames[$childId])) {
+                                    $child->last_name = $decryptedLastNames[$childId];
+                                    $child->last_name_encrypted = null;
+                                    $child->last_name_iv = null;
+                                    $child->last_name_tag = null;
+                                }
                                 
                                 if ($childrenTable->save($child)) {
                                     $updateCount++;
@@ -371,7 +391,10 @@ class OrganizationsController extends AppController
         // Get all children for this organization (for decryption)
         $children = $this->fetchTable('Children')->find()
             ->where(['organization_id' => $id])
-            ->select(['id', 'name', 'name_encrypted', 'name_iv', 'name_tag'])
+            ->select([
+                'id', 'name', 'name_encrypted', 'name_iv', 'name_tag',
+                'last_name', 'last_name_encrypted', 'last_name_iv', 'last_name_tag'
+            ])
             ->toArray();
 
         $this->set(compact('organization', 'allUsers', 'children'));
