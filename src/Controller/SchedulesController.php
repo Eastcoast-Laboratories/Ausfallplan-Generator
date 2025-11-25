@@ -484,31 +484,25 @@ class SchedulesController extends AppController
             ->all();
 
         // Get children for this organization (for right column - with organization_order)
-        // Only show children assigned to THIS schedule OR on waitlist (schedule_id IS NULL)
+        // Only show children assigned to THIS schedule (schedule_id must match)
         $childrenTable = $this->fetchTable('Children');
         $childrenInOrder = $childrenTable->find()
             ->where([
                 'Children.organization_id' => $schedule->organization_id,
-                'Children.organization_order IS NOT' => null,
-                'OR' => [
-                    ['Children.schedule_id' => $schedule->id],
-                    ['Children.schedule_id IS' => null]
-                ]
+                'Children.schedule_id' => $schedule->id,
+                'Children.organization_order IS NOT' => null
             ])
             ->contain(['SiblingGroups'])
             ->orderBy(['Children.organization_order' => 'ASC', 'Children.id' => 'ASC'])
             ->all();
 
         // Get all children of organization without organization_order (for left column - excluded)
-        // Only show children assigned to THIS schedule OR on waitlist (schedule_id IS NULL)
+        // Only show children assigned to THIS schedule (schedule_id must match)
         $childrenNotInOrder = $childrenTable->find()
             ->where([
                 'Children.organization_id' => $schedule->organization_id,
-                'Children.organization_order IS' => null,
-                'OR' => [
-                    ['Children.schedule_id' => $schedule->id],
-                    ['Children.schedule_id IS' => null]
-                ]
+                'Children.schedule_id' => $schedule->id,
+                'Children.organization_order IS' => null
             ])
             ->contain(['SiblingGroups'])
             ->orderBy(['Children.name' => 'ASC'])
