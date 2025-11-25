@@ -483,32 +483,30 @@ class SchedulesController extends AppController
             ->orderBy(['created' => 'DESC'])
             ->all();
 
-        // Get children for this organization (for right column - with organization_order)
-        // Only show children assigned to THIS schedule (schedule_id must match)
+        // Get children for this organization (for right column - assigned to THIS schedule)
+        // Show only children where schedule_id matches
         $childrenTable = $this->fetchTable('Children');
         $childrenInOrder = $childrenTable->find()
             ->where([
                 'Children.organization_id' => $schedule->organization_id,
-                'Children.schedule_id' => $schedule->id,
-                'Children.organization_order IS NOT' => null
+                'Children.schedule_id' => $schedule->id
             ])
             ->contain(['SiblingGroups'])
             ->orderBy(['Children.organization_order' => 'ASC', 'Children.id' => 'ASC'])
             ->all();
 
-        // Get all children of organization without organization_order (for left column - excluded)
-        // Show children assigned to THIS schedule OR children not assigned to any schedule (NULL)
+        // Get all children NOT assigned to this schedule (for left column)
+        // Show children with NULL schedule_id OR schedule_id != this schedule
         $childrenNotInOrder = $childrenTable->find()
             ->where([
                 'Children.organization_id' => $schedule->organization_id,
-                'Children.organization_order IS' => null,
                 'OR' => [
-                    ['Children.schedule_id' => $schedule->id],
-                    ['Children.schedule_id IS' => null]
+                    ['Children.schedule_id IS' => null],
+                    ['Children.schedule_id !=' => $schedule->id]
                 ]
             ])
             ->contain(['SiblingGroups'])
-            ->orderBy(['Children.name' => 'ASC'])
+            ->orderBy(['Children.organization_order' => 'ASC', 'Children.name' => 'ASC'])
             ->all();
 
         // Find siblings assigned to different schedules
@@ -518,7 +516,7 @@ class SchedulesController extends AppController
     }
 
     /**
-     * Remove child from organization order (set to NULL)
+     * Remove child from schedule (set schedule_id to NULL, keep organization_order)
      *
      * @param string|null $id Schedule id
      * @return \Cake\Http\Response JSON response
@@ -546,8 +544,8 @@ class SchedulesController extends AppController
             $childrenTable = $this->fetchTable('Children');
             $child = $childrenTable->get($childId);
             
-            // Set organization_order to NULL
-            $child->organization_order = null;
+            // Remove from schedule (keep organization_order intact)
+            $child->schedule_id = null;
             
             if ($childrenTable->save($child)) {
                 return $this->response
@@ -604,18 +602,22 @@ class SchedulesController extends AppController
             $childrenTable = $this->fetchTable('Children');
             $child = $childrenTable->get($childId);
             
-            // Find max organization_order and assign next number
-            $maxOrderResult = $childrenTable->find()
-                ->where([
-                    'organization_id' => $schedule->organization_id,
-                    'organization_order IS NOT' => null
-                ])
-                ->orderBy(['organization_order' => 'DESC'])
-                ->first();
-            
-            $nextOrder = $maxOrderResult ? (int)$maxOrderResult->organization_order + 1 : 1;
-            $child->organization_order = $nextOrder;
-            $child->schedule_id = $schedule->id; // Set schedule_id when adding to order
+            // Only set organization_order if it's NULL (new child to organization order)
+            if ($child->organization_order === null) {
+                // Find max organization_order and assign next number
+                $maxOrderResult = $childrenTable->find()
+                    ->where([
+                        'organization_id' => $schedule->organization_id,
+                        'organization_order IS NOT' => null
+                    ])
+                    ->orderBy(['organization_order' => 'DESC'])
+                    ->first();
+                
+                $nextOrder = $maxOrderResult ? (int)$maxOrderResult->organization_order + 1 : 1;
+                $child->organization_order = $nextOrder;
+            }
+            // Always set schedule_id when adding to schedule
+            $child->schedule_id = $schedule->id;
             
             if ($childrenTable->save($child)) {
                 $this->set([
