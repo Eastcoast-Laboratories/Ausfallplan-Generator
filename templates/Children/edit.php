@@ -59,9 +59,18 @@ $this->assign('title', __('Edit Child'));
     </fieldset>
     
     <!-- Hidden fields for encrypted name data -->
-    <?= $this->Form->hidden('name_encrypted', ['id' => 'name-encrypted-field']) ?>
-    <?= $this->Form->hidden('name_iv', ['id' => 'name-iv-field']) ?>
-    <?= $this->Form->hidden('name_tag', ['id' => 'name-tag-field']) ?>
+    <?= $this->Form->hidden('name_encrypted', [
+        'id' => 'name-encrypted-field',
+        'value' => $child->name_encrypted ?? ''
+    ]) ?>
+    <?= $this->Form->hidden('name_iv', [
+        'id' => 'name-iv-field',
+        'value' => $child->name_iv ?? ''
+    ]) ?>
+    <?= $this->Form->hidden('name_tag', [
+        'id' => 'name-tag-field',
+        'value' => $child->name_tag ?? ''
+    ]) ?>
     
     <?= $this->Form->button(__('Submit'), ['id' => 'submit-button']) ?>
     <?= $this->Form->end() ?>
@@ -84,7 +93,40 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Get organization ID from child entity
     const orgId = <?= json_encode($child->organization_id) ?>;
     
-    // Store original name to detect changes
+    // DECRYPT NAME ON PAGE LOAD if encrypted data exists
+    if (nameEncryptedField.value && nameIvField.value && nameTagField.value) {
+        console.log('🔓 Encrypted name detected, attempting to decrypt...');
+        
+        try {
+            // Get DEK from session storage
+            const dek = await window.OrgEncryption.getDEK(orgId);
+            
+            if (dek) {
+                // Convert base64 to ArrayBuffer/Uint8Array
+                const ciphertextBuffer = window.OrgEncryption.base64ToArrayBuffer(nameEncryptedField.value);
+                const ivArray = new Uint8Array(window.OrgEncryption.base64ToArrayBuffer(nameIvField.value));
+                const tagArray = new Uint8Array(window.OrgEncryption.base64ToArrayBuffer(nameTagField.value));
+                
+                // Decrypt name
+                const decryptedName = await window.OrgEncryption.decryptField(
+                    ciphertextBuffer,
+                    ivArray,
+                    tagArray,
+                    dek
+                );
+                
+                // Update name field with decrypted value
+                nameField.value = decryptedName;
+                console.log('✅ Name decrypted successfully');
+            } else {
+                console.log('⚠️  No DEK available, keeping encrypted placeholder');
+            }
+        } catch (error) {
+            console.error('❌ Error decrypting name:', error);
+        }
+    }
+    
+    // Store original name to detect changes (AFTER decryption)
     const originalName = nameField.value;
     
     // Intercept form submission to encrypt name if needed
