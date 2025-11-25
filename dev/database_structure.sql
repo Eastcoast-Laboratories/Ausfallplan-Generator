@@ -20,6 +20,9 @@ CREATE TABLE `children` (
   `name_encrypted` text COLLATE utf8mb4_unicode_ci COMMENT 'Encrypted name (AES-GCM ciphertext)',
   `name_iv` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Initialization vector for name encryption',
   `name_tag` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Authentication tag for name encryption',
+  `last_name_encrypted` text COLLATE utf8mb4_unicode_ci COMMENT 'Encrypted last_name (AES-GCM ciphertext)',
+  `last_name_iv` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Initialization vector for last_name encryption',
+  `last_name_tag` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Authentication tag for last_name encryption',
   PRIMARY KEY (`id`),
   KEY `sibling_group_id` (`sibling_group_id`),
   KEY `schedule_id` (`schedule_id`),
@@ -28,7 +31,7 @@ CREATE TABLE `children` (
   CONSTRAINT `children_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `children_ibfk_2` FOREIGN KEY (`schedule_id`) REFERENCES `schedules` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `children_ibfk_3` FOREIGN KEY (`sibling_group_id`) REFERENCES `sibling_groups` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=159 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=168 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -146,7 +149,7 @@ CREATE TABLE `schedules` (
   KEY `user_id` (`user_id`),
   CONSTRAINT `schedules_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `schedules_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -159,7 +162,7 @@ CREATE TABLE `sibling_groups` (
   PRIMARY KEY (`id`),
   KEY `organization_id` (`organization_id`),
   CONSTRAINT `sibling_groups_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
