@@ -468,6 +468,28 @@ class ReportService
                 }
             }
             
+            // FILL UP: If day is not full yet, continue with more children
+            // Reset tried units and continue filling until capacity is reached
+            if ($countingSum < $capacity && !empty($childUnits)) {
+                $fillAttempts = 0;
+                $maxFillAttempts = count($childUnits) * 10; // Allow more attempts for filling
+                
+                while ($countingSum < $capacity && $fillAttempts < $maxFillAttempts) {
+                    $unitIndex = $currentIndex % count($childUnits);
+                    $unit = $childUnits[$unitIndex];
+                    $currentIndex++;
+                    $fillAttempts++;
+                    
+                    $unitCapacity = $this->getUnitCapacity($unit);
+                    
+                    // Try to add if it fits (allow duplicates now to fill up)
+                    if ($countingSum + $unitCapacity <= $capacity) {
+                        $dayChildren = array_merge($dayChildren, $this->expandUnitToChildren($unit));
+                        $countingSum += $unitCapacity;
+                    }
+                }
+            }
+            
             $overflowQueue = $newOverflowQueue;
             
             $days[] = [
