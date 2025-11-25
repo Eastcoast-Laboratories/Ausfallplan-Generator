@@ -271,6 +271,8 @@ class AppController extends Controller
                         'sibling_id' => $sib->id, // Missing sibling ID
                         'sibling_group_id' => $child->sibling_group_id,
                         'schedule_id' => $sib->schedule_id, // Sibling's schedule (where they currently are)
+                        'name' => $sib->name, // Name of the missing sibling
+                        'sibling_of' => $child->name, // Name of the current child
                     ];
                 }
             }
