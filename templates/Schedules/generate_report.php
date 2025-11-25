@@ -63,7 +63,7 @@ $this->assign('title', __('FairNestPlan') . ' - ' . h($schedule->title));
 
         .day-box {
             border: 2px solid #000;
-            padding: 8px;
+            padding: 6px;
             min-height: <?= $dayMinHeight ?>;
             display: flex;
             flex-direction: column;
@@ -86,8 +86,8 @@ $this->assign('title', __('FairNestPlan') . ' - ' . h($schedule->title));
         .child-item {
             display: flex;
             justify-content: space-between;
-            padding: 1px 0;
-            line-height: 0.4;
+            padding: 0.5px 0;
+            line-height: 1.0;
         }
 
         .child-name {
@@ -172,6 +172,8 @@ $this->assign('title', __('FairNestPlan') . ' - ' . h($schedule->title));
             font-size: 10px;
             line-height: 1.5;
             border: 2px solid #000;
+            /* Allow text to extend beyond grid columns when explanation is narrow (1-2 columns) */
+            min-width: 100%;
         }
 
         .flag-icon {
