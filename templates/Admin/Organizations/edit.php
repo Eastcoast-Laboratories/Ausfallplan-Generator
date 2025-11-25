@@ -53,6 +53,10 @@ $this->assign('title', __('Edit Organization'));
                 if (form && encryptionCheckbox) {
                     form.addEventListener('submit', async function(e) {
                         console.log('📝 Form submit triggered. DecryptionComplete:', decryptionComplete);
+                        console.log('🔍 DEBUG - originalEncryptionState:', originalEncryptionState);
+                        console.log('🔍 DEBUG - encryptionCheckbox.checked:', encryptionCheckbox.checked);
+                        console.log('🔍 DEBUG - !encryptionCheckbox.checked:', !encryptionCheckbox.checked);
+                        console.log('🔍 DEBUG - Condition evaluation:', originalEncryptionState && !encryptionCheckbox.checked && !decryptionComplete);
                         
                         // Check if encryption was disabled AND we haven't decrypted yet
                         if (originalEncryptionState && !encryptionCheckbox.checked && !decryptionComplete) {
