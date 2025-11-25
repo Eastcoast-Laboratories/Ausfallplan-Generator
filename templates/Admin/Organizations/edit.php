@@ -40,21 +40,12 @@ $this->assign('title', __('Edit Organization'));
                 // Read current checkbox state (user might have changed it)
                 // DO NOT force it to originalEncryptionState - that would override user changes!
                 
-                console.log('🔐 Org Edit: Original encryption_enabled from DB:', originalEncryptionState);
-                console.log('🔐 Org Edit: Checkbox forced to:', encryptionCheckbox ? encryptionCheckbox.checked : 'N/A');
-                console.log('🔐 Org Edit: Children data received from PHP:', <?= json_encode($children) ?>);
-                console.log('🔐 Org Edit: Number of children:', <?= count($children) ?>);
-                
                 // Flag to track if decryption is complete
                 let decryptionComplete = false;
                 
                 if (form && encryptionCheckbox) {
                     form.addEventListener('submit', async function(e) {
                         console.log('📝 Form submit triggered. DecryptionComplete:', decryptionComplete);
-                        console.log('🔍 DEBUG - originalEncryptionState:', originalEncryptionState);
-                        console.log('🔍 DEBUG - encryptionCheckbox.checked:', encryptionCheckbox.checked);
-                        console.log('🔍 DEBUG - !encryptionCheckbox.checked:', !encryptionCheckbox.checked);
-                        console.log('🔍 DEBUG - Condition evaluation:', originalEncryptionState && !encryptionCheckbox.checked && !decryptionComplete);
                         
                         // Check if encryption was disabled AND we haven't decrypted yet
                         if (originalEncryptionState && !encryptionCheckbox.checked && !decryptionComplete) {
