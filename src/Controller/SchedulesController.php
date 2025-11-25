@@ -497,12 +497,15 @@ class SchedulesController extends AppController
             ->all();
 
         // Get all children of organization without organization_order (for left column - excluded)
-        // Only show children assigned to THIS schedule (schedule_id must match)
+        // Show children assigned to THIS schedule OR children not assigned to any schedule (NULL)
         $childrenNotInOrder = $childrenTable->find()
             ->where([
                 'Children.organization_id' => $schedule->organization_id,
-                'Children.schedule_id' => $schedule->id,
-                'Children.organization_order IS' => null
+                'Children.organization_order IS' => null,
+                'OR' => [
+                    ['Children.schedule_id' => $schedule->id],
+                    ['Children.schedule_id IS' => null]
+                ]
             ])
             ->contain(['SiblingGroups'])
             ->orderBy(['Children.name' => 'ASC'])

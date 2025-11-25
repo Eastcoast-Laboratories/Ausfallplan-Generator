@@ -81,6 +81,11 @@ $this->assign('title', __('Add Child'));
     <?= $this->Form->hidden('name_iv', ['id' => 'name-iv-field']) ?>
     <?= $this->Form->hidden('name_tag', ['id' => 'name-tag-field']) ?>
     
+    <!-- Hidden fields for encrypted last_name data -->
+    <?= $this->Form->hidden('last_name_encrypted', ['id' => 'last-name-encrypted-field']) ?>
+    <?= $this->Form->hidden('last_name_iv', ['id' => 'last-name-iv-field']) ?>
+    <?= $this->Form->hidden('last_name_tag', ['id' => 'last-name-tag-field']) ?>
+    
     <?= $this->Form->button(__('Submit'), ['id' => 'submit-button', 'type' => 'button']) ?>
     <?= $this->Form->end() ?>
 </div>
@@ -93,6 +98,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     const nameEncryptedField = document.getElementById('name-encrypted-field');
     const nameIvField = document.getElementById('name-iv-field');
     const nameTagField = document.getElementById('name-tag-field');
+    const lastNameField = document.querySelector('input[name="last_name"]');
+    const lastNameEncryptedField = document.getElementById('last-name-encrypted-field');
+    const lastNameIvField = document.getElementById('last-name-iv-field');
+    const lastNameTagField = document.getElementById('last-name-tag-field');
     const warningBanner = document.getElementById('encryption-warning');
     
     if (!form) {
@@ -213,14 +222,29 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         try {
             console.log('Encrypting name field...');
-            const encrypted = await window.OrgEncryption.encryptField(name, dek);
+            const encryptedName = await window.OrgEncryption.encryptField(name, dek);
             
             // Convert ArrayBuffer/Uint8Array to base64 strings for form submission
-            nameEncryptedField.value = window.OrgEncryption.arrayBufferToBase64(encrypted.ciphertext);
-            nameIvField.value = window.OrgEncryption.arrayBufferToBase64(encrypted.iv);
-            nameTagField.value = window.OrgEncryption.arrayBufferToBase64(encrypted.tag);
+            nameEncryptedField.value = window.OrgEncryption.arrayBufferToBase64(encryptedName.ciphertext);
+            nameIvField.value = window.OrgEncryption.arrayBufferToBase64(encryptedName.iv);
+            nameTagField.value = window.OrgEncryption.arrayBufferToBase64(encryptedName.tag);
             
-            console.log('Name encrypted successfully, submitting form...');
+            console.log('Name encrypted successfully');
+            
+            // Encrypt last_name if provided
+            const lastName = lastNameField.value.trim();
+            if (lastName) {
+                console.log('Encrypting last_name field...');
+                const encryptedLastName = await window.OrgEncryption.encryptField(lastName, dek);
+                
+                lastNameEncryptedField.value = window.OrgEncryption.arrayBufferToBase64(encryptedLastName.ciphertext);
+                lastNameIvField.value = window.OrgEncryption.arrayBufferToBase64(encryptedLastName.iv);
+                lastNameTagField.value = window.OrgEncryption.arrayBufferToBase64(encryptedLastName.tag);
+                
+                console.log('Last name encrypted successfully');
+            }
+            
+            console.log('All fields encrypted, submitting form...');
             
             // Submit form
             form.submit();

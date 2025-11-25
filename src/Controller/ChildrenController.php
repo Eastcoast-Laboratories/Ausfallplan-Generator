@@ -206,16 +206,23 @@ class ChildrenController extends AppController
             
             // Handle encryption: accept both encrypted and plaintext during transition
             if ((bool)($organization->encryption_enabled ?? false)) {
-                // If encrypted data is provided, use it
+                // Handle name encryption
                 if (!empty($data['name_encrypted']) && !empty($data['name_iv']) && !empty($data['name_tag'])) {
                     // Clear plaintext name if encrypted version is provided
                     $data['name'] = 'encrypted:' . substr($data['name_encrypted'], 0, 20); // Placeholder for database
+                }
+                
+                // Handle last_name encryption
+                if (!empty($data['last_name_encrypted']) && !empty($data['last_name_iv']) && !empty($data['last_name_tag'])) {
+                    // Clear plaintext last_name if encrypted version is provided
+                    $data['last_name'] = 'encrypted:' . substr($data['last_name_encrypted'], 0, 20); // Placeholder for database
                 }
                 // Otherwise allow plaintext for backward compatibility during UI implementation
                 // Client-side encryption will be added in future update
             } else {
                 // If encryption is disabled, clear encrypted fields from POST data
                 unset($data['name_encrypted'], $data['name_iv'], $data['name_tag']);
+                unset($data['last_name_encrypted'], $data['last_name_iv'], $data['last_name_tag']);
                 
                 // Ensure plaintext name is required
                 if (empty($data['name'])) {
@@ -308,10 +315,16 @@ class ChildrenController extends AppController
             
             // Handle encryption: accept both encrypted and plaintext during transition
             if ((bool)($organization->encryption_enabled ?? false)) {
-                // If encrypted data is provided, use it
+                // Handle name encryption
                 if (!empty($data['name_encrypted']) && !empty($data['name_iv']) && !empty($data['name_tag'])) {
                     // Clear plaintext name if encrypted version is provided
                     $data['name'] = 'encrypted:' . substr($data['name_encrypted'], 0, 20);
+                }
+                
+                // Handle last_name encryption
+                if (!empty($data['last_name_encrypted']) && !empty($data['last_name_iv']) && !empty($data['last_name_tag'])) {
+                    // Clear plaintext last_name if encrypted version is provided
+                    $data['last_name'] = 'encrypted:' . substr($data['last_name_encrypted'], 0, 20);
                 }
                 // Otherwise allow plaintext for backward compatibility during UI implementation
                 // Client-side encryption will be added in future update
@@ -319,6 +332,7 @@ class ChildrenController extends AppController
                 // If encryption is disabled, clear encrypted fields from POST data
                 // This allows editing children that previously had encryption enabled
                 unset($data['name_encrypted'], $data['name_iv'], $data['name_tag']);
+                unset($data['last_name_encrypted'], $data['last_name_iv'], $data['last_name_tag']);
                 
                 // Ensure plaintext name is required
                 if (empty($data['name'])) {

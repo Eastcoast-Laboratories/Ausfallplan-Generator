@@ -72,6 +72,20 @@ $this->assign('title', __('Edit Child'));
         'value' => $child->name_tag ?? ''
     ]) ?>
     
+    <!-- Hidden fields for encrypted last_name data -->
+    <?= $this->Form->hidden('last_name_encrypted', [
+        'id' => 'last-name-encrypted-field',
+        'value' => $child->last_name_encrypted ?? ''
+    ]) ?>
+    <?= $this->Form->hidden('last_name_iv', [
+        'id' => 'last-name-iv-field',
+        'value' => $child->last_name_iv ?? ''
+    ]) ?>
+    <?= $this->Form->hidden('last_name_tag', [
+        'id' => 'last-name-tag-field',
+        'value' => $child->last_name_tag ?? ''
+    ]) ?>
+    
     <?= $this->Form->button(__('Submit'), ['id' => 'submit-button']) ?>
     <?= $this->Form->end() ?>
 </div>
@@ -84,6 +98,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     const nameEncryptedField = document.getElementById('name-encrypted-field');
     const nameIvField = document.getElementById('name-iv-field');
     const nameTagField = document.getElementById('name-tag-field');
+    const lastNameField = document.querySelector('input[name="last_name"]');
+    const lastNameEncryptedField = document.getElementById('last-name-encrypted-field');
+    const lastNameIvField = document.getElementById('last-name-iv-field');
+    const lastNameTagField = document.getElementById('last-name-tag-field');
     
     if (!form || !window.OrgEncryption) {
         console.log('Encryption module not available or form not found');
@@ -126,17 +144,48 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
     
-    // Store original name to detect changes (AFTER decryption)
+    // DECRYPT LAST_NAME ON PAGE LOAD if encrypted data exists
+    if (lastNameEncryptedField.value && lastNameIvField.value && lastNameTagField.value) {
+        console.log('🔓 Encrypted last_name detected, attempting to decrypt...');
+        
+        try {
+            const dek = await window.OrgEncryption.getDEK(orgId);
+            
+            if (dek) {
+                const ciphertextBuffer = window.OrgEncryption.base64ToArrayBuffer(lastNameEncryptedField.value);
+                const ivArray = new Uint8Array(window.OrgEncryption.base64ToArrayBuffer(lastNameIvField.value));
+                const tagArray = new Uint8Array(window.OrgEncryption.base64ToArrayBuffer(lastNameTagField.value));
+                
+                const decryptedLastName = await window.OrgEncryption.decryptField(
+                    ciphertextBuffer,
+                    ivArray,
+                    tagArray,
+                    dek
+                );
+                
+                lastNameField.value = decryptedLastName;
+                console.log('✅ Last name decrypted successfully');
+            } else {
+                console.log('⚠️  No DEK available for last_name, keeping encrypted placeholder');
+            }
+        } catch (error) {
+            console.error('❌ Error decrypting last_name:', error);
+        }
+    }
+    
+    // Store original values to detect changes (AFTER decryption)
     const originalName = nameField.value;
+    const originalLastName = lastNameField.value;
     
     // Intercept form submission to encrypt name if needed
     form.addEventListener('submit', async function(e) {
-        // Check if name was changed
+        // Check if fields were changed
         const nameChanged = nameField.value !== originalName;
+        const lastNameChanged = lastNameField.value !== originalLastName;
         
-        // Only encrypt if fields are empty (first submission) OR name was changed
-        if (nameEncryptedField.value && !nameChanged) {
-            return; // Already encrypted and name unchanged, proceed with submission
+        // Only encrypt if fields are empty (first submission) OR if any field changed
+        if (nameEncryptedField.value && !nameChanged && !lastNameChanged) {
+            return; // Already encrypted and nothing changed, proceed with submission
         }
         
         // If name changed, clear old encrypted fields to force re-encryption
@@ -145,6 +194,14 @@ document.addEventListener('DOMContentLoaded', async function() {
             nameEncryptedField.value = '';
             nameIvField.value = '';
             nameTagField.value = '';
+        }
+        
+        // If last_name changed, clear old encrypted fields to force re-encryption
+        if (lastNameChanged) {
+            console.log('Last name changed, clearing old encrypted fields');
+            lastNameEncryptedField.value = '';
+            lastNameIvField.value = '';
+            lastNameTagField.value = '';
         }
         
         e.preventDefault();
@@ -177,14 +234,29 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         try {
             console.log('Encrypting name field...');
-            const encrypted = await window.OrgEncryption.encryptField(name, dek);
+            const encryptedName = await window.OrgEncryption.encryptField(name, dek);
             
             // Convert ArrayBuffer/Uint8Array to base64 strings for form submission
-            nameEncryptedField.value = window.OrgEncryption.arrayBufferToBase64(encrypted.ciphertext);
-            nameIvField.value = window.OrgEncryption.arrayBufferToBase64(encrypted.iv);
-            nameTagField.value = window.OrgEncryption.arrayBufferToBase64(encrypted.tag);
+            nameEncryptedField.value = window.OrgEncryption.arrayBufferToBase64(encryptedName.ciphertext);
+            nameIvField.value = window.OrgEncryption.arrayBufferToBase64(encryptedName.iv);
+            nameTagField.value = window.OrgEncryption.arrayBufferToBase64(encryptedName.tag);
             
-            console.log('Name encrypted successfully, submitting form...');
+            console.log('Name encrypted successfully');
+            
+            // Encrypt last_name if provided
+            const lastName = lastNameField.value.trim();
+            if (lastName) {
+                console.log('Encrypting last_name field...');
+                const encryptedLastName = await window.OrgEncryption.encryptField(lastName, dek);
+                
+                lastNameEncryptedField.value = window.OrgEncryption.arrayBufferToBase64(encryptedLastName.ciphertext);
+                lastNameIvField.value = window.OrgEncryption.arrayBufferToBase64(encryptedLastName.iv);
+                lastNameTagField.value = window.OrgEncryption.arrayBufferToBase64(encryptedLastName.tag);
+                
+                console.log('Last name encrypted successfully');
+            }
+            
+            console.log('All fields encrypted, submitting form...');
             
             // Submit form
             form.submit();
