@@ -294,6 +294,7 @@ $this->assign('title', __('FairNestPlan') . ' - ' . h($schedule->title));
             <div class="explanation" style="grid-column: span <?= $explanationColumns ?>;">
                 <p>
                     <?= __('If places become available due to illness, appointments, etc., parents can fill them via a chatgroup. Work through the waitlist from top to bottom, starting with the child at the bottom of the current day. When you reach the end, start again at the top. Important: The maximum number of counting children must not be exceeded – integrative children count double. If only one spot becomes available but the next child on the list requires two spots, the child after that moves up temporarily. If additional spots become available later, the order will be adjusted accordingly.') ?>
+                    <br><br><?= __('Created with') ?> <span style="text-decoration: underline;">www.fairnestplan.z11.de</span>
                 </p>
             </div>
         </div>

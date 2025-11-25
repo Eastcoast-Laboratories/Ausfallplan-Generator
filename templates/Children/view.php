@@ -6,7 +6,11 @@
 ?>
 <div class="children view content">
     <h3>
-        <?= h($child->name) ?>
+        <span class="child-name" 
+              data-encrypted="<?= h($child->name_encrypted ?? '') ?>"
+              data-iv="<?= h($child->name_iv ?? '') ?>"
+              data-tag="<?= h($child->name_tag ?? '') ?>"
+              data-org-id="<?= $child->organization_id ?>"><?= h($child->name) ?></span>
         <?php if ($child->sibling_group_id && isset($siblingNames[$child->id])): ?>
             <?= $this->Html->link(
                 '👨‍👩‍👧 ' . __("Geschwister"),
@@ -22,11 +26,23 @@
     <table>
         <tr>
             <th><?= __('Name') ?></th>
-            <td><?= h($child->name) ?></td>
+            <td>
+                <span class="child-name" 
+                      data-encrypted="<?= h($child->name_encrypted ?? '') ?>"
+                      data-iv="<?= h($child->name_iv ?? '') ?>"
+                      data-tag="<?= h($child->name_tag ?? '') ?>"
+                      data-org-id="<?= $child->organization_id ?>"><?= h($child->name) ?></span>
+            </td>
         </tr>
         <tr>
             <th><?= __('Last Name') ?></th>
-            <td><?= h($child->last_name) ?></td>
+            <td>
+                <span class="child-last-name" 
+                      data-encrypted="<?= h($child->last_name_encrypted ?? '') ?>"
+                      data-iv="<?= h($child->last_name_iv ?? '') ?>"
+                      data-tag="<?= h($child->last_name_tag ?? '') ?>"
+                      data-org-id="<?= $child->organization_id ?>"><?= h($child->last_name) ?></span>
+            </td>
         </tr>
         <tr>
             <th><?= __('Display Name (for Reports)') ?></th>

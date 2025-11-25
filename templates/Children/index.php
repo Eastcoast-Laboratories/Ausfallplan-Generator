@@ -70,7 +70,12 @@ $this->assign('title', __('Children'));
                             ) ?>
                         <?php endif; ?>
                     </td>
-                    <td><?= h($child->last_name) ?></td>
+                    <td>
+                        <span class="child-last-name" 
+                              data-encrypted="<?= h($child->last_name_encrypted ?? '') ?>"
+                              data-iv="<?= h($child->last_name_iv ?? '') ?>"
+                              data-tag="<?= h($child->last_name_tag ?? '') ?>"><?= h($child->last_name) ?></span>
+                    </td>
                     <td><strong><span class="child-display-name"><?= h($child->display_name ?? ($child->name . ' ' . $child->last_name)) ?></span></strong></td>
                     <?php if (!$selectedOrgId && $canSelectOrganization): ?>
                     <td><?= h($organizations[$child->organization_id] ?? '-') ?></td>
