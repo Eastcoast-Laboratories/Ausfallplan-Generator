@@ -74,7 +74,8 @@ $this->assign('title', __('Children'));
                         <span class="child-last-name" 
                               data-encrypted="<?= h($child->last_name_encrypted ?? '') ?>"
                               data-iv="<?= h($child->last_name_iv ?? '') ?>"
-                              data-tag="<?= h($child->last_name_tag ?? '') ?>"><?= h($child->last_name) ?></span>
+                              data-tag="<?= h($child->last_name_tag ?? '') ?>"
+                              data-org-id="<?= $child->organization_id ?>"><?= h($child->last_name) ?></span>
                     </td>
                     <td><strong><span class="child-display-name"><?= h($child->display_name ?? ($child->name . ' ' . $child->last_name)) ?></span></strong></td>
                     <?php if (!$selectedOrgId && $canSelectOrganization): ?>
