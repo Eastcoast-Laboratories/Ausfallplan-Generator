@@ -34,13 +34,11 @@ $this->assign('title', __('Edit Organization'));
                 const encryptionCheckbox = document.querySelector('input[name="encryption_enabled"]');
                 const form = document.querySelector('form');
                 const organizationId = <?= $organization->id ?>;
-                // Use DB value, not checkbox state (checkbox might be manipulated by browser)
+                // Use DB value from PHP, stored before page load
                 const originalEncryptionState = <?= json_encode((bool)$organization->encryption_enabled) ?>;
                 
-                // Force checkbox to match DB value (fix browser autocomplete issues)
-                if (encryptionCheckbox) {
-                    encryptionCheckbox.checked = originalEncryptionState;
-                }
+                // Read current checkbox state (user might have changed it)
+                // DO NOT force it to originalEncryptionState - that would override user changes!
                 
                 console.log('🔐 Org Edit: Original encryption_enabled from DB:', originalEncryptionState);
                 console.log('🔐 Org Edit: Checkbox forced to:', encryptionCheckbox ? encryptionCheckbox.checked : 'N/A');
