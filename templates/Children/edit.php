@@ -84,11 +84,25 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Get organization ID from child entity
     const orgId = <?= json_encode($child->organization_id) ?>;
     
+    // Store original name to detect changes
+    const originalName = nameField.value;
+    
     // Intercept form submission to encrypt name if needed
     form.addEventListener('submit', async function(e) {
-        // Only encrypt if fields are empty (first submission)
-        if (nameEncryptedField.value) {
-            return; // Already encrypted, proceed with submission
+        // Check if name was changed
+        const nameChanged = nameField.value !== originalName;
+        
+        // Only encrypt if fields are empty (first submission) OR name was changed
+        if (nameEncryptedField.value && !nameChanged) {
+            return; // Already encrypted and name unchanged, proceed with submission
+        }
+        
+        // If name changed, clear old encrypted fields to force re-encryption
+        if (nameChanged) {
+            console.log('Name changed, clearing old encrypted fields');
+            nameEncryptedField.value = '';
+            nameIvField.value = '';
+            nameTagField.value = '';
         }
         
         e.preventDefault();
