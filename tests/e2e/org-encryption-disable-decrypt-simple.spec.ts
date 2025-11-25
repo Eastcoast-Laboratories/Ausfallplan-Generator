@@ -25,7 +25,7 @@ test.describe('Organization Encryption Disable & Auto-Decryption', () => {
         ];
         
         // Use existing admin
-        const adminEmail = 'a10@a.de';
+        const adminEmail = 'admin@demo.kita';
         const adminPassword = 'password';
         
         // Log important browser messages
