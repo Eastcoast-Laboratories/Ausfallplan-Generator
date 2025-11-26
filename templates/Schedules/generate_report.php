@@ -172,8 +172,11 @@ $this->assign('title', __('FairNestPlan') . ' - ' . h($schedule->title));
             font-size: 10px;
             line-height: 1.5;
             border: 2px solid #000;
-            /* Allow text to extend beyond grid columns when explanation is narrow (1-2 columns) */
-            min-width: 100%;
+        }
+
+        /* When explanation is only 1-2 columns, extend it to the right beyond grid */
+        .explanation-wide {
+            min-width: 150%;
         }
 
         .flag-icon {
@@ -252,10 +255,8 @@ $this->assign('title', __('FairNestPlan') . ' - ' . h($schedule->title));
             $totalDays = count($days);
             $daysInLastRow = $totalDays % 4; // 0 means full row (4 days)
             $explanationColumns = $daysInLastRow === 0 ? 4 : (4 - $daysInLastRow);
-            // If explanation is only 1 or 2 columns wide, add one more column for better readability
-            if ($explanationColumns <= 2) {
-                $explanationColumns = min($explanationColumns + 1, 4);
-            }
+            // Flag if explanation is narrow (will extend beyond grid via CSS)
+            $isNarrowExplanation = $explanationColumns <= 2;
             ?>
             <?php foreach ($days as $day): ?>
                 <div class="day-box">
@@ -297,7 +298,7 @@ $this->assign('title', __('FairNestPlan') . ' - ' . h($schedule->title));
             <?php endforeach; ?>
             
             <!-- Explanation box - fills remaining columns in last row -->
-            <div class="explanation" style="grid-column: span <?= $explanationColumns ?>;">
+            <div class="explanation<?= $isNarrowExplanation ? ' explanation-wide' : '' ?>" style="grid-column: span <?= $explanationColumns ?>;">
                 <p>
                     <?= __('If places become available due to illness, appointments, etc., parents can fill them via a chatgroup. Work through the waitlist from top to bottom, starting with the child at the bottom of the current day. When you reach the end, start again at the top. Important: The maximum number of counting children must not be exceeded – integrative children count double. If only one spot becomes available but the next child on the list requires two spots, the child after that moves up temporarily. If additional spots become available later, the order will be adjusted accordingly.') ?>
                     <br><br><?= __('Created with') ?> <span style="text-decoration: underline;">www.fairnestplan.z11.de</span>
