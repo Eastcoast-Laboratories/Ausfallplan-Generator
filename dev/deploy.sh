@@ -27,6 +27,8 @@ echo "🌐 Step 2: Deploying to eclabs-vm06..."
 ssh eclabs-vm06 "cd /var/kunden/webs/ruben/www/fairnestplan.z11.de && \
     git reset --hard 8c1fed22 && \
     git pull origin main && \
+    echo '📦 Installing composer dependencies...' && \
+    composer install --no-dev --optimize-autoloader && \
     rm -rf tmp/cache/* && \
     echo '🗄️  Running database migrations...' && \
     bin/cake migrations migrate && \
