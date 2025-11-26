@@ -80,14 +80,14 @@ $this->assign('title', __('FairNestPlan') . ' - ' . h($schedule->title));
         .children-list {
             list-style: none;
             flex: 1;
-            margin-bottom: 0;
+            margin-bottom: -4px;
         }
 
         .child-item {
             display: flex;
             justify-content: space-between;
             padding: 0.5px 0;
-            line-height: 1.0;
+            line-height: 0.3;
         }
 
         .child-name {
@@ -252,6 +252,10 @@ $this->assign('title', __('FairNestPlan') . ' - ' . h($schedule->title));
             $totalDays = count($days);
             $daysInLastRow = $totalDays % 4; // 0 means full row (4 days)
             $explanationColumns = $daysInLastRow === 0 ? 4 : (4 - $daysInLastRow);
+            // If explanation is only 1 or 2 columns wide, add one more column for better readability
+            if ($explanationColumns <= 2) {
+                $explanationColumns = min($explanationColumns + 1, 4);
+            }
             ?>
             <?php foreach ($days as $day): ?>
                 <div class="day-box">
