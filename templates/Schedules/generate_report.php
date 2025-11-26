@@ -212,6 +212,7 @@ $this->assign('title', __('FairNestPlan') . ' - ' . h($schedule->title));
         @media print {
             body {
                 padding: 10px;
+                font-size: 10px; /* 1px smaller than default 11px */
             }
             .no-print {
                 display: none;
@@ -223,6 +224,32 @@ $this->assign('title', __('FairNestPlan') . ' - ' . h($schedule->title));
                 opacity: 0;
                 width: 0;
                 overflow: hidden;
+            }
+            
+            /* Reduce all font sizes by 1px for print */
+            .day-title {
+                font-size: 11px; /* was 12px */
+            }
+            .box-title {
+                font-size: 11px; /* was 12px */
+            }
+            .explanation {
+                font-size: 9px; /* was 10px */
+            }
+            .waitlist-item, .priority-badge {
+                font-size: 9px; /* was 10px */
+            }
+            .firstOnWaitlist-child {
+                font-size: 9px; /* was 10px */
+            }
+            .day-sum {
+                font-size: 6px; /* was 7px */
+            }
+            .checksums {
+                font-size: 6px; /* was 7px */
+            }
+            .total-counting-children {
+                font-size: 7px; /* was 8px */
             }
         }
     </style>
