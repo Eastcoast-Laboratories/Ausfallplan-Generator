@@ -156,6 +156,9 @@ class EmailDebugService
      */
     private static function sendRealEmail(array $email): bool
     {
+        $emailId = substr(md5(uniqid() . $email['to'] . ($email['subject'] ?? '')), 0, 8);
+        error_log(sprintf('[EmailDebugService] START sending email ID:%s to %s: %s', $emailId, $email['to'], $email['subject'] ?? 'No Subject'));
+        
         try {
             $mailer = new Mailer('default');
             
@@ -166,9 +169,11 @@ class EmailDebugService
             $mailer->setTo($email['to']);
             
             // Add BCC to sysadmin if configured
+            // BUT NOT if we're already sending TO the sysadmin (avoid duplicate)
             $sysadminEmail = self::getSysadminEmail();
-            if ($sysadminEmail) {
+            if ($sysadminEmail && $email['to'] !== $sysadminEmail) {
                 $mailer->setBcc($sysadminEmail);
+                error_log(sprintf('[EmailDebugService] Added BCC to %s', $sysadminEmail));
             }
             
             // Set subject and body
@@ -191,7 +196,7 @@ class EmailDebugService
                 $mailer->deliver($body);
             }
             
-            error_log(sprintf('[EmailDebugService] Sent email to %s: %s', $email['to'], $email['subject'] ?? 'No Subject'));
+            error_log(sprintf('[EmailDebugService] COMPLETED sending email ID:%s to %s: %s', $emailId, $email['to'], $email['subject'] ?? 'No Subject'));
             
             return true;
         } catch (\Exception $e) {

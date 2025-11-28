@@ -246,13 +246,7 @@ class UsersController extends AppController
     {
         $sysadminEmail = \Cake\Core\env('SYSADMIN_BCC_EMAIL', 'ausfallplan-sysadmin@it.z11.de');
         
-        error_log('[DEBUG] notifySysadminAboutNewUser called');
-        error_log('[DEBUG] Sysadmin email from env: ' . ($sysadminEmail ?: 'EMPTY'));
-        error_log('[DEBUG] User email: ' . $user->email);
-        error_log('[DEBUG] Organization: ' . $organization->name);
-        
         if (empty($sysadminEmail)) {
-            error_log('[DEBUG] Sysadmin email is empty, skipping notification');
             return; // BCC disabled
         }
         
