@@ -24,7 +24,7 @@ class EmailDebugService
      */
     private static function getSysadminEmail(): ?string
     {
-        $email = env('SYSADMIN_BCC_EMAIL', 'ausfallplan-sysadmin@it.z11.de');
+        $email = \Cake\Core\env('SYSADMIN_BCC_EMAIL', 'ausfallplan-sysadmin@it.z11.de');
         return !empty($email) ? $email : null;
     }
     
