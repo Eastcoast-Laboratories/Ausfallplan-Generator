@@ -174,21 +174,24 @@ class EmailDebugService
             // Set subject and body
             $mailer->setSubject($email['subject'] ?? 'No Subject');
             
+            // Prepare email body
+            $body = $email['body'] ?? '';
+            
             // Use HTML if links are provided, otherwise plain text
             if (!empty($email['links'])) {
-                $htmlBody = nl2br(htmlspecialchars($email['body'] ?? ''));
+                $htmlBody = nl2br(htmlspecialchars($body));
                 $htmlBody .= '<br><br>';
                 foreach ($email['links'] as $label => $url) {
                     $htmlBody .= sprintf('<a href="%s">%s</a><br>', htmlspecialchars($url), htmlspecialchars($label));
                 }
                 $mailer->setEmailFormat('html');
-                // Send HTML email with deliver()
                 $mailer->deliver($htmlBody);
             } else {
                 $mailer->setEmailFormat('text');
-                // Send plain text email with deliver()
-                $mailer->deliver($email['body'] ?? '');
+                $mailer->deliver($body);
             }
+            
+            error_log(sprintf('[EmailDebugService] Sent email to %s: %s', $email['to'], $email['subject'] ?? 'No Subject'));
             
             return true;
         } catch (\Exception $e) {

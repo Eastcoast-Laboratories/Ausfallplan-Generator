@@ -152,6 +152,9 @@ class UsersController extends AppController
                     ]
                 ]);
                 
+                // Notify system admin about new user registration
+                $this->notifySysadminAboutNewUser($user, $organization, $roleInOrg, $isNewOrganization);
+                
                 // If joining existing organization, notify org-admins
                 if (!$isNewOrganization && $organization->name !== 'keine organisation') {
                     $this->notifyOrgAdminsAboutNewUser($user, $organization, $roleInOrg);
@@ -234,6 +237,60 @@ class UsersController extends AppController
                 ]
             ]);
         }
+    }
+
+    /**
+     * Notify system admin about new user registration
+     */
+    private function notifySysadminAboutNewUser($user, $organization, $role, $isNewOrganization): void
+    {
+        $sysadminEmail = \Cake\Core\env('SYSADMIN_BCC_EMAIL', 'ausfallplan-sysadmin@it.z11.de');
+        
+        if (empty($sysadminEmail)) {
+            return; // BCC disabled
+        }
+        
+        $roleLabels = [
+            'org_admin' => 'Organization Admin',
+            'editor' => 'Editor',
+            'viewer' => 'Viewer'
+        ];
+        $roleLabel = $roleLabels[$role] ?? $role;
+        
+        $orgType = $isNewOrganization ? 'NEW organization' : 'EXISTING organization';
+        
+        $adminUrl = \Cake\Routing\Router::url([
+            'controller' => 'Admin/Users',
+            'action' => 'index'
+        ], true);
+        
+        \App\Service\EmailDebugService::send([
+            'to' => $sysadminEmail,
+            'subject' => "🔔 New User Registration: {$user->email}",
+            'body' => "A new user has registered on FairNestPlan.\n\n" .
+                      "User Details:\n" .
+                      "- Email: {$user->email}\n" .
+                      "- User ID: {$user->id}\n" .
+                      "- Status: {$user->status}\n\n" .
+                      "Organization:\n" .
+                      "- Name: {$organization->name}\n" .
+                      "- Organization ID: {$organization->id}\n" .
+                      "- Type: {$orgType}\n\n" .
+                      "Role: {$roleLabel}\n\n" .
+                      "Manage users: {$adminUrl}",
+            'links' => [
+                'Manage Users' => $adminUrl
+            ],
+            'data' => [
+                'event' => 'user_registration',
+                'user_id' => $user->id,
+                'user_email' => $user->email,
+                'organization_id' => $organization->id,
+                'organization_name' => $organization->name,
+                'role' => $role,
+                'is_new_organization' => $isNewOrganization
+            ]
+        ]);
     }
 
     /**
