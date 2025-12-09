@@ -544,5 +544,37 @@ return [
     'Client-Side Encryption enabled' => 'Client-seitige Verschlüsselung aktiviert',
     'Basis-Information' => 'Basis-Informationen',
     'Aktive' => 'Aktiv',
-    'Cannot delete sibling group with children. Please remove children from this group first.' => 'Geschwistergruppe mit Kindern kann nicht gelöscht werden. Bitte entfernen Sie zuerst die Kinder aus dieser Gruppe.'
+    'Cannot delete sibling group with children. Please remove children from this group first.' => 'Geschwistergruppe mit Kindern kann nicht gelöscht werden. Bitte entfernen Sie zuerst die Kinder aus dieser Gruppe.',
+    
+    // Emails - Verification
+    'Verify your email address' => 'Bitte bestätigen Sie Ihre E-Mail-Adresse',
+    "Hello,\n\nPlease verify your email address by clicking the link below:\n\n{0}\n\nIf you did not register, please ignore this email." => "Hallo,\n\nbitte bestätigen Sie Ihre E-Mail-Adresse, indem Sie auf den folgenden Link klicken:\n\n{0}\n\nWenn Sie sich nicht registriert haben, können Sie diese E-Mail ignorieren.",
+    'Verify Email' => 'E-Mail bestätigen',
+    
+    // Emails - Organization roles / labels
+    'Organization Admin' => 'Organisations-Admin',
+    'Editor' => 'Bearbeiter',
+    'Viewer' => 'Leser',
+    
+    // Emails - Org admin notification about new user
+    'New user registration for {0}' => 'Neue Benutzerregistrierung für {0}',
+    "Hello,\n\nA new user has registered to join your organization '{0}'.\n\nUser Details:\n- Email: {1}\n- Requested Role: {2}\n\nPlease review and approve this user:\n{3}\n\nIf you did not expect this registration, please contact support." => "Hallo,\n\nEin neuer Benutzer hat sich registriert, um Ihrer Organisation '{0}' beizutreten.\n\nBenutzerdaten:\n- E-Mail: {1}\n- Gewünschte Rolle: {2}\n\nBitte prüfen und bestätigen Sie diesen Benutzer:\n{3}\n\nWenn Sie diese Registrierung nicht erwartet haben, kontaktieren Sie bitte den Support.",
+    'Approve User' => 'Benutzer freigeben',
+    
+    // Emails - Sysadmin notification about new user
+    'New organization' => 'Neue Organisation',
+    'Existing organization' => 'Bestehende Organisation',
+    "🔔 New user registered: {0}" => "🔔 Neuer Benutzer registriert: {0}",
+    "A new user has registered on FairNestPlan.\n\nUser Details:\n- Email: {0}\n- User ID: {1}\n- Status: {2}\n\nOrganization:\n- Name: {3}\n- Organization ID: {4}\n- Type: {5}\n\nRole in organization: {6}\n\nOpen user management: {7}" => "Ein neuer Benutzer hat sich bei FairNestPlan registriert.\n\nBenutzerdaten:\n- E-Mail: {0}\n- Benutzer-ID: {1}\n- Status: {2}\n\nOrganisation:\n- Name: {3}\n- Organisations-ID: {4}\n- Typ: {5}\n\nRolle in der Organisation: {6}\n\nBenutzerverwaltung öffnen: {7}",
+    'User Management' => 'Benutzerverwaltung',
+    
+    // Emails - Password reset
+    'Password Reset Code' => 'Passwort-Zurücksetzcode',
+    "Hello,\n\nYour password reset code is: {0}\n\nThis code will expire in 1 hour.\n\nIf you did not request a password reset, please ignore this email." => "Hallo,\n\nIhr Code zum Zurücksetzen des Passworts lautet: {0}\n\nDieser Code ist 1 Stunde gültig.\n\nWenn Sie kein Zurücksetzen Ihres Passworts angefordert haben, können Sie diese E-Mail ignorieren.",
+    'Reset Password' => 'Passwort zurücksetzen',
+    
+    // Emails - Account approved
+    'Your account has been approved' => 'Ihr Konto wurde freigeschaltet',
+    "Hello,\n\nYour account for organization '{0}' has been approved!\n\nYou can now log in and start using FairNestPlan.\n\nLogin: {1}" => "Hallo,\n\nIhr Konto für die Organisation '{0}' wurde freigeschaltet!\n\nSie können sich jetzt anmelden und FairNestPlan verwenden.\n\nLogin: {1}",
+    'Login Now' => 'Jetzt einloggen'
 ];
