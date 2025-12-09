@@ -105,7 +105,7 @@ $io->success('✓ Verification email sent (stored in debug)');
 // 5. Send sysadmin notification (simulating the controller method)
 $io->out('<info>Sending sysadmin notification...</info>');
 
-$sysadminEmail = \Cake\Core\env('SYSADMIN_BCC_EMAIL', 'ausfallplan-sysadmin@it.z11.de');
+$sysadminEmail = \Cake\Core\env('SYSADMIN_BCC_EMAIL', 'sysadmin@fairnestplan.z11.de');
 
 $io->out("Sysadmin email from env: {$sysadminEmail}");
 

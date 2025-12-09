@@ -61,7 +61,7 @@ $this->disableAutoLayout();
             Knickweg 16<br>
             24114 Kiel<br>
             Deutschland<br>
-            E-Mail: fairnestplan-kontakt@it.z11.de<br>
+            E-Mail: kontakt@fairnestplan.z11.de<br>
             Tel: Kiel-53687223
         </p>
         
@@ -113,7 +113,7 @@ $this->disableAutoLayout();
         <h2>8. Kontakt zum Datenschutz</h2>
         <p>Wenn Sie Fragen zum Datenschutz haben, schreiben Sie uns bitte eine E-Mail an:</p>
         <p>
-            E-Mail: fairnestplan-kontakt@it.z11.de<br>
+            E-Mail: kontakt@fairnestplan.z11.de<br>
             Telefon: Kiel-53687223
         </p>
         

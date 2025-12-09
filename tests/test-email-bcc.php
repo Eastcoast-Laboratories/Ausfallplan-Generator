@@ -20,7 +20,7 @@ $email = [
 echo "Email Details:\n";
 echo "  To: " . $email['to'] . "\n";
 echo "  Subject: " . $email['subject'] . "\n";
-echo "  BCC: ausfallplan-sysadmin@it.z11.de (automatisch)\n\n";
+echo "  BCC: sysadmin@fairnestplan.z11.de (automatisch)\n\n";
 
 $result = EmailDebugService::send($email);
 
@@ -34,7 +34,7 @@ if ($result) {
         echo "   View at: http://localhost:8765/debug/emails\n";
     } else {
         echo "\nℹ️  Running on production - email sent via SMTP\n";
-        echo "   BCC sent to: ausfallplan-sysadmin@it.z11.de\n";
+        echo "   BCC sent to: sysadmin@fairnestplan.z11.de\n";
     }
 } else {
     echo "❌ Email sending failed!\n";

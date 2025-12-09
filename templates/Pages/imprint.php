@@ -59,7 +59,7 @@ $this->disableAutoLayout();
         <h2>Kontakt</h2>
         <p>
             Telefon: Kiel-53687223<br>
-            E-Mail: fairnestplan-kontakt@it.z11.de
+            E-Mail: kontakt@fairnestplan.z11.de
         </p>
         
         <h2>Umsatzsteuer-ID</h2>

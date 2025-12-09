@@ -51,7 +51,7 @@ $this->disableAutoLayout();
     <p>
         <strong>Allgemeine Geschäftsbedingungen von Ruben Barkow-Kuder, Eastcoast Laboratories</strong><br>
         Knickweg 16, 24114 Kiel<br>
-        fairnestplan-kontakt@it.z11.de<br>
+        kontakt@fairnestplan.z11.de<br>
         im Folgenden als „FairNestPlan" gekennzeichnet.
     </p>
     
@@ -175,7 +175,7 @@ $this->disableAutoLayout();
         Ruben Barkow-Kuder<br>
         Knickweg 16<br>
         24114 Kiel<br>
-        E-Mail: fairnestplan-kontakt@it.z11.de
+        E-Mail: kontakt@fairnestplan.z11.de
     </p>
     </div>
 </body>

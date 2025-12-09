@@ -24,7 +24,7 @@ class EmailDebugService
      */
     private static function getSysadminEmail(): ?string
     {
-        $email = \Cake\Core\env('SYSADMIN_BCC_EMAIL', 'ausfallplan-sysadmin@it.z11.de');
+        $email = \Cake\Core\env('SYSADMIN_BCC_EMAIL', 'sysadmin@fairnestplan.z11.de');
         return !empty($email) ? $email : null;
     }
     
@@ -163,7 +163,7 @@ class EmailDebugService
             $mailer = new Mailer('default');
             
             // Set sender
-            $mailer->setFrom(['noreply@fairnestplan.z11.de' => 'Ausfallplan Generator']);
+            $mailer->setFrom(['noreply@fairnestplan.z11.de' => 'FairNestPlan']);
             
             // Set recipient
             $mailer->setTo($email['to']);

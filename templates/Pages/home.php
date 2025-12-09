@@ -348,7 +348,7 @@ $lang = substr($locale, 0, 2); // de or en
                             <li><?= __('Dedicated Support') ?></li>
                             <li><?= __('Custom Features') ?></li>
                         </ul>
-                        <a href="mailto:fairnestplan-kontakt@it.z11.de" class="btn-primary"><?= __('Contact') ?></a>
+                        <a href="mailto:kontakt@fairnestplan.z11.de" class="btn-primary"><?= __('Contact') ?></a>
                     </div>
                 </div>
             </div>

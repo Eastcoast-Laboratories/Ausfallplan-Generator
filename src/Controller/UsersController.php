@@ -138,12 +138,19 @@ class UsersController extends AppController
                     $user->email_token
                 ], true);
                 
+                $verifySubject = __('Verify your email address');
+                $verifyBody = __(
+                    "Hello,\n\nPlease verify your email address by clicking the link below:\n\n{0}\n\nIf you did not register, please ignore this email.",
+                    [$verifyUrl]
+                );
+                $verifyLinkLabel = __('Verify Email');
+                
                 \App\Service\EmailDebugService::send([
                     'to' => $user->email,
-                    'subject' => 'Verify your email address',
-                    'body' => "Hello,\n\nPlease verify your email address by clicking the link below:\n\n{$verifyUrl}\n\nIf you did not register, please ignore this email.",
+                    'subject' => $verifySubject,
+                    'body' => $verifyBody,
                     'links' => [
-                        'Verify Email' => $verifyUrl
+                        $verifyLinkLabel => $verifyUrl
                     ],
                     'data' => [
                         'user_id' => $user->id,
@@ -207,11 +214,23 @@ class UsersController extends AppController
         ], true);
         
         $roleLabels = [
-            'org_admin' => 'Organization Admin',
-            'editor' => 'Editor',
-            'viewer' => 'Viewer'
+            'org_admin' => __('Organization Admin'),
+            'editor' => __('Editor'),
+            'viewer' => __('Viewer')
         ];
         $roleLabel = $roleLabels[$requestedRole] ?? $requestedRole;
+        
+        $subjectTemplate = 'New user registration for {0}';
+        $bodyTemplate = __(
+            "Hello,\n\nA new user has registered to join your organization '{0}'.\n\nUser Details:\n- Email: {1}\n- Requested Role: {2}\n\nPlease review and approve this user:\n{3}\n\nIf you did not expect this registration, please contact support.",
+            [
+                $organization->name,
+                $user->email,
+                $roleLabel,
+                $approvalUrl
+            ]
+        );
+        $approveLinkLabel = __('Approve User');
         
         // Send email to each org-admin
         foreach ($orgAdmins as $orgAdmin) {
@@ -222,10 +241,10 @@ class UsersController extends AppController
             
             \App\Service\EmailDebugService::send([
                 'to' => $orgAdmin->user->email,
-                'subject' => "New user registration for {$organization->name}",
-                'body' => "Hello,\n\nA new user has registered to join your organization '{$organization->name}'.\n\nUser Details:\n- Email: {$user->email}\n- Requested Role: {$roleLabel}\n\nPlease review and approve this user:\n{$approvalUrl}\n\nIf you did not expect this registration, please contact support.",
+                'subject' => __($subjectTemplate, [$organization->name]),
+                'body' => $bodyTemplate,
                 'links' => [
-                    'Approve User' => $approvalUrl
+                    $approveLinkLabel => $approvalUrl
                 ],
                 'data' => [
                     'new_user_id' => $user->id,
@@ -244,42 +263,58 @@ class UsersController extends AppController
      */
     private function notifySysadminAboutNewUser($user, $organization, $role, $isNewOrganization): void
     {
-        $sysadminEmail = \Cake\Core\env('SYSADMIN_BCC_EMAIL', 'ausfallplan-sysadmin@it.z11.de');
+        $sysadminEmail = \Cake\Core\env('SYSADMIN_BCC_EMAIL', 'sysadmin@fairnestplan.z11.de');
         
         if (empty($sysadminEmail)) {
             return; // BCC disabled
         }
         
         $roleLabels = [
-            'org_admin' => 'Organization Admin',
-            'editor' => 'Editor',
-            'viewer' => 'Viewer'
+            'org_admin' => __('Organization Admin'),
+            'editor' => __('Editor'),
+            'viewer' => __('Viewer')
         ];
         $roleLabel = $roleLabels[$role] ?? $role;
         
-        $orgType = $isNewOrganization ? 'NEW organization' : 'EXISTING organization';
+        $orgType = $isNewOrganization ? __('New organization') : __('Existing organization');
         
         $adminUrl = \Cake\Routing\Router::url([
             'controller' => 'Admin/Users',
             'action' => 'index'
         ], true);
         
+        $sysadminSubject = __("🔔 New user registered: {0}", [$user->email]);
+        $sysadminBody = __(
+            "A new user has registered on FairNestPlan.\n\n" .
+            "User Details:\n" .
+            "- Email: {0}\n" .
+            "- User ID: {1}\n" .
+            "- Status: {2}\n\n" .
+            "Organization:\n" .
+            "- Name: {3}\n" .
+            "- Organization ID: {4}\n" .
+            "- Type: {5}\n\n" .
+            "Role in organization: {6}\n\n" .
+            "Open user management: {7}",
+            [
+                $user->email,
+                $user->id,
+                $user->status,
+                $organization->name,
+                $organization->id,
+                $orgType,
+                $roleLabel,
+                $adminUrl
+            ]
+        );
+        $sysadminLinkLabel = __('User Management');
+        
         \App\Service\EmailDebugService::send([
             'to' => $sysadminEmail,
-            'subject' => "🔔 New User Registration: {$user->email}",
-            'body' => "A new user has registered on FairNestPlan.\n\n" .
-                      "User Details:\n" .
-                      "- Email: {$user->email}\n" .
-                      "- User ID: {$user->id}\n" .
-                      "- Status: {$user->status}\n\n" .
-                      "Organization:\n" .
-                      "- Name: {$organization->name}\n" .
-                      "- Organization ID: {$organization->id}\n" .
-                      "- Type: {$orgType}\n\n" .
-                      "Role: {$roleLabel}\n\n" .
-                      "Manage users: {$adminUrl}",
+            'subject' => $sysadminSubject,
+            'body' => $sysadminBody,
             'links' => [
-                'Manage Users' => $adminUrl
+                $sysadminLinkLabel => $adminUrl
             ],
             'data' => [
                 'event' => 'user_registration',
@@ -675,12 +710,20 @@ class UsersController extends AppController
                 
                 if ($this->fetchTable('PasswordResets')->save($reset)) {
                     // Send password reset email (or store for debug on localhost)
+                    $resetSubject = __('Password Reset Code');
+                    $resetBody = __(
+                        "Hello,\n\nYour password reset code is: {0}\n\nThis code will expire in 1 hour.\n\nIf you did not request a password reset, please ignore this email.",
+                        [$resetCode]
+                    );
+                    $resetLinkLabel = __('Reset Password');
+                    $resetUrl = \Cake\Routing\Router::url(['controller' => 'Users', 'action' => 'resetPassword'], true);
+                    
                     \App\Service\EmailDebugService::send([
                         'to' => $user->email,
-                        'subject' => 'Password Reset Code',
-                        'body' => "Hello,\n\nYour password reset code is: {$resetCode}\n\nThis code will expire in 1 hour.\n\nIf you did not request a password reset, please ignore this email.",
+                        'subject' => $resetSubject,
+                        'body' => $resetBody,
                         'links' => [
-                            'Reset Password' => \Cake\Routing\Router::url(['controller' => 'Users', 'action' => 'resetPassword'], true)
+                            $resetLinkLabel => $resetUrl
                         ],
                         'data' => [
                             'user_id' => $user->id,
@@ -815,12 +858,20 @@ class UsersController extends AppController
             $this->Flash->success(__('User approved successfully.'));
             
             // Send notification to the approved user
+            $loginUrl = \Cake\Routing\Router::url(['controller' => 'Users', 'action' => 'login'], true);
+            $approvedSubject = __('Your account has been approved');
+            $approvedBody = __(
+                "Hello,\n\nYour account for organization '{0}' has been approved!\n\nYou can now log in and start using FairNestPlan.\n\nLogin: {1}",
+                [$sharedOrg->organization->name, $loginUrl]
+            );
+            $loginLinkLabel = __('Login Now');
+            
             \App\Service\EmailDebugService::send([
                 'to' => $userToApprove->email,
-                'subject' => 'Your account has been approved',
-                'body' => "Hello,\n\nYour account for organization '{$sharedOrg->organization->name}' has been approved!\n\nYou can now log in and start using FairNestPlan.\n\nLogin: " . \Cake\Routing\Router::url(['controller' => 'Users', 'action' => 'login'], true),
+                'subject' => $approvedSubject,
+                'body' => $approvedBody,
                 'links' => [
-                    'Login Now' => \Cake\Routing\Router::url(['controller' => 'Users', 'action' => 'login'], true)
+                    $loginLinkLabel => $loginUrl
                 ],
                 'data' => [
                     'user_id' => $userToApprove->id,
