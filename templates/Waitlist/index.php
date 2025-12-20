@@ -104,8 +104,8 @@ $this->assign('title', __('Waitlist'));
                         'style' => 'background: #4caf50; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; margin-left: 1rem;'
                     ]
                 ) ?>
-            <?php endif; ?>
-        </div>
+            </div>
+        <?php endif; ?>
     </div>
     
     <?php if ($selectedSchedule): ?>

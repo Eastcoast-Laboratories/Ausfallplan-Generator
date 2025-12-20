@@ -25,7 +25,10 @@ $this->assign('title', __('Sibling Groups'));
                 <?= $this->Html->link(__('New Sibling Group'), ['action' => 'add'], ['class' => 'button', 'style' => 'white-space: nowrap;']) ?>
             </form>
         <?php else: ?>
-            <?= $this->Html->link(__('New Sibling Group'), ['action' => 'add'], ['class' => 'button']) ?>
+            <div style="display: flex; gap: 1rem;">
+                <?= $this->Html->link(__('Manage Children'), ['controller' => 'Children', 'action' => 'index'], ['class' => 'button']) ?>
+                <?= $this->Html->link(__('New Sibling Group'), ['action' => 'add'], ['class' => 'button']) ?>
+            </div>
         <?php endif; ?>
     </div>
     

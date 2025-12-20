@@ -144,7 +144,7 @@ document.querySelectorAll('.delete-child-btn').forEach(button => {
         const childName = this.dataset.childName;
         const row = this.closest('tr');
         
-        if (!confirm("<?= __('Are you sure you want to delete') ?> " + childName + "?")) {
+        if (!confirm("<?= __('Are you sure you want to delete this child?') ?>")) {
             return;
         }
         

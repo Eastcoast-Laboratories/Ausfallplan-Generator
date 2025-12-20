@@ -155,14 +155,45 @@ class SiblingGroupsController extends AppController
             $siblingGroup = $this->SiblingGroups->patchEntity($siblingGroup, $data);
             
             if ($this->SiblingGroups->save($siblingGroup)) {
-                $this->Flash->success(__('The sibling group has been saved.'));
+                // Check if there's a pending child to assign to this group
+                $pendingChildId = $this->request->getSession()->read('pendingChildForSiblingGroup');
+                if ($pendingChildId) {
+                    $childrenTable = $this->fetchTable('Children');
+                    try {
+                        $child = $childrenTable->get($pendingChildId);
+                        $child->sibling_group_id = $siblingGroup->id;
+                        if ($childrenTable->save($child)) {
+                            $this->Flash->success(__('The sibling group has been saved and assigned to the child.'));
+                        } else {
+                            $this->Flash->warning(__('The sibling group has been saved, but could not be assigned to the child.'));
+                        }
+                    } catch (\Exception $e) {
+                        $this->Flash->warning(__('The sibling group has been saved, but the child was not found.'));
+                    }
+                    $this->request->getSession()->delete('pendingChildForSiblingGroup');
+                } else {
+                    $this->Flash->success(__('The sibling group has been saved.'));
+                }
                 return $this->redirect(['action' => 'index']);
             }
             
             $this->Flash->error(__('The sibling group could not be saved. Please try again.'));
         }
         
-        $this->set(compact('siblingGroup', 'userOrgs', 'selectedOrgId'));
+        // Check if there's a pending child (show info message)
+        $pendingChildId = $this->request->getSession()->read('pendingChildForSiblingGroup');
+        $pendingChild = null;
+        if ($pendingChildId) {
+            $childrenTable = $this->fetchTable('Children');
+            try {
+                $pendingChild = $childrenTable->get($pendingChildId);
+            } catch (\Exception $e) {
+                // Child not found, clear session
+                $this->request->getSession()->delete('pendingChildForSiblingGroup');
+            }
+        }
+        
+        $this->set(compact('siblingGroup', 'userOrgs', 'selectedOrgId', 'pendingChild'));
     }
 
     /**

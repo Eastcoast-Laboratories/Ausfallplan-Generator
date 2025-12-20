@@ -90,10 +90,19 @@ class DashboardController extends AppController
     {
         $activities = [];
         
-        // Get recent children
+        // Get recent children (include encryption fields for client-side decryption)
         $childrenTable = $this->fetchTable('Children');
         $childrenQuery = $childrenTable->find()
             ->contain(['Organizations'])
+            ->select([
+                'Children.id',
+                'Children.name',
+                'Children.name_encrypted',
+                'Children.name_iv',
+                'Children.name_tag',
+                'Children.organization_id',
+                'Children.created',
+            ])
             ->order(['Children.created' => 'DESC'])
             ->limit(5);
             
@@ -105,10 +114,15 @@ class DashboardController extends AppController
             $activities[] = [
                 'type' => 'child',
                 'icon' => '👶',
-                'title' => __('Child added: {0}', $child->name),
+                'title_prefix' => __('Child added:'),
+                'name' => $child->name,
+                'name_encrypted' => $child->name_encrypted,
+                'name_iv' => $child->name_iv,
+                'name_tag' => $child->name_tag,
                 'organization' => $child->organization->name ?? '-',
+                'organization_id' => $child->organization_id,
                 'time' => $child->created,
-                'url' => ['controller' => 'Children', 'action' => 'view', $child->id]
+                'url' => ['controller' => 'Children', 'action' => 'view', $child->id],
             ];
         }
         

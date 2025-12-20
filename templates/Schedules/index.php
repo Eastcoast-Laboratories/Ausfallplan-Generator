@@ -81,9 +81,9 @@ $this->assign('title', __('Schedules'));
 </style>
 
 <div class="schedules index content">
-    <h3><?= __('Schedules') ?></h3>
-    <div class="actions">
-        <?= $this->Html->link(__('New Schedule'), ['action' => 'add'], ['class' => 'button float-right']) ?>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="margin: 0;"><?= __('Schedules') ?></h3>
+        <?= $this->Html->link(__('New Schedule'), ['action' => 'add'], ['class' => 'button']) ?>
     </div>
     
     <?php if ($hasMultipleOrgs || ($user && $user->is_system_admin)): ?>

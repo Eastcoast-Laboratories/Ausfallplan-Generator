@@ -346,9 +346,23 @@ class ChildrenController extends AppController
                 }
             }
             
+            // Check if user wants to create a new sibling group
+            $createNewSiblingGroup = !empty($data['create_new_sibling_group']) && $data['create_new_sibling_group'] === '1';
+            if ($createNewSiblingGroup) {
+                // Clear the sibling_group_id (it was set to '__new__')
+                $data['sibling_group_id'] = null;
+            }
+            
             $child = $this->Children->patchEntity($child, $data);
             
             if ($this->Children->save($child)) {
+                // If user wants to create new sibling group, redirect to add page with child ID in session
+                if ($createNewSiblingGroup) {
+                    $this->request->getSession()->write('pendingChildForSiblingGroup', $child->id);
+                    $this->Flash->success(__('The child has been updated. Now create the sibling group.'));
+                    return $this->redirect(['controller' => 'SiblingGroups', 'action' => 'add']);
+                }
+                
                 $this->Flash->success(__('The child has been updated.'));
                 return $this->redirect(['action' => 'index']);
             }

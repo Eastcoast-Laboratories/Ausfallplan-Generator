@@ -50,11 +50,16 @@ $this->assign('title', __('Edit Child'));
             echo $this->Form->control('postal_code', ['label' => __('Postal Code'), 'required' => false]);
             echo $this->Form->control('is_active', ['type' => 'checkbox', 'label' => __('Active')]);
             echo $this->Form->control('is_integrative', ['type' => 'checkbox', 'label' => __('Integrative Child')]);
+            // Add "New Group" option to sibling groups
+            $siblingGroupOptions = $siblingGroups->toArray();
+            $siblingGroupOptions['__new__'] = '➕ ' . __('Create New Group');
             echo $this->Form->control('sibling_group_id', [
-                'options' => $siblingGroups,
+                'options' => $siblingGroupOptions,
                 'empty' => __('(No Sibling Group)'),
                 'label' => __('Sibling Group'),
+                'id' => 'sibling-group-select',
             ]);
+            echo $this->Form->hidden('create_new_sibling_group', ['id' => 'create-new-sibling-group', 'value' => '0']);
         ?>
     </fieldset>
     
@@ -91,6 +96,22 @@ $this->assign('title', __('Edit Child'));
 </div>
 
 <script>
+// Handle "Create New Group" selection
+document.addEventListener('DOMContentLoaded', function() {
+    const siblingGroupSelect = document.getElementById('sibling-group-select');
+    const createNewField = document.getElementById('create-new-sibling-group');
+    
+    if (siblingGroupSelect && createNewField) {
+        siblingGroupSelect.addEventListener('change', function() {
+            if (this.value === '__new__') {
+                createNewField.value = '1';
+            } else {
+                createNewField.value = '0';
+            }
+        });
+    }
+});
+
 document.addEventListener('DOMContentLoaded', async function() {
     const form = document.querySelector('.children.form form');
     const submitButton = document.getElementById('submit-button');

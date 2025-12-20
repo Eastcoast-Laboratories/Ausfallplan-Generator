@@ -89,15 +89,27 @@ $this->assign('title', __('Dashboard'));
         <?php if (!empty($recentActivities)): ?>
             <div class="activity-list">
                 <?php foreach ($recentActivities as $activity): ?>
-                    <div class="activity-item">
+                    <div class="activity-item" data-org-id="<?= h($activity['organization_id'] ?? '') ?>">
                         <div class="activity-icon"><?= $activity['icon'] ?></div>
                         <div class="activity-content">
                             <div class="activity-title">
-                                <?= $this->Html->link(
-                                    h($activity['title']),
-                                    $activity['url'],
-                                    ['class' => 'activity-link']
-                                ) ?>
+                                <?php if ($activity['type'] === 'child'): ?>
+                                    <?= h($activity['title_prefix']) ?>
+                                    <?= $this->Html->link(
+                                        '<span class="child-name" 
+                                              data-encrypted="' . h($activity['name_encrypted'] ?? '') . '"
+                                              data-iv="' . h($activity['name_iv'] ?? '') . '"
+                                              data-tag="' . h($activity['name_tag'] ?? '') . '">' . h($activity['name']) . '</span>',
+                                        $activity['url'],
+                                        ['class' => 'activity-link', 'escape' => false]
+                                    ) ?>
+                                <?php else: ?>
+                                    <?= $this->Html->link(
+                                        h($activity['title']),
+                                        $activity['url'],
+                                        ['class' => 'activity-link']
+                                    ) ?>
+                                <?php endif; ?>
                             </div>
                             <?php if (isset($user) && $user->is_system_admin): ?>
                                 <div class="activity-meta">
