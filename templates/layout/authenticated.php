@@ -427,6 +427,11 @@ $currentLangShort = substr($currentLang, 0, 2);
                 <span><?= __('Waitlist') ?></span>
             </a>
             
+            <a href="/schedules/plan-preview" class="sidebar-nav-item <?= $this->request->getParam('controller') === 'Schedules' && $this->request->getParam('action') === 'planPreview' ? 'active' : '' ?>">
+                <span>📄</span>
+                <span><?= __('Plan Preview') ?></span>
+            </a>
+            
             <?php 
             // Show Organizations link for system admins OR org_admins OR editors
             $showOrganizationsLink = false;

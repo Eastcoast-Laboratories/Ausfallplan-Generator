@@ -67,19 +67,19 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
             </p>
         </div>
         <?php
-        echo $this->Html->link( __("Generate Schedule"),
+        echo $this->Html->link("📄 " . __('Plan Preview'),
             ["controller" => "Schedules", "action" => "generate-report", $schedule->id],
-            ["class" => "button", "style" => "background: #4caf50; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; font-weight: bold;"]
+            ["class" => "button", "style" => "background: #4caf50; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; font-weight: bold; margin-left: 0.5rem;"]
         );
         echo $this->Html->link( __("Waitlist"),
             ["controller" => "Waitlist", "action" => "?schedule_id=".$schedule->id],
-            ["class" => "button", "style" => "background: #4caf50; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; font-weight: bold;"]
+            ["class" => "button", "style" => "background: #4caf50; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; font-weight: bold; margin-left: 0.5rem;"]
         );
         ?>
         <?= $this->Html->link(
             "+ " . __("Add Child"),
             ["controller" => "Children", "action" => "add"],
-            ["class" => "button", "style" => "background: #4caf50; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; font-weight: bold;"]
+            ["class" => "button", "style" => "background: #4caf50; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; font-weight: bold; margin-left: 0.5rem;"]
         ) ?>
     </div>
     

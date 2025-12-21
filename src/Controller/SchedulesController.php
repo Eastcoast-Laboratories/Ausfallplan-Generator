@@ -773,6 +773,13 @@ class SchedulesController extends AppController
             ])
             ->count();
         
+        // Check if there are fewer children than Max. Kinder pro Tag
+        if ($assignedChildrenCount < $schedule->capacity_per_day) {
+            $minRequired = $schedule->capacity_per_day;
+            $this->Flash->error(__('There are not enough children on the plan. Add at least {0} children.', $minRequired));
+            return $this->redirect(['action' => 'manage-children', $schedule->id]);
+        }
+        
         // Use days_count from schedule or default to assigned children count
         $daysCount = $schedule->days_count ?? $assignedChildrenCount;
         
@@ -1421,6 +1428,41 @@ class SchedulesController extends AppController
             ]));
     }
     
+    /**
+     * Plan Preview - Show schedule selection or redirect to report if only one schedule
+     *
+     * @return \Cake\Http\Response|null|void
+     */
+    public function planPreview()
+    {
+        $user = $this->Authentication->getIdentity();
+        $userOrgs = $this->getUserOrganizations();
+        
+        // Get schedules for user's organizations
+        $orgIds = array_map(fn($org) => $org->id, $userOrgs);
+        $schedules = $this->Schedules->find()
+            ->where(['Schedules.organization_id IN' => $orgIds])
+            ->orderBy(['Schedules.created' => 'DESC'])
+            ->all();
+        
+        $scheduleCount = count($schedules);
+        
+        // If only one schedule, redirect directly to its report
+        if ($scheduleCount === 1) {
+            $schedule = $schedules->first();
+            return $this->redirect(['action' => 'generate-report', $schedule->id]);
+        }
+        
+        // If no schedules, show message
+        if ($scheduleCount === 0) {
+            $this->Flash->error(__('Please create a schedule first.'));
+            return $this->redirect(['action' => 'index']);
+        }
+        
+        // Multiple schedules - show selection page
+        $this->set(compact('schedules'));
+    }
+
     /**
      * Build COUNTIF formula for first-on-waitlist count
      * 

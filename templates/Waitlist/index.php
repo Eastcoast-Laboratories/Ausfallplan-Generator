@@ -59,7 +59,7 @@ $this->assign('title', __('Waitlist'));
         <div style="display: flex; gap: 0.5rem;">
             <?php if ($selectedSchedule): ?>
                 <?= $this->Html->link(
-                    "📄 " . __('Generate Report'),
+                    "📄 " . __('Plan Preview'),
                     ['controller' => 'Schedules', 'action' => 'generate-report', $selectedSchedule->id],
                     ['class' => 'button', 'style' => 'background: #2196F3; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; font-weight: bold;']
                 ) ?>

@@ -47,7 +47,6 @@ $requiredTranslations = [
     
     // Schedules
     'New Schedule',
-    'Generate List',
     'Manage Children',
     'Edit',
     'Delete',

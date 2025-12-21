@@ -64,7 +64,7 @@ $this->assign('title', __('Children'));
                                 ['controller' => 'SiblingGroups', 'action' => 'view', $child->sibling_group_id],
                                 [
                                     'style' => 'background: #fff3cd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; margin-left: 0.5rem; text-decoration: none; color: #856404; display: inline-block;',
-                                    'title' => 'Geschwister: ' . h($siblingNames[$child->id]),
+                                    'title' => __('Siblings') . ': ' . h($siblingNames[$child->id]),
                                     'escape' => false
                                 ]
                             ) ?>
@@ -84,13 +84,13 @@ $this->assign('title', __('Children'));
                     <td style="text-align: center; font-size: 1.2rem;">
                         <?php
                         if ($child->gender === 'male') {
-                            echo '<span title="Junge">♂️</span>';
+                            echo '<span title="' . __('Boy') . '">♂️</span>';
                         } elseif ($child->gender === 'female') {
-                            echo '<span title="Mädchen">♀️</span>';
+                            echo '<span title="' . __('Girl') . '">♀️</span>';
                         } elseif ($child->gender === 'neutral') {
-                            echo '<span title="Neutral">⚪</span>';
+                            echo '<span title="' . __('Neutral') . '">⚪</span>';
                         } else {
-                            echo '<span title="Unbekannt">❓</span>';
+                            echo '<span title="' . __('Unknown') . '">❓</span>';
                         }
                         ?>
                     </td>

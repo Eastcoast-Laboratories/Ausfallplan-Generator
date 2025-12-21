@@ -183,7 +183,7 @@ $this->assign('title', __('Schedules'));
                 <div class="card-box">
                     <h4><?= __('Actions') ?></h4>
                     <div class="card-actions">
-                        <?= $this->Html->link(__('Generate List'), ['action' => 'generateReport', $schedule->id], ['class' => 'button', 'style' => 'background: #2196F3; color: white;']) ?>
+                        <?= $this->Html->link("📄 " . __('Plan Preview'), ['action' => 'generateReport', $schedule->id], ['class' => 'button', 'style' => 'background: #2196F3; color: white;']) ?>
                         <?php if (!($isViewer ?? false)): ?>
                             <?= $this->Html->link(__('Manage Children'), '/schedules/manage-children/' . $schedule->id, ['class' => 'button']) ?>
                             <?= $this->Html->link(__('Edit'), ['action' => 'edit', $schedule->id], ['class' => 'button']) ?>
