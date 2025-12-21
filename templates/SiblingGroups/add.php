@@ -8,9 +8,9 @@ $this->assign('title', __('Add Sibling Group'));
 ?>
 <div class="sibling-groups form content">
     <?php if (!empty($pendingChild)): ?>
-        <div style="background: #e3f2fd; border-left: 4px solid #2196F3; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
+        <div style="background: #e3f2fd; border-left: 4px solid #2196F3; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;" data-org-id="<?= $pendingChild->organization_id ?>">
             <strong>ℹ️ <?= __('Info') ?>:</strong> 
-            <?= __('This group will be assigned to child: {0}', '<strong>' . h($pendingChild->name) . '</strong>') ?>
+            <?= __('This group will be assigned to child: {0}', '<strong><span class="child-name" data-encrypted="' . h($pendingChild->name_encrypted ?? '') . '" data-iv="' . h($pendingChild->name_iv ?? '') . '" data-tag="' . h($pendingChild->name_tag ?? '') . '">' . h($pendingChild->name) . '</span></strong>') ?>
         </div>
     <?php endif; ?>
     
