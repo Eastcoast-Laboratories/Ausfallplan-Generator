@@ -38,7 +38,7 @@ class AuthorizationMiddleware implements MiddlewareInterface
         $action = $request->getParam('action');
         
         // Always allow these safe actions for all authenticated users
-        $alwaysAllowed = ['logout', 'login', 'register', 'display', 'profile', 'account', 'deleteAccount', 'changeLanguage'];
+        $alwaysAllowed = ['logout', 'login', 'register', 'display', 'profile', 'account', 'deleteAccount', 'changeLanguage', 'plan-preview', 'planPreview'];
         if (in_array($action, $alwaysAllowed)) {
             return $handler->handle($request);
         }
@@ -58,7 +58,9 @@ class AuthorizationMiddleware implements MiddlewareInterface
         
         // Viewer: Only read actions allowed
         if ($role === 'viewer') {
-            $allowedActions = ['index', 'view', 'generateReport', 'planPreview'];
+            // Note: CakePHP converts action names to kebab-case in routing
+            // Allow all read-only actions for viewers
+            $allowedActions = ['index', 'view', 'generate-report', 'plan-preview', 'generateReport', 'planPreview'];
             
             if (!in_array($action, $allowedActions)) {
                 // Redirect with flash message (info, not error)

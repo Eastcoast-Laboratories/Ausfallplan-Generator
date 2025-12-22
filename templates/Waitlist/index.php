@@ -111,6 +111,7 @@ $this->assign('title', __('Waitlist'));
     </div>
     
     <!-- Schedule Selector with Child Count -->
+    <?php if (count($schedules) > 1): ?>
     <div class="schedule-selector" style="margin-bottom: 2rem; padding: 1rem; background: #f5f5f5; border-radius: 8px;">
         <div style="display: flex; align-items: center; gap: 1rem;">
             <label for="schedule-select" style="font-weight: bold;"><?= __('Select Schedule') ?>:</label>
@@ -130,7 +131,7 @@ $this->assign('title', __('Waitlist'));
                 ) ?>
             <?php endif; ?>
         </div>
-        <?php if ($selectedSchedule && isset($countNotOnWaitlist) && $countNotOnWaitlist > 0): ?>
+        <?php if ($selectedSchedule && isset($countNotOnWaitlist) && $countNotOnWaitlist > 0 && !($isViewer ?? false)): ?>
             <div style="margin-top: 1rem; padding: 0.75rem; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
                 <strong>ℹ️ <?= __('Note') ?>:</strong> 
                 <?= __('There are {0} children not yet on the waitlist', h($countNotOnWaitlist)) ?>
@@ -145,6 +146,7 @@ $this->assign('title', __('Waitlist'));
             </div>
         <?php endif; ?>
     </div>
+    <?php endif; ?>
     
     <?php if ($selectedSchedule): ?>
     
@@ -224,24 +226,26 @@ $this->assign('title', __('Waitlist'));
                     <span style="font-size: 0.9rem; color: #666;">(<?= __('Drag to reorder') ?>)</span>
                 </h4>
                 <div style="display: flex; gap: 0.5rem;">
-                    <?= $this->Form->postLink(
-                        '📅 ' . __('Sort by Birthdate'),
-                        ['action' => 'sortBy', '?' => ['schedule_id' => $selectedSchedule->id, 'field' => 'birthdate']],
-                        [
-                            'class' => 'button button-small',
-                            'style' => 'background: #9C27B0; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; font-size: 0.85rem;',
-                            'title' => __('Sort waitlist by birthdate (oldest first)')
-                        ]
-                    ) ?>
-                    <?= $this->Form->postLink(
-                        '📍 ' . __('Sort by Postal Code'),
-                        ['action' => 'sortBy', '?' => ['schedule_id' => $selectedSchedule->id, 'field' => 'postal_code']],
-                        [
-                            'class' => 'button button-small',
-                            'style' => 'background: #00BCD4; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; font-size: 0.85rem;',
-                            'title' => __('Sort waitlist by postal code (ascending)')
-                        ]
-                    ) ?>
+                    <?php if (!($isViewer ?? false)): ?>
+                        <?= $this->Form->postLink(
+                            '📅 ' . __('Sort by Birthdate'),
+                            ['action' => 'sortBy', '?' => ['schedule_id' => $selectedSchedule->id, 'field' => 'birthdate']],
+                            [
+                                'class' => 'button button-small',
+                                'style' => 'background: #9C27B0; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; font-size: 0.85rem;',
+                                'title' => __('Sort waitlist by birthdate (oldest first)')
+                            ]
+                        ) ?>
+                        <?= $this->Form->postLink(
+                            '📍 ' . __('Sort by Postal Code'),
+                            ['action' => 'sortBy', '?' => ['schedule_id' => $selectedSchedule->id, 'field' => 'postal_code']],
+                            [
+                                'class' => 'button button-small',
+                                'style' => 'background: #00BCD4; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; font-size: 0.85rem;',
+                                'title' => __('Sort waitlist by postal code (ascending)')
+                            ]
+                        ) ?>
+                    <?php endif; ?>
                 </div>
             </div>
             <div id="waitlist-sortable" style="background: #fff3e0; padding: 1rem; border-radius: 8px; min-height: 300px;">

@@ -117,7 +117,10 @@ class DashboardController extends AppController
         // Get recent activities for this organization
         $recentActivities = $this->getRecentActivities($primaryOrg->id);
         
-        $this->set(compact('stats', 'user', 'recentActivities'));
+        // Check if user is viewer
+        $isViewer = ($userRole === 'viewer');
+        
+        $this->set(compact('stats', 'user', 'recentActivities', 'isViewer'));
     }
     
     /**

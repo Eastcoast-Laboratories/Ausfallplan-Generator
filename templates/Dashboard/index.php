@@ -66,6 +66,7 @@ $this->assign('title', __('Dashboard'));
         ) ?>
     </div>
 
+    <?php if (!($isViewer ?? false)): ?>
     <div class="quick-actions">
         <h2><?= __('Quick Actions') ?></h2>
         <div class="action-buttons">
@@ -83,6 +84,7 @@ $this->assign('title', __('Dashboard'));
             </a>
         </div>
     </div>
+    <?php endif; ?>
 
     <div class="recent-activity">
         <h2><?= __('Recent Activity') ?></h2>
