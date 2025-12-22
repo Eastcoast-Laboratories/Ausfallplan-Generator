@@ -256,7 +256,14 @@ class WaitlistController extends AppController
             }
         }
         
-        $this->set(compact('schedules', 'selectedSchedule', 'waitlistChildren', 'availableChildren', 'countNotOnWaitlist', 'siblingGroupsMap', 'siblingNames', 'missingSiblings', 'user'));
+        // Check if user is viewer (for permission checks in view)
+        $isViewer = false;
+        if ($user && !$user->is_system_admin && $selectedSchedule) {
+            $userRole = $this->getUserRoleInOrg((int)$selectedSchedule->organization_id);
+            $isViewer = ($userRole === 'viewer');
+        }
+        
+        $this->set(compact('schedules', 'selectedSchedule', 'waitlistChildren', 'availableChildren', 'countNotOnWaitlist', 'siblingGroupsMap', 'siblingNames', 'missingSiblings', 'user', 'isViewer'));
     }
 
     /**

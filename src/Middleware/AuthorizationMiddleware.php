@@ -58,7 +58,7 @@ class AuthorizationMiddleware implements MiddlewareInterface
         
         // Viewer: Only read actions allowed
         if ($role === 'viewer') {
-            $allowedActions = ['index', 'view', 'generateReport'];
+            $allowedActions = ['index', 'view', 'generateReport', 'planPreview'];
             
             if (!in_array($action, $allowedActions)) {
                 // Redirect with flash message (info, not error)

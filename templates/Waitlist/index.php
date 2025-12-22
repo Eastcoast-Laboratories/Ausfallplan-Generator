@@ -100,11 +100,13 @@ $this->assign('title', __('Waitlist'));
                     ['class' => 'button', 'style' => 'background: #2196F3; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; font-weight: bold;']
                 ) ?>
             <?php endif; ?>
-            <?= $this->Html->link(
-                "+ " . __('Add Child'),
-                ['controller' => 'Children', 'action' => 'add'],
-                ['class' => 'button', 'style' => 'background: #4caf50; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; font-weight: bold;']
-            ) ?>
+            <?php if (!($isViewer ?? false)): ?>
+                <?= $this->Html->link(
+                    "+ " . __('Add Child'),
+                    ['controller' => 'Children', 'action' => 'add'],
+                    ['class' => 'button', 'style' => 'background: #4caf50; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; font-weight: bold;']
+                ) ?>
+            <?php endif; ?>
         </div>
     </div>
     
@@ -120,7 +122,7 @@ $this->assign('title', __('Waitlist'));
                     </option>
                 <?php endforeach; ?>
             </select>
-            <?php if ($selectedSchedule): ?>
+            <?php if ($selectedSchedule && !($isViewer ?? false)): ?>
                 <?= $this->Html->link(
                     __('Manage Children'),
                     ['controller' => 'Schedules', 'action' => 'manage-children', $selectedSchedule->id],
