@@ -6,6 +6,12 @@
  */
 $this->assign('title', __('Edit Child'));
 ?>
+<style>
+    /* Hide Display Name field in edit form */
+    #display_name-container {
+        display: none;
+    }
+</style>
 <div class="children form content" data-org-id="<?= $child->organization_id ?>">
     <h3>
         <span class="child-name" id="header-child-name"
@@ -94,7 +100,9 @@ $this->assign('title', __('Edit Child'));
         'value' => $child->last_name_tag ?? ''
     ]) ?>
     
-    <?= $this->Form->button(__('Submit'), ['id' => 'submit-button']) ?>
+    <?php if ($userRole !== 'viewer'): ?>
+        <?= $this->Form->button(__('Submit'), ['id' => 'submit-button']) ?>
+    <?php endif; ?>
     <?= $this->Form->end() ?>
 </div>
 

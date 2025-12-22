@@ -378,7 +378,18 @@ class ChildrenController extends AppController
         // Load sibling names if child has siblings
         $siblingNames = $this->loadSiblingNames([$child]);
         
-        $this->set(compact('child', 'siblingGroups', 'siblingNames'));
+        // Get user's role in organization for UI display
+        $user = $this->Authentication->getIdentity();
+        $userRole = null;
+        if ($user) {
+            $orgUsersTable = $this->fetchTable('OrganizationUsers');
+            $orgUser = $orgUsersTable->find()
+                ->where(['user_id' => $user->id, 'organization_id' => $child->organization_id])
+                ->first();
+            $userRole = $orgUser ? $orgUser->role : null;
+        }
+        
+        $this->set(compact('child', 'siblingGroups', 'siblingNames', 'userRole'));
     }
 
     /**
