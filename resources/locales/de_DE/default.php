@@ -600,5 +600,10 @@ return [
     // Emails - Account approved
     'Your account has been approved' => 'Ihr Konto wurde freigeschaltet',
     "Hello,\n\nYour account for organization '{0}' has been approved!\n\nYou can now log in and start using FairNestPlan.\n\nLogin: {1}" => "Hallo,\n\nIhr Konto für die Organisation '{0}' wurde freigeschaltet!\n\nSie können sich jetzt anmelden und FairNestPlan verwenden.\n\nLogin: {1}",
-    'Login Now' => 'Jetzt einloggen'
+    'Login Now' => 'Jetzt einloggen',
+    
+    // User Roles
+    'viewer' => 'Betrachter',
+    'editor' => 'Bearbeiter',
+    'org_admin' => 'Administrator',
 ];
