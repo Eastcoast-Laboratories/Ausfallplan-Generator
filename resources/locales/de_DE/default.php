@@ -578,7 +578,7 @@ return [
     // Emails - Organization roles / labels
     'Organization Admin' => 'Organisations-Admin',
     'Editor' => 'Bearbeiter',
-    'Viewer' => 'Leser',
+    'Viewer' => 'Betrachter',
     
     // Emails - Org admin notification about new user
     'New user registration for {0}' => 'Neue Benutzerregistrierung für {0}',

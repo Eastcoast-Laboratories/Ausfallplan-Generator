@@ -519,7 +519,43 @@ $currentLangShort = substr($currentLang, 0, 2);
                     <div class="user-dropdown" id="user-dropdown">
                         <div class="user-dropdown-header">
                             <div class="user-dropdown-name"><?= h($user->email ?? __('User')) ?></div>
-                            <div class="user-dropdown-email"><?= h($user->role ?? 'viewer') ?></div>
+                            <div class="user-dropdown-email">
+                                <?php
+                                // Get user's role in current organization
+                                $currentUserRole = 'viewer';
+                                if ($user) {
+                                    // Check if user is system admin
+                                    if ($user->is_system_admin) {
+                                        $currentUserRole = 'org_admin';
+                                    } else {
+                                        // Get role from session or primary organization
+                                        $session = $this->request->getSession();
+                                        $selectedOrgId = $session->read('selectedOrgId');
+                                        
+                                        if ($selectedOrgId) {
+                                            // Get role in selected organization
+                                            $orgUsersTable = \Cake\Datasource\FactoryLocator::get('Table')->get('OrganizationUsers');
+                                            $orgUser = $orgUsersTable->find()
+                                                ->where(['user_id' => $user->id, 'organization_id' => $selectedOrgId])
+                                                ->first();
+                                            if ($orgUser) {
+                                                $currentUserRole = $orgUser->role;
+                                            }
+                                        } else {
+                                            // Get role from primary organization
+                                            $orgUsersTable = \Cake\Datasource\FactoryLocator::get('Table')->get('OrganizationUsers');
+                                            $orgUser = $orgUsersTable->find()
+                                                ->where(['user_id' => $user->id, 'is_primary' => true])
+                                                ->first();
+                                            if ($orgUser) {
+                                                $currentUserRole = $orgUser->role;
+                                            }
+                                        }
+                                    }
+                                }
+                                echo __($currentUserRole);
+                                ?>
+                            </div>
                         </div>
                         <a href="/profile" class="user-dropdown-item">
                             <span>⚙️</span>
