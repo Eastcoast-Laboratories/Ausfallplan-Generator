@@ -13,6 +13,25 @@ $identity = $this->request->getAttribute('identity');
 // Get current locale
 $locale = $this->request->getSession()->read('Config.language', 'de_DE');
 $lang = substr($locale, 0, 2); // de or en
+
+// Get flash messages from session (without consuming them)
+$session = $this->request->getSession();
+$flashMessages = [];
+if ($session->check('Flash')) {
+    // Read Flash messages without consuming them (use peek instead of read)
+    $allFlash = $session->read('Flash');
+    // Flash messages are stored as: ['type' => ['message1', 'message2']]
+    // We need to flatten them properly
+    if (is_array($allFlash)) {
+        foreach ($allFlash as $type => $messages) {
+            if (is_array($messages)) {
+                $flashMessages[$type] = $messages;
+            } else {
+                $flashMessages[$type] = [$messages];
+            }
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="<?= $lang ?>">
@@ -175,6 +194,35 @@ $lang = substr($locale, 0, 2); // de or en
             font-weight: bold;
             margin-right: 0.5rem;
         }
+        
+        /* Flash Messages */
+        .flash-message {
+            padding: 1rem 2rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+            border-left: 4px solid;
+        }
+        .flash-message.success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        .flash-message.error {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        .flash-message.info {
+            background: #d1ecf1;
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
+        .flash-message.warning {
+            background: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+        }
+        
         /* Mobile Navigation */
         @media (max-width: 768px) {
             .hamburger {
@@ -249,6 +297,26 @@ $lang = substr($locale, 0, 2); // de or en
             <?php endif; ?>
         </div>
     </nav>
+    <?php if (!empty($flashMessages)): ?>
+        <!-- Flash Messages -->
+        <div class="container" style="margin-top: 1rem;">
+            <?php foreach ($flashMessages as $messages): ?>
+                <?php 
+                    if (is_array($messages)):
+                        foreach ($messages as $message):
+                            $type=$message["params"]["class"]; ?>
+                            <div class="flash-message <?= h($type) ?>">
+                                <?= h($message['message']) ?>
+                            </div>
+                    <?php endforeach; ?>
+                <?php elseif (is_string($messages)): ?>
+                    <div class="flash-message <?= h($type) ?>">
+                        <?= h($messages) ?>
+                    </div>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
 
     <div class="hero">
         <div class="container">

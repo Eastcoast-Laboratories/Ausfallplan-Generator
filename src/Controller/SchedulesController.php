@@ -170,6 +170,19 @@ class SchedulesController extends AppController
             ->combine('id', 'name')
             ->toArray();
         
+        // Check if user is viewer - viewers cannot create schedules
+        if (!$user->is_system_admin && !empty($userOrgs)) {
+            $orgUsersTable = $this->fetchTable('OrganizationUsers');
+            $orgUser = $orgUsersTable->find()
+                ->where(['user_id' => $user->id, 'organization_id' => $userOrgs[0]->id])
+                ->first();
+            
+            if ($orgUser && $orgUser->role === 'viewer') {
+                $this->Flash->error(__('You do not have permission to create schedules. Only editors and administrators can create schedules.'));
+                return $this->redirect(['controller' => 'Schedules', 'action' => 'index']);
+            }
+        }
+        
         // Get selected organization from session (set by filter)
         $selectedOrgId = $this->request->getSession()->read('selectedOrgId');
         
