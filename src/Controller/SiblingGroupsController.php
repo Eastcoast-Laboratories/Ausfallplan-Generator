@@ -79,8 +79,15 @@ class SiblingGroupsController extends AppController
                 $errorGroups[] = $group->id;
             }
         }
+        
+        // Check if user is viewer (for permission checks in view)
+        $isViewer = false;
+        if ($user && !$user->is_system_admin && $selectedOrgId) {
+            $userRole = $this->getUserRoleInOrg((int)$selectedOrgId);
+            $isViewer = ($userRole === 'viewer');
+        }
 
-        $this->set(compact('siblingGroups', 'errorGroups', 'userOrgs', 'hasMultipleOrgs', 'selectedOrgId'));
+        $this->set(compact('siblingGroups', 'errorGroups', 'userOrgs', 'hasMultipleOrgs', 'selectedOrgId', 'isViewer'));
     }
 
     /**

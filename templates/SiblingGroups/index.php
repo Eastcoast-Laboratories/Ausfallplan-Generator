@@ -22,12 +22,16 @@ $this->assign('title', __('Sibling Groups'));
                         </option>
                     <?php endforeach; ?>
                 </select>
-                <?= $this->Html->link(__('New Sibling Group'), ['action' => 'add'], ['class' => 'button', 'style' => 'white-space: nowrap;']) ?>
+                <?php if (!($isViewer ?? false)): ?>
+                    <?= $this->Html->link(__('New Sibling Group'), ['action' => 'add'], ['class' => 'button', 'style' => 'white-space: nowrap;']) ?>
+                <?php endif; ?>
             </form>
         <?php else: ?>
             <div style="display: flex; gap: 1rem;">
-                <?= $this->Html->link(__('Manage Children'), ['controller' => 'Children', 'action' => 'index'], ['class' => 'button']) ?>
-                <?= $this->Html->link(__('New Sibling Group'), ['action' => 'add'], ['class' => 'button']) ?>
+                <?php if (!($isViewer ?? false)): ?>
+                    <?= $this->Html->link(__('Manage Children'), ['controller' => 'Children', 'action' => 'index'], ['class' => 'button']) ?>
+                    <?= $this->Html->link(__('New Sibling Group'), ['action' => 'add'], ['class' => 'button']) ?>
+                <?php endif; ?>
             </div>
         <?php endif; ?>
     </div>

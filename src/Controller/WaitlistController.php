@@ -98,11 +98,19 @@ class WaitlistController extends AppController
             
             $scheduleId = $this->request->getQuery('schedule_id');
             $selectedSchedule = null;
+            $invalidScheduleId = false;
             
             if ($scheduleId) {
                 try {
                     $selectedSchedule = $schedulesTable->get($scheduleId);
-                    $this->request->getSession()->write('activeScheduleId', (int)$scheduleId);
+                    // Check if schedule belongs to user's organization
+                    if ($selectedSchedule->organization_id !== $primaryOrg->id) {
+                        $invalidScheduleId = true;
+                        $selectedSchedule = null;
+                        $scheduleId = null;
+                    } else {
+                        $this->request->getSession()->write('activeScheduleId', (int)$scheduleId);
+                    }
                 } catch (\Exception $e) {
                     $scheduleId = null;
                 }
@@ -113,7 +121,13 @@ class WaitlistController extends AppController
                 if ($activeScheduleId) {
                     try {
                         $selectedSchedule = $schedulesTable->get($activeScheduleId);
-                        $scheduleId = $selectedSchedule->id;
+                        // Validate that active schedule belongs to user's organization
+                        if ($selectedSchedule->organization_id !== $primaryOrg->id) {
+                            $this->request->getSession()->delete('activeScheduleId');
+                            $selectedSchedule = null;
+                        } else {
+                            $scheduleId = $selectedSchedule->id;
+                        }
                     } catch (\Exception $e) {
                         $this->request->getSession()->delete('activeScheduleId');
                     }
@@ -124,6 +138,11 @@ class WaitlistController extends AppController
                 $selectedSchedule = $schedules->first();
                 $scheduleId = $selectedSchedule->id;
                 $this->request->getSession()->write('activeScheduleId', (int)$scheduleId);
+                
+                // Show warning if invalid schedule ID was provided
+                if ($invalidScheduleId) {
+                    $this->Flash->warning(__('Unknown schedule ID {0}, selected first schedule', $this->request->getQuery('schedule_id')));
+                }
             }
             
             // If no schedules exist, redirect to schedules page
