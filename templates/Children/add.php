@@ -60,13 +60,21 @@ $this->assign('title', __('Add Child'));
                 'empty' => __('(No Sibling Group)'),
                 'label' => __('Sibling Group'),
             ]);
-            echo $this->Form->control('schedule_id', [
-                'options' => $schedules,
-                'empty' => __('(Select Schedule)'),
-                'label' => __('Schedule (Ausfallplan)'),
-                'help' => __('Select the schedule this child will be assigned to'),
-                'default' => $defaultScheduleId ?? null, // Auto-select if only one exists
-            ]);
+            // Schedule selector - show only if user has multiple schedules
+            if (!empty($schedules) && count($schedules) > 1):
+                echo $this->Form->control('schedule_id', [
+                    'options' => $schedules,
+                    'empty' => __('(Select Schedule)'),
+                    'label' => __('Schedule'),
+                    'help' => __('Select the schedule this child will be assigned to'),
+                    'default' => $defaultScheduleId ?? null, // Auto-select if only one exists
+                ]);
+            elseif (!empty($schedules) && count($schedules) === 1):
+                // Hidden field for single schedule
+                $schedulesArray = is_array($schedules) ? $schedules : iterator_to_array($schedules);
+                $scheduleId = array_key_first($schedulesArray);
+                echo $this->Form->hidden('schedule_id', ['value' => $scheduleId]);
+            endif;
         ?>
         
         <!-- Collapsible Additional Information Section -->

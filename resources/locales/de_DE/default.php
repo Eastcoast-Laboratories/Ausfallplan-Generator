@@ -231,7 +231,7 @@ return [
     'Invalid children data' => 'Ungültige Kinder-Daten',
     'Siblings' => 'Geschwister',
     'Switch between schedules to manage different organization orders' => 'Zwischen Ausfallplänen wechseln, um verschiedene Organisations-Reihenfolgen zu verwalten',
-    'Schedule (Ausfallplan)' => 'Ausfallplan',
+    'Schedule' => 'Ausfallplan',
     'Select the schedule this child will be assigned to' => 'Wähle den Ausfallplan, dem dieses Kind zugeordnet werden soll',
     '(Select Schedule)' => '(Ausfallplan wählen)',
     'Days' => 'Tage',
