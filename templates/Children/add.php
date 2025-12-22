@@ -23,8 +23,8 @@ $this->assign('title', __('Add Child'));
     <fieldset>
         <legend><?= __('Add Child') ?></legend>
         <?php
-            // Organization selector - show first for editors/admins
-            if (!empty($userOrgs)):
+            // Organization selector - show only if user has multiple organizations
+            if (!empty($userOrgs) && count($userOrgs) > 1):
                 $orgOptions = [];
                 foreach ($userOrgs as $org) {
                     $orgOptions[$org->id] = $org->name;
@@ -37,32 +37,23 @@ $this->assign('title', __('Add Child'));
                     'default' => $selectedOrgId ?? null,
                     'help' => __('Select the organization this child belongs to')
                 ]);
+            elseif (!empty($userOrgs) && count($userOrgs) === 1):
+                // Hidden field for single organization
+                echo $this->Form->hidden('organization_id', ['value' => $userOrgs[0]->id]);
             endif;
             
             echo $this->Form->control('name', ['label' => __('Name'), 'required' => true, 'autofocus' => false]);
             echo $this->Form->control('last_name', ['label' => __('Last Name'), 'required' => false]);
+            
+            // Display Name field - hidden
+            echo '<div style="display: none;">';
             echo $this->Form->control('display_name', [
                 'label' => __('Display Name (for Reports)'),
                 'required' => false,
                 'help' => __('How the child\'s name should appear in reports. Leave empty to auto-generate from name + last name.')
             ]);
-            echo $this->Form->control('gender', [
-                'type' => 'select',
-                'options' => [
-                    'm' => __('Male'),
-                    'f' => __('Female'),
-                    'd' => __('Diverse'),
-                ],
-                'empty' => __('(Not specified)'),
-                'label' => __('Gender')
-            ]);
-            echo $this->Form->control('birthdate', [
-                'type' => 'date',
-                'label' => __('Birthdate'),
-                'empty' => true,
-            ]);
-            echo $this->Form->control('postal_code', ['label' => __('Postal Code'), 'required' => false]);
-            echo $this->Form->control('is_active', ['type' => 'checkbox', 'label' => __('Active'), 'checked' => true]);
+            echo '</div>';
+            
             echo $this->Form->control('is_integrative', ['type' => 'checkbox', 'label' => __('Integrative Child')]);
             echo $this->Form->control('sibling_group_id', [
                 'options' => $siblingGroups,
@@ -77,6 +68,36 @@ $this->assign('title', __('Add Child'));
                 'default' => $defaultScheduleId ?? null, // Auto-select if only one exists
             ]);
         ?>
+        
+        <!-- Collapsible Additional Information Section -->
+        <div style="margin-top: 2rem; border-top: 1px solid #e1e8ed; padding-top: 1.5rem;">
+            <button type="button" id="toggle-additional-info" style="background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; color: #2c3e50; font-weight: 600;">
+                <span id="toggle-icon" style="display: inline-block; transition: transform 0.3s;">▶</span>
+                <span><?= __('Additional Information') ?></span>
+            </button>
+            
+            <div id="additional-info-section" style="display: none; margin-top: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                <?php
+                    echo $this->Form->control('gender', [
+                        'type' => 'select',
+                        'options' => [
+                            'm' => __('Male'),
+                            'f' => __('Female'),
+                            'd' => __('Diverse'),
+                        ],
+                        'empty' => __('(Not specified)'),
+                        'label' => __('Gender')
+                    ]);
+                    echo $this->Form->control('birthdate', [
+                        'type' => 'date',
+                        'label' => __('Birthdate'),
+                        'empty' => true,
+                    ]);
+                    echo $this->Form->control('postal_code', ['label' => __('Postal Code'), 'required' => false]);
+                    echo $this->Form->control('is_active', ['type' => 'checkbox', 'label' => __('Active'), 'checked' => true]);
+                ?>
+            </div>
+        </div>
     </fieldset>
     
     <!-- Hidden fields for encrypted name data -->
@@ -95,6 +116,20 @@ $this->assign('title', __('Add Child'));
 
 <script>
 document.addEventListener('DOMContentLoaded', async function() {
+    // Toggle Additional Information section
+    const toggleButton = document.getElementById('toggle-additional-info');
+    const toggleIcon = document.getElementById('toggle-icon');
+    const additionalInfoSection = document.getElementById('additional-info-section');
+    
+    if (toggleButton && additionalInfoSection) {
+        toggleButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            const isHidden = additionalInfoSection.style.display === 'none';
+            additionalInfoSection.style.display = isHidden ? 'block' : 'none';
+            toggleIcon.style.transform = isHidden ? 'rotate(90deg)' : 'rotate(0deg)';
+        });
+    }
+    
     const form = document.querySelector('.children.form form');
     const submitButton = document.getElementById('submit-button');
     const nameField = document.querySelector('input[name="name"]');
