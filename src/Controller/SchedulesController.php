@@ -103,9 +103,22 @@ class SchedulesController extends AppController
         
         // Check if user is viewer in selected organization (for permission checks in view)
         $isViewer = false;
-        if ($selectedOrgId) {
-            $userRole = $this->getUserRoleInOrg((int)$selectedOrgId);
-            $isViewer = ($userRole === 'viewer');
+        if ($user && !$user->is_system_admin) {
+            if ($selectedOrgId) {
+                $userRole = $this->getUserRoleInOrg((int)$selectedOrgId);
+                $isViewer = ($userRole === 'viewer');
+            } else {
+                // If no selected org, check if user is viewer in all their organizations
+                // User is viewer only if they are viewer in ALL their orgs
+                $isViewer = true;
+                foreach ($userOrgs as $org) {
+                    $userRole = $this->getUserRoleInOrg((int)$org->id);
+                    if ($userRole !== 'viewer') {
+                        $isViewer = false;
+                        break;
+                    }
+                }
+            }
         }
 
         $this->set(compact('schedules', 'user', 'activeScheduleId', 'childrenCounts', 'missingSiblingsPerSchedule', 'userOrgs', 'hasMultipleOrgs', 'selectedOrgId', 'isViewer'));
