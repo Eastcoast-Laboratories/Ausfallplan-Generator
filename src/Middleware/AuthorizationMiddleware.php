@@ -38,7 +38,12 @@ class AuthorizationMiddleware implements MiddlewareInterface
         $action = $request->getParam('action');
         
         // Always allow these safe actions for all authenticated users
-        $alwaysAllowed = ['logout', 'login', 'register', 'display', 'profile', 'account', 'deleteAccount', 'changeLanguage', 'plan-preview', 'planPreview'];
+        // Note: Include both camelCase and kebab-case versions
+        $alwaysAllowed = [
+            'logout', 'login', 'register', 'display', 'profile', 'account', 
+            'deleteAccount', 'delete-account', 'changeLanguage', 'change-language',
+            'plan-preview', 'planPreview'
+        ];
         if (in_array($action, $alwaysAllowed)) {
             return $handler->handle($request);
         }
@@ -56,13 +61,13 @@ class AuthorizationMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
         
-        // Viewer: Only read actions allowed
+        // Viewer: Restricted access - but allow read-only actions
+        // Note: Specific actions handle viewer permissions individually
         if ($role === 'viewer') {
-            // Note: CakePHP converts action names to kebab-case in routing
-            // Allow all read-only actions for viewers
-            $allowedActions = ['index', 'view', 'generate-report', 'plan-preview', 'generateReport', 'planPreview'];
+            // Actions that are explicitly blocked for viewers
+            $blockedActions = ['add', 'edit', 'delete', 'import', 'add-all', 'sort-by', 'sortBy'];
             
-            if (!in_array($action, $allowedActions)) {
+            if (in_array($action, $blockedActions)) {
                 // Redirect with flash message (info, not error)
                 $session = $request->getAttribute('session');
                 $session->write('Flash.flash', [
