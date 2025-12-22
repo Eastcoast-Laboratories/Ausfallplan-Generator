@@ -16,6 +16,9 @@ $this->assign('title', __('Add Child'));
 </div>
 
 <div class="children form content">
+    <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-bottom: 1rem;">
+        <?= $this->Html->link('📥 ' . __('CSV Import'), ['action' => 'import'], ['class' => 'button', 'style' => 'background: #2196f3; color: white;']) ?>
+    </div>
     <?= $this->Form->create($child) ?>
     <fieldset>
         <legend><?= __('Add Child') ?></legend>

@@ -54,6 +54,46 @@ class DashboardController extends AppController
             return $this->redirect(['controller' => 'Admin/Organizations', 'action' => 'index']);
         }
         
+        // Get user's role in primary organization
+        $orgUsersTable = $this->fetchTable('OrganizationUsers');
+        $orgUser = $orgUsersTable->find()
+            ->where(['user_id' => $user->id, 'organization_id' => $primaryOrg->id])
+            ->first();
+        
+        $userRole = $orgUser ? $orgUser->role : null;
+        $isEditor = $userRole === 'editor' || $userRole === 'org_admin';
+        
+        // Check if user has any schedules
+        $scheduleCount = $schedulesTable->find()
+            ->where(['Schedules.organization_id' => $primaryOrg->id])
+            ->count();
+        
+        // If no schedules exist and user is editor, redirect to schedule add
+        if ($scheduleCount === 0 && $isEditor) {
+            $this->Flash->info(__('No schedules found. Please create a schedule to get started.'));
+            return $this->redirect(['controller' => 'Schedules', 'action' => 'add']);
+        }
+        
+        // Find schedule with highest capacity_per_day
+        $maxCapacitySchedule = $schedulesTable->find()
+            ->where(['Schedules.organization_id' => $primaryOrg->id])
+            ->orderBy(['Schedules.capacity_per_day' => 'DESC'])
+            ->first();
+        
+        // Check if children count is less than max capacity (only for editors)
+        if ($maxCapacitySchedule && $isEditor) {
+            $childrenCount = $childrenTable->find()
+                ->where(['Children.organization_id' => $primaryOrg->id])
+                ->count();
+            
+            if ($childrenCount < $maxCapacitySchedule->capacity_per_day) {
+                $minRequired = $maxCapacitySchedule->capacity_per_day;
+                $this->Flash->info(__('You need at least {0} children to complete your schedule. Please add more children.', $minRequired));
+                $this->request->getSession()->write('activeScheduleId', (int)$maxCapacitySchedule->id);
+                return $this->redirect(['controller' => 'Children', 'action' => 'add']);
+            }
+        }
+        
         // Regular users see their organization stats
         $stats = [
             'children' => $childrenTable->find()

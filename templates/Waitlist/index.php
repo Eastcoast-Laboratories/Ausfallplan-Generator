@@ -51,6 +51,42 @@ $this->assign('title', __('Waitlist'));
             width: 100%;
         }
     }
+    
+    /* Mobile: Waitlist header - stack title and buttons */
+    @media (max-width: 1468px) {
+        .waitlist-children > div {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+        }
+        
+        .waitlist-children h4 {
+            width: 100%;
+            margin-bottom: 0.5rem !important;
+        }
+        
+        .waitlist-children > div > div {
+            width: 100%;
+            flex-wrap: wrap;
+        }
+    }
+    
+    /* Mobile: Top buttons (Plan Preview, Add Child) - wrap on small screens */
+    @media (max-width: 768px) {
+        .waitlist.index.content > div:first-child > div {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 0.5rem !important;
+        }
+        
+        .waitlist.index.content > div:first-child > div > div {
+            width: 100%;
+        }
+        
+        .waitlist.index.content > div:first-child > div .button {
+            width: 100%;
+            text-align: center;
+        }
+    }
 </style>
 
 <div class="waitlist index content">
@@ -181,7 +217,10 @@ $this->assign('title', __('Waitlist'));
         <!-- Waitlist -->
         <div class="waitlist-children">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h4 style="margin: 0;"><?= __('Children on Waitlist') ?> <span style="font-size: 0.9rem; color: #666;">(<?= __('Drag to reorder') ?>)</span></h4>
+                <h4 style="margin: 5px;line-height: 17px;">
+                    <?= str_replace(" ", "&nbsp;", __('Children on Waitlist')) ?>
+                    <span style="font-size: 0.9rem; color: #666;">(<?= __('Drag to reorder') ?>)</span>
+                </h4>
                 <div style="display: flex; gap: 0.5rem;">
                     <?= $this->Form->postLink(
                         '📅 ' . __('Sort by Birthdate'),

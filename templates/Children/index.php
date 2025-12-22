@@ -8,6 +8,23 @@
  */
 $this->assign('title', __('Children'));
 ?>
+<style>
+    /* Hide Display Name column everywhere */
+    [data-field="display_name"] {
+        display: none;
+    }
+    
+    /* Mobile: Hide Gender, Birthdate, Status, Integrative, Sibling Group columns */
+    @media (max-width: 768px) {
+        [data-field="gender"],
+        [data-field="birthdate"],
+        [data-field="status"],
+        [data-field="integrative"],
+        [data-field="sibling_group"] {
+            display: none;
+        }
+    }
+</style>
 <div class="children index content">
     <h3><?= __('Children') ?></h3>
     
@@ -38,15 +55,15 @@ $this->assign('title', __('Children'));
                 <tr>
                     <th><?= __('Name') ?></th>
                     <th><?= __('Last Name') ?></th>
-                    <th><?= __('Display Name') ?></th>
+                    <th data-field="display_name"><?= __('Display Name') ?></th>
                     <?php if (!$selectedOrgId && $canSelectOrganization): ?>
                     <th><?= __('Organization') ?></th>
                     <?php endif; ?>
-                    <th><?= __('Gender') ?></th>
-                    <th><?= __('Birthdate') ?></th>
-                    <th><?= __('Status') ?></th>
-                    <th><?= __('Integrative') ?></th>
-                    <th><?= __('Sibling Group') ?></th>
+                    <th data-field="gender"><?= __('Gender') ?></th>
+                    <th data-field="birthdate"><?= __('Birthdate') ?></th>
+                    <th data-field="status"><?= __('Status') ?></th>
+                    <th data-field="integrative"><?= __('Integrative') ?></th>
+                    <th data-field="sibling_group"><?= __('Sibling Group') ?></th>
                     <th class="actions"><?= __('Actions') ?></th>
                 </tr>
             </thead>
@@ -77,11 +94,11 @@ $this->assign('title', __('Children'));
                               data-tag="<?= h($child->last_name_tag ?? '') ?>"
                               data-org-id="<?= $child->organization_id ?>"><?= h($child->last_name) ?></span>
                     </td>
-                    <td><strong><span class="child-display-name"><?= h($child->display_name ?? ($child->name . ' ' . $child->last_name)) ?></span></strong></td>
+                    <td data-field="display_name"><strong><span class="child-display-name"><?= h($child->display_name ?? ($child->name . ' ' . $child->last_name)) ?></span></strong></td>
                     <?php if (!$selectedOrgId && $canSelectOrganization): ?>
                     <td><?= h($organizations[$child->organization_id] ?? '-') ?></td>
                     <?php endif; ?>
-                    <td style="text-align: center; font-size: 1.2rem;">
+                    <td data-field="gender" style="text-align: center; font-size: 1.2rem;">
                         <?php
                         if ($child->gender === 'male') {
                             echo '<span title="' . __('Boy') . '">♂️</span>';
@@ -94,7 +111,7 @@ $this->assign('title', __('Children'));
                         }
                         ?>
                     </td>
-                    <td>
+                    <td data-field="birthdate">
                         <?php
                         if ($child->birthdate) {
                             $birthdate = $child->birthdate instanceof \DateTime ? $child->birthdate : new \DateTime($child->birthdate);
@@ -109,9 +126,9 @@ $this->assign('title', __('Children'));
                         }
                         ?>
                     </td>
-                    <td><?= $child->is_active ? __('Active') : __('Inactive') ?></td>
-                    <td><?= $child->is_integrative ? __('Yes') : __('No') ?></td>
-                    <td><?= $child->has('sibling_group') && $child->sibling_group ? h($child->sibling_group->label) : '' ?></td>
+                    <td data-field="status"><?= $child->is_active ? __('Active') : __('Inactive') ?></td>
+                    <td data-field="integrative"><?= $child->is_integrative ? __('Yes') : __('No') ?></td>
+                    <td data-field="sibling_group"><?= $child->has('sibling_group') && $child->sibling_group ? h($child->sibling_group->label) : '' ?></td>
                     <td class="actions">
                         <?php if (!($isViewer ?? false)): ?>
                             <?= $this->Html->link(__('Edit'), ['action' => 'edit', $child->id]) ?>

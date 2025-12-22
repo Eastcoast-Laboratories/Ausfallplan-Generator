@@ -58,7 +58,7 @@
         </tr>
         <tr>
             <th><?= __('Sibling Group') ?></th>
-            <td><?= $child->has('sibling_group') && $child->sibling_group ? $this->Html->link($child->sibling_group->name, ['controller' => 'SiblingGroups', 'action' => 'view', $child->sibling_group->id]) : __('None') ?></td>
+            <td><?= $child->has('sibling_group') && $child->sibling_group && $child->sibling_group->name ? $this->Html->link($child->sibling_group->name, ['controller' => 'SiblingGroups', 'action' => 'view', $child->sibling_group->id]) : __('None') ?></td>
         </tr>        <tr>
             <th><?= __('Created') ?></th>
             <td><?= h($child->created) ?></td>

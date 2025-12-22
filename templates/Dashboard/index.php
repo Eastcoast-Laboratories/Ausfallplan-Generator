@@ -12,8 +12,8 @@ $this->assign('title', __('Dashboard'));
 
 <div class="dashboard">
     <div class="welcome-section">
-        <h1><?= __('Welcome back!') ?></h1>
-        <p><?= __('Here\'s your overview for today.') ?></p>
+        <h1><?= __('Welcome back, {0}!', h($user->name ?? $user->email)) ?></h1>
+        <p><?= __('You are logged in.') ?></p>
     </div>
 
     <div class="stats-grid">

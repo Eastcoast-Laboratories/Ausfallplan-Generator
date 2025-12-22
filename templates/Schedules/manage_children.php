@@ -72,7 +72,7 @@ $this->assign("title", __("Manage Children") . " - " . h($schedule->title));
             ["class" => "button", "style" => "background: #4caf50; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; font-weight: bold; margin-left: 0.5rem;"]
         );
         echo $this->Html->link( __("Waitlist"),
-            ["controller" => "Waitlist", "action" => "?schedule_id=".$schedule->id],
+            ["controller" => "Waitlist", "action" => "index", "?" => ["schedule_id" => $schedule->id]],
             ["class" => "button", "style" => "background: #4caf50; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; font-weight: bold; margin-left: 0.5rem;"]
         );
         ?>
