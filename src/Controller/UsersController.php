@@ -419,27 +419,14 @@ class UsersController extends AppController
                 ->withStringBody(json_encode(['success' => false, 'message' => 'Not authenticated']));
         }
         
-        // Get JSON data from request body
-        $jsonData = $this->request->getBody()->getContents();
+        // Get JSON data from request - use getParsedBody() instead of getBody()->getContents()
+        $data = $this->request->getParsedBody();
         
-        // Debug logging
-        error_log('DEBUG setupEncryption - Raw JSON length: ' . strlen($jsonData));
-        error_log('DEBUG setupEncryption - Raw JSON (first 200 chars): ' . substr($jsonData, 0, 200));
-        
-        $data = json_decode($jsonData, true);
-        
-        if (!$data) {
-            $jsonError = json_last_error_msg();
-            error_log('DEBUG setupEncryption - JSON decode failed: ' . $jsonError);
-            error_log('DEBUG setupEncryption - Full JSON: ' . $jsonData);
+        if (!$data || !is_array($data)) {
             return $this->response->withType('application/json')
                 ->withStringBody(json_encode([
                     'success' => false, 
-                    'message' => 'Invalid JSON data: ' . $jsonError,
-                    'debug' => [
-                        'length' => strlen($jsonData),
-                        'preview' => substr($jsonData, 0, 100)
-                    ]
+                    'message' => 'Invalid JSON data: Unable to parse request body'
                 ]));
         }
         
