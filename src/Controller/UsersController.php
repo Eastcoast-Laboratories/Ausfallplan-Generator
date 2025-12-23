@@ -449,7 +449,7 @@ class UsersController extends AppController
         
         if ($this->Users->save($user)) {
             // Generate DEKs for user's organizations
-            $orgsUsersTable = $this->fetchTable('OrganizationsUsers');
+            $orgsUsersTable = $this->fetchTable('OrganizationUsers');
             $userOrgs = $orgsUsersTable->find()
                 ->where(['user_id' => $user->id])
                 ->contain(['Organizations'])
