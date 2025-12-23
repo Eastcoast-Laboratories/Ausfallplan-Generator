@@ -36,11 +36,13 @@ $this->assign('title', __('Profile Settings'));
                     <div class="role-badge role-<?= h($userEntity->subscription_plan) ?>">
                         <?php
                         $planNames = [
-                            'test' => __('Test (Free)'),
-                            'pro' => __('Pro'),
-                            'enterprise' => __('Enterprise')
+                            'test' => 'Test' . ' (' . __('Free') . ')',
                         ];
-                        echo h($planNames[$userEntity->subscription_plan] ?? ucfirst($userEntity->subscription_plan));
+                        if(array_key_exists($userEntity->subscription_plan, $planNames)){
+                            echo h($planNames[$userEntity->subscription_plan]);
+                        } else {
+                            echo h(ucfirst($userEntity->subscription_plan));
+                        }
                         ?>
                     </div>
                     <small>

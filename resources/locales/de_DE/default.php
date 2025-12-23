@@ -606,4 +606,9 @@ return [
     'viewer' => 'Betrachter',
     'editor' => 'Bearbeiter',
     'org_admin' => 'Administrator',
+    
+    // Profile - Subscription
+    'Subscription Plan' => 'Abonnementplan',
+    'Free' => 'Kostenlos',
+    'Manage Subscription' => 'Abonnement verwalten',
 ];
