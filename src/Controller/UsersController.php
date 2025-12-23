@@ -564,6 +564,13 @@ class UsersController extends AppController
     {
         $user = $this->Authentication->getIdentity();
         $userEntity = $this->Users->get($user->id);
+        
+        // Get user's organizations with roles
+        $userOrganizations = $this->fetchTable('OrganizationUsers')
+            ->find()
+            ->where(['user_id' => $user->id])
+            ->contain(['Organizations'])
+            ->all();
 
         if ($this->request->is(['patch', 'post', 'put'])) {
             $data = $this->request->getData();
@@ -572,7 +579,7 @@ class UsersController extends AppController
             if (!empty($data['new_password'])) {
                 if (!empty($data['confirm_password']) && $data['new_password'] !== $data['confirm_password']) {
                     $this->Flash->error(__('Passwords do not match.'));
-                    $this->set(compact('userEntity'));
+                    $this->set(compact('userEntity', 'userOrganizations'));
                     return;
                 }
                 // Only set password if confirmation is also provided
@@ -580,7 +587,7 @@ class UsersController extends AppController
                     // Validate password complexity
                     if (!$this->Users->validatePasswordComplexity($data['new_password'])) {
                         $this->Flash->error(__('Password must be at least 8 characters and contain at least one number and one letter.'));
-                        $this->set(compact('userEntity'));
+                        $this->set(compact('userEntity', 'userOrganizations'));
                         return;
                     }
                     $data['password'] = $data['new_password'];
@@ -602,7 +609,7 @@ class UsersController extends AppController
             $this->Flash->error(__('Unable to update your profile.'));
         }
 
-        $this->set(compact('userEntity'));
+        $this->set(compact('userEntity', 'userOrganizations'));
     }
 
     /**
