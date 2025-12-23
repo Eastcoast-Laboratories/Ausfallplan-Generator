@@ -557,7 +557,7 @@ class UsersController extends AppController
             ->find()
             ->where(['user_id' => $user->id])
             ->contain(['Organizations'])
-            ->all();
+            ->toArray();
 
         if ($this->request->is(['patch', 'post', 'put'])) {
             $data = $this->request->getData();

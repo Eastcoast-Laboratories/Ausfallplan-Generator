@@ -67,11 +67,11 @@ $this->assign('title', __('Profile Settings'));
                     <div class="organizations-list">
                         <?php if (!empty($userOrganizations)): ?>
                             <ul style="list-style: none; padding: 0; margin: 0;">
-                                <?php foreach ($userOrganizations as $org): ?>
+                                <?php foreach ($userOrganizations as $orgUser): ?>
                                     <li style="padding: 0.5rem 0; border-bottom: 1px solid #e1e8ed;">
-                                        <strong><?= h($org->name) ?></strong>
+                                        <strong><?= h($orgUser->organization->name ?? 'Unknown') ?></strong>
                                         <span style="color: #95a5a6; font-size: 0.85rem; margin-left: 0.5rem;">
-                                            (<?= h($org->organization_user->role ?? 'unknown') ?>)
+                                            (<?= h($orgUser->role ?? 'unknown') ?>)
                                         </span>
                                     </li>
                                 <?php endforeach; ?>
