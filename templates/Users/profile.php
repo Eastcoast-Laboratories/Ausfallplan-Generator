@@ -34,7 +34,14 @@ $this->assign('title', __('Profile Settings'));
                 <div class="form-info">
                     <label><?= __('Subscription Plan') ?></label>
                     <div class="role-badge role-<?= h($userEntity->subscription_plan) ?>">
-                        <?= __('Test (Free)') ?>
+                        <?php
+                        $planNames = [
+                            'test' => __('Test (Free)'),
+                            'pro' => __('Pro'),
+                            'enterprise' => __('Enterprise')
+                        ];
+                        echo h($planNames[$userEntity->subscription_plan] ?? ucfirst($userEntity->subscription_plan));
+                        ?>
                     </div>
                     <small>
                         <?= $this->Html->link(__('Manage Subscription'), ['controller' => 'Subscriptions', 'action' => 'index']) ?>
