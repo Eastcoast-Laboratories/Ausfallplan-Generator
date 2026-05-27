@@ -95,6 +95,11 @@ class UsersTable extends Table
             ->allowEmptyString('role');  // Will be removed in next migration
 
         $validator
+            ->scalar('status')
+            ->maxLength('status', 50)
+            ->inList('status', ['pending', 'active', 'inactive']);
+
+        $validator
             ->boolean('is_system_admin')
             ->notEmptyString('is_system_admin');
 
@@ -149,5 +154,35 @@ class UsersTable extends Table
         }
 
         return true;
+    }
+
+    /**
+     * Keep status and is_active synchronized.
+     *
+     * @param \Cake\Event\EventInterface $event Event instance
+     * @param \App\Model\Entity\User $entity User entity
+     * @param \ArrayObject<string, mixed> $options Save options
+     * @return void
+     */
+    public function beforeSave(
+        \Cake\Event\EventInterface $event,
+        \App\Model\Entity\User $entity,
+        \ArrayObject $options
+    ): void {
+        if ($entity->isDirty('status')) {
+            $entity->is_active = $entity->status === 'active';
+            return;
+        }
+
+        if ($entity->isDirty('is_active')) {
+            if ($entity->is_active) {
+                $entity->status = 'active';
+                return;
+            }
+
+            if (($entity->status ?? null) === 'active') {
+                $entity->status = 'inactive';
+            }
+        }
     }
 }

@@ -199,7 +199,7 @@ class UsersController extends AppController
                 'OrganizationUsers.role' => 'org_admin'
             ])
             ->contain(['Users' => function ($q) {
-                return $q->where(['Users.status' => 'active']);
+                return $q->where(['Users.is_active' => true]);
             }])
             ->all();
         
@@ -236,7 +236,7 @@ class UsersController extends AppController
         // Send email to each org-admin
         foreach ($orgAdmins as $orgAdmin) {
             // Skip if user doesn't exist or is not active
-            if (!$orgAdmin->user || $orgAdmin->user->status !== 'active') {
+            if (!$orgAdmin->user || !$orgAdmin->user->is_active) {
                 continue;
             }
             
@@ -350,9 +350,13 @@ class UsersController extends AppController
                 return $this->redirect(['action' => 'login']);
             }
             
-            if ($identity->status !== 'active') {
+            if (!$identity->is_active) {
                 $this->Authentication->logout();
-                $this->Flash->error(__('Your account is pending approval by an administrator.'));
+                if ($identity->status === 'inactive') {
+                    $this->Flash->error(__('Your account has been deactivated by an administrator.'));
+                } else {
+                    $this->Flash->error(__('Your account is pending approval by an administrator.'));
+                }
                 return $this->redirect(['action' => 'login']);
             }
             
@@ -661,7 +665,7 @@ class UsersController extends AppController
             $activeUserCount = $orgUsersTable->find()
                 ->where(['organization_id' => $orgUser->organization_id])
                 ->matching('Users', function ($q) {
-                    return $q->where(['Users.status' => 'active']);
+                    return $q->where(['Users.is_active' => true]);
                 })
                 ->count();
             
