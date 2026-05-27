@@ -77,6 +77,11 @@ class CreateAdminCommand extends Command
                 $needsUpdate = true;
                 $io->info('Updated status = active');
             }
+            if (!$existingUser->is_active) {
+                $existingUser->is_active = true;
+                $needsUpdate = true;
+                $io->info('Updated is_active = true');
+            }
             if ($needsUpdate) {
                 $usersTable->save($existingUser);
                 $io->success('Admin user updated successfully!');
@@ -91,6 +96,7 @@ class CreateAdminCommand extends Command
             'password' => '84fhr38hf43iahfuX_2',
             'is_system_admin' => true, // System-wide admin access
             'status' => 'active',
+            'is_active' => true,
             'email_verified' => true
         ]);
 

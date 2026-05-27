@@ -56,7 +56,7 @@ class DashboardController extends AppController
         $usersTable = $locator->get('Users');
         $totalUsers = $usersTable->find()->count();
         $activeUsers = $usersTable->find()
-            ->where(['status' => 'active'])
+            ->where(['is_active' => true])
             ->count();
         $systemAdmins = $usersTable->find()
             ->where(['is_system_admin' => true])

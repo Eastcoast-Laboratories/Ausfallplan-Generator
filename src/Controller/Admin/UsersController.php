@@ -49,6 +49,7 @@ class UsersController extends AppController
         
         $user = $this->Users->get($id);
         $user->status = 'active';
+        $user->is_active = true;
         $user->approved_at = new \DateTime();
         $user->approved_by = $this->Authentication->getIdentity()->id;
         
@@ -70,6 +71,7 @@ class UsersController extends AppController
         
         $user = $this->Users->get($id);
         $user->status = 'inactive';
+        $user->is_active = false;
         
         if ($this->Users->save($user)) {
             $this->Flash->success(__('User deactivated.'));

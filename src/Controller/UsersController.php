@@ -93,6 +93,7 @@ class UsersController extends AppController
             // Set initial status and email verification
             // All users require email verification
             $user->status = 'pending';
+            $user->is_active = false;
             $user->email_verified = false;
             $user->email_token = bin2hex(random_bytes(16));
             
@@ -667,16 +668,19 @@ class UsersController extends AppController
             if ($activeUserCount === 0 || $orgUser->organization->name === 'keine organisation') {
                 // First user or "keine organisation" → auto-approve
                 $user->status = 'active';
+                $user->is_active = true;
                 $user->approved_at = new \DateTime();
                 $this->Flash->success(__('E-Mail verifiziert! Sie können sich jetzt anmelden.'));
             } else {
                 // Not first user → needs approval
                 $user->status = 'pending';
+                $user->is_active = false;
                 $this->Flash->info(__('E-Mail verifiziert! Admin-Freigabe erforderlich.'));
             }
         } else {
             // No organization → auto-approve
             $user->status = 'active';
+            $user->is_active = true;
             $user->approved_at = new \DateTime();
             $this->Flash->success(__('E-Mail verifiziert! Sie können sich jetzt anmelden.'));
         }
@@ -845,6 +849,7 @@ class UsersController extends AppController
         
         // Approve the user
         $userToApprove->status = 'active';
+        $userToApprove->is_active = true;
         $userToApprove->approved_at = new \DateTime();
         $userToApprove->approved_by = $identity->id;
         

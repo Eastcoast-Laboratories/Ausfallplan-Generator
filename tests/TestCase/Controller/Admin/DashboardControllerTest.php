@@ -18,7 +18,7 @@ class DashboardControllerTest extends TestCase
         'app.SiblingGroups',
     ];
 
-    public function testIndexCountsActiveUsersByStatus(): void
+    public function testIndexCountsActiveUsersByIsActiveFlag(): void
     {
         $usersTable = $this->getTableLocator()->get('Users');
         $admin = $usersTable->find()
@@ -27,14 +27,15 @@ class DashboardControllerTest extends TestCase
         $userToDeactivate = $usersTable->find()
             ->where([
                 'id !=' => $admin->id,
-                'status' => 'active',
+                'is_active' => true,
             ])
             ->firstOrFail();
         $userToDeactivate->status = 'inactive';
+        $userToDeactivate->is_active = false;
         $usersTable->saveOrFail($userToDeactivate);
         $expectedTotalUsers = $usersTable->find()->count();
         $expectedActiveUsers = $usersTable->find()
-            ->where(['status' => 'active'])
+            ->where(['is_active' => true])
             ->count();
         $expectedSystemAdmins = $usersTable->find()
             ->where(['is_system_admin' => true])
