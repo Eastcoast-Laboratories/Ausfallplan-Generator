@@ -171,16 +171,13 @@ class UsersTable extends Table
     ): void {
         if ($entity->isDirty('status')) {
             $entity->is_active = $entity->status === 'active';
-            return;
-        }
-
-        if ($entity->isDirty('is_active')) {
+        } elseif ($entity->isDirty('is_active')) {
             if ($entity->is_active) {
                 $entity->status = 'active';
                 return;
             }
 
-            if (($entity->status ?? null) === 'active') {
+            if (($entity->status ?? null) !== 'pending') {
                 $entity->status = 'inactive';
             }
         }
