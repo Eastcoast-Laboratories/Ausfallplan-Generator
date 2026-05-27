@@ -9,12 +9,19 @@ class AddIsActiveToUsers extends BaseMigration
     {
         $table = $this->table('users');
         $table->addColumn('is_active', 'boolean', [
-            'default' => true,
-            'null' => false,
+            'default' => null,
+            'null' => true,
             'after' => 'is_system_admin',
         ]);
         $table->update();
 
         $this->execute("UPDATE users SET is_active = CASE WHEN status = 'active' THEN 1 ELSE 0 END");
+
+        $table->changeColumn('is_active', 'boolean', [
+            'default' => true,
+            'null' => false,
+            'after' => 'is_system_admin',
+        ]);
+        $table->update();
     }
 }
