@@ -24,14 +24,14 @@ class DashboardControllerTest extends TestCase
         $admin = $usersTable->find()
             ->where(['is_system_admin' => true])
             ->firstOrFail();
-        $inactiveUser = $usersTable->find()
+        $userToDeactivate = $usersTable->find()
             ->where([
                 'id !=' => $admin->id,
                 'status' => 'active',
             ])
             ->firstOrFail();
-        $inactiveUser->status = 'inactive';
-        $usersTable->saveOrFail($inactiveUser);
+        $userToDeactivate->status = 'inactive';
+        $usersTable->saveOrFail($userToDeactivate);
         $expectedTotalUsers = $usersTable->find()->count();
         $expectedActiveUsers = $usersTable->find()
             ->where(['status' => 'active'])
