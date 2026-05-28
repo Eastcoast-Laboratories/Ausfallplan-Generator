@@ -461,6 +461,14 @@ $currentLangShort = substr($currentLang, 0, 2);
             </a>
             <?php endif; ?>
             
+            <?php // Admin Users link for system admins only ?>
+            <?php if ($user && ($user->is_system_admin ?? false)): ?>
+            <a href="/admin/users" class="sidebar-nav-item <?= $this->request->getParam('controller') === 'Users' && $this->request->getParam('prefix') === 'Admin' ? 'active' : '' ?>">
+                <span>👥</span>
+                <span><?= __('Admin Users') ?></span>
+            </a>
+            <?php endif; ?>
+            
             <a href="/subscriptions" class="sidebar-nav-item <?= $this->request->getParam('controller') === 'Subscriptions' ? 'active' : '' ?>">
                 <span>💳</span>
                 <span><?= __('Subscription') ?></span>

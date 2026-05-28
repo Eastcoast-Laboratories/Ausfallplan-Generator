@@ -17,13 +17,39 @@
             </thead>
             <tbody>
                 <?php foreach ($users as $user): ?>
+                <?php
+                // Get primary organization name
+                $primaryOrgName = '-';
+                if (!empty($user->organizations)) {
+                    foreach ($user->organizations as $org) {
+                        if ($org->_joinData->is_primary ?? false) {
+                            $primaryOrgName = $org->name;
+                            break;
+                        }
+                    }
+                    // Fallback to first organization if no primary found
+                    if ($primaryOrgName === '-' && !empty($user->organizations[0])) {
+                        $primaryOrgName = $user->organizations[0]->name;
+                    }
+                }
+                // Get primary role
+                $primaryRole = '-';
+                if (!empty($user->organization_users)) {
+                    foreach ($user->organization_users as $orgUser) {
+                        if ($orgUser->is_primary) {
+                            $primaryRole = $orgUser->role;
+                            break;
+                        }
+                    }
+                }
+                ?>
                 <tr>
                     <td><?= $user->id ?></td>
                     <td><?= h($user->email) ?></td>
-                    <td><?= h($user->organization->name) ?></td>
+                    <td><?= h($primaryOrgName) ?></td>
                     <td>
-                        <span class="badge badge-<?= $user->role ?>">
-                            <?= h($user->role) ?>
+                        <span class="badge badge-<?= $primaryRole ?>">
+                            <?= h($primaryRole) ?>
                         </span>
                     </td>
                     <td>
@@ -51,7 +77,12 @@
                                 ['confirm' => __('Deactivate this user?'), 'class' => 'button-danger']
                             ) ?>
                         <?php endif; ?>
-                    </td>
+
+                        <?= $this->Form->postLink(
+                            __('Delete'),
+                            ['action' => 'delete', $user->id],
+                            ['confirm' => __('Delete this user and their organization? This cannot be undone!'), 'class' => 'button-danger']
+                        ) ?>
                 </tr>
                 <?php endforeach; ?>
             </tbody>
