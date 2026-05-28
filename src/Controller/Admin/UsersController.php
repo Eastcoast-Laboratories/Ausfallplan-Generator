@@ -50,7 +50,27 @@ class UsersController extends AppController
             ->orderBy(['Users.created' => 'DESC'])
             ->all();
 
-        $this->set(compact('users'));
+        // Get children count for each user
+        $childrenTable = $this->fetchTable('Children');
+        $userChildCounts = [];
+        foreach ($users as $user) {
+            $orgIds = [];
+            foreach ($user->organization_users as $orgUser) {
+                if ($orgUser->organization_id) {
+                    $orgIds[] = $orgUser->organization_id;
+                }
+            }
+            if (!empty($orgIds)) {
+                $count = $childrenTable->find()
+                    ->where(['organization_id IN' => $orgIds])
+                    ->count();
+                $userChildCounts[$user->id] = $count;
+            } else {
+                $userChildCounts[$user->id] = 0;
+            }
+        }
+
+        $this->set(compact('users', 'userChildCounts'));
     }
 
     /**

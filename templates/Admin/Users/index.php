@@ -11,6 +11,7 @@
                     <th><?= __('Role') ?></th>
                     <th><?= __('Status') ?></th>
                     <th><?= __('Email Verified') ?></th>
+                    <th><?= __('Children') ?></th>
                     <th><?= __('Created') ?></th>
                     <th><?= __('Actions') ?></th>
                 </tr>
@@ -59,6 +60,9 @@
                     </td>
                     <td>
                         <?= $user->email_verified ? '✓' : '✗' ?>
+                    </td>
+                    <td>
+                        <?= $userChildCounts[$user->id] ?? 0 ?>
                     </td>
                     <td><?= $user->created->format('Y-m-d H:i') ?></td>
                     <td class="actions">
