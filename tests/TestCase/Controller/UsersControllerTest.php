@@ -290,4 +290,135 @@ class UsersControllerTest extends TestCase
     // Note: Profile update/password tests removed
     // These require full authentication middleware stack which is difficult to test
     // Should be tested manually or via E2E tests
+
+    /**
+     * Test bot protection blocks random organization names
+     *
+     * @return void
+     * @uses \App\Controller\UsersController::validateBotProtection()
+     */
+    public function testBotProtectionBlocksRandomOrgNames(): void
+    {
+        $this->session(['Config.language' => 'en']);
+
+        // These are bot-like random strings that should be blocked
+        $illegalOrgNames = [
+            'hqEjDRwjxvvYrDxJNHpw',
+            'sZ7sH9ISiJkLmNoPqR',
+        ];
+        foreach ($illegalOrgNames as $illegalOrgName) {
+            $data = [
+                'organization_name' => $illegalOrgName,
+                'organization_choice' => 'new',
+                'email' => 'test@example.com',
+                'password' => 'Secure84hbfUb_3dsf!',
+                'password_confirm' => 'Secure84hbfUb_3dsf!',
+                'reg_timestamp' => time() - 10, // 10 seconds ago (valid)
+                'hp_data' => '', // honeypot empty (valid)
+            ];
+
+            $this->post('/users/register', $data);
+
+            // Should redirect back to register with error
+            $this->assertResponseCode(200);
+            $this->assertResponseContains('Registration failed');
+        }
+    }
+
+    /**
+     * Test bot protection allows legitimate CamelCase organization names
+     *
+     * @return void
+     * @uses \App\Controller\UsersController::validateBotProtection()
+     */
+    public function testBotProtectionAllowsLegitimateCamelCaseOrgNames(): void
+    {
+        $this->session(['Config.language' => 'en']);
+
+        // Legitimate CamelCase organization names should pass
+        $legitimateNames = [
+            'MeineCooleOrganisation',
+            'SuperKitaBerlin',
+            'KindergartenSchuleXYZ',
+            'SuperOrganisation',
+            'MeineSuperOrgaMitVielenCamelCase',
+            'z.y.x',
+            'X.Y.Z',
+        ];
+
+        foreach ($legitimateNames as $index => $orgName) {
+            $data = [
+                'organization_name' => $orgName . ' ' . time() . $index, // Make unique
+                'organization_choice' => 'new',
+                'email' => 'test' . time() . $index . '@example.com', // Unique email
+                'password' => 'Secure84hbfUb_3dsf!',
+                'password_confirm' => 'Secure84hbfUb_3dsf!',
+                'reg_timestamp' => time() - 10,
+                'hp_data' => '',
+            ];
+
+            $this->post('/users/register', $data);
+
+            // Should redirect to login (success)
+            $this->assertResponseCode(302);
+            $this->assertRedirectContains('/login');
+
+            // Reset for next iteration
+            $this->get('/users/register');
+        }
+    }
+
+    /**
+     * Test bot protection blocks honeypot filled
+     *
+     * @return void
+     * @uses \App\Controller\UsersController::validateBotProtection()
+     */
+    public function testBotProtectionBlocksHoneypotFilled(): void
+    {
+        $this->session(['Config.language' => 'en']);
+
+        $data = [
+            'organization_name' => 'Legitimate Kita Name',
+            'organization_choice' => 'new',
+            'email' => 'honeypot@test.com',
+            'password' => 'Secure84hbfUb_3dsf!',
+            'password_confirm' => 'Secure84hbfUb_3dsf!',
+            'reg_timestamp' => time() - 10,
+            'hp_data' => 'bot-filled-this', // honeypot filled (invalid)
+        ];
+
+        $this->post('/users/register', $data);
+
+        // Should show error
+        $this->assertResponseCode(200);
+        $this->assertResponseContains('Registration failed');
+    }
+
+    /**
+     * Test bot protection blocks too fast submission
+     *
+     * @return void
+     * @uses \App\Controller\UsersController::validateBotProtection()
+     */
+    public function testBotProtectionBlocksTooFast(): void
+    {
+        $this->session(['Config.language' => 'en']);
+
+        $data = [
+            'organization_name' => 'Legitimate Kita Name',
+            'organization_choice' => 'new',
+            'email' => 'toofast@test.com',
+            'password' => 'Secure84hbfUb_3dsf!',
+            'password_confirm' => 'Secure84hbfUb_3dsf!',
+            'reg_timestamp' => time(), // now (too fast)
+            'hp_data' => '',
+        ];
+
+        $this->post('/users/register', $data);
+
+        // Should show error
+        $this->assertResponseCode(200);
+        $this->assertResponseContains('Registration failed');
+    }
 }
