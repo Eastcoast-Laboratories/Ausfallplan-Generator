@@ -100,12 +100,12 @@ $this->assign('title', __('Children'));
                     <?php endif; ?>
                     <td data-field="gender" style="text-align: center; font-size: 1.2rem;">
                         <?php
-                        if ($child->gender === 'male') {
+                        if ($child->gender === 'm') {
                             echo '<span title="' . __('Boy') . '">♂️</span>';
-                        } elseif ($child->gender === 'female') {
+                        } elseif ($child->gender === 'f') {
                             echo '<span title="' . __('Girl') . '">♀️</span>';
-                        } elseif ($child->gender === 'neutral') {
-                            echo '<span title="' . __('Neutral') . '">⚪</span>';
+                        } elseif ($child->gender === 'd') {
+                            echo '<span title="' . __('Diverse') . '">⚪</span>';
                         } else {
                             echo '<span title="' . __('Unknown') . '">❓</span>';
                         }
