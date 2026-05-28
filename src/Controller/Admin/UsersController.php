@@ -233,11 +233,23 @@ class UsersController extends AppController
             return $this->redirect(['action' => 'index']);
         }
 
+        // Get current user ID to prevent self-deletion
+        $identity = $this->Authentication->getIdentity();
+        $currentUserId = $identity ? $identity->id : null;
+
         $deletedCount = 0;
         $errorCount = 0;
         $skippedKeineOrg = 0;
+        $skippedSelf = 0;
+        $errors = [];
 
         foreach ($userIds as $userId) {
+            // Prevent deleting yourself
+            if ($currentUserId && $userId == $currentUserId) {
+                $skippedSelf++;
+                continue;
+            }
+
             $connection = $this->Users->getConnection();
             $connection->begin();
 
@@ -276,12 +288,32 @@ class UsersController extends AppController
                 $connection->commit();
                 $deletedCount++;
 
+            } catch (\Cake\Datasource\Exception\RecordNotFoundException $e) {
+                // User doesn't exist (already deleted or invalid ID)
+                if ($connection->inTransaction()) {
+                    $connection->rollback();
+                }
+                $errorCount++;
+                $errors[] = "User {$userId}: Not found";
+            } catch (\PDOException $e) {
+                // Database constraint error
+                if ($connection->inTransaction()) {
+                    $connection->rollback();
+                }
+                $errorCount++;
+                $errors[] = "User {$userId}: " . $e->getMessage();
             } catch (\Exception $e) {
                 if ($connection->inTransaction()) {
                     $connection->rollback();
                 }
                 $errorCount++;
+                $errors[] = "User {$userId}: " . $e->getMessage();
             }
+        }
+
+        // Debug logging for errors
+        if (!empty($errors)) {
+            error_log('[BULK_DELETE_DEBUG] Errors: ' . implode('; ', $errors));
         }
 
         // Build result message
@@ -290,15 +322,18 @@ class UsersController extends AppController
             $messages[] = __('{0} users deleted successfully.', $deletedCount);
         }
         if ($skippedKeineOrg > 0) {
-            $messages[] = __('{0} users deleted but their "keine organisation" was preserved.', $skippedKeineOrg);
+            $messages[] = __('{0} users had "keine organisation" preserved.', $skippedKeineOrg);
+        }
+        if ($skippedSelf > 0) {
+            $messages[] = __('{0} users skipped (cannot delete yourself).', $skippedSelf);
         }
         if ($errorCount > 0) {
-            $messages[] = __('{0} users could not be deleted.', $errorCount);
+            $messages[] = __('{0} users could not be deleted. {1}', $errorCount, implode('; ', $errors));
         }
 
         if ($errorCount > 0) {
             $this->Flash->error(implode(' ', $messages));
-        } elseif ($skippedKeineOrg > 0) {
+        } elseif ($skippedKeineOrg > 0 || $skippedSelf > 0) {
             $this->Flash->warning(implode(' ', $messages));
         } else {
             $this->Flash->success(implode(' ', $messages));

@@ -56,7 +56,7 @@
                 }
                 ?>
                 <tr>
-                    <td><?= $this->Form->checkbox('user_ids[]', ['value' => $user->id, 'class' => 'user-checkbox']) ?></td>
+                    <td><?= $this->Form->checkbox('user_ids[]', ['value' => $user->id, 'class' => 'user-checkbox', 'hiddenField' => false]) ?></td>
                     <td><?= $user->id ?></td>
                     <td><?= h($user->email) ?></td>
                     <td><?= h($primaryOrgName) ?></td>
