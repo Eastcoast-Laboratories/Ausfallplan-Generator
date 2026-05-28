@@ -1,10 +1,21 @@
 <div class="admin-users index content">
     <h2><?= __('User Management') ?></h2>
-    
+
+    <?= $this->Form->create(null, ['url' => ['action' => 'bulkDelete'], 'id' => 'bulk-delete-form']) ?>
+    <div class="bulk-actions" style="margin-bottom: 15px;">
+        <?= $this->Form->button(__('Delete Selected'), [
+            'type' => 'submit',
+            'class' => 'button-danger',
+            'confirm' => __('Delete selected users and their organizations? This cannot be undone!'),
+            'id' => 'bulk-delete-btn'
+        ]) ?>
+    </div>
+
     <div class="table-responsive">
         <table>
             <thead>
                 <tr>
+                    <th><input type="checkbox" id="select-all" title="Select all users"></th>
                     <th><?= __('ID') ?></th>
                     <th><?= __('Email') ?></th>
                     <th><?= __('Organization') ?></th>
@@ -45,6 +56,7 @@
                 }
                 ?>
                 <tr>
+                    <td><?= $this->Form->checkbox('user_ids[]', ['value' => $user->id, 'class' => 'user-checkbox']) ?></td>
                     <td><?= $user->id ?></td>
                     <td><?= h($user->email) ?></td>
                     <td><?= h($primaryOrgName) ?></td>
@@ -92,7 +104,29 @@
             </tbody>
         </table>
     </div>
+    <?= $this->Form->end() ?>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectAll = document.getElementById('select-all');
+        const userCheckboxes = document.querySelectorAll('.user-checkbox');
+        const bulkDeleteBtn = document.getElementById('bulk-delete-btn');
+
+        // Select all functionality
+        selectAll.addEventListener('change', function() {
+            userCheckboxes.forEach(cb => cb.checked = selectAll.checked);
+        });
+
+        // Update select all state based on individual checkboxes
+        userCheckboxes.forEach(cb => {
+            cb.addEventListener('change', function() {
+                const allChecked = Array.from(userCheckboxes).every(c => c.checked);
+                selectAll.checked = allChecked;
+            });
+        });
+    });
+</script>
 
 <style>
 .badge {

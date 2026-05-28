@@ -137,60 +137,12 @@ class UsersController extends AppController
         $connection->begin();
 
         try {
-            // If user has a primary organization, delete it using same logic as OrganizationsController
+            // If user has a primary organization, delete it using DRY method
             if ($primaryOrg) {
-                // Prevent deletion of "keine organisation"
-                if ($primaryOrg->name === 'keine organisation') {
-                    $this->Flash->error(__('Cannot delete user with standard organization "keine organisation".'));
-                    return $this->redirect(['action' => 'index']);
-                }
-
-                // Get "keine organisation" as fallback for reassignment
-                $noOrg = $this->fetchTable('Organizations')->find()->where(['name' => 'keine organisation'])->first();
-                $orgId = $primaryOrg->id;
-
-                // 1. Reassign or delete children
-                $childrenTable = $this->fetchTable('Children');
-                if ($noOrg && $noOrg->id != $orgId) {
-                    $childrenTable->updateAll(
-                        ['organization_id' => $noOrg->id],
-                        ['organization_id' => $orgId]
-                    );
-                } else {
-                    $childrenTable->deleteAll(['organization_id' => $orgId]);
-                }
-
-                // 2. Clear waitlist assignments
-                $schedulesInOrg = $this->fetchTable('Schedules')
-                    ->find()
-                    ->where(['organization_id' => $orgId])
-                    ->all()
-                    ->extract('id')
-                    ->toArray();
-
-                if (!empty($schedulesInOrg)) {
-                    $childrenTable->updateAll(
-                        ['schedule_id' => null, 'waitlist_order' => null],
-                        ['schedule_id IN' => $schedulesInOrg]
-                    );
-                }
-
-                // 3. Delete schedules
-                $this->fetchTable('Schedules')->deleteAll(['organization_id' => $orgId]);
-
-                // 4. Delete sibling groups
-                $this->fetchTable('SiblingGroups')->deleteAll(['organization_id' => $orgId]);
-
-                // 5. Delete organization_users entries for this org
-                $this->fetchTable('OrganizationUsers')->deleteAll(['organization_id' => $orgId]);
-
-                // 6. Delete the organization
-                if (!$this->fetchTable('Organizations')->delete($primaryOrg)) {
-                    throw new \RuntimeException('Organization could not be deleted');
-                }
+                $this->deleteOrganization($primaryOrg);
             }
 
-            // 7. Delete remaining organization_users for this user (if any other memberships)
+            // Delete remaining organization_users for this user (if any other memberships)
             $this->fetchTable('OrganizationUsers')->deleteAll(['user_id' => $id]);
 
             // 8. Finally delete the user
@@ -206,6 +158,150 @@ class UsersController extends AppController
                 $connection->rollback();
             }
             $this->Flash->error(__('Error deleting: {0}', $e->getMessage()));
+        }
+
+        return $this->redirect(['action' => 'index']);
+    }
+
+    /**
+     * Delete organization and all related data
+     * DRY method used by both delete() and bulkDelete()
+     */
+    private function deleteOrganization($organization): void
+    {
+        // Prevent deletion of "keine organisation"
+        if ($organization->name === 'keine organisation') {
+            throw new \RuntimeException('Cannot delete standard organization "keine organisation"');
+        }
+
+        // Get "keine organisation" as fallback for reassignment
+        $noOrg = $this->fetchTable('Organizations')->find()->where(['name' => 'keine organisation'])->first();
+        $orgId = $organization->id;
+
+        // 1. Reassign or delete children
+        $childrenTable = $this->fetchTable('Children');
+        if ($noOrg && $noOrg->id != $orgId) {
+            $childrenTable->updateAll(
+                ['organization_id' => $noOrg->id],
+                ['organization_id' => $orgId]
+            );
+        } else {
+            $childrenTable->deleteAll(['organization_id' => $orgId]);
+        }
+
+        // 2. Clear waitlist assignments
+        $schedulesInOrg = $this->fetchTable('Schedules')
+            ->find()
+            ->where(['organization_id' => $orgId])
+            ->all()
+            ->extract('id')
+            ->toArray();
+
+        if (!empty($schedulesInOrg)) {
+            $childrenTable->updateAll(
+                ['schedule_id' => null, 'waitlist_order' => null],
+                ['schedule_id IN' => $schedulesInOrg]
+            );
+        }
+
+        // 3. Delete schedules
+        $this->fetchTable('Schedules')->deleteAll(['organization_id' => $orgId]);
+
+        // 4. Delete sibling groups
+        $this->fetchTable('SiblingGroups')->deleteAll(['organization_id' => $orgId]);
+
+        // 5. Delete organization_users entries for this org
+        $this->fetchTable('OrganizationUsers')->deleteAll(['organization_id' => $orgId]);
+
+        // 6. Delete the organization
+        if (!$this->fetchTable('Organizations')->delete($organization)) {
+            throw new \RuntimeException('Organization could not be deleted');
+        }
+    }
+
+    /**
+     * Bulk delete users and their primary organizations
+     */
+    public function bulkDelete()
+    {
+        $this->request->allowMethod(['post']);
+
+        $userIds = $this->request->getData('user_ids');
+
+        if (empty($userIds)) {
+            $this->Flash->warning(__('No users selected.'));
+            return $this->redirect(['action' => 'index']);
+        }
+
+        $deletedCount = 0;
+        $errorCount = 0;
+        $skippedKeineOrg = 0;
+
+        foreach ($userIds as $userId) {
+            $connection = $this->Users->getConnection();
+            $connection->begin();
+
+            try {
+                $user = $this->Users->get($userId, [
+                    'contain' => ['OrganizationUsers.Organizations']
+                ]);
+
+                // Find primary organization to delete with user
+                $primaryOrg = null;
+                foreach ($user->organization_users as $orgUser) {
+                    if ($orgUser->is_primary && $orgUser->organization) {
+                        $primaryOrg = $orgUser->organization;
+                        break;
+                    }
+                }
+
+                // If user has a primary organization, delete it
+                if ($primaryOrg) {
+                    // Skip if it's "keine organisation" - delete user but not the org
+                    if ($primaryOrg->name === 'keine organisation') {
+                        $skippedKeineOrg++;
+                    } else {
+                        $this->deleteOrganization($primaryOrg);
+                    }
+                }
+
+                // Delete remaining organization_users for this user
+                $this->fetchTable('OrganizationUsers')->deleteAll(['user_id' => $userId]);
+
+                // Finally delete the user
+                if (!$this->Users->delete($user)) {
+                    throw new \RuntimeException('User could not be deleted');
+                }
+
+                $connection->commit();
+                $deletedCount++;
+
+            } catch (\Exception $e) {
+                if ($connection->inTransaction()) {
+                    $connection->rollback();
+                }
+                $errorCount++;
+            }
+        }
+
+        // Build result message
+        $messages = [];
+        if ($deletedCount > 0) {
+            $messages[] = __('{0} users deleted successfully.', $deletedCount);
+        }
+        if ($skippedKeineOrg > 0) {
+            $messages[] = __('{0} users deleted but their "keine organisation" was preserved.', $skippedKeineOrg);
+        }
+        if ($errorCount > 0) {
+            $messages[] = __('{0} users could not be deleted.', $errorCount);
+        }
+
+        if ($errorCount > 0) {
+            $this->Flash->error(implode(' ', $messages));
+        } elseif ($skippedKeineOrg > 0) {
+            $this->Flash->warning(implode(' ', $messages));
+        } else {
+            $this->Flash->success(implode(' ', $messages));
         }
 
         return $this->redirect(['action' => 'index']);
