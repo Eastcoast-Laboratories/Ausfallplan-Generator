@@ -104,17 +104,22 @@ class ChildrenController extends AppController
      */
     public function view($id = null)
     {
-        $child = $this->Children->get($id, contain: [
-            'Organizations',
-            'SiblingGroups',
-        ]);
-        
+        try {
+            $child = $this->Children->get($id, contain: [
+                'Organizations',
+                'SiblingGroups',
+            ]);
+        } catch (\Cake\Datasource\Exception\RecordNotFoundException $e) {
+            $this->Flash->error(__('Child not found. It may have been deleted.'));
+            return $this->redirect(['action' => 'index']);
+        }
+
         // Permission check: User must be member of child's organization
         if (!$this->hasOrgRole($child->organization_id)) {
             $this->Flash->error(__('Zugriff verweigert.'));
             return $this->redirect(['action' => 'index']);
         }
-        
+
         // Load sibling names if child has siblings
         $siblingNames = $this->loadSiblingNames([$child]);
 
@@ -298,8 +303,13 @@ class ChildrenController extends AppController
      */
     public function edit($id = null)
     {
-        $child = $this->Children->get($id, contain: []);
-        
+        try {
+            $child = $this->Children->get($id, contain: []);
+        } catch (\Cake\Datasource\Exception\RecordNotFoundException $e) {
+            $this->Flash->error(__('Child not found. It may have been deleted.'));
+            return $this->redirect(['action' => 'index']);
+        }
+
         // Permission check: User must have editor role in child's organization
         if (!$this->hasOrgRole($child->organization_id, 'editor')) {
             $this->Flash->error(__('Sie haben keine Berechtigung Kinder zu bearbeiten.'));
