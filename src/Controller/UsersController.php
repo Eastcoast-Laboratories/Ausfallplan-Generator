@@ -920,7 +920,7 @@ class UsersController extends AppController
 
         if ($orgChoice === 'new' && !empty($orgName)) {
             // Detect truly random organization names (bots generate these)
-            // Legitimate: "MeineGeileOrganisation" (CamelCase with word boundaries)
+            // Legitimate: "MeineCooleOrganisation" (CamelCase with word boundaries)
             // Bot: "hqEjDRwjxvvYrDxJNHpw" (random, high entropy, no structure)
 
             if (strlen($orgName) > 12 && !preg_match('/\s/', $orgName)) {
@@ -930,12 +930,12 @@ class UsersController extends AppController
                 $lowerCount = preg_match_all('/[a-z]/', $orgName);
                 $totalLetters = $upperCount + $lowerCount;
 
-                // High entropy (>4.0) with very uneven upper/lower distribution = likely bot
-                // Legitimate CamelCase has balanced distribution (e.g., MeineGeileOrganisation: ~30% upper)
-                // Random bot strings often have chaotic distribution (e.g., hqEjDRwjxvvY: ~50% upper scattered)
-                if ($entropy > 4.2) {
+                // High entropy (>3.8) with very uneven upper/lower distribution = likely bot
+                // Legitimate CamelCase has balanced distribution (e.g., MeineCooleOrganisation: ~30% upper, entropy ~3.4)
+                // Random bot strings often have chaotic distribution (e.g., hqEjDRwjxvvY: ~50% upper, entropy ~4.1)
+                if ($entropy > 3.8) {
                     // Check if uppercase letters appear in "random" positions vs word boundaries
-                    // Legitimate: Uppercase followed by multiple lowercase (Meine, Geile, Organisation)
+                    // Legitimate: Uppercase followed by multiple lowercase (Meine, Coole, Organisation)
                     // Bot: Scattered uppercase (hqE jD Rw jx vv Yr Dx JN Hp w)
                     $camelCasePattern = preg_match_all('/[A-Z][a-z]{2,}/', $orgName);
                     $scatteredUpperPattern = preg_match_all('/[a-z][A-Z][a-z]/', $orgName);
