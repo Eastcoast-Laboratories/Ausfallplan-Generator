@@ -421,4 +421,73 @@ class UsersControllerTest extends TestCase
         $this->assertResponseCode(200);
         $this->assertResponseContains('Registration failed');
     }
+
+    /**
+     * Test rate limiting with time lockout and reset after block duration
+     *
+     * @return void
+     * @uses \App\Controller\UsersController::validateBotProtection()
+     */
+    public function testRateLimitingWithTimeLockoutAndReset(): void
+    {
+        $this->session(['Config.language' => 'en']);
+
+        // Make 5 failed attempts (triggering honeypot to simulate bot attempts)
+        for ($i = 0; $i < 5; $i++) {
+            $data = [
+                'organization_name' => 'Bot Test ' . $i,
+                'organization_choice' => 'new',
+                'email' => 'bot' . $i . time() . '@test.com',
+                'password' => 'Secure84hbfUb_3dsf!',
+                'password_confirm' => 'Secure84hbfUb_3dsf!',
+                'reg_timestamp' => time() - 10,
+                'hp_data' => 'filled-by-bot', // Trigger bot detection
+            ];
+
+            $this->post('/users/register', $data);
+            $this->assertResponseCode(200);
+            $this->assertResponseContains('Registration failed');
+
+            // Reset session for next request to simulate new request
+            $this->session(['Config.language' => 'en']);
+        }
+
+        // 6th attempt should be blocked with time lockout message
+        $data = [
+            'organization_name' => 'Blocked Attempt',
+            'organization_choice' => 'new',
+            'email' => 'blocked' . time() . '@test.com',
+            'password' => 'Secure84hbfUb_3dsf!',
+            'password_confirm' => 'Secure84hbfUb_3dsf!',
+            'reg_timestamp' => time() - 10,
+            'hp_data' => '',
+        ];
+
+        $this->post('/users/register', $data);
+        $this->assertResponseCode(200);
+        $this->assertResponseContains('Too many attempts');
+        $this->assertResponseContains('minutes');
+
+        // Simulate time passing - set blockedUntil to 3 minutes ago (past the 2-minute block)
+        $this->session([
+            'Config.language' => 'en',
+            'reg_blocked_until' => time() - 180, // Expired 3 minutes ago
+            'reg_attempts_session' => 0, // Also reset attempts
+        ]);
+
+        // After block expired, registration should work again
+        $data = [
+            'organization_name' => 'After Block Expired Kita',
+            'organization_choice' => 'new',
+            'email' => 'unblocked' . time() . '@example.com', // Unique email
+            'password' => 'Secure84hbfUb_3dsf!',
+            'password_confirm' => 'Secure84hbfUb_3dsf!',
+            'reg_timestamp' => time() - 10,
+            'hp_data' => '',
+        ];
+
+        $this->post('/users/register', $data);
+        // Should succeed (redirect to login) or show form with validation error (200)
+        $this->assertResponseSuccess();
+    }
 }

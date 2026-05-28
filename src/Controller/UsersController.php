@@ -37,7 +37,19 @@ class UsersController extends AppController
             $botErrors = $this->validateBotProtection($data);
             if (!empty($botErrors)) {
                 error_log('[BOT_BLOCKED] Registration blocked: ' . implode(', ', $botErrors) . ' | IP: ' . $this->request->clientIp());
-                $this->Flash->error(__('Registration failed. Please try again.'));
+
+                // Increment attempt counter for rate limiting
+                $session = $this->request->getSession();
+                $attemptsKey = 'reg_attempts_session';
+                $currentAttempts = $session->read($attemptsKey) ?? 0;
+                $session->write($attemptsKey, $currentAttempts + 1);
+
+                // If rate limit reached, show specific message
+                if (in_array('Too many attempts. Please try again in 2 minutes.', $botErrors)) {
+                    $this->Flash->error(__('Too many attempts. Please try again in 2 minutes.'));
+                } else {
+                    $this->Flash->error(__('Registration failed. Please try again.'));
+                }
                 $this->set(compact('user', 'organizationsList'));
                 return;
             }
