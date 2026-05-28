@@ -8,21 +8,13 @@ cd "$(dirname "$0")" || exit 1
 
 # Check if Docker is running
 if ! docker info > /dev/null 2>&1; then
-    echo "❌ Error: Docker is not running. Please start Docker first."
-    exit 1
+    echo "❌ Error: Docker is not running. starting Docker ..."
+    sudo service docker start
 fi
 
-# Detect docker compose command (V2 preferred, V1 fallback)
-if docker compose version > /dev/null 2>&1; then
-    DOCKER_COMPOSE="docker compose"
-    echo "✓ Using Docker Compose V2 (docker compose)"
-elif command -v docker compose> /dev/null 2>&1; then
-    DOCKER_COMPOSE="docker-compose"
-    echo "⚠ Using Docker Compose V1 (docker-compose) - Consider upgrading to V2"
-else
-    echo "❌ Error: Docker Compose is not installed."
-    exit 1
-fi
+DOCKER_COMPOSE="docker compose"
+echo "✓ Using Docker Compose V2 (docker compose)"
+
 echo ""
 
 # Check if nginx is running and stop it (it usually uses port 8080)
@@ -42,6 +34,25 @@ else
     echo "✓ Nginx is not running."
 fi
 
+# Check if MySQL is running and stop it (it usually uses port 3306)
+echo "🔍 Checking for MySQL..."
+if systemctl is-active --quiet mysql; then
+    echo "⚠️  MySQL is running and may block port 3306."
+    echo "   Stopping MySQL..."
+    sudo systemctl stop mysql
+    sleep 3
+    if [ $? -eq 0 ]; then
+        echo "   ✓ MySQL stopped successfully."
+    else
+        echo "   ❌ Failed to stop MySQL. Please run: sudo systemctl stop mysql"
+        exit 1
+    fi
+else
+    echo "✓ MySQL is not running."
+fi
+
+echo ""
+
 # Double-check if port 8080 is available
 if lsof -Pi :8080 -sTCP:LISTEN -t >/dev/null 2>&1; then
     echo "⚠️  Port 8080 is still in use by another process:"
@@ -54,7 +65,7 @@ echo ""
 # Create necessary directories
 echo "📁 Creating necessary directories..."
 mkdir -p tmp/cache/models tmp/cache/persistent tmp/cache/views tmp/sessions tmp/tests logs
-chmod -R 775 tmp logs
+chmod -Rf 777 tmp logs
 
 # Copy app_local.php if it doesn't exist
 if [ ! -f config/app_local.php ]; then
@@ -69,25 +80,21 @@ if [ ! -f config/app_local.php ]; then
     sed -i "s/'salt' => env('SECURITY_SALT', '__SALT__'),/'salt' => env('SECURITY_SALT', '$RANDOM_SALT'),/" config/app_local.php
 fi
 
-# Build and start containers
+# Build (if needed) and start containers
 echo ""
-echo "🏗️  Building Docker image..."
-$DOCKER_COMPOSE -f docker/docker-compose.yml build
-
-echo ""
-echo "🚀 Starting containers..."
-$DOCKER_COMPOSE -f docker/docker-compose.yml up -d
+echo "🚀 Building (if needed) and starting containers..."
+$DOCKER_COMPOSE -f docker/docker-compose.yml up -d --build
 
 # Wait for container to be ready
 echo ""
 echo "⏳ Waiting for container to be ready..."
-sleep 3
+sleep 4
 
 # Fix permissions for logs and tmp (required for volume mounts)
 echo ""
 echo "🔧 Fixing permissions for logs and tmp directories..."
 $DOCKER_COMPOSE -f docker/docker-compose.yml exec -T app chown -R www-data:www-data /var/www/html/logs /var/www/html/tmp
-$DOCKER_COMPOSE -f docker/docker-compose.yml exec -T app chmod -R 775 /var/www/html/logs /var/www/html/tmp
+$DOCKER_COMPOSE -f docker/docker-compose.yml exec -T app chmod -R 777 /var/www/html/logs /var/www/html/tmp
 
 # Run migrations
 echo ""

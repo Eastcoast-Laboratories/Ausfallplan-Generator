@@ -1,0 +1,38 @@
+# Git
+.git
+.gitignore
+
+# Logs and temp files
+logs/*
+tmp/*
+tmp/cache/*
+tmp/sessions/*
+tmp/tests/*
+*.log
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# Dependencies (installed in container)
+vendor/
+node_modules/
+
+# Test coverage
+coverage/
+.phpunit.result.cache
+
+# Environment
+.env
+config/app_local.php
+
+# Docker itself (keep docker/ for build context)
+run.sh
+.dockerignore
+
+# OS files
+.DS_Store
+Thumbs.db
