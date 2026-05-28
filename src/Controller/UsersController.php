@@ -948,17 +948,32 @@ class UsersController extends AppController
             }
         }
 
-        // 5. Session-based rate limiting (IP not used due to proxy)
+        // 5. Session-based rate limiting with time lockout (IP not used due to proxy)
         $session = $this->request->getSession();
-        $sessionKey = 'reg_attempts_session';
-        $attempts = $session->read($sessionKey) ?? 0;
+        $attemptsKey = 'reg_attempts_session';
+        $blockedUntilKey = 'reg_blocked_until';
+        $maxAttempts = 5;
+        $blockDuration = 120; // in seconds
 
-        if ($attempts > 5) {
-            $errors[] = 'Too many attempts';
+        // Check if currently blocked
+        $blockedUntil = $session->read($blockedUntilKey) ?? 0;
+        if (time() < $blockedUntil) {
+            $remainingMinutes = ceil(($blockedUntil - time()) / 60);
+            $errors[] = 'Too many attempts. Please try again in ' . $remainingMinutes . ' minutes.';
+            return $errors;
         }
 
-        // Increment attempts
-        $session->write($sessionKey, $attempts + 1);
+        $attempts = $session->read($attemptsKey) ?? 0;
+
+        if ($attempts >= $maxAttempts) {
+            // Block for 2 minutes
+            $session->write($blockedUntilKey, time() + $blockDuration);
+            $errors[] = 'Too many attempts. Please try again in 2 minutes.';
+            return $errors;
+        }
+
+        // Increment attempts only on bot detection (not on every request)
+        // This is done in the register() method after validation fails
 
         return $errors;
     }
