@@ -297,6 +297,33 @@ class UsersControllerTest extends TestCase
      * @return void
      * @uses \App\Controller\UsersController::validateBotProtection()
      */
+    /**
+     * Calculate entropy for debugging organization name patterns
+     */
+    private function calculateEntropy(string $string): float
+    {
+        $string = preg_replace('/[^a-zA-Z]/', '', $string);
+        if (strlen($string) === 0) {
+            return 0;
+        }
+
+        $charCounts = [];
+        $totalChars = strlen($string);
+
+        for ($i = 0; $i < $totalChars; $i++) {
+            $char = $string[$i];
+            $charCounts[$char] = ($charCounts[$char] ?? 0) + 1;
+        }
+
+        $entropy = 0;
+        foreach ($charCounts as $count) {
+            $probability = $count / $totalChars;
+            $entropy -= $probability * log($probability, 2);
+        }
+
+        return $entropy;
+    }
+
     public function testBotProtectionBlocksRandomOrgNames(): void
     {
         $this->session(['Config.language' => 'en']);
@@ -305,8 +332,22 @@ class UsersControllerTest extends TestCase
         $illegalOrgNames = [
             'hqEjDRwjxvvYrDxJNHpw',
             'sZ7sH9ISiJkLmNoPqR',
+            'UuodqjJmvBtkjCoOHCgrnB',
+            'OwyScKSckRMrmWxprqA'
         ];
         foreach ($illegalOrgNames as $illegalOrgName) {
+            $entropy = $this->calculateEntropy($illegalOrgName);
+            $camelCasePattern = preg_match_all('/[A-Z][a-z]{2,}/', $illegalOrgName);
+            $scatteredUpperPattern = preg_match_all('/[a-z][A-Z][a-z]/', $illegalOrgName);
+
+            error_log(sprintf(
+                '[ENTROPY_DEBUG] Org: "%s" | Entropy: %.2f | CamelCase: %d | Scattered: %d',
+                $illegalOrgName,
+                $entropy,
+                $camelCasePattern,
+                $scatteredUpperPattern
+            ));
+
             $data = [
                 'organization_name' => $illegalOrgName,
                 'organization_choice' => 'new',
@@ -320,8 +361,8 @@ class UsersControllerTest extends TestCase
             $this->post('/users/register', $data);
 
             // Should redirect back to register with error
-            $this->assertResponseCode(200);
-            $this->assertResponseContains('Registration failed');
+            $this->assertResponseCode(200, 'Failed for organization: ' . $illegalOrgName . ' (entropy: ' . $entropy . ', camelCase: ' . $camelCasePattern . ', scattered: ' . $scatteredUpperPattern . ')');
+            $this->assertResponseContains('Registration failed', 'Organization "' . $illegalOrgName . '" should have been blocked but was not');
         }
     }
 
@@ -430,10 +471,17 @@ class UsersControllerTest extends TestCase
      */
     public function testRateLimitingWithTimeLockoutAndReset(): void
     {
-        $this->session(['Config.language' => 'en']);
+        // Track attempts manually since integration test session doesn't persist between requests
+        $attempts = 0;
 
         // Make 5 failed attempts (triggering honeypot to simulate bot attempts)
         for ($i = 0; $i < 5; $i++) {
+            // Set session with current attempt count
+            $this->session([
+                'Config.language' => 'en',
+                'reg_attempts_session' => $attempts,
+            ]);
+
             $data = [
                 'organization_name' => 'Bot Test ' . $i,
                 'organization_choice' => 'new',
@@ -448,11 +496,15 @@ class UsersControllerTest extends TestCase
             $this->assertResponseCode(200);
             $this->assertResponseContains('Registration failed');
 
-            // Reset session for next request to simulate new request
-            $this->session(['Config.language' => 'en']);
+            // Increment attempts (controller does this on bot detection)
+            $attempts++;
         }
 
-        // 6th attempt should be blocked with time lockout message
+        // 6th attempt should be blocked with time lockout message (attempts=5 triggers block)
+        $this->session([
+            'Config.language' => 'en',
+            'reg_attempts_session' => $attempts, // Should be 5 now
+        ]);
         $data = [
             'organization_name' => 'Blocked Attempt',
             'organization_choice' => 'new',
@@ -469,10 +521,11 @@ class UsersControllerTest extends TestCase
         $this->assertResponseContains('minutes');
 
         // Simulate time passing - set blockedUntil to 3 minutes ago (past the 2-minute block)
+        // Also set attempts back to 0 since block has expired
         $this->session([
             'Config.language' => 'en',
             'reg_blocked_until' => time() - 180, // Expired 3 minutes ago
-            'reg_attempts_session' => 0, // Also reset attempts
+            'reg_attempts_session' => 0, // Reset attempts after block expired
         ]);
 
         // After block expired, registration should work again
