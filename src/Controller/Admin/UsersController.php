@@ -18,9 +18,17 @@ class UsersController extends AppController
     {
         parent::beforeFilter($event);
         
-        // Check if user is admin
+        // Check if user is system admin
         $identity = $this->Authentication->getIdentity();
-        if (!$identity || $identity->role !== 'admin') {
+        if (!$identity) {
+            $this->Flash->error(__('Access denied. Please login.'));
+            $event->setResult($this->redirect(['_name' => 'login']));
+            $event->stopPropagation();
+            return;
+        }
+        
+        $user = $identity->getOriginalData();
+        if (!$user->isSystemAdmin()) {
             $this->Flash->error(__('Access denied. Admin only.'));
             $event->setResult($this->redirect(['controller' => 'Dashboard', 'action' => 'index']));
             $event->stopPropagation();
