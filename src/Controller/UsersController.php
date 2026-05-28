@@ -32,7 +32,16 @@ class UsersController extends AppController
         
         if ($this->request->is('post')) {
             $data = $this->request->getData();
-            
+
+            // Bot protection validation
+            $botErrors = $this->validateBotProtection($data);
+            if (!empty($botErrors)) {
+                error_log('[BOT_BLOCKED] Registration blocked: ' . implode(', ', $botErrors) . ' | IP: ' . $this->request->clientIp());
+                $this->Flash->error(__('Registration failed. Please try again.'));
+                $this->set(compact('user', 'organizationsList'));
+                return;
+            }
+
             // Handle organization choice
             $orgChoice = $data['organization_choice'] ?? 'new';
             $organizationsTable = $this->fetchTable('Organizations');
@@ -877,5 +886,128 @@ class UsersController extends AppController
         }
         
         return $this->redirect(['controller' => 'Dashboard', 'action' => 'index']);
+    }
+
+    /**
+     * Bot protection validation
+     * Detects and blocks automated registrations
+     *
+     * @param array $data Form data
+     * @return array List of error messages, empty if no bot detected
+     */
+    private function validateBotProtection(array $data): array
+    {
+        $errors = [];
+
+        // 1. Honeypot check - field must be empty
+        if (!empty($data['website'])) {
+            $errors[] = 'Honeypot filled';
+        }
+
+        // 2. Time-based check - form must take at least 3 seconds to fill
+        $timestamp = $data['reg_timestamp'] ?? 0;
+        $timeElapsed = time() - (int)$timestamp;
+        if ($timeElapsed < 3) {
+            $errors[] = 'Too fast (' . $timeElapsed . 's)';
+        }
+
+        // 3. Email pattern check - block suspicious patterns
+        $email = $data['email'] ?? '';
+
+        // Block emails with +numbers pattern (like aa.62.34.303.5.6@gmail.com)
+        if (preg_match('/\+\d+@|\.\d+\.\d+\.\d+\.|\d{3,}@/', $email)) {
+            $errors[] = 'Suspicious email pattern';
+        }
+
+        // // Block very long random local parts (bots often use random strings)
+        // $localPart = explode('@', $email)[0] ?? '';
+        // if (strlen($localPart) > 20 && !preg_match('/[a-z0-9]*[._-][a-z0-9]*/i', $localPart)) {
+        //     // Random string without word separators
+        //     $errors[] = 'Random email pattern';
+        // }
+
+        // 4. Organization name check - block random strings
+        $orgName = $data['organization_name'] ?? '';
+        $orgChoice = $data['organization_choice'] ?? 'new';
+
+        if ($orgChoice === 'new' && !empty($orgName)) {
+            // Detect truly random organization names (bots generate these)
+            // Legitimate: "MeineGeileOrganisation" (CamelCase with word boundaries)
+            // Bot: "hqEjDRwjxvvYrDxJNHpw" (random, high entropy, no structure)
+
+            if (strlen($orgName) > 12 && !preg_match('/\s/', $orgName)) {
+                // Calculate entropy and check for randomness markers
+                $entropy = $this->calculateStringEntropy($orgName);
+                $upperCount = preg_match_all('/[A-Z]/', $orgName);
+                $lowerCount = preg_match_all('/[a-z]/', $orgName);
+                $totalLetters = $upperCount + $lowerCount;
+
+                // High entropy (>4.0) with very uneven upper/lower distribution = likely bot
+                // Legitimate CamelCase has balanced distribution (e.g., MeineGeileOrganisation: ~30% upper)
+                // Random bot strings often have chaotic distribution (e.g., hqEjDRwjxvvY: ~50% upper scattered)
+                if ($entropy > 4.2) {
+                    // Check if uppercase letters appear in "random" positions vs word boundaries
+                    // Legitimate: Uppercase followed by multiple lowercase (Meine, Geile, Organisation)
+                    // Bot: Scattered uppercase (hqE jD Rw jx vv Yr Dx JN Hp w)
+                    $camelCasePattern = preg_match_all('/[A-Z][a-z]{2,}/', $orgName);
+                    $scatteredUpperPattern = preg_match_all('/[a-z][A-Z][a-z]/', $orgName);
+
+                    // If few CamelCase patterns but many scattered uppercases = bot
+                    if ($camelCasePattern < 2 && $scatteredUpperPattern > 3) {
+                        $errors[] = 'Random organization name pattern';
+                    }
+                }
+            }
+        }
+
+        // 5. IP-based rate limiting (simple session-based)
+        $session = $this->request->getSession();
+        $ipKey = 'reg_attempts_' . $this->request->clientIp();
+        $attempts = $session->read($ipKey) ?? 0;
+
+        if ($attempts > 5) {
+            $errors[] = 'Too many attempts';
+        }
+
+        // Increment attempts (with 1 hour expiry)
+        $session->write($ipKey, $attempts + 1);
+        $session->write($ipKey . '_time', time());
+
+        // Reset counter if more than 1 hour passed
+        $lastAttempt = $session->read($ipKey . '_time') ?? 0;
+        if (time() - $lastAttempt > 3600) {
+            $session->write($ipKey, 1);
+        }
+
+        return $errors;
+    }
+
+    /**
+     * Calculate Shannon entropy of a string
+     * Higher entropy = more randomness
+     *
+     * @param string $str Input string
+     * @return float Entropy value (0-8 for ASCII)
+     */
+    private function calculateStringEntropy(string $str): float
+    {
+        $len = strlen($str);
+        if ($len === 0) {
+            return 0.0;
+        }
+
+        $charCounts = [];
+        for ($i = 0; $i < $len; $i++) {
+            $char = $str[$i];
+            $charCounts[$char] = ($charCounts[$char] ?? 0) + 1;
+        }
+
+        $entropy = 0.0;
+        foreach ($charCounts as $count) {
+            $frequency = $count / $len;
+            $entropy -= $frequency * log($frequency, 2);
+        }
+
+        return $entropy;
     }
 }

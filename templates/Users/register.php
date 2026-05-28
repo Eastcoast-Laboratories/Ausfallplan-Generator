@@ -59,6 +59,12 @@
     <?= $this->Form->hidden('public_key', ['id' => 'public-key-field']) ?>
     <?= $this->Form->hidden('encrypted_private_key', ['id' => 'encrypted-private-key-field']) ?>
     <?= $this->Form->hidden('key_salt', ['id' => 'key-salt-field']) ?>
+
+    <!-- Bot protection: Honeypot field (must be empty) -->
+    <div class="website-field">
+        <?= $this->Form->text('website', ['autocomplete' => 'off', 'tabindex' => '-1']) ?>
+    </div>
+    <?= $this->Form->hidden('reg_timestamp', ['value' => time()]) ?>
     
     <div class="form-actions">
         <?= $this->Form->button(__('Create Account'), ['class' => 'button-primary', 'id' => 'register-button']) ?>
@@ -107,6 +113,23 @@
 #register-button.generating {
     opacity: 0.6;
     cursor: wait;
+}
+
+/* Bot protection: Hide honeypot field from real users */
+.website-field {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+    height: 0;
+    width: 0;
+    opacity: 0;
+    overflow: hidden;
+}
+.website-field input {
+    height: 0;
+    width: 0;
+    padding: 0;
+    border: none;
 }
 </style>
 
