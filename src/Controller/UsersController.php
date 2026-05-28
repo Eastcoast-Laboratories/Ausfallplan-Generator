@@ -945,10 +945,13 @@ class UsersController extends AppController
                 // High entropy (>3.8) indicates randomness
                 // Legitimate CamelCase has lower entropy (~3.4) due to repeating letters
                 // Random bot strings have higher entropy (~4.1) with chaotic distribution
-                if ($entropy > 3.8) {
+                if ($entropy > 3.9) {
+                    // Very high entropy - definitely bot-like, block immediately
+                    $errors[] = 'Random organization name pattern';
+                } elseif ($entropy > 3.8) {
                     // Check if uppercase letters appear in "random" positions vs word boundaries
                     // Legitimate: Uppercase followed by multiple lowercase (Meine, Coole, Organisation)
-                    // Bot: Scattered uppercase (hqE jD Rw jx vv Yr Dx JN Hp w)
+                    // Bot: Scattered uppercase (hqE jD Rw jx vv vv Yr Dx JN Hp w)
                     $camelCasePattern = preg_match_all('/[A-Z][a-z]{2,}/', $orgName);
                     $scatteredUpperPattern = preg_match_all('/[a-z][A-Z][a-z]/', $orgName);
 
