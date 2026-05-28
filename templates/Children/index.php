@@ -114,8 +114,29 @@ $this->assign('title', __('Children'));
                     <td data-field="birthdate">
                         <?php
                         if ($child->birthdate) {
-                            $birthdate = $child->birthdate instanceof \DateTime ? $child->birthdate : new \DateTime($child->birthdate);
-                            echo $birthdate->format('d.m.Y');
+                            if ($child->birthdate instanceof \Cake\I18n\Date || $child->birthdate instanceof \Cake\I18n\DateTime) {
+                                echo $child->birthdate->format('d.m.Y');
+                                $birthdate = $child->birthdate->toNative();
+                            } elseif ($child->birthdate instanceof \DateTime) {
+                                echo $child->birthdate->format('d.m.Y');
+                                $birthdate = $child->birthdate;
+                            } else {
+                                // It's a string - try to parse it safely
+                                $dateStr = $child->birthdate;
+                                // If it's in Y-m-d format (from database), parse it
+                                if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateStr)) {
+                                    $birthdate = new \DateTime($dateStr);
+                                    echo $birthdate->format('d.m.Y');
+                                } elseif (preg_match('/^\d{2}\.\d{2}\.\d{4}$/', $dateStr)) {
+                                    // Already in d.m.Y format
+                                    echo $dateStr;
+                                    $birthdate = new \DateTime(str_replace('.', '-', $dateStr));
+                                } else {
+                                    // Try default parsing
+                                    $birthdate = new \DateTime($dateStr);
+                                    echo $birthdate->format('d.m.Y');
+                                }
+                            }
                             
                             // Calculate age
                             $now = new \DateTime();
