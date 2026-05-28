@@ -899,8 +899,8 @@ class UsersController extends AppController
     {
         $errors = [];
 
-        // 1. Honeypot check - field must be empty
-        if (!empty($data['website'])) {
+        // 1. Honeypot check - field must be empty (hp_data is hidden from real users)
+        if (!empty($data['hp_data'])) {
             $errors[] = 'Honeypot filled';
         }
 
@@ -913,18 +913,6 @@ class UsersController extends AppController
 
         // 3. Email pattern check - block suspicious patterns
         $email = $data['email'] ?? '';
-
-        // Block emails with +numbers pattern (like aa.62.34.303.5.6@gmail.com)
-        if (preg_match('/\+\d+@|\.\d+\.\d+\.\d+\.|\d{3,}@/', $email)) {
-            $errors[] = 'Suspicious email pattern';
-        }
-
-        // // Block very long random local parts (bots often use random strings)
-        // $localPart = explode('@', $email)[0] ?? '';
-        // if (strlen($localPart) > 20 && !preg_match('/[a-z0-9]*[._-][a-z0-9]*/i', $localPart)) {
-        //     // Random string without word separators
-        //     $errors[] = 'Random email pattern';
-        // }
 
         // 4. Organization name check - block random strings
         $orgName = $data['organization_name'] ?? '';
@@ -960,24 +948,17 @@ class UsersController extends AppController
             }
         }
 
-        // 5. IP-based rate limiting (simple session-based)
+        // 5. Session-based rate limiting (IP not used due to proxy)
         $session = $this->request->getSession();
-        $ipKey = 'reg_attempts_' . $this->request->clientIp();
-        $attempts = $session->read($ipKey) ?? 0;
+        $sessionKey = 'reg_attempts_session';
+        $attempts = $session->read($sessionKey) ?? 0;
 
         if ($attempts > 5) {
             $errors[] = 'Too many attempts';
         }
 
-        // Increment attempts (with 1 hour expiry)
-        $session->write($ipKey, $attempts + 1);
-        $session->write($ipKey . '_time', time());
-
-        // Reset counter if more than 1 hour passed
-        $lastAttempt = $session->read($ipKey . '_time') ?? 0;
-        if (time() - $lastAttempt > 3600) {
-            $session->write($ipKey, 1);
-        }
+        // Increment attempts
+        $session->write($sessionKey, $attempts + 1);
 
         return $errors;
     }

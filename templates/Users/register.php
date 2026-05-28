@@ -60,9 +60,9 @@
     <?= $this->Form->hidden('encrypted_private_key', ['id' => 'encrypted-private-key-field']) ?>
     <?= $this->Form->hidden('key_salt', ['id' => 'key-salt-field']) ?>
 
-    <!-- Bot protection: Honeypot field (must be empty) -->
-    <div class="website-field">
-        <?= $this->Form->text('website', ['autocomplete' => 'off', 'tabindex' => '-1']) ?>
+    <!-- Bot protection: Honeypot field (must be empty) - hidden from humans -->
+    <div class="hp-field">
+        <?= $this->Form->text('hp_data', ['autocomplete' => 'nope', 'tabindex' => '-1']) ?>
     </div>
     <?= $this->Form->hidden('reg_timestamp', ['value' => time()]) ?>
     
@@ -116,7 +116,7 @@
 }
 
 /* Bot protection: Hide honeypot field from real users */
-.website-field {
+.hp-field {
     position: absolute;
     left: -9999px;
     top: -9999px;
@@ -125,7 +125,7 @@
     opacity: 0;
     overflow: hidden;
 }
-.website-field input {
+.hp-field input {
     height: 0;
     width: 0;
     padding: 0;
