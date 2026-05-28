@@ -957,13 +957,21 @@ class UsersController extends AppController
 
         // Check if currently blocked
         $blockedUntil = $session->read($blockedUntilKey) ?? 0;
+        $attempts = $session->read($attemptsKey) ?? 0;
+
         if (time() < $blockedUntil) {
+            // Still blocked - show remaining time
             $remainingMinutes = ceil(($blockedUntil - time()) / 60);
             $errors[] = 'Too many attempts. Please try again in ' . $remainingMinutes . ' minutes.';
             return $errors;
         }
 
-        $attempts = $session->read($attemptsKey) ?? 0;
+        // Block has expired - reset counter
+        if ($blockedUntil > 0 && time() >= $blockedUntil) {
+            $session->delete($blockedUntilKey);
+            $session->write($attemptsKey, 0);
+            $attempts = 0;
+        }
 
         if ($attempts >= $maxAttempts) {
             // Block for 2 minutes
