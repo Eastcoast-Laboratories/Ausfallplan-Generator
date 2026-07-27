@@ -23,8 +23,8 @@ fi
 git push origin main
 
 # 2. Deploy to server
-echo "🌐 Step 2: Deploying to eclabs-vm06..."
-ssh eclabs-vm06 "cd /var/kunden/webs/ruben/www/fairnestplan.z11.de && \
+echo "🌐 Step 2: Deploying to eclabs-vm06-web..."
+ssh eclabs-vm06-web "cd /var/kunden/webs/ruben/www/fairnestplan.z11.de && \
     git reset --hard 8c1fed22 && \
     git pull origin main && \
     echo '📦 Updating composer dependencies for PHP 8.5...' && \
