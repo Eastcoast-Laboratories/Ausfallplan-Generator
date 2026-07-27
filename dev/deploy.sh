@@ -27,12 +27,12 @@ echo "🌐 Step 2: Deploying to eclabs-vm06-web..."
 ssh eclabs-vm06-web "cd /var/kunden/webs/ruben/www/fairnestplan.z11.de && \
     git reset --hard 8c1fed22 && \
     git pull origin main && \
-    echo '📦 Updating composer dependencies for PHP 8.5...' && \
-    composer update --no-dev --optimize-autoloader && \
+    echo 'Installing composer dependencies from lock...' && \
+    composer install --no-dev --optimize-autoloader --ignore-platform-req=php && \
     rm -rf tmp/cache/* && \
     echo '� Fixing file ownership for fpm user...' && \
     chown -R w-fairnestplan-z11-de:w-fairnestplan-z11-de . && \
-    echo '�🗄️  Running database migrations...' && \
+    echo '��️  Running database migrations...' && \
     bin/cake migrations migrate && \
     echo '✅ Deployment completed!'"
 
