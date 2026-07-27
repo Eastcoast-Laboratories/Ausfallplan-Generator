@@ -30,7 +30,9 @@ ssh eclabs-vm06-web "cd /var/kunden/webs/ruben/www/fairnestplan.z11.de && \
     echo '📦 Updating composer dependencies for PHP 8.5...' && \
     composer update --no-dev --optimize-autoloader && \
     rm -rf tmp/cache/* && \
-    echo '🗄️  Running database migrations...' && \
+    echo '� Fixing file ownership for fpm user...' && \
+    chown -R w-fairnestplan-z11-de:w-fairnestplan-z11-de . && \
+    echo '�🗄️  Running database migrations...' && \
     bin/cake migrations migrate && \
     echo '✅ Deployment completed!'"
 
